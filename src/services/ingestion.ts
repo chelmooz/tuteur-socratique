@@ -120,7 +120,7 @@ function extractTextFromOfficeParserContent(content: unknown): string {
   return texts.join("\n\n");
 }
 
-async function extractTextFromFile(filepath: string, format: string): Promise<string> {
+async function extractTextFromFile(filepath: string, format: string, meta?: { title: string; description: string }): Promise<string> {
   const ext = path.extname(filepath).toLowerCase();
 
   const supportedByOfficeParser = [".pdf", ".pptx", ".docx", ".odt", ".odp", ".ods", ".odg", ".rtf", ".csv", ".md", ".html", ".epub"];
@@ -153,6 +153,9 @@ async function extractTextFromFile(filepath: string, format: string): Promise<st
     case ".png":
     case ".tiff":
     case ".bmp":
+      if (meta && meta.title && meta.description) {
+        return `${meta.title}\n\n${meta.description}`;
+      }
       return `[Image format ${ext} not directly supported - skipping OCR for standalone images]`;
     default:
       return `[Format ${format} (${ext}) not supported for text extraction]`;
@@ -188,7 +191,7 @@ export async function ingestDocument(
     if (!fs.existsSync(filepath)) {
       return { filename, chunksCreated: 0, success: false, error: "File not found" };
     }
-    text = await extractTextFromFile(filepath, meta.format);
+    text = await extractTextFromFile(filepath, meta.format, { title: meta.title, description: meta.description });
   }
 
   if (!text || text.trim().length < 100) {
