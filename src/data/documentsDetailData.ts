@@ -3125,6 +3125,65 @@ export const DETAILED_DOCUMENTS_MAP: Record<string, DocumentDetail> = {
       "Relire après migration corpus (pipeline RAG local)."
     ],
     keyConcepts: [{ name: "Chunking sémantique", explanation: "Découpe en segments cohérents pour indexation vectorielle." }]
+  },
+  "Architecture d'un agent IA _files.html": {
+    filename: "Architecture d'un agent IA _files.html",
+    category: "Architecture & Production" as const,
+    title: "Architecture d'un agent IA",
+    format: "HTML" as const,
+    importance: "Haute" as const,
+    description: "Architecture complète d'un agent IA : boucles ReAct, graphes d'états cycliques, outillage dynamique, protocole MCP. Export d'artefact Claude.",
+    fullOverview: `Architecture d'un agent IA : document du corpus Architecture & Production. Fourni brut dans data/corpus/, découpé en chunks (chunking sémantique par section thématique (400-600 tokens), découpe aux sous-titres.) puis indexé dans ChromaDB.`,
+    aiEngineerTakeaways: [
+      "Maîtriser les patterns d'agents autonomes (ReAct, LangGraph, MCP).",
+      "Comprendre les boucles ReAct et la gestion d'états cycliques.",
+      "Intégrer l'outillage dynamique et le protocole MCP.",
+      "Relire après migration corpus (pipeline RAG local)."
+    ],
+    keyConcepts: [
+      { name: "Architecture Agent IA", explanation: "Boucles ReAct, graphes d'états, outillage, MCP." },
+      { name: "Chunking sémantique", explanation: "Découpe en segments cohérents pour indexation vectorielle." }
+    ]
+  },
+  "De Prompt Engineer à Agent Engineer — 7 compétences (Copy) - Claude_files.html": {
+    filename: "De Prompt Engineer à Agent Engineer — 7 compétences (Copy) - Claude_files.html",
+    category: "Agents & Orchestration" as const,
+    title: "De Prompt Engineer à Agent Engineer — 7 compétences",
+    format: "HTML" as const,
+    importance: "Haute" as const,
+    description: "Parcours complet pour passer du prompt engineering à l'ingénierie d'agents autonomes : 7 compétences clés. Export d'artefact Claude.",
+    fullOverview: `De Prompt Engineer à Agent Engineer — 7 compétences : document du corpus Agents Autonomes. Fourni brut dans data/corpus/, découpé en chunks (chunking sémantique par compétence (400-600 tokens), découpe aux sous-titres.) puis indexé dans ChromaDB.`,
+    aiEngineerTakeaways: [
+      "Maîtriser les 7 compétences pour passer du prompt engineering à l'agent engineering.",
+      "Comprendre l'évolution : prompt engineering → agent engineering.",
+      "Appliquer les patterns d'agents autonomes en production.",
+      "Relire après migration corpus (pipeline RAG local)."
+    ],
+    keyConcepts: [
+      { name: "Prompt Engineering → Agent Engineering", explanation: "Évolution des compétences vers l'ingénierie d'agents." },
+      { name: "7 compétences clés", explanation: "Parcours structuré pour devenir Agent Engineer." },
+      { name: "Chunking sémantique", explanation: "Découpe en segments cohérents pour indexation vectorielle." }
+    ]
+  },
+  "Observabilité & Évaluation LLM — Architecture de Production (Copy) - Claude_files.html": {
+    filename: "Observabilité & Évaluation LLM — Architecture de Production (Copy) - Claude_files.html",
+    category: "Architecture & Production" as const,
+    title: "Observabilité & Évaluation LLM — Architecture de Production",
+    format: "HTML" as const,
+    importance: "Haute" as const,
+    description: "Architecture d'observabilité et d'évaluation pour LLM en production : métriques, tracing, évaluation continue. Export d'artefact Claude.",
+    fullOverview: `Observabilité & Évaluation LLM — Architecture de Production : document du corpus Évaluation & Production. Fourni brut dans data/corpus/, découpé en chunks (chunking sémantique par section thématique (400-600 tokens), découpe aux sous-titres.) puis indexé dans ChromaDB.`,
+    aiEngineerTakeaways: [
+      "Construire une architecture d'observabilité pour LLM en production.",
+      "Mettre en place l'évaluation continue et les métriques de qualité.",
+      "Implémenter le tracing et le monitoring des modèles.",
+      "Relire après migration corpus (pipeline RAG local)."
+    ],
+    keyConcepts: [
+      { name: "Observabilité LLM", explanation: "Monitoring, tracing, métriques pour modèles en production." },
+      { name: "Évaluation continue", explanation: "Métriques de qualité, détection de dérive, alertes." },
+      { name: "Chunking sémantique", explanation: "Découpe en segments cohérents pour indexation vectorielle." }
+    ]
   }
 };
 
