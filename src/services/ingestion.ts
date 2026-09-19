@@ -14,6 +14,16 @@ export interface IngestionResult {
   chunksCreated: number;
   success: boolean;
   error?: string;
+  skipped?: boolean;
+}
+
+const NON_INGESTIBLE_EXTENSIONS = new Set([
+  ".jpg", ".jpeg", ".png", ".gif", ".webp", ".tiff", ".bmp", ".tif",
+]);
+
+export function isIngestible(filename: string): boolean {
+  const ext = path.extname(filename).toLowerCase();
+  return !NON_INGESTIBLE_EXTENSIONS.has(ext);
 }
 
 function estimateTokens(text: string): number {
@@ -179,6 +189,17 @@ export async function ingestDocument(
     return { filename, chunksCreated: 0, success: false, error: "Document metadata not found" };
   }
 
+  // Skip non-ingestible files (images, etc.) unless custom content is provided
+  if (!customContent && !isIngestible(filename)) {
+    return { 
+      filename, 
+      chunksCreated: 0, 
+      success: true, 
+      skipped: true,
+      error: undefined 
+    };
+  }
+
   const meta = docMeta || {
     filename,
     category: "Custom",
@@ -233,7 +254,7 @@ export async function ingestDocument(
 
 export async function ingestAllCorpus(): Promise<IngestionResult[]> {
   const results: IngestionResult[] = [];
-  const filenames = Object.keys(DETAILED_DOCUMENTS_MAP);
+  const filenames = Object.keys(DETAILED_DOCUMENTS_MAP).filter(isIngestible);
   
   for (const filename of filenames) {
     try {
@@ -242,6 +263,8 @@ export async function ingestAllCorpus(): Promise<IngestionResult[]> {
       results.push(result);
       if (!result.success) {
         console.warn(`[Ingestion] Failed ${filename}: ${result.error}`);
+      } else if (result.skipped) {
+        console.log(`[Ingestion] ⊘ ${filename}: skipped (non-ingestible format)`);
       } else {
         console.log(`[Ingestion] ✓ ${filename}: ${result.chunksCreated} chunks`);
       }
