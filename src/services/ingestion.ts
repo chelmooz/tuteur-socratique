@@ -195,14 +195,14 @@ export async function ingestDocument(
     return { filename, chunksCreated: 0, success: false, error: "Insufficient content after extraction" };
   }
 
-  await deleteExistingChunks(filename);
-
   const chunks = chunkText(text);
   if (chunks.length === 0) {
     return { filename, chunksCreated: 0, success: false, error: "No valid chunks generated" };
   }
 
   const embeddings = await ollamaService.embed(chunks);
+
+  await deleteExistingChunks(filename);
 
   const documentChunks: DocumentChunk[] = chunks.map((chunk, i) => ({
     id: `${filename}_chunk_${i}_${Date.now()}`,
