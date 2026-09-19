@@ -126,7 +126,11 @@ async function extractTextFromFile(filepath: string, format: string, meta?: { ti
   const supportedByOfficeParser = [".pdf", ".pptx", ".docx", ".odt", ".odp", ".ods", ".odg", ".rtf", ".csv", ".md", ".html", ".epub"];
   if (supportedByOfficeParser.includes(ext)) {
     try {
-      const config = (ext === ".pptx" || ext === ".pdf") ? { ocr: true, extractAttachments: true } : {};
+      const hasLangData = fs.existsSync(path.join(process.cwd(), "eng.traineddata"));
+      const config = (ext === ".pptx" || ext === ".pdf") ? { ocr: hasLangData, extractAttachments: true } : {};
+      if (!hasLangData && (ext === ".pptx" || ext === ".pdf")) {
+        console.warn(`[Ingestion] eng.traineddata not found in cwd, OCR disabled for ${filepath}`);
+      }
       const result = await parseOffice(filepath, config);
       if (result && result.content) {
         const extractedText = extractTextFromOfficeParserContent(result.content);
