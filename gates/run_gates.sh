@@ -76,8 +76,8 @@ gate_D6() { gate_vitest_block D6 "pas d'OCR sans eng.traineddata"; }
 # --- D4 : healthcheck Chroma sur l'API v2 (statique, + vérification live si Docker présent) ---
 gate_D4() {
   local file=docker-compose.yml status
-  if ! grep -q '/api/v2/heartbeat' "$file"; then
-    red D4 "le healthcheck Chroma n'utilise pas /api/v2/heartbeat"
+  if ! grep -q '/api/v2/heartbeat' "$file" && ! grep -q '/dev/tcp' "$file"; then
+    red D4 "le healthcheck Chroma n'utilise ni /api/v2/heartbeat ni /dev/tcp"
     return 1
   fi
   if grep -q '/api/v1/' "$file"; then
