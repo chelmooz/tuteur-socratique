@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours Interactif : L'Ingénierie du Contexte (Context Engineering)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300" x-data="{ darkMode: true, activeTab: 'intro' }" :class="{ 'dark': darkMode }">
+
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    IC
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Ingénierie du Contexte</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Le Guide Ultime des Systèmes IA</p>
+                </div>
+            </div>
+            
+            <!-- Contrôles de navigation et mode sombre -->
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex space-x-1 text-sm font-medium">
+                    <button @click="activeTab = 'intro'" :class="activeTab === 'intro' ? 'bg-indigo-50 dark:bg-indigo-950/55 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-3 py-2 rounded-lg transition">Introduction</button>
+                    <button @click="activeTab = 'stack'" :class="activeTab === 'stack' ? 'bg-indigo-50 dark:bg-indigo-950/55 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-3 py-2 rounded-lg transition">Pile & Erreurs</button>
+                    <button @click="activeTab = 'steps'" :class="activeTab === 'steps' ? 'bg-indigo-50 dark:bg-indigo-950/55 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-3 py-2 rounded-lg transition">4 Étapes & LogLook</button>
+                    <button @click="activeTab = 'quiz'" :class="activeTab === 'quiz' ? 'bg-indigo-50 dark:bg-indigo-950/55 text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-3 py-2 rounded-lg transition">Quiz Interactif</button>
+                </nav>
+
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:scale-105 transition" aria-label="Changer le mode d'affichage">
+                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Menu mobile -->
+        <div class="md:hidden flex overflow-x-auto px-4 py-2 border-t border-slate-200 dark:border-slate-700 space-x-2">
+            <button @click="activeTab = 'intro'" :class="activeTab === 'intro' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Introduction</button>
+            <button @click="activeTab = 'stack'" :class="activeTab === 'stack' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Pile & Erreurs</button>
+            <button @click="activeTab = 'steps'" :class="activeTab === 'steps' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">4 Étapes & LogLook</button>
+            <button @click="activeTab = 'quiz'" :class="activeTab === 'quiz' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Quiz</button>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div x-show="activeTab === 'intro'" x-transition class="space-y-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-violet-600 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 bottom-0 translate-x-8 translate-y-8 opacity-10 pointer-events-none">
+                    <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                </div>
+                <span class="bg-white/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Le grand changement stratégique</span>
+                <h2 class="text-3xl font-bold mt-3 mb-4">Oubliez les prompts kilométriques, bienvenue dans l'Ingénierie du Contexte</h2>
+                <p class="text-indigo-100 text-lg max-w-2xl leading-relaxed">
+                    La plupart des utilisateurs tentent de corriger de mauvaises réponses en rédigeant des requêtes toujours plus longues. C'est une erreur stratégique. Apprenez à curer les jetons à fort signal pour bâtir des agents IA fiables.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-xl mb-4">❌</div>
+                        <h3 class="text-xl font-bold mb-2">Prompt Engineering classique</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            Consiste à structurer la formulation, les consignes et les exemples sous forme d'un essai géant pour tenter de forcer le modèle à bien obéir.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-orange-500 font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Limite : Surcharge cognitive & dilution du signal
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xl mb-4">✨</div>
+                        <h3 class="text-xl font-bold mb-2">Context Engineering (Ingénierie du Contexte)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                            L'art de décider rigoureusement ce que le modèle doit voir et ignorer à chaque appel (outils, faits récupérés, notes courtes, historique récent).
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 text-xs text-indigo-500 font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Avantage : Systèmes intelligents, robustes et hautement prédictifs
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Pourquoi la taille ne fait pas tout -->
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div>
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Analyse de la mémoire</span>
+                    <h3 class="text-2xl font-bold mt-2">Pourquoi la taille de la fenêtre de contexte ne fait pas tout ?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 mt-2">
+                        Même avec des fenêtres gigantesques, accumuler trop de texte dégrade la précision. Le modèle se distrait, accumule des erreurs ou subit des contradictions. Voici les 4 modes de défaillance majeurs :
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block px-2.5 py-1 rounded-md bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 font-bold text-xs">1. Poisoning</span>
+                            <h4 class="font-bold text-base mt-2 mb-1">Empoisonnement</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">Un fait erroné ou halluciné pénètre le contexte et est répété en boucle.</p>
+                        </div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-bold text-xs">2. Distraction</span>
+                            <h4 class="font-bold text-base mt-2 mb-1">Distraction</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">Le modèle se fixe sur un historique massif au lieu d'établir un plan clair.</p>
+                        </div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block px-2.5 py-1 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold text-xs">3. Confusion</span>
+                            <h4 class="font-bold text-base mt-2 mb-1">Confusion</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">Des détails secondaires superflus incitent le modèle vers une fausse piste.</p>
+                        </div>
+                    </div>
+                    <div class="p-5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs">4. Clash</span>
+                            <h4 class="font-bold text-base mt-2 mb-1">Conflit / Clash</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">Deux sources se contredisent frontalement et le modèle choisit la mauvaise.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'stack'" x-transition class="space-y-8" x-data="{ openComponent: 1 }">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <h2 class="text-3xl font-bold">La Pile de Contexte (Context Stack)</h2>
+                <p class="text-slate-600 dark:text-slate-400">À chaque appel, le modèle reçoit une pile composée de 7 éléments dynamiques. Cliquez sur chaque composant pour découvrir son rôle détaillé en français.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Liste des 7 composants -->
+                <div class="md:col-span-1 space-y-2">
+                    <template x-for="item in [
+                        { id: 1, name: '1. Instructions', desc: 'Consignes système & règles de sécurité' },
+                        { id: 2, name: '2. Entrée utilisateur', desc: 'La question ou la requête actuelle' },
+                        { id: 3, name: '3. Faits récupérés', desc: 'Extraits pertinents (recherche)' },
+                        { id: 4, name: '4. Outils', desc: 'Fonctions disponibles & descriptions' },
+                        { id: 5, name: '5. Notes à court terme', desc: 'Résumé des étapes récentes' },
+                        { id: 6, name: '6. Mémoire à long terme', desc: 'Faits stables sélectionnés à la demande' },
+                        { id: 7, name: '7. Format de sortie', desc: 'Schémas ou structures JSON stricts' }
+                    ]">
+                        <button @click="openComponent = item.id" 
+                            :class="openComponent === item.id ? 'bg-indigo-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200 dark:border-slate-700'"
+                            class="w-full text-left p-3.5 rounded-xl transition flex items-center justify-between">
+                            <div>
+                                <div class="font-semibold text-sm" x-text="item.name"></div>
+                                <div class="text-xs opacity-80" x-text="item.desc"></div>
+                            </div>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Détail du composant actif -->
+                <div class="md:col-span-2 bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center">
+                    <div x-show="openComponent === 1" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 1 sur 7</span>
+                        <h3 class="text-2xl font-bold">Instructions (System Prompt & Guardrails)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Ce sont les directives principales et les règles de sécurité données au modèle. Un langage clair, direct et sans ambiguïté fonctionne le mieux ici pour encadrer fermement le comportement général de l'agent.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 2" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 2 sur 7</span>
+                        <h3 class="text-2xl font-bold">Entrée utilisateur (User Input)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            C'est la question directe, la requête ou la tâche spécifique formulée par l'utilisateur au moment précis de l'appel en cours.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 3" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 3 sur 7</span>
+                        <h3 class="text-2xl font-bold">Faits récupérés (Retrieved Facts)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Les quelques extraits de documents ou de fichiers de logs qui comptent réellement pour résoudre le problème, injectés dynamiquement via une recherche ciblée.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 4" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 4 sur 7</span>
+                        <h3 class="text-2xl font-bold">Outils (Tools & Functions)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Les fonctions exécutables que le modèle peut appeler (lecture de fichiers, recherche grep, API externes) ainsi que leurs descriptions textuelles intégrées au contexte.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 5" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 5 sur 7</span>
+                        <h3 class="text-2xl font-bold">Notes à court terme (Short-term Notes)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Un résumé synthétique des étapes récentes de l'investigation (ex: « ce fichier a déjà été vérifié, examinez plutôt ce log ») pour garder le fil sans encombrer la mémoire.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 6" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 6 sur 7</span>
+                        <h3 class="text-2xl font-bold">Mémoire à long terme (Long-term Memory)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Contient des faits stables et durables sur l'utilisateur ou le projet en cours, sélectionnés à la demande selon les besoins spécifiques de l'agent.
+                        </p>
+                    </div>
+                    <div x-show="openComponent === 7" class="space-y-4">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">Composant 7 sur 7</span>
+                        <h3 class="text-2xl font-bold">Format de sortie (Output Format)</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                            Schémas de données ou exemples de structures (ex: format JSON strict) qui verrouillent la forme exacte de la réponse attendue du modèle.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'steps'" x-transition class="space-y-12">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <h2 class="text-3xl font-bold">Les 4 Étapes Clés de l'Ingénierie du Contexte</h2>
+                <p class="text-slate-600 dark:text-slate-400">Pour garder un contexte sain, performant et propre dans les agents IA complexes.</p>
+            </div>
+
+            <!-- Grille des 4 étapes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-3 -bottom-3 text-7xl font-black text-slate-100 dark:text-slate-700/20 select-none">1</div>
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Write (Écrire)</span>
+                        <h3 class="font-bold text-lg mt-3 mb-2">Écrire en externe</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Sauvegarder notes, plans et résultats intermédiaires hors du contexte pour conserver un espace propre.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-3 -bottom-3 text-7xl font-black text-slate-100 dark:text-slate-700/20 select-none">2</div>
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 uppercase tracking-wide">Select (Sélectionner)</span>
+                        <h3 class="font-bold text-lg mt-3 mb-2">Sélectionner</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Récupérer uniquement ce qui importe pour ce tour (privilégier la recherche hybride sémantique + mots-clés).</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-3 -bottom-3 text-7xl font-black text-slate-100 dark:text-slate-700/20 select-none">3</div>
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 uppercase tracking-wide">Compress (Compresser)</span>
+                        <h3 class="font-bold text-lg mt-3 mb-2">Compresser</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Résumer périodiquement les historiques longs en notes concises pour repartir sur une fenêtre fraîche.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-3 -bottom-3 text-7xl font-black text-slate-100 dark:text-slate-700/20 select-none">4</div>
+                    <div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 uppercase tracking-wide">Isolate (Isoler)</span>
+                        <h3 class="font-bold text-lg mt-3 mb-2">Isoler</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Diviser les gros travaux en sous-agents ou en phases (sandboxing) pour éviter les fuites et interférences.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cas pratique LogLook -->
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-700/60">
+                    <div>
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400">Cas Pratique Réel</span>
+                        <h3 class="text-2xl font-bold mt-2">L'Agent « LogLook »</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Assistant de sécurité qui analyse les alertes de logs, rédige un résumé et attribue un score de sévérité (0 à 4).</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 bg-slate-100 dark:bg-slate-700/50 px-4 py-2 rounded-xl text-xs font-mono">
+                        Objectif : Entrée/Sortie JSON stricte
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                        <h4 class="font-bold text-sm text-red-500 flex items-center">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></span> Approche Chatbot Naïve
+                        </h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                            « Hey, analyse les logs d'aujourd'hui et dis-moi ce qui ne va pas. »
+                        </p>
+                        <p class="text-xs text-slate-500">
+                            <strong>Résultat :</strong> Le modèle devine au hasard, se noie dans la masse de logs brute et génère des diagnostics erronés ou hallucines.
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50/50 dark:bg-indigo-950/20 p-6 rounded-xl border border-indigo-200 dark:border-indigo-900/50 space-y-3">
+                        <h4 class="font-bold text-sm text-indigo-600 dark:text-indigo-400 flex items-center">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 mr-2"></span> Approche par Ingénierie du Contexte
+                        </h4>
+                        <ul class="text-xs text-slate-700 dark:text-slate-300 space-y-1.5 list-disc list-inside">
+                            <li><strong>Instructions strictes :</strong> Résumé en 1 paragraphe + score 0 à 4. Demander un fichier si données manquantes.</li>
+                            <li><strong>Outils ciblés :</strong> Lecture de fichiers, grep, liste de faux positifs connus.</li>
+                            <li><strong>Faits filtrés :</strong> Uniquement la tranche de logs d'erreurs/critiques de la dernière heure.</li>
+                            <li><strong>Format strict :</strong> Sortie JSON exigée pour automatisation.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'quiz'" x-transition class="max-w-3xl mx-auto" x-data="{
+            score: 0,
+            submitted: false,
+            answers: { q1: null, q2: null, q3: null, q4: null },
+            checkQuiz() {
+                this.score = 0;
+                if(this.answers.q1 === 'b') this.score++;
+                if(this.answers.q2 === 'c') this.score++;
+                if(this.answers.q3 === 'a') this.score++;
+                if(this.answers.q4 === 'b') this.score++;
+                this.submitted = true;
+            },
+            resetQuiz() {
+                this.answers = { q1: null, q2: null, q3: null, q4: null };
+                this.submitted = false;
+                this.score = 0;
+            }
+        }">
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-8">
+                <div>
+                    <h2 class="text-2xl font-bold">Quiz de Validation des Connaissances</h2>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Testez ce que vous avez retenu des concepts clés de l'ingénierie du contexte !</p>
+                </div>
+
+                <!-- Question 1 -->
+                <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-700/60">
+                    <p class="font-semibold text-sm">1. Qu'est-ce que l'"Ingénierie du Contexte" par rapport au prompt engineering classique ?</p>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q1" value="a" x-model="answers.q1" class="text-indigo-600">
+                            <span>Écrire des textes de plus en plus longs pour détailler chaque consigne.</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q1" value="b" x-model="answers.q1" class="text-indigo-600">
+                            <span>L'art de curer dynamiquement ce que le modèle doit voir et ignorer à l'exécution.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-700/60">
+                    <p class="font-semibold text-sm">2. Quel mode de défaillance correspond à « un fait halluciné qui entre dans le contexte et est réutilisé en boucle » ?</p>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q2" value="a" x-model="answers.q2" class="text-indigo-600">
+                            <span>Distraction</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q2" value="b" x-model="answers.q2" class="text-indigo-600">
+                            <span>Conflit (Clash)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q2" value="c" x-model="answers.q2" class="text-indigo-600">
+                            <span>Empoisonnement (Poisoning)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="space-y-3 pb-6 border-b border-slate-100 dark:border-slate-700/60">
+                    <p class="font-semibold text-sm">3. Que signifie l'étape "Write" (Écrire) dans les 4 principes fondamentaux ?</p>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q3" value="a" x-model="answers.q3" class="text-indigo-600">
+                            <span>Sauvegarder notes et plans en dehors du contexte (scratchpad externe).</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q3" value="b" x-model="answers.q3" class="text-indigo-600">
+                            <span>Rédiger le prompt initial de la conversation.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="space-y-3">
+                    <p class="font-semibold text-sm">4. Pourquoi une fenêtre de contexte trop grande peut-elle nuire à la précision du modèle ?</p>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q4" value="a" x-model="answers.q4" class="text-indigo-600">
+                            <span>Parce que les puces graphiques (GPU) surchauffent inévitablement.</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500 transition">
+                            <input type="radio" name="q4" value="b" x-model="answers.q4" class="text-indigo-600">
+                            <span>À cause du bruit, des distractions et des contradictions potentielles entre sources.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action du quiz -->
+                <div class="pt-4 flex items-center justify-between">
+                    <button @click="checkQuiz()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition shadow-lg shadow-indigo-500/25">
+                        Valider mes réponses
+                    </button>
+                    <button @click="resetQuiz()" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium transition">
+                        Recommencer
+                    </button>
+                </div>
+
+                <!-- Résultat du quiz -->
+                <template x-if="submitted">
+                    <div class="p-6 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 text-center space-y-2">
+                        <h3 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">Résultat du Quiz</h3>
+                        <p class="text-lg font-semibold" x-text="score + ' / 4 bonnes réponses'"></p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400" x-text="score === 4 ? 'Excellent ! Vous maîtrisez parfaitement l\'ingénierie du contexte.' : 'Bien joué ! Relisez les sections précédentes pour parfaire vos connaissances.'"></p>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-700 py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>Cours interactif complet sur l'Ingénierie du Contexte — Entièrement traduit en français.</p>
+    </footer>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

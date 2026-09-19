@@ -1,0 +1,59 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parcours personnalisé — Tuteur scolastique IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="current">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Parcours personnalisé • 6 semaines</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Baseline"><span class="pill">Diagnostic</span><h1>Construire le tuteur scolastique IA</h1><p class="muted">Un parcours adapté à un profil TSSR, à l’aise avec l’infrastructure et le RAG conceptuel, mais débutant en Python, APIs, Docker et production.</p><div class="grid"><div><h3>Forces</h3><p>Réseaux, virtualisation, Linux, GitHub, usage quotidien des LLM, RAG et fine-tuning expérimentés.</p></div><div><h3>Lacunes prioritaires</h3><p>Lire et comprendre Python, appeler une API, déployer progressivement, comprendre les conteneurs et évaluer.</p></div><div><h3>Principe</h3><p>Réduire les variables : Quadro RTX 4000 et Ollama local d’abord ; BC-250 comme exercice de migration ultérieur.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle stratégie réduit le plus la friction au début ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Commencer localement avec une seule machine et une CLI simple</button><button class="choice" data-correct="false" onclick="answer(this,false)">Activer immédiatement React, Docker, Postgres, Nginx et multi-GPU</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 1"><span class="pill">Jalon 1</span><h2>Je parle à mon modèle</h2><div class="week"><h3>Fondations Python et Ollama</h3><p>Créer un venv, comprendre variables, fonctions, conditions, listes, dictionnaires, JSON et exceptions. Appeler Ollama en HTTP avec <code>requests</code>, afficher le streaming et conserver un historique.</p><p><strong>Livrable :</strong> <code>chat.py</code> commenté, dépôt Git propre, README, notes Python et Kanban.</p><p><strong>Test :</strong> corriger trois bugs en moins de 45 minutes et expliquer chaque correction.</p></div><pre id="s1">curl http://localhost:11434/api/generate \\
+  -d '{"model":"qwen2.5:7b-instruct-q4_k_m","prompt":"Explique un token en une phrase.","stream":false}'</pre><button class="btn primary copy" onclick="copyText('s1')">Copier le test Ollama</button><div class="quiz"><h3>Quiz</h3><p>Quel est le livrable de la semaine 1 ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Une CLI Python comprise qui interroge Ollama et stream les réponses</button><button class="choice" data-correct="false" onclick="answer(this,false)">Une plateforme React multi-conteneurs</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 2"><span class="pill">Jalon 2</span><h2>Mon livre devient données</h2><p>Extraire un PDF, nettoyer le texte, découper en chunks de 500–800 tokens avec overlap et produire du JSONL avec livre, page et index.</p><p><strong>Livrable :</strong> <code>ingest.py</code> et dix chunks propres tirés au hasard.</p><p><strong>Test :</strong> ingérer l’article Harvard sans modifier le code, ou une seule ligne au maximum, puis montrer les chunks.</p><div class="quiz"><h3>Quiz</h3><p>Pourquoi conserver les métadonnées page/livre ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour retrouver et citer la source exacte</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour augmenter artificiellement la taille du corpus</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 3"><span class="pill">Jalon 3</span><h2>Ma mémoire fonctionne</h2><p>Vectoriser localement, stocker dans Chroma, rechercher les cinq meilleurs chunks avec score et page, puis mesurer une mini-évaluation sur dix questions.</p><p><strong>Livrable :</strong> <code>search.py</code> et hit-rate ≥ 8/10, avec recherche hybride ou reranking mesurable.</p><div class="quiz"><h3>Quiz</h3><p>Quel critère valide le retrieval ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Un hit-rate mesuré sur des questions à réponses connues</button><button class="choice" data-correct="false" onclick="answer(this,false)">Une impression subjective sans jeu de test</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 4"><span class="pill">Jalon 4</span><h2>Mon tuteur enseigne sans donner la réponse</h2><p>Construire le flux retrieval → contexte → génération socratique. Versionner le system prompt séparément, imposer les citations livre/page et refuser le hors-sujet.</p><p><strong>Livrable :</strong> <code>tutor.py</code> avec scaffolding pédagogique et garde-fous anti-hallucination.</p><p><strong>Test :</strong> guider un étudiant dix minutes sans donner directement la solution, avec au moins une citation correcte.</p><div class="quiz"><h3>Quiz</h3><p>Quelle règle définit le tuteur scolastique ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Guider par étapes et demander à l’étudiant de raisonner</button><button class="choice" data-correct="false" onclick="answer(this,false)">Donner immédiatement la réponse finale</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 5"><span class="pill">Jalon 5</span><h2>Mon app est testable et fiable</h2><p>Migrer vers une interface Chainlit avec sources visibles et mémoire de session. Créer un golden dataset de vingt cas et un rapport d’évaluation.</p><p><strong>Livrable :</strong> réussite, violations et citations mesurées.</p><p><strong>Test :</strong> score ≥ 70 % sur vingt cas et détection d’un sabotage introduit dans le système.</p><div class="quiz"><h3>Quiz</h3><p>Que doit contenir le golden dataset ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Des cas connus permettant de mesurer réponses, violations et citations</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement des exemples choisis après coup</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Semaine 6"><span class="pill">Jalon 6</span><h2>Mon tuteur est en production</h2><p>Dockeriser proprement l’application, Chroma persistant et Ollama. Documenter les opérations, le redémarrage, la mise à jour du corpus et les logs.</p><p><strong>Livrable :</strong> <code>docker compose up</code>, API compatible OpenAI, branchement OpenWebUI et <code>OPERATIONS.md</code>.</p><p><strong>Test :</strong> reconstruire depuis un état propre en moins de 30 minutes et faire une démonstration depuis une autre machine du LAN.</p><div class="quiz"><h3>Quiz</h3><p>Quel est le test de production le plus utile ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Repartir de zéro et reconstruire avec uniquement OPERATIONS.md</button><button class="choice" data-correct="false" onclick="answer(this,false)">Vérifier seulement que le conteneur démarre une fois</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Focus"><span class="pill">À différer</span><h2>La liste IGNORE pendant six semaines</h2><p>Pour protéger l’apprentissage, reporter React/TypeScript, Postgres/pgvector, Nginx, fine-tuning/LoRA, GraphRAG, optimisation avancée, multi-GPU, Kubernetes, cloud/WAN et MLOps complexes.</p><p><strong>Trio prioritaire :</strong> prompting + RAG + évaluation.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Je garde une seule tâche active sur le Kanban (WIP = 1).</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Je commente et explique chaque bloc généré par l’IA avant commit.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Je termine chaque jour par « Fait / Bloqué / Demain ».</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Je documente les preuves de chaque jalon.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Je reporte la complexité non nécessaire au jalon courant.</label><button class="btn primary" onclick="finish()">Valider mon contrat</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

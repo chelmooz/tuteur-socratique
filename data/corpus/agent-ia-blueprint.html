@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comment construire un agent d'IA — schéma interactif</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span> AGENT-IA / SCHEMA-01</div>
+  <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+    <span class="label" id="themeLabel">CLAIR</span>
+    <span class="track">
+      <span class="knob">
+        <svg viewBox="0 0 24 24" id="knobIcon"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>
+      </span>
+    </span>
+  </button>
+</div>
+
+<section class="hero">
+  <div class="eyebrow">Schéma de construction · 8 étapes</div>
+  <h1>Comment construire un <span class="en">agent d'IA</span></h1>
+  <p class="sub">Du cadrage de l'objectif jusqu'aux tests en production : cliquez sur chaque bloc du pipeline pour déplier les composants clés, puis comparez les plateformes disponibles pour chaque étage.</p>
+  <div class="hero-meta">
+    <div class="stat"><b>8</b><span>ÉTAPES DU PIPELINE</span></div>
+    <div class="stat"><b>12</b><span>PLATEFORMES COMPARÉES</span></div>
+    <div class="stat"><b>4</b><span>CATÉGORIES D'OUTILS</span></div>
+  </div>
+</section>
+
+<div class="pipeline-wrap">
+  <div class="pipeline-hint">
+    <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    Cliquez un bloc pour voir le détail des composants
+  </div>
+  <svg id="connector" viewBox="0 0 1180 70" preserveAspectRatio="none"></svg>
+  <div class="stages" id="stages"></div>
+</div>
+
+<section class="table-section">
+  <div class="table-head">
+    <div>
+      <h2>Comparatif des plateformes</h2>
+      <p>Filtrez par catégorie ou cherchez une plateforme pour trouver l'outil adapté à votre agent.</p>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Rechercher une plateforme…">
+    </div>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Catégorie</th>
+          <th>Plateforme</th>
+          <th>LLM</th>
+          <th>Déploiement</th>
+          <th>Fonctionnalités clés</th>
+          <th>Idéal pour</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<footer>SCHÉMA GÉNÉRÉ DYNAMIQUEMENT — DONNÉES INDICATIVES, À VÉRIFIER AVANT DÉCISION</footer>
+
+<script>
+/* ============ ICON LIBRARY (line icons, 24x24) ============ */
+const ICONS = {
+  target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/>',
+  user: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/>',
+  bars: '<line x1="5" y1="19" x2="5" y2="11"/><line x1="12" y1="19" x2="12" y2="6"/><line x1="19" y1="19" x2="19" y2="14"/>',
+  sliders: '<line x1="5" y1="21" x2="5" y2="9"/><line x1="5" y1="5" x2="5" y2="3"/><line x1="12" y1="21" x2="12" y2="13"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="19" y1="21" x2="19" y2="16"/><line x1="19" y1="12" x2="19" y2="3"/><circle cx="5" cy="7" r="2"/><circle cx="12" cy="11" r="2"/><circle cx="19" cy="14" r="2"/>',
+  clipboard: '<rect x="6" y="4" width="12" height="17" rx="1.5"/><rect x="9" y="2.5" width="6" height="3" rx="1"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/>',
+  persona: '<circle cx="12" cy="9" r="3"/><path d="M6.5 19.5c1-3 3-4.5 5.5-4.5s4.5 1.5 5.5 4.5"/><rect x="3.5" y="3.5" width="17" height="17" rx="2"/>',
+  chat: '<path d="M4 5.5h16v11H9l-4 3.5v-3.5H4z"/><line x1="7.5" y1="9" x2="16.5" y2="9"/><line x1="7.5" y1="12.5" x2="13" y2="12.5"/>',
+  shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  network: '<circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="17" r="2.2"/><circle cx="19" cy="17" r="2.2"/><line x1="12" y1="7.2" x2="6.4" y2="15.2"/><line x1="12" y1="7.2" x2="17.6" y2="15.2"/><line x1="7.2" y1="17" x2="16.8" y2="17"/>',
+  monitor: '<rect x="3" y="4.5" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16.5" x2="12" y2="20"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15.5" y2="14"/>',
+  laptop: '<rect x="4" y="5" width="16" height="10.5" rx="1.2"/><line x1="2" y1="19" x2="22" y2="19"/>',
+  code: '<polyline points="9 8 4.5 12 9 16"/><polyline points="15 8 19.5 12 15 16"/>',
+  server: '<rect x="4" y="4" width="16" height="6.5" rx="1"/><rect x="4" y="13.5" width="16" height="6.5" rx="1"/><circle cx="7.5" cy="7.2" r="0.7" fill="currentColor" stroke="none"/><circle cx="7.5" cy="16.7" r="0.7" fill="currentColor" stroke="none"/>',
+  wrench: '<path d="M14.5 6.5a4 4 0 00-5.4 4.9L4 16.5 6.5 19l5-5.1a4 4 0 004.9-5.4l-2.6 2.6-2.3-2.3z"/>',
+  puzzle: '<path d="M9 4h4v2.2a1.6 1.6 0 003.2 0V4H20v4.8h-2.2a1.6 1.6 0 000 3.2H20V17h-3.8v-2.2a1.6 1.6 0 00-3.2 0V17H9v-4.8h2.2a1.6 1.6 0 000-3.2H9z"/>',
+  brainDb: '<path d="M9 4a3 3 0 00-3 3v.3A2.7 2.7 0 004 10a2.7 2.7 0 002 2.6V13a3 3 0 003 3M9 4a3 3 0 013 3v9a3 3 0 01-3 3M15 4a3 3 0 013 3v.3a2.7 2.7 0 012 2.7 2.7 2.7 0 01-2 2.6V13a3 3 0 01-3 3M15 4a3 3 0 00-3 3v9a3 3 0 003 3"/>',
+  workMem: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12a3.5 3.5 0 117 0"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+  db: '<ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5V18c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5.5"/><path d="M5 11.8c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/>',
+  folder: '<path d="M3.5 6.5A1.5 1.5 0 015 5h4.5l2 2.5H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19.5H5A1.5 1.5 0 013.5 18z"/>',
+  route: '<circle cx="6" cy="6" r="2.3"/><circle cx="18" cy="18" r="2.3"/><path d="M6 8.3V13a4 4 0 004 4h4"/>',
+  bolt: '<polygon points="13 2 4 14 11 14 10 22 20 9 13 9"/>',
+  mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="1.5"/><polyline points="4 6.5 12 13 20 6.5"/>',
+  agentLink: '<circle cx="6" cy="7" r="2.6"/><circle cx="18" cy="17" r="2.6"/><path d="M8.3 8.6L15.7 15.4"/><path d="M15.7 8.6L8.3 15.4"/>',
+  warning: '<path d="M12 3.5l9.5 16.5h-19z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.7" fill="currentColor" stroke="none"/>',
+  globe: '<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.4" ry="8.5"/><line x1="3.5" y1="12" x2="20.5" y2="12"/>',
+  point: '<circle cx="12" cy="12" r="8.5"/><path d="M12 6.5v5.5l3.5 2"/>',
+  bot: '<rect x="5" y="8" width="14" height="10" rx="2.5"/><line x1="12" y1="4" x2="12" y2="8"/><circle cx="12" cy="3" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.2" fill="currentColor" stroke="none"/><line x1="9" y1="17" x2="15" y2="17"/>',
+  tests: '<rect x="5" y="3.5" width="14" height="17" rx="1.5"/><polyline points="8.5 11 11 13.5 15.5 8.5"/>',
+  refresh: '<path d="M4 12a8 8 0 0113.7-5.7L20 8"/><polyline points="20 3 20 8 15 8"/><path d="M20 12a8 8 0 01-13.7 5.7L4 16"/><polyline points="4 21 4 16 9 16"/>',
+  search: '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'
+};
+function icon(name, cls=''){ return `<svg class="${cls}" viewBox="0 0 24 24">${ICONS[name]||''}</svg>`; }
+
+/* ============ PIPELINE DATA ============ */
+const STAGES = [
+  { title:"Définir l'objectif et le périmètre", icon:'target',
+    items:[
+      {icon:'target', t:"Cas d'usage", d:"Le problème précis que l'agent doit résoudre."},
+      {icon:'user', t:"Besoins utilisateur", d:"Qui utilise l'agent et dans quel contexte."},
+      {icon:'bars', t:"Critères de succès", d:"Métriques qui définissent une réussite."},
+      {icon:'sliders', t:"Contraintes", d:"Budget, latence, conformité, sécurité."},
+    ]},
+  { title:"Conception du prompt système", icon:'clipboard',
+    items:[
+      {icon:'clipboard', t:"Objectifs", d:"Ce que l'agent doit accomplir en priorité."},
+      {icon:'persona', t:"Rôle / Persona", d:"Ton, expertise et posture de l'agent."},
+      {icon:'chat', t:"Instructions", d:"Règles de comportement et de format."},
+      {icon:'shield', t:"Garde-fous", d:"Limites explicites et refus prévus."},
+    ]},
+  { title:"Choisir le LLM", icon:'network',
+    items:[
+      {icon:'network', t:"Modèle de base", d:"Famille de modèle selon la tâche."},
+      {icon:'sliders', t:"Paramètres", d:"Température, top-p, longueur de sortie."},
+      {icon:'monitor', t:"Fenêtre de contexte", d:"Volume d'information traitable."},
+      {icon:'clock', t:"Coût / Latence", d:"Compromis prix vs vitesse de réponse."},
+    ]},
+  { title:"Outils & intégrations", icon:'wrench',
+    items:[
+      {icon:'laptop', t:"Simple (local)", d:"Fonctions exécutées sur la machine."},
+      {icon:'code', t:"API (web, apps, données)", d:"Connexion à des services externes."},
+      {icon:'server', t:"Serveur MCP", d:"Outils standardisés via protocole MCP."},
+      {icon:'agentLink', t:"Agent d'IA comme outil", d:"Un agent qui en appelle un autre."},
+      {icon:'puzzle', t:"Fonctions personnalisées", d:"Logique métier propre au projet."},
+    ]},
+  { title:"Systèmes de mémoire", icon:'brainDb',
+    items:[
+      {icon:'chat', t:"Épisodique (conversation)", d:"Historique de l'échange en cours."},
+      {icon:'workMem', t:"Mémoire de travail", d:"Contexte actif à court terme."},
+      {icon:'db', t:"Base de données vectorielle", d:"Recherche sémantique à long terme."},
+      {icon:'server', t:"SQL / DB structurée", d:"Données factuelles et relationnelles."},
+      {icon:'folder', t:"Stockage de fichiers", d:"Documents et pièces jointes."},
+    ]},
+  { title:"Orchestration", icon:'route',
+    items:[
+      {icon:'route', t:"Routes / flux de travail", d:"Chemins possibles selon le contexte."},
+      {icon:'bolt', t:"Déclencheurs", d:"Événements qui activent l'agent."},
+      {icon:'sliders', t:"Paramètres", d:"Réglages du moteur d'orchestration."},
+      {icon:'mail', t:"Files d'attente de messages", d:"Traitement asynchrone des tâches."},
+      {icon:'agentLink', t:"Agent-à-agent", d:"Coordination entre plusieurs agents."},
+      {icon:'warning', t:"Gestion des erreurs", d:"Reprises et repli en cas d'échec."},
+    ]},
+  { title:"Interface utilisateur", icon:'chat',
+    items:[
+      {icon:'chat', t:"Interface de chat", d:"Conversation textuelle classique."},
+      {icon:'globe', t:"App web", d:"Interface accessible depuis le navigateur."},
+      {icon:'point', t:"Point de terminaison API", d:"Intégration dans d'autres logiciels."},
+      {icon:'bot', t:"Bot Slack / Discord", d:"Présence directe dans les outils d'équipe."},
+    ]},
+  { title:"Tests & évaluations", icon:'tests',
+    items:[
+      {icon:'tests', t:"Tests unitaires", d:"Vérification de chaque composant isolé."},
+      {icon:'clock', t:"Test de latence", d:"Temps de réponse sous charge réelle."},
+      {icon:'bars', t:"Métriques de qualité", d:"Précision, pertinence, satisfaction."},
+      {icon:'refresh', t:"Itérer & améliorer", d:"Boucle continue d'amélioration."},
+    ]},
+];
+
+/* ============ TABLE DATA ============ */
+const ROWS = [
+  {cat:"Agents d'IA grand public", prod:"ChatGPT (OpenAI)", llm:"GPT-5", deploy:"Cloud", feat:"GPTs personnalisés, voix, vision, mémoire, intégration DALL-E", best:"Assistant polyvalent, travail créatif"},
+  {cat:"Agents d'IA grand public", prod:"Claude (Anthropic)", llm:"Claude 4.5", deploy:"Cloud", feat:"Projets, artefacts, analyse, contexte de 200K", best:"Recherche, rédaction, codage"},
+  {cat:"Agents d'IA grand public", prod:"Perplexity", llm:"Multiple", deploy:"Cloud", feat:"Recherche d'abord, citations, Pro Search", best:"Assistant de recherche, vérification des faits"},
+  {cat:"Outils de codage agentiques", prod:"Cursor", llm:"Claude, GPT", deploy:"Local + Cloud", feat:"IDE complet, mode compositeur, édition multi-fichiers", best:"Développeurs professionnels, projets complexes"},
+  {cat:"Outils de codage agentiques", prod:"Windsurf (Codeium)", llm:"Cascade", deploy:"Local + Cloud", feat:"Flux de travail agentique, conscience de la base de code", best:"Développement d'équipe, grandes bases de code"},
+  {cat:"Outils de codage agentiques", prod:"Claude Code (Anthropic)", llm:"Claude 4.5", deploy:"Local", feat:"Intégration git native-terminal, codage autonome", best:"Flux CLI, scripts d'automatisation"},
+  {cat:"Constructeurs sans-code", prod:"Lindy", llm:"GPT-5", deploy:"Cloud", feat:"Plus de 3000 intégrations, flux de travail en langage naturel", best:"Automatisation d'entreprise, équipes non-techniques"},
+  {cat:"Constructeurs sans-code", prod:"Relay.app", llm:"GPT-5", deploy:"Cloud", feat:"\"Human-in-the-loop\", natif Gmail/Slack", best:"Flux de travail d'équipe, validations nécessaires"},
+  {cat:"Constructeurs sans-code", prod:"n8n", llm:"Multiple", deploy:"Cloud / Les deux", feat:"Plus de 400 intégrations, auto-hébergement, open source", best:"Équipes techniques, besoins de confidentialité des données"},
+  {cat:"Cadres de développement", prod:"LangGraph", llm:"Tout", deploy:"Local/Cloud", feat:"Flux basés sur les graphes, gestion d'état, cycles", best:"Flux complexes, applications de production"},
+  {cat:"Cadres de développement", prod:"CrewAI", llm:"Tout", deploy:"Local/Cloud", feat:"Basé sur les rôles, plus de 40 intégrations, délégation de tâches", best:"Équipes multi-agents, systèmes autonomes"},
+  {cat:"Cadres de développement", prod:"LlamaIndex", llm:"Tout", deploy:"Local/Cloud", feat:"RAG d'abord, connecteurs de données, moteurs de requête", best:"Applications à forte intensité de connaissances, Q&R sur documents"},
+];
+
+/* ============ RENDER: connector line ============ */
+function renderConnector(){
+  const svg = document.getElementById('connector');
+  const W = 1180, H = 70;
+  svg.innerHTML = `
+    <path id="flowPath" d="M 40 35 H 1140" stroke="var(--line-faint)" stroke-width="2" stroke-dasharray="2 8" fill="none" stroke-linecap="round"/>
+    <circle class="flow-dot" r="4"><animateMotion dur="6s" repeatCount="indefinite" path="M 40 35 H 1140"/></circle>
+    <circle class="flow-dot" r="4" opacity="0.6"><animateMotion dur="6s" begin="2s" repeatCount="indefinite" path="M 40 35 H 1140"/></circle>
+    <circle class="flow-dot" r="4" opacity="0.3"><animateMotion dur="6s" begin="4s" repeatCount="indefinite" path="M 40 35 H 1140"/></circle>
+  `;
+}
+
+/* ============ RENDER: stages ============ */
+function renderStages(){
+  const wrap = document.getElementById('stages');
+  wrap.innerHTML = STAGES.map((s,i)=>`
+    <div class="stage-card" data-idx="${i}">
+      <div class="stage-head">
+        <div class="stage-num mono">${i+1}</div>
+        ${icon(s.icon,'stage-icon')}
+        <div class="stage-title">${s.title}</div>
+        ${icon('point','chev').replace(ICONS.point, '<polyline points="6 9 12 15 18 9"/>')}
+      </div>
+      <div class="stage-body">
+        <div class="stage-items">
+          ${s.items.map(it=>`
+            <div class="sub-item">
+              ${icon(it.icon)}
+              <div>
+                <div class="si-title">${it.t}</div>
+                <div class="si-desc">${it.d}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.stage-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      card.classList.toggle('open');
+    });
+  });
+}
+
+/* ============ RENDER: table + filters ============ */
+const CATS = [...new Set(ROWS.map(r=>r.cat))];
+let activeCat = 'Tout';
+let searchTerm = '';
+
+function renderFilters(){
+  const el = document.getElementById('filters');
+  const cats = ['Tout', ...CATS];
+  el.innerHTML = cats.map(c=>`<button class="chip ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`).join('');
+  el.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeCat = btn.dataset.cat;
+      renderFilters();
+      renderTable();
+    });
+  });
+}
+
+function renderTable(){
+  const body = document.getElementById('tableBody');
+  const filtered = ROWS.filter(r=>{
+    const matchCat = activeCat==='Tout' || r.cat===activeCat;
+    const matchSearch = !searchTerm || (r.prod+r.cat+r.feat+r.best).toLowerCase().includes(searchTerm.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  if(filtered.length===0){
+    body.innerHTML = `<tr class="empty-row"><td colspan="6">Aucune plateforme ne correspond à cette recherche.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(r=>`
+    <tr>
+      <td class="cat-cell">${r.cat}</td>
+      <td class="prod-cell">${r.prod}</td>
+      <td><span class="badge">${r.llm}</span></td>
+      <td><span class="badge">${r.deploy}</span></td>
+      <td>${r.feat}</td>
+      <td>${r.best}</td>
+    </tr>
+  `).join('');
+}
+
+/* ============ Theme toggle ============ */
+const root = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel = document.getElementById('themeLabel');
+const knobIcon = document.getElementById('knobIcon');
+const moonPath = '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>';
+const sunPath = ICONS.clock ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>' : '';
+
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  themeLabel.textContent = t==='dark' ? 'SOMBRE' : 'CLAIR';
+  knobIcon.innerHTML = t==='dark' ? moonPath : sunPath;
+}
+themeToggle.addEventListener('click', ()=>{
+  const next = root.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
+
+/* ============ Search ============ */
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  renderTable();
+});
+
+/* ============ Init ============ */
+renderConnector();
+renderStages();
+renderFilters();
+renderTable();
+applyTheme('light');
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

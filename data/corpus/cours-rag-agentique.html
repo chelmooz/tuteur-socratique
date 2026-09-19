@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Maîtriser le RAG Agentique (n8n + Supabase)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+
+  <div class="topbar">
+    <div class="brand">🧠 RAG Agentique Masterclass</div>
+    <div class="progress-container">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
+    <div class="stats">
+      <span id="scoreDisplay">Score: 0/0</span>
+      <button class="btn-icon" onclick="toggleTheme()" title="Changer de thème">🌓</button>
+      <button class="btn-icon" id="mobileMenuBtn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURATION DU COURS (DATA)
+    // ==========================================
+    const COURSE_DATA = {
+      title: "Maîtriser le RAG Agentique",
+      modules: [
+        {
+          id: "diag",
+          title: "🎯 Diagnostic",
+          type: "diag",
+          content: `
+            <h1>Évaluez votre point de départ</h1>
+            <p class="lead">Quelques questions pour adapter votre parcours d'apprentissage sur l'automatisation IA.</p>
+            <div class="quiz-box">
+              <div class="q-item">
+                <p class="q-text">1. Avez-vous déjà mis en place un système RAG (Retrieval Augmented Generation) ?</p>
+                <label class="q-option"><input type="radio" name="d1" value="1"> Non, je découvre le concept</label>
+                <label class="q-option"><input type="radio" name="d1" value="2"> Oui, un RAG classique (requête -> base vectorielle -> réponse)</label>
+                <label class="q-option"><input type="radio" name="d1" value="3"> Oui, un système agentique avec outils multiples et reranking</label>
+              </div>
+              <div class="q-item">
+                <p class="q-text">2. Quel outil d'automatisation utilisez-vous principalement ?</p>
+                <label class="q-option"><input type="radio" name="d2" value="1"> Je n'en utilise pas encore</label>
+                <label class="q-option"><input type="radio" name="d2" value="2"> Make ou Zapier</label>
+                <label class="q-option"><input type="radio" name="d2" value="3"> n8n ou des solutions auto-hébergées</label>
+              </div>
+              <button class="btn" onclick="processDiagnostic()">Valider et commencer</button>
+            </div>
+          `
+        },
+        {
+          id: "m1",
+          title: "1. Le Problème du Contexte",
+          type: "module",
+          content: `
+            <h1>Pourquoi les LLM échouent sur vos données internes</h1>
+            <p class="lead">Un modèle de langage standard ne connaît pas vos procédures internes, comme la politique de congés ou le guide de réponse aux avis de la chaîne "Urban Vallée".</p>
+            <div class="grid">
+              <div class="card red">
+                <h3>❌ Sans contexte</h3>
+                <p>L'IA hallucine ou donne des réponses génériques ("AI slop"). Elle ne peut pas deviner vos règles métier spécifiques.</p>
+              </div>
+              <div class="card green">
+                <h3>✅ Avec RAG Agentique</h3>
+                <p>L'IA agit comme un employé : elle consulte vos documents (base vectorielle), vérifie les faits, et formule une réponse précise et sourcée.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button class="btn" onclick="nextModule()">Passer au concept clé →</button>
+            </div>
+          `
+        },
+        {
+          id: "m2",
+          title: "2. RAG Classique vs Agentique",
+          type: "module",
+          content: `
+            <h1>Le saut paradigmatique : de la pipeline à l'agent</h1>
+            <p class="lead">Le RAG classique est linéaire. Le RAG agentique est dynamique et décisionnel.</p>
+            
+            <div class="schema-wrap">
+              <svg class="schema-svg" viewBox="0 0 800 320">
+                <defs>
+                  <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--accent)" />
+                  </marker>
+                </defs>
+                
+                <!-- RAG Classique (Haut) -->
+                <text x="50" y="40" class="schema-text" style="font-size:16px; fill: var(--muted);">RAG Classique (Linéaire)</text>
+                <rect x="50" y="60" width="120" height="50" class="schema-node" style="stroke: var(--muted);" />
+                <text x="110" y="90" class="schema-text" text-anchor="middle">Requête</text>
+                
+                <path class="schema-path" d="M170 85 L230 85" marker-end="url(#arrow)" style="stroke: var(--muted);" />
+                
+                <rect x="230" y="60" width="140" height="50" class="schema-node" style="stroke: var(--muted);" />
+                <text x="300" y="90" class="schema-text" text-anchor="middle">Base Vectorielle</text>
+                
+                <path class="schema-path" d="M370 85 L430 85" marker-end="url(#arrow)" style="stroke: var(--muted);" />
+                
+                <rect x="430" y="60" width="120" height="50" class="schema-node" style="stroke: var(--muted);" />
+                <text x="490" y="90" class="schema-text" text-anchor="middle">LLM</text>
+                
+                <path class="schema-path" d="M550 85 L610 85" marker-end="url(#arrow)" style="stroke: var(--muted);" />
+                
+                <rect x="610" y="60" width="140" height="50" class="schema-node" style="stroke: var(--green);" />
+                <text x="680" y="90" class="schema-text" text-anchor="middle">Réponse</text>
+
+                <!-- RAG Agentique (Bas) -->
+                <text x="50" y="180" class="schema-text" style="font-size:16px; fill: var(--accent); font-weight:bold;">RAG Agentique (Dynamique)</text>
+                
+                <rect x="50" y="200" width="120" height="50" class="schema-node pulse" />
+                <text x="110" y="230" class="schema-text" text-anchor="middle">Requête</text>
+                
+                <path class="schema-path" d="M170 225 L230 225" marker-end="url(#arrow)" />
+                
+                <!-- Agent Central -->
+                <circle cx="280" cy="225" r="40" class="schema-node pulse" style="stroke-width: 3;" />
+                <text x="280" y="230" class="schema-text" text-anchor="middle" style="font-size:14px;">Agent IA</text>
+                
+                <!-- Outils -->
+                <path class="schema-path" d="M315 200 L380 170" marker-end="url(#arrow)" />
+                <rect x="380" y="145" width="130" height="50" class="schema-node" />
+                <text x="445" y="175" class="schema-text" text-anchor="middle">Base Vectorielle</text>
+                
+                <path class="schema-path" d="M320 225 L380 225" marker-end="url(#arrow)" />
+                <rect x="380" y="200" width="130" height="50" class="schema-node" />
+                <text x="445" y="230" class="schema-text" text-anchor="middle">Recherche Web</text>
+                
+                <path class="schema-path" d="M315 250 L380 280" marker-end="url(#arrow)" />
+                <rect x="380" y="255" width="130" height="50" class="schema-node" />
+                <text x="445" y="285" class="schema-text" text-anchor="middle">Base SQL</text>
+                
+                <!-- Reranker & LLM -->
+                <path class="schema-path" d="M510 225 L560 225" marker-end="url(#arrow)" />
+                <rect x="560" y="200" width="100" height="50" class="schema-node" style="stroke: var(--yellow);" />
+                <text x="610" y="230" class="schema-text" text-anchor="middle">Reranker</text>
+                
+                <path class="schema-path" d="M660 225 L700 225" marker-end="url(#arrow)" />
+                <rect x="700" y="200" width="80" height="50" class="schema-node" />
+                <text x="740" y="230" class="schema-text" text-anchor="middle">LLM</text>
+              </svg>
+            </div>
+            
+            <div class="card accent">
+              <h3>💡 Le rôle du Reranker (ex: Cohere)</h3>
+              <p>Après la recherche sémantique, le reranker analyse la pertinence fine des top résultats (ex: top 3) pour ne fournir au LLM que le contexte le plus dense et utile, évitant la dilution de l'attention.</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn secondary" onclick="prevModule()">← Précédent</button>
+              <button class="btn" onclick="nextModule()">Voir le Workflow d'ingestion →</button>
+            </div>
+          `
+        },
+        {
+          id: "m3",
+          title: "3. Workflow 1 : Ingestion",
+          type: "module",
+          content: `
+            <h1>Automatiser la vectorisation (n8n + Supabase)</h1>
+            <p class="lead">Comment transformer un document Google Docs en connaissances exploitables par l'IA, sans doublons.</p>
+            
+            <div class="grid">
+              <div class="card">
+                <h3>1. Déclencheur</h3>
+                <p>Surveillance d'un dossier Google Drive ("Demo Rag"). Déclenchement à la création ou mise à jour d'un fichier.</p>
+              </div>
+              <div class="card">
+                <h3>2. Vérification (Merge)</h3>
+                <p>Interroger Supabase pour vérifier si le <code>doc_id</code> existe déjà. Si oui, on met à jour (update) pour éviter les doublons de vecteurs.</p>
+              </div>
+              <div class="card">
+                <h3>3. Embedding & Métadonnées</h3>
+                <p>Utilisation d'OpenAI (ex: <code>text-embedding-3-small</code>). Ajout de métadonnées cruciales : date, catégorie, doc_id.</p>
+              </div>
+            </div>
+
+            <div class="card yellow">
+              <h3>⚠️ Point d'attention Supabase</h3>
+              <p>Avant de connecter n8n, exécutez un script SQL dans l'éditeur Supabase pour créer la table <code>documents</code> avec une colonne de type <code>vector</code> et activer l'extension <code>pgvector</code>.</p>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn secondary" onclick="prevModule()">← Précédent</button>
+              <button class="btn" onclick="nextModule()">Le Chatbot Agentique →</button>
+            </div>
+          `
+        },
+        {
+          id: "m4",
+          title: "4. Workflow 2 : Le Cerveau",
+          type: "module",
+          content: `
+            <h1>Configurer l'Agent de Service Client</h1>
+            <p class="lead">L'agent ne se contente pas de répondre, il utilise des outils de manière autonome.</p>
+            
+            <div class="card accent">
+              <h3>System Prompt (Extrait Urban Vallée)</h3>
+              <p style="font-family: var(--font-mono); font-size: 0.9rem; background: var(--bg); padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">
+                "Tu es l'assistant de service client de la chaîne Urban Vallée. Ta mission est de trouver les bonnes procédures pour répondre aux avis. Utilise systématiquement l'outil de recherche vectorielle pour consulter le 'Guide de réponse aux avis'. Respecte le ton chaleureux et personnalisé."
+              </p>
+            </div>
+
+            <h2>Les Outils de l'Agent</h2>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; color: var(--muted);">
+              <li style="margin-bottom: 0.5rem;"><strong>Supabase Vector Store :</strong> Pour retrouver les procédures internes.</li>
+              <li style="margin-bottom: 0.5rem;"><strong>Cohere Reranker :</strong> Pour filtrer les 3 meilleurs chunks de texte avant de les envoyer au LLM.</li>
+              <li><strong>Simple Memory :</strong> Pour conserver le contexte des 5 derniers échanges.</li>
+            </ul>
+
+            <div class="toolbar">
+              <button class="btn secondary" onclick="prevModule()">← Précédent</button>
+              <button class="btn" onclick="nextModule()">Atelier Pratique →</button>
+            </div>
+          `
+        },
+        {
+          id: "m5",
+          title: "5. Atelier : Générateur de Prompt",
+          type: "workshop",
+          content: `
+            <h1>Atelier : Construisez votre System Prompt</h1>
+            <p class="lead">Utilisez ce générateur pour créer le prompt parfait pour votre agent RAG, basé sur la méthode du transcript.</p>
+            
+            <div class="generator">
+              <div class="form-group">
+                <label>Rôle de l'agent</label>
+                <input type="text" id="p-role" placeholder="Ex: Assistant de service client de la chaîne Urban Vallée" value="Assistant de service client de la chaîne Urban Vallée">
+              </div>
+              <div class="form-group">
+                <label>Mission principale</label>
+                <textarea id="p-mission" rows="2" placeholder="Ex: Trouver les bonnes procédures pour répondre aux avis clients">Trouver les bonnes procédures et informations pour répondre aux avis clients de manière personnalisée.</textarea>
+              </div>
+              <div class="form-group">
+                <label>Outils disponibles</label>
+                <input type="text" id="p-tools" placeholder="Ex: Base de données vectorielle Supabase, Reranker Cohere" value="Base de données vectorielle Supabase (guides internes), Reranker Cohere">
+              </div>
+              <div class="form-group">
+                <label>Contraintes de format</label>
+                <input type="text" id="p-format" placeholder="Ex: Répondre en moins de 3 paragraphes, ton chaleureux" value="Répondre en moins de 3 paragraphes, ton chaleureux et professionnel, inclure toujours la source de la procédure.">
+              </div>
+              <button class="btn" onclick="generatePrompt()">Générer le Prompt</button>
+              
+              <div class="prompt-output" id="prompt-result" style="display:none;"></div>
+              <button class="btn secondary small" id="copy-btn" style="display:none; margin-top:0.5rem;" onclick="copyPrompt()">📋 Copier le prompt</button>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn secondary" onclick="prevModule()">← Précédent</button>
+              <button class="btn" onclick="nextModule()">Simulateur de Scénario →</button>
+            </div>
+          `
+        },
+        {
+          id: "m6",
+          title: "6. Simulateur de Scénario",
+          type: "simulator",
+          content: `
+            <h1>Analyse d'Avis en Cascade (Workflow 3)</h1>
+            <p class="lead">Testez votre compréhension du flux d'analyse des avis clients (Toulouse, Lyon, Paris, etc.).</p>
+            
+            <div class="simulator">
+              <div class="scenario-box">
+                <strong>Scénario :</strong> Vous devez analyser les avis de l'établissement de <strong>Toulouse</strong>. Un client a laissé un avis 2 étoiles mentionnant "attente longue au restaurant" et "problème d'ascenseur".
+              </div>
+              <p class="q-text">Comment l'agent RAG agentique doit-il procéder pour fournir une analyse actionnable à la direction ?</p>
+              
+              <label class="q-option" onclick="checkScenario(this, false)">
+                <input type="radio" name="sim"> A) Il génère une réponse d'excuse générique sans consulter les données historiques.
+              </label>
+              <label class="q-option" onclick="checkScenario(this, true)">
+                <input type="radio" name="sim"> B) Il utilise des filtres de métadonnées (ville="Toulouse", note<=3) pour interroger la base vectorielle, récupère les verbatims, et propose un plan d'action correctif (audit restauration).
+              </label>
+              <label class="q-option" onclick="checkScenario(this, false)">
+                <input type="radio" name="sim"> C) Il demande à l'utilisateur de lui fournir manuellement les avis un par un pour les analyser.
+              </label>
+              
+              <div id="sim-feedback" class="feedback-box"></div>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn secondary" onclick="prevModule()">← Précédent</button>
+              <button class="btn" onclick="nextModule()">Évaluation Finale →</button>
+            </div>
+          `
+        },
+        {
+          id: "m7",
+          title: "7. Évaluation Finale",
+          type: "final",
+          content: `
+            <h1>Validez vos compétences</h1>
+            <p class="lead">Répondez à ces questions pour obtenir votre certificat de complétion.</p>
+            
+            <div class="quiz-box">
+              <div class="q-item">
+                <p class="q-text">1. Quelle est la principale différence entre le RAG classique et le RAG agentique ?</p>
+                <label class="q-option"><input type="radio" name="q1" value="0"> Le RAG classique est plus rapide.</label>
+                <label class="q-option"><input type="radio" name="q1" value="1"> L'agent décide dynamiquement quels outils utiliser (Vector DB, Web, SQL) et vérifie la pertinence.</label>
+                <label class="q-option"><input type="radio" name="q1" value="0"> Le RAG agentique ne nécessite pas de base de données.</label>
+                <div class="explain">Exact ! L'agentique introduit une boucle de raisonnement et de sélection d'outils, contrairement au pipeline linéaire du RAG classique.</div>
+              </div>
+              
+              <div class="q-item">
+                <p class="q-text">2. Dans le workflow d'ingestion n8n, pourquoi utilise-t-on un nœud "Merge" avant d'insérer dans Supabase ?</p>
+                <label class="q-option"><input type="radio" name="q2" value="0"> Pour fusionner deux fichiers PDF en un seul.</label>
+                <label class="q-option"><input type="radio" name="q2" value="1"> Pour vérifier si le document existe déjà et éviter les doublons de vecteurs en cas de mise à jour.</label>
+                <label class="q-option"><input type="radio" name="q2" value="0"> Pour augmenter la vitesse de l'embedding.</label>
+                <div class="explain">Correct. La vérification du doc_id permet d'update les informations obsolètes plutôt que de créer des entrées dupliquées.</div>
+              </div>
+
+              <div class="q-item">
+                <p class="q-text">3. Quel est le rôle du Reranker (ex: Cohere) dans ce système ?</p>
+                <label class="q-option"><input type="radio" name="q3" value="0"> Il traduit le texte dans une autre langue.</label>
+                <label class="q-option"><input type="radio" name="q3" value="0"> Il génère les vecteurs d'embedding.</label>
+                <label class="q-option"><input type="radio" name="q3" value="1"> Il réévalue et trie les résultats de la recherche vectorielle pour ne garder que les plus pertinents avant le LLM.</label>
+                <div class="explain">Exactement. Le reranking améliore la précision en filtrant le "bruit" sémantique avant la génération finale.</div>
+              </div>
+
+              <button class="btn" onclick="checkFinalQuiz()">Soumettre l'évaluation</button>
+              <div class="explain" id="final-result" style="font-weight: bold; font-size: 1.1rem; margin-top: 1rem;"></div>
+            </div>
+          `
+        },
+        {
+          id: "m8",
+          title: "8. Certificat & Plan d'Action",
+          type: "certificate",
+          content: `
+            <h1>Félicitations !</h1>
+            <p class="lead">Vous avez complété la masterclass sur le RAG Agentique.</p>
+            
+            <div class="certificate" id="cert-block">
+              <span class="badge">🏆</span>
+              <h2>Certificat de Maîtrise</h2>
+              <p>Décerné à l'attention de l'apprenant ayant validé les concepts de</p>
+              <h3 style="color: var(--accent); margin: 1rem 0;">RAG Agentique avec n8n & Supabase</h3>
+              <p style="color: var(--muted); font-size: 0.9rem;">Date : <span id="cert-date"></span> | Score : <span id="cert-score"></span></p>
+            </div>
+
+            <h2>📋 Votre Plan d'Action (7 jours)</h2>
+            <div class="card green" style="margin-top: 1rem;">
+              <label class="q-option" style="border:none; padding-left:0;">
+                <input type="checkbox" id="check1" onchange="saveChecklist()"> 1. Créer un projet Supabase et exécuter le script SQL <code>pgvector</code>.
+              </label>
+              <label class="q-option" style="border:none; padding-left:0;">
+                <input type="checkbox" id="check2" onchange="saveChecklist()"> 2. Configurer les credentials (URL + Clé secrète) dans n8n.
+              </label>
+              <label class="q-option" style="border:none; padding-left:0;">
+                <input type="checkbox" id="check3" onchange="saveChecklist()"> 3. Créer le workflow d'ingestion (Google Drive -> Embedding -> Supabase).
+              </label>
+              <label class="q-option" style="border:none; padding-left:0;">
+                <input type="checkbox" id="check4" onchange="saveChecklist()"> 4. Ajouter un nœud Cohere Reranker pour optimiser la pertinence.
+              </label>
+              <label class="q-option" style="border:none; padding-left:0;">
+                <input type="checkbox" id="check5" onchange="saveChecklist()"> 5. Tester avec une requête réelle sur un document "Guide des procédures".
+              </label>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn secondary" onclick="resetCourse()">🔄 Recommencer le cours</button>
+              <button class="btn" onclick="window.print()">🖨️ Imprimer / Sauvegarder en PDF</button>
+            </div>
+          `
+        }
+      ]
+    };
+
+    // ==========================================
+    // ÉTAT ET UTILITAIRES
+    // ==========================================
+    let currentModuleIndex = 0;
+    let score = 0;
+    let totalQuizQuestions = 0;
+    let visitedModules = new Set();
+
+    function $(sel) { return document.querySelector(sel); }
+    function $$(sel) { return document.querySelectorAll(sel); }
+
+    function init() {
+      // Charger le thème
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.body.setAttribute('data-theme', savedTheme);
+      
+      // Charger la progression
+      const savedProgress = localStorage.getItem('rag_progress');
+      if (savedProgress) {
+        visitedModules = new Set(JSON.parse(savedProgress));
+      }
+      
+      // Charger la checklist
+      const savedChecks = localStorage.getItem('rag_checklist');
+      if (savedChecks) {
+        const checks = JSON.parse(savedChecks);
+        for (let i = 1; i <= 5; i++) {
+          const el = $(`#check${i}`);
+          if (el && checks[i-1]) el.checked = true;
+        }
+      }
+
+      renderNav();
+      showModule(0);
+      updateProgress();
+    }
+
+    function renderNav() {
+      const nav = $('#nav');
+      nav.innerHTML = COURSE_DATA.modules.map((m, i) => `
+        <button data-index="${i}" class="${visitedModules.has(m.id) ? 'completed' : ''}" onclick="showModule(${i})">
+          ${m.title}
+        </button>
+      `).join('');
+    }
+
+    function showModule(index) {
+      currentModuleIndex = index;
+      const module = COURSE_DATA.modules[index];
+      
+      // Marquer comme visité
+      visitedModules.add(module.id);
+      localStorage.setItem('rag_progress', JSON.stringify([...visitedModules]));
+      
+      // Mise à jour UI
+      $$('.section').forEach(s => s.classList.remove('active'));
+      $$('#nav button').forEach(b => b.classList.remove('active'));
+      
+      // Injection du contenu si pas déjà rendu (pour garder l'état des quiz, on pourrait optimiser, mais ici on réinjecte)
+      // Pour une app simple, on régénère le HTML du module actif
+      const contentDiv = $('#content');
+      contentDiv.innerHTML = `<div class="section active">${module.content}</div>`;
+      
+      $$('#nav button')[index].classList.add('active');
+      renderNav(); // Pour mettre à jour les coches
+      updateProgress();
+      
+      // Scroll top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Mobile : fermer le menu
+      $('#sidebar').classList.remove('mobile-open');
+    }
+
+    function nextModule() {
+      if (currentModuleIndex < COURSE_DATA.modules.length - 1) {
+        showModule(currentModuleIndex + 1);
+      }
+    }
+
+    function prevModule() {
+      if (currentModuleIndex > 0) {
+        showModule(currentModuleIndex - 1);
+      }
+    }
+
+    function updateProgress() {
+      const pct = Math.round((visitedModules.size / COURSE_DATA.modules.length) * 100);
+      $('#progressBar').style.width = pct + '%';
+      
+      // Calculer le score global des quiz validés
+      const correctAnswers = $$('.q-option.correct').length;
+      // Total des questions uniques (simplifié pour cette démo)
+      $('#scoreDisplay').textContent = `Progression: ${pct}%`;
+    }
+
+    // ==========================================
+    // INTERACTIONS SPÉCIFIQUES
+    // ==========================================
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    function toggleMobileNav() {
+      $('#sidebar').classList.toggle('mobile-open');
+    }
+
+    function processDiagnostic() {
+      // Simulation de personnalisation
+      nextModule();
+    }
+
+    function generatePrompt() {
+      const role = $('#p-role').value;
+      const mission = $('#p-mission').value;
+      const tools = $('#p-tools').value;
+      const format = $('#p-format').value;
+      
+      const prompt = `# Rôle
+Tu es ${role}.
+
+# Mission
+${mission}
+
+# Outils à ta disposition
+- ${tools}
+
+# Contraintes de format et de ton
+${format}
+
+# Instructions de raisonnement
+1. Analyse la demande de l'utilisateur.
+2. Utilise l'outil de recherche vectorielle pour trouver les informations pertinentes.
+3. Si les résultats sont nombreux, utilise le Reranker pour identifier les top 3 extraits les plus pertinents.
+4. Formule ta réponse en te basant uniquement sur ces extraits.
+5. Cite ta source (nom du document ou date) si applicable.`;
+
+      $('#prompt-result').textContent = prompt;
+      $('#prompt-result').style.display = 'block';
+      $('#copy-btn').style.display = 'inline-flex';
+    }
+
+    function copyPrompt() {
+      const text = $('#prompt-result').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = $('#copy-btn');
+        const original = btn.textContent;
+        btn.textContent = '✅ Copié !';
+        setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+
+    function checkScenario(el, isCorrect) {
+      // Reset styles
+      $$('.simulator .q-option').forEach(opt => {
+        opt.classList.remove('correct', 'incorrect');
+        opt.style.pointerEvents = 'none';
+      });
+      
+      const feedback = $('#sim-feedback');
+      if (isCorrect) {
+        el.classList.add('correct');
+        feedback.className = 'feedback-box success';
+        feedback.innerHTML = '<strong>✅ Excellente analyse !</strong><br>C\'est exactement la puissance du RAG agentique : combiner la recherche sémantique avec des filtres de métadonnées (ville, note) pour obtenir des insights actionnables, et non juste du texte générique.';
+      } else {
+        el.classList.add('incorrect');
+        feedback.className = 'feedback-box error';
+        feedback.innerHTML = '<strong>❌ Pas optimal.</strong><br>Un agent RAG doit exploiter les métadonnées (ville, catégorie, note) pour filtrer la base vectorielle et fournir une analyse contextuelle, pas une réponse générique ou manuelle.';
+      }
+    }
+
+    function checkFinalQuiz() {
+      let currentScore = 0;
+      const q1 = $('input[name="q1"]:checked');
+      const q2 = $('input[name="q2"]:checked');
+      const q3 = $('input[name="q3"]:checked');
+      
+      if (!q1 || !q2 || !q3) {
+        alert('Veuillez répondre à toutes les questions.');
+        return;
+      }
+      
+      // Validation
+      [q1, q2, q3].forEach(q => {
+        const parent = q.closest('.q-item');
+        const explain = parent.querySelector('.explain');
+        const options = parent.querySelectorAll('.q-option');
+        
+        options.forEach(opt => {
+          const input = opt.querySelector('input');
+          if (input.value === "1") {
+            opt.classList.add('correct');
+          } else if (input.checked && input.value === "0") {
+            opt.classList.add('incorrect');
+          }
+        });
+        
+        explain.style.display = 'block';
+        if (q.value === "1") currentScore++;
+      });
+      
+      const resultDiv = $('#final-result');
+      resultDiv.textContent = `Résultat : ${currentScore}/3`;
+      
+      if (currentScore === 3) {
+        resultDiv.style.color = 'var(--green)';
+        showCertificate(currentScore);
+      } else {
+        resultDiv.style.color = 'var(--yellow)';
+        resultDiv.textContent += ' - Relisez les explications et réessayez !';
+      }
+      
+      updateProgress();
+    }
+
+    function showCertificate(score) {
+      $('#cert-block').classList.add('show');
+      $('#cert-date').textContent = new Date().toLocaleDateString('fr-FR');
+      $('#cert-score').textContent = `${score}/3`;
+      // Scroll vers le certificat
+      setTimeout(() => {
+        $('#cert-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 500);
+    }
+
+    function saveChecklist() {
+      const checks = [];
+      for (let i = 1; i <= 5; i++) {
+        checks.push($(`#check${i}`).checked);
+      }
+      localStorage.setItem('rag_checklist', JSON.stringify(checks));
+    }
+
+    function resetCourse() {
+      if (confirm('Voulez-vous vraiment réinitialiser votre progression ?')) {
+        localStorage.removeItem('rag_progress');
+        localStorage.removeItem('rag_checklist');
+        visitedModules.clear();
+        showModule(0);
+        // Recharger la page pour nettoyer les états de quiz
+        location.reload();
+      }
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

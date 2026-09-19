@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Graph Engineering · Concevoir des workflows IA fiables</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="container">
+    <span class="eyebrow"><i class="fas fa-project-diagram"></i> Cours interactif illustré</span>
+    <h1>Graph Engineering</h1>
+    <p class="subtitle">
+      Concevez des workflows IA fiables et scalables : graphes d'agents, schéma en diamant,
+      mémoire composable, portes humaines, files d'attente et orchestration.
+    </p>
+
+    <!-- Hero SVG : diamant pattern -->
+    <div class="svg-container" style="max-width:720px;margin:34px auto 0;background:transparent;border:none;">
+      <svg viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma en diamant : planificateur, chercheurs parallèles, sceptique, fusion, porte humaine">
+        <defs>
+          <marker id="arr" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+            <polygon points="0 0, 10 4, 0 8" fill="#2dd4bf"/>
+          </marker>
+          <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2dd4bf"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Planner -->
+        <g transform="translate(360,50)">
+          <rect x="-90" y="-25" width="180" height="50" rx="12" fill="#101820" stroke="#2dd4bf" stroke-width="2"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="12" fill="#e6f1f3" font-weight="700">Planificateur</text>
+          <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8ea3ab">décompose la question</text>
+        </g>
+
+        <!-- Research branches -->
+        <g transform="translate(120,150)">
+          <rect x="-70" y="-22" width="140" height="44" rx="10" fill="#101820" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" fill="#e6f1f3" font-weight="600">Chercheur A</text>
+          <text x="0" y="12" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#8ea3ab">clients</text>
+        </g>
+        <g transform="translate(360,150)">
+          <rect x="-70" y="-22" width="140" height="44" rx="10" fill="#101820" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" fill="#e6f1f3" font-weight="600">Chercheur B</text>
+          <text x="0" y="12" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#8ea3ab">concurrents</text>
+        </g>
+        <g transform="translate(600,150)">
+          <rect x="-70" y="-22" width="140" height="44" rx="10" fill="#101820" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" fill="#e6f1f3" font-weight="600">Chercheur C</text>
+          <text x="0" y="12" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#8ea3ab">distribution</text>
+        </g>
+
+        <!-- Arrows planner -> researchers -->
+        <path d="M 300 80 Q 200 100 130 125" fill="none" stroke="#2dd4bf" stroke-width="1.8" marker-end="url(#arr)"/>
+        <path d="M 360 80 L 360 125" fill="none" stroke="#2dd4bf" stroke-width="1.8" marker-end="url(#arr)"/>
+        <path d="M 420 80 Q 520 100 590 125" fill="none" stroke="#2dd4bf" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Skeptic -->
+        <g transform="translate(360,250)">
+          <rect x="-90" y="-25" width="180" height="50" rx="12" fill="#101820" stroke="#f59e0b" stroke-width="2"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="12" fill="#f59e0b" font-weight="700">Sceptique</text>
+          <text x="0" y="14" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8ea3ab">attaque les preuves faibles</text>
+        </g>
+
+        <!-- Arrows researchers -> skeptic -->
+        <path d="M 130 175 Q 200 220 280 235" fill="none" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arr)"/>
+        <path d="M 360 175 L 360 222" fill="none" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arr)"/>
+        <path d="M 590 175 Q 520 220 440 235" fill="none" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Merge -->
+        <g transform="translate(360,330)">
+          <rect x="-80" y="-22" width="160" height="44" rx="12" fill="#101820" stroke="#34d399" stroke-width="2"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="11" fill="#34d399" font-weight="700">Fusion</text>
+          <text x="0" y="12" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#8ea3ab">recommandation structurée</text>
+        </g>
+        <path d="M 360 275 L 360 305" fill="none" stroke="#f59e0b" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Human gate -->
+        <g transform="translate(600,330)">
+          <rect x="-70" y="-22" width="140" height="44" rx="12" fill="#101820" stroke="#8b5cf6" stroke-width="2"/>
+          <text x="0" y="-3" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" fill="#8b5cf6" font-weight="700">Porte humaine</text>
+          <text x="0" y="12" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#8ea3ab">décision finale</text>
+        </g>
+        <path d="M 440 330 L 525 330" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#arr)"/>
+
+        <!-- Labels -->
+        <text x="360" y="385" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#8ea3ab">// schéma en diamant : éclatement → vérification → fusion → décision</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="container">
+    <ul>
+      <li><a href="#intro" class="nav-link">Introduction</a></li>
+      <li><a href="#probleme" class="nav-link">Problème du chat</a></li>
+      <li><a href="#vocabulaire" class="nav-link">Vocabulaire</a></li>
+      <li><a href="#types" class="nav-link">2 types de graphes</a></li>
+      <li><a href="#quand" class="nav-link">Quand l'utiliser</a></li>
+      <li><a href="#diamant" class="nav-link">Diamant</a></li>
+      <li><a href="#casusage" class="nav-link">Cas d'usage</a></li>
+      <li><a href="#niveaux" class="nav-link">3 niveaux</a></li>
+      <li><a href="#pieges" class="nav-link">Pièges</a></li>
+      <li><a href="#memoire" class="nav-link">Mémoire</a></li>
+      <li><a href="#principes" class="nav-link">Principes</a></li>
+      <li><a href="#exercice" class="nav-link">Exercice</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+<!-- ================= 1. INTRODUCTION ================= -->
+<section id="intro">
+  <h2><span class="num">01</span> Introduction</h2>
+
+  <div class="info-box">
+    <span class="lbl">Définition</span>
+    Le <strong>Graph Engineering</strong> est une méthode pour transformer un travail IA flou en un
+    processus clair, découpé en étapes, vérifications et validations humaines. Au lieu de poser une
+    seule question à un modèle et de lui faire confiance aveuglément, vous concevez un <em>graphe</em>
+    de tâches où chaque étape a un rôle précis, où certaines tâches peuvent être exécutées en parallèle,
+    et où les résultats sont systématiquement vérifiés avant d'être fusionnés en une décision finale.
+  </div>
+
+  <h3>Les trois piliers de l'interaction IA</h3>
+  <div class="grid-3">
+    <div class="card">
+      <h4 style="color:var(--accent);"><i class="fas fa-comment-dots"></i> Prompt Engineering</h4>
+      <p>Comment poser une meilleure question via un <em>Prompt</em> structuré.</p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-2);"><i class="fas fa-database"></i> Context Engineering</h4>
+      <p>Comment fournir de meilleures informations à l'IA, souvent via <em>RAG</em>.</p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-3);"><i class="fas fa-project-diagram"></i> Graph Engineering</h4>
+      <p>Comment concevoir le <em>workflow</em> global pour qu'il ne vive plus dans un seul chat chaotique.</p>
+    </div>
+  </div>
+
+  <p>Le Graph Engineering transforme un <em>Agentic workflow</em> désordonné en un processus gérable et prédictible.</p>
+</section>
+
+<!-- ================= 2. PROBLÈME DU CHAT ================= -->
+<section id="probleme">
+  <h2><span class="num">02</span> Le problème du chat unique</h2>
+
+  <p>
+    La manière la plus courante d'utiliser un <em>LLM</em> reste le chat : vous posez une question, le modèle
+    répond en un seul bloc, vous avez l'impression d'avoir fait le travail.
+  </p>
+
+  <div class="card">
+    <h4>Exemple typique</h4>
+    <blockquote>« Dois-je lancer ce produit pour les commerçants Shopify ? »</blockquote>
+    <p>Le modèle peut donner une estimation du marché, quelques concurrents, un plan de go-to-market et une recommandation confiante.</p>
+    <div class="limit-box">
+      <span class="lbl">Mais en réalité</span>
+      Un seul appel au modèle a <strong>décidé ce qui comptait</strong>, <strong>recherché le marché</strong>,
+      <strong>interprété les preuves</strong>, <strong>écrit la recommandation</strong> et
+      <strong>auto-évalué sa propre confiance</strong>. C'est beaucoup trop de responsabilité déléguée en une seule passe, favorisant les <em>hallucinations</em>.
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="mermaid">
+    graph LR
+      Q["Une question"] --> B["Un seul blob de texte"]
+      B --> C["Marché + concurrents + GTM + reco + confiance"]
+      C --> D["Décision risquée"]
+      classDef n fill:#101820,stroke:#f87171,stroke-width:1.5px,color:#e6f1f3;
+      class Q,B,C,D n;
+    </div>
+    <div class="diagram-caption">le chat unique concentre trop de responsabilités</div>
+  </div>
+
+  <h3>La version graphe</h3>
+  <p>Dans un <em>Agentic workflow</em> modélisé en graphe, le même problème est soigneusement découpé :</p>
+  <div class="diagram">
+    <div class="mermaid">
+    graph TD
+      P["Planner<br/>décompose en angles"] --> R1["Researcher<br/>clients"]
+      P --> R2["Researcher<br/>concurrents"]
+      P --> R3["Researcher<br/>distribution"]
+      P --> R4["Researcher<br/>pricing"]
+      P --> R5["Researcher<br/>risques"]
+      R1 --> S["Skeptic<br/>attaque les conclusions"]
+      R2 --> S
+      R3 --> S
+      R4 --> S
+      R5 --> S
+      S --> M["Merge<br/>recommandation structurée"]
+      M --> H["Human-in-the-loop<br/>décision finale"]
+      classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+      class P,R1,R2,R3,R4,R5,M,H n;
+      classDef d fill:#101820,stroke:#f59e0b,stroke-width:1.5px,color:#e6f1f3;
+      class S d;
+    </div>
+  </div>
+
+  <p>Le résultat final est peut-être un simple rapport, mais le <em>workflow</em> sous-jacent offre des garanties architecturales majeures.</p>
+</section>
+
+<!-- ================= 3. VOCABULAIRE ================= -->
+<section id="vocabulaire">
+  <h2><span class="num">03</span> Vocabulaire de base</h2>
+
+  <p>Un <strong>Graph</strong> en <em>AI Engineering</em> est structuré autour de concepts fondamentaux :</p>
+  <ul class="flist">
+    <li>des <strong>Nodes</strong> (tâches ou agents) ;</li>
+    <li>reliés par des <strong>Edges</strong> (dépendances et flux de contrôle) ;</li>
+    <li>avec un <strong>State</strong> persistant qui circule entre chaque étape.</li>
+  </ul>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Élément technique</th><th>Signification & Rôle</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Node</strong></td><td>Lieu d'exécution d'une fonction métier ou d'un appel <em>LLM</em> (ex: Planner, Critic).</td></tr>
+        <tr><td><strong>Edge</strong></td><td>Le chemin qui dicte le passage au nœud suivant (peut être conditionnel).</td></tr>
+        <tr><td><strong>State</strong></td><td>L'état global partagé. L'objet mémoire mis à jour par chaque <em>Node</em> (ex: <code>StateGraph</code>).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Exemple concret : support client</h3>
+  <p>Un workflow de traitement de tickets n'est pas juste un <em>Prompt</em> « réponds à l'utilisateur ». Le véritable processus s'opère en plusieurs phases :</p>
+  <div class="timeline">
+    <div class="tstep"><h4>1 · Classifier (Node)</h4><p>Analyse de l'intention et typologie de l'incident (billing, bug technique, churn risk).</p></div>
+    <div class="tstep"><h4>2 · Context Retrieval (Node)</h4><p>Recherche de la documentation et de l'historique utilisateur via <em>RAG</em> pour enrichir le <em>Context Window</em>.</p></div>
+    <div class="tstep"><h4>3 · Draft Generation (Node)</h4><p>Génération de la réponse brute basée strictement sur le contexte récupéré.</p></div>
+    <div class="tstep"><h4>4 · Guardrail Validation (Edge Conditionnel)</h4><p>Un vérificateur automatique (ou <em>Human-in-the-loop</em>) valide que la réponse ne contient pas d'hallucinations avant l'envoi.</p></div>
+  </div>
+</section>
+
+<!-- ================= 4. DEUX TYPES DE GRAPHES ================= -->
+<section id="types">
+  <h2><span class="num">04</span> Deux familles de Graphes</h2>
+  
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--accent);">Static Graph (DAG)</h4>
+      <p>Le chemin d'exécution est fixe (Direct Acyclic Graph). Les <em>Edges</em> sont déterministes.</p>
+      <ul class="flist">
+        <li>Grande prévisibilité du <em>workflow</em>.</li>
+        <li>Débogage et monitoring simplifiés.</li>
+        <li>Parfait pour les pipelines de données ou la traduction massive (ex: <em>Map-Reduce</em>).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-2);">Dynamic Graph (Agentic)</h4>
+      <p>L'IA décide dynamiquement du prochain <em>Node</em> en fonction du <em>State</em>. Gère les cycles et itérations.</p>
+      <ul class="flist">
+        <li>Adaptabilité maximale face à l'imprévu.</li>
+        <li>Nécessite des garde-fous stricts pour éviter les boucles infinies.</li>
+        <li>Idéal pour la génération de <em>Codebase</em> (ex: Write &rarr; Execute &rarr; Fix errors &rarr; Repeat).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. QUAND L'UTILISER ================= -->
+<section id="quand">
+  <h2><span class="num">05</span> Quand utiliser le Graph Engineering ?</h2>
+  
+  <p>La règle d'or en <em>AI Engineering</em> : ne déployez pas un graphe complexe si un simple <em>Few-Shot Prompt</em> suffit. La complexité architecturale doit être justifiée.</p>
+
+  <div class="warn-box">
+    <span class="lbl">Indicateurs de nécessité absolue</span>
+    <ul class="flist">
+      <li><strong>Cognitive Overload :</strong> La tâche nécessite plusieurs étapes de raisonnement qui dépassent les capacités de concentration d'une seule passe (phénomène de <em>Lost in the middle</em>).</li>
+      <li><strong>Cost of Failure :</strong> Les erreurs en production ont un coût critique justifiant des <em>Nodes</em> de validation et des mécanismes <em>Human-in-the-loop</em>.</li>
+      <li><strong>Tool Integration :</strong> Votre système doit interagir avec l'extérieur de manière asynchrone (Appels APIs, exécution de code, requêtes SQL).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 6. LE DIAMANT ================= -->
+<section id="diamant">
+  <h2><span class="num">06</span> Le pattern "Diamond"</h2>
+  
+  <p>Le schéma en diamant est le <em>design pattern</em> le plus robuste pour traiter des recherches ou analyses multidimensionnelles sans sacrifier la précision.</p>
+
+  <div class="maturity">
+    <div class="step">
+      <span class="badge">1. Fan-out</span>
+      <span class="flow">Le <strong>Planner Node</strong> décompose la macro-tâche en <em>N</em> sous-tâches strictement indépendantes.</span>
+    </div>
+    <div class="step">
+      <span class="badge">2. Parallel Execution</span>
+      <span class="flow">Des <strong>Worker Nodes</strong> traitent ces sous-tâches simultanément (gain massif de latence).</span>
+    </div>
+    <div class="step">
+      <span class="badge">3. Peer Review</span>
+      <span class="flow">Le <strong>Skeptic Node</strong> (Critic) analyse les <em>Outputs</em> partiels pour identifier les failles logiques.</span>
+    </div>
+    <div class="step">
+      <span class="badge">4. Fan-in</span>
+      <span class="flow">Le <strong>Merge Node</strong> consolide le <em>State</em> final validé et l'expose à l'utilisateur.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7. CAS D'USAGE ================= -->
+<section id="casusage">
+  <h2><span class="num">07</span> Cas d'usage pratiques</h2>
+  
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Domaine</th>
+          <th>Prompt classique (Fragile)</th>
+          <th>Workflow Graphe (Robuste)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Software Engineering</strong></td>
+          <td>"Écris cette <em>feature</em> en Python."</td>
+          <td>Generate Draft &rarr; Run Tests &rarr; <em>Analyze Traceback</em> &rarr; Rewrite &rarr; QA Node</td>
+        </tr>
+        <tr>
+          <td><strong>Research & Data</strong></td>
+          <td>"Fais-moi un résumé du marché IA."</td>
+          <td>Query Generation &rarr; <em>Web Search Tools</em> &rarr; Fact-check &rarr; Merge Data</td>
+        </tr>
+        <tr>
+          <td><strong>Content Creation</strong></td>
+          <td>"Rédige un article complet."</td>
+          <td>Outline Plan &rarr; Critic &rarr; Draft Sections Parallel &rarr; Tone Alignment &rarr; Review</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 8. LES 3 NIVEAUX ================= -->
+<section id="niveaux">
+  <h2><span class="num">08</span> Maturité des workflows IA</h2>
+  
+  <div class="grid-3">
+    <div class="guard-card guard-jamais">
+      <h4>Niveau 1 : Mega-Prompt</h4>
+      <p>Tout dans une seule requête. Fragile, vulnérable au <em>Prompt Drift</em>, très difficile à debugger ou optimiser composant par composant.</p>
+    </div>
+    <div class="guard-card guard-demander">
+      <h4>Niveau 2 : Chaining linéaire</h4>
+      <p>Des appels <em>LLMs</em> séquentiels via scripts (ex: LangChain basique). Mieux structuré, mais incapable de gérer les erreurs ou les rebouclages conditionnels.</p>
+    </div>
+    <div class="guard-card guard-toujours">
+      <h4>Niveau 3 : State Graph</h4>
+      <p>Architecture <em>Agentic</em> (ex: LangGraph). Un <em>State</em> explicite typé, des <em>Conditional Edges</em>, du routage intelligent et une tolérance aux pannes intégrée.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 9. PIÈGES ================= -->
+<section id="pieges">
+  <h2><span class="num">09</span> Anti-patterns et Pièges</h2>
+  
+  <div class="limit-box">
+    <span class="lbl">State Bloat (Surcharge de l'état)</span>
+    <p>Le piège classique est de conserver l'intégralité de la conversation et des <em>Outputs</em> précédents dans le <em>State</em> courant. Résultat : vous explosez le <em>Context Window</em>, le modèle devient distrait (<em>Lost in the middle</em>), et vos coûts d'inférence s'envolent. <strong>Solution :</strong> Implémentez un <em>State Filter</em> pour ne passer au <em>Node</em> suivant que la donnée strictement nécessaire.</p>
+  </div>
+
+  <div class="warn-box">
+    <span class="lbl">Over-Engineering Agentic</span>
+    <p>Ne créez pas une usine à gaz avec 8 <em>Nodes</em> si un modèle performant avec un bon <em>System Prompt</em> peut résoudre le problème d'un coup de manière fiable. Chaque <em>Edge</em> est un potentiel point de défaillance réseau et ajoute de la latence (<em>Time to First Token</em> retardé).</p>
+  </div>
+</section>
+
+<!-- ================= 10. MÉMOIRE ================= -->
+<section id="memoire">
+  <h2><span class="num">10</span> Gérer la mémoire du Graphe</h2>
+  
+  <p>L'orchestration d'un <em>Agentic workflow</em> nécessite deux paradigmes de mémorisation distincts :</p>
+  
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--accent-2);">Short-term Memory (State)</h4>
+      <p>C'est le <em>State</em> local du run en cours. Il vit le temps de la complétion du graphe. Il maintient le fil d'exécution (variables, brouillons partiels, liste d'erreurs rencontrées). Stockage in-memory ou base de données rapide (Redis).</p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent-3);">Long-term Memory (Semantic)</h4>
+      <p>La connaissance globale du système à travers les différentes sessions. Préférences de l'utilisateur, documents d'entreprise, historique lointain. Récupérable via <em>Vector Database</em> et mécanismes <em>RAG</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 11. PRINCIPES ================= -->
+<section id="principes">
+  <h2><span class="num">11</span> Principes d'architecture en production</h2>
+  
+  <ul class="flist">
+    <li><strong>Découplage cognitif :</strong> Séparez la logique décisionnelle (le <em>LLM</em>) de la logique d'exécution (votre <em>Codebase</em> Python/TypeScript).</li>
+    <li><strong>Typage strict (Structured Output) :</strong> Le <em>State</em> doit toujours être validé. Forcez vos <em>Nodes</em> à cracher des données structurées via des schémas Pydantic ou Zod (JSON mode strict).</li>
+    <li><strong>Checkpoints (Human-in-the-loop) :</strong> Marquez les <em>Nodes</em> exécutant des actions irréversibles (envoi d'email, modification DB, achat API) avec un point d'arrêt nécessitant une validation humaine. L'état est suspendu (<em>AFK</em>) en attendant l'approbation.</li>
+  </ul>
+
+  <div class="formula">
+    Graph Engineering <span class="plus">+</span> Typage Fort <span class="plus">+</span> Petits Modèles Spécialisés (SLMs) <span class="plus">=</span> <span class="result">Système Fiable en Production</span>
+  </div>
+</section>
+
+<!-- ================= 12. EXERCICE ================= -->
+<section id="exercice">
+  <h2><span class="num">12</span> Exercice de réflexion</h2>
+  
+  <p>Analysez votre processus IA interne le plus long (génération de rapports, analyse de code, recherche concurrentielle). Comment pourriez-vous le refactoriser selon un schéma <em>Agentic</em> en diamant ?</p>
+  
+  <div class="reflect-box">
+    <h4>Votre défi architectural :</h4>
+    <p>Identifiez explicitement : (1) Le <strong>Planner</strong>, (2) Les <strong>Workers</strong> parallèles, (3) Le <strong>Skeptic</strong> de validation, (4) La condition de <strong>Human-in-the-loop</strong>.</p>
+    <textarea class="reflect-input" placeholder="Décrivez l'architecture de votre workflow ici..."></textarea>
+    <button class="btn" onclick="document.getElementById('fb1').classList.toggle('show')">Afficher le conseil d'ingénierie</button>
+    <div id="fb1" class="feedback">
+      <strong>Engineering Tip :</strong> Assurez-vous d'utiliser une température (<code>temperature=0</code>) pour le <em>Planner</em> afin de garantir un comportement déterministe, mais autorisez une légère variance (<code>temperature=0.3</code>) pour le <em>Skeptic</em> afin de maximiser sa capacité critique face aux <em>Workers</em>. N'utilisez pas le même <em>System Prompt</em> pour le critique et le créateur !
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Graph Engineering Module. Conçu pour le web et l'impression PDF. | <em>AI Engineering & Agentic Workflows</em></p>
+  </div>
+</footer>
+
+<script>
+  // Script simple pour la barre de progression au scroll
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.getElementById("progressBar").style.width = scrolled + "%";
+  });
+
+  // Gestion des liens de navigation actifs
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      if (pageYOffset >= sectionTop - 100) {
+        current = section.getAttribute("id");
+      }
+    });
+    navLinks.forEach((a) => {
+      a.classList.remove("active");
+      if (a.getAttribute("href").includes(current)) {
+        a.classList.add("active");
+      }
+    });
+  });
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

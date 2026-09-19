@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Récupération RAG avancée</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<header>
+  <div class="kicker">SYSTÈME RAG — RÉCUPÉRATION AVANCÉE</div>
+  <h1>Récupération RAG avancée</h1>
+  <p class="lede">Recherche hybride, re-classement et optimisation du contexte. Cliquez sur une étape du pipeline pour explorer comment elle fonctionne.</p>
+</header>
+
+<main>
+  <div class="stage">
+    <svg id="diagram" viewBox="0 0 900 800" role="img" aria-label="Pipeline interactif de récupération RAG avancée, de la requête utilisateur jusqu'à la réponse finale."></svg>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="panel-empty" id="panelEmpty">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke-linecap="round"/>
+      </svg>
+      <div>Sélectionnez une étape du<br>pipeline pour afficher son<br>fonctionnement en détail.</div>
+    </div>
+  </div>
+</main>
+
+<div class="tabs-wrap">
+  <div class="tabs-bar" role="tablist" aria-label="Compléments sur le RAG avancé">
+    <button class="tab-btn" role="tab" data-tab="why" aria-selected="true">Pourquoi la récupération avancée&nbsp;?</button>
+    <button class="tab-btn" role="tab" data-tab="python" aria-selected="false">Exemple Python</button>
+    <button class="tab-btn" role="tab" data-tab="metrics" aria-selected="false">Métriques d'évaluation</button>
+    <button class="tab-btn" role="tab" data-tab="errors" aria-selected="false">Erreurs courantes</button>
+    <button class="tab-btn" role="tab" data-tab="keys" aria-selected="false">Points clés</button>
+  </div>
+
+  <div class="tab-panel show" id="tab-why">
+    <div class="why-grid">
+      <div class="why-card"><div class="n">01</div><p>La recherche vectorielle peut manquer les termes exacts (ex&nbsp;: noms de produits, codes d'erreur).</p></div>
+      <div class="why-card"><div class="n">02</div><p>La recherche par mots-clés peut manquer le sens sémantique d'une requête.</p></div>
+      <div class="why-card"><div class="n">03</div><p>Combiner plusieurs techniques permet de récupérer un contexte plus pertinent.</p></div>
+      <div class="why-card"><div class="n">04</div><p>Cela conduit à des réponses plus précises et mieux fondées, produites par le LLM.</p></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-python">
+    <p class="panel-intro" style="margin-bottom:14px;">Pseudo-code pédagogique inspiré de LangChain — il illustre la structure du pipeline plutôt qu'une implémentation prête à l'exécution (certaines fonctions comme <code>create_embeddings</code> ou <code>reranker.rerank</code> sont des espaces réservés à adapter à votre bibliothèque).</p>
+    <pre class="code"><span class="cmt"># 1. Charger et diviser les documents</span>
+documents = <span class="fn">load_and_split_documents</span>()
+
+<span class="cmt"># 2. Créer les embeddings et le retriever dense</span>
+embeddings = <span class="fn">create_embeddings</span>(documents)
+dense_retriever = <span class="fn">create_dense_retriever</span>(embeddings)
+
+<span class="cmt"># 3. Créer le retriever creux BM25 (lexical)</span>
+sparse_retriever = <span class="fn">create_bm25_retriever</span>(documents)
+
+<span class="cmt"># 4. Construire le retriever hybride</span>
+hybrid_retriever = <span class="fn">EnsembleRetriever</span>(
+    retrievers=[dense_retriever, sparse_retriever],
+    weights=[0.5, 0.5]
+)
+
+<span class="cmt"># 5. Récupérer puis re-classer les documents</span>
+top_docs = hybrid_retriever.<span class="fn">get_relevant_documents</span>(query)
+top_docs = reranker.<span class="fn">rerank</span>(query, top_docs, top_k=5)
+
+<span class="cmt"># 6. Requête vectorielle avec filtrage de métadonnées</span>
+results = vectorstore.<span class="fn">similarity_search</span>(
+    query, filter={<span class="str">"category"</span>: <span class="str">"docs"</span>}, k=5
+)
+
+<span class="cmt"># 7. Construire le contexte et interroger le LLM</span>
+context = <span class="fn">format_documents</span>(top_docs)
+answer = llm.<span class="fn">invoke</span>(<span class="str">f"Contexte : {context}\n\nQuestion : {query}"</span>)</pre>
+  </div>
+
+  <div class="tab-panel" id="tab-metrics">
+    <div class="metrics-grid">
+      <div>
+        <h3>Métriques de récupération</h3>
+        <table class="metric-table">
+          <tr><th>Métrique</th><th>Ce qu'elle mesure</th></tr>
+          <tr><td>Recall@K</td><td>Fraction des documents pertinents effectivement récupérés</td></tr>
+          <tr><td>Precision@K</td><td>Fraction des documents récupérés qui sont réellement pertinents</td></tr>
+          <tr><td>MRR</td><td>Position du premier document pertinent dans le classement</td></tr>
+          <tr><td>NDCG</td><td>Qualité du classement, pondérée sur l'ensemble des documents</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Métriques de génération</h3>
+        <table class="metric-table">
+          <tr><th>Métrique</th><th>Ce qu'elle mesure</th></tr>
+          <tr><td>Pertinence de la réponse</td><td>À quel point la réponse finale répond bien à la requête</td></tr>
+          <tr><td>Fidélité (Faithfulness)</td><td>La réponse est-elle fondée sur le contexte récupéré ?</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-errors">
+    <ul class="cross-list" id="errorsList"></ul>
+  </div>
+
+  <div class="tab-panel" id="tab-keys">
+    <ul class="check-list" id="keysList"></ul>
+  </div>
+</div>
+
+<footer>
+  Astuce&nbsp;: naviguez au clavier avec <kbd>Tab</kbd> puis <kbd>Entrée</kbd> pour ouvrir une étape du pipeline ou un onglet.
+</footer>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const XHTMLNS = "http://www.w3.org/1999/xhtml";
+
+function el(tag, attrs){
+  const e = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function foreign(x, y, w, h, className, html){
+  const fo = el("foreignObject", { x:x-w/2, y:y-h/2, width:w, height:h });
+  const div = document.createElementNS(XHTMLNS, "div");
+  div.setAttribute("class", className);
+  div.innerHTML = html;
+  fo.appendChild(div);
+  return fo;
+}
+
+const NODES = [
+  { id:"query", x:450, y:50, w:230, h:54, color:"var(--text)", hex:"#8B93A7", label:"Requête utilisateur",
+    detail:{ title:"Requête utilisateur", intro:"Le point de départ du pipeline : la question brute posée par la personne, avant toute transformation ou recherche." } },
+
+  { id:"transform", x:450, y:164, w:230, h:54, color:"var(--transform)", hex:"#38BDF8", label:"Transformation de la requête",
+    detail:{ title:"Transformation de la requête", intro:"Avant de chercher, on reformule ou enrichit la requête pour maximiser les chances de retrouver les bons documents.",
+      cards:[
+        {t:"Rewriting", d:"Reformuler des requêtes ambiguës en questions plus claires."},
+        {t:"Expansion", d:"Ajouter des termes liés, synonymes ou mots-clés spécifiques au domaine."},
+        {t:"Multi-Query", d:"Générer plusieurs variantes de la requête pour couvrir différents angles de recherche."},
+      ] } },
+
+  { id:"dense", x:250, y:296, w:200, h:70, color:"var(--dense)", hex:"#4C8DFF", label:"Recherche dense",
+    sub:"(embeddings)",
+    detail:{ title:"Recherche dense (embeddings)", intro:"Utilise des embeddings pour trouver des documents sémantiquement proches de la requête.",
+      bullets:["Comprend le sens et le contexte de la requête","Idéale pour les requêtes conceptuelles ou en langage naturel","S'appuie sur des index vectoriels (ex&nbsp;: bases de données vectorielles)","Peut parfois manquer des mots-clés spécifiques"] } },
+
+  { id:"sparse", x:650, y:296, w:200, h:70, color:"var(--sparse)", hex:"#FF8A4C", label:"Récupération creuse",
+    sub:"(recherche lexicale)",
+    detail:{ title:"Récupération creuse (BM25)", intro:"Utilise la correspondance de mots-clés avec pondération des termes (ex&nbsp;: BM25).",
+      bullets:["Fait correspondre exactement les mots-clés (avec pondération des termes)","Excellente pour les noms propres, termes techniques, codes et numéros","S'appuie sur un index inversé (ex&nbsp;: BM25 dans Elasticsearch)","Peut manquer la similarité sémantique"] } },
+
+  { id:"hybrid", x:450, y:430, w:230, h:60, color:"var(--hybrid)", hex:"#B983FF", label:"Recherche hybride",
+    detail:{ title:"Recherche hybride", intro:"Combine les résultats denses et creux (ex&nbsp;: fusion pondérée ou RRF), pour réunir sens sémantique et précision lexicale.",
+      bullets:["Fusionne les deux ensembles de résultats et re-score les documents","Améliore souvent la pertinence par rapport à chaque méthode seule","S'adapte à différents types de requêtes"] } },
+
+  { id:"rerank", x:450, y:536, w:230, h:54, color:"var(--rerank)", hex:"#F2C14E", label:"Re-classement",
+    detail:{ title:"Re-classement (Re-ranking)", intro:"Un modèle plus précis affine l'ordre des meilleurs candidats issus de la recherche hybride.",
+      bullets:["Part d'un ensemble de N candidats (ex&nbsp;: top 20)","Re-classeur de type cross-encoder ou basé sur un LLM","Réévalue finement la pertinence de chaque candidat","Produit un ensemble top-k plus ciblé (ex&nbsp;: 5 documents)"] } },
+
+  { id:"context", x:450, y:640, w:230, h:60, color:"var(--context)", hex:"#34D399", label:"Optimisation du contexte",
+    detail:{ title:"Optimisation du contexte", intro:"Les documents pertinents peuvent contenir des informations inutiles : on sélectionne et compresse les parties les plus utiles avant de les envoyer au LLM.",
+      bullets:["Sélection top-k : ne garder que les meilleurs passages","Suppression du contenu non pertinent","Compression du contexte (raccourcir les longs passages)","Filtrage par métadonnées (ex&nbsp;: source, date, section)"] } },
+
+  { id:"topk", x:250, y:742, w:190, h:60, color:"var(--context)", hex:"#34D399", label:"Contexte Top-k",
+    detail:{ title:"Contexte Top-k", intro:"L'ensemble final, compact et optimisé, de passages qui sera transmis au LLM comme contexte de réponse." } },
+
+  { id:"llm", x:450, y:742, w:150, h:60, color:"var(--llm)", hex:"#F2C14E", label:"LLM",
+    detail:{ title:"LLM", intro:"Le modèle de langage reçoit la requête et le contexte top-k, puis génère une réponse en s'appuyant dessus." } },
+
+  { id:"answer", x:650, y:742, w:190, h:60, color:"var(--text)", hex:"#8B93A7", label:"Réponse finale",
+    detail:{ title:"Réponse finale", intro:"La réponse produite par le LLM — idéalement fondée sur le contexte récupéré, avec un minimum d'hallucination." } },
+];
+
+const CONNECTORS = [
+  { d:"M 450 77 L 450 137", color:"#38BDF8" },
+  { d:"M 450 191 Q 350 240 250 261", color:"#4C8DFF" },
+  { d:"M 450 191 Q 550 240 650 261", color:"#FF8A4C" },
+  { d:"M 250 331 Q 350 385 450 400", color:"#B983FF" },
+  { d:"M 650 331 Q 550 385 450 400", color:"#B983FF" },
+  { d:"M 450 460 L 450 509", color:"#F2C14E" },
+  { d:"M 450 563 L 450 610", color:"#34D399" },
+  { d:"M 450 670 Q 350 705 250 712", color:"#34D399" },
+  { d:"M 345 742 L 375 742", color:"#F2C14E" },
+  { d:"M 525 742 L 555 742", color:"#8B93A7" },
+];
+
+const svg = document.getElementById("diagram");
+
+const defs = el("defs", {});
+const filter = el("filter", { id:"glow", x:"-60%", y:"-60%", width:"220%", height:"220%" });
+filter.appendChild(el("feGaussianBlur", { stdDeviation:6, result:"blur" }));
+const merge = el("feMerge", {});
+merge.appendChild(el("feMergeNode", { in:"blur" }));
+merge.appendChild(el("feMergeNode", { in:"SourceGraphic" }));
+filter.appendChild(merge);
+defs.appendChild(filter);
+svg.appendChild(defs);
+
+const wires = el("g", {});
+const flows = el("g", {});
+CONNECTORS.forEach(c=>{
+  wires.appendChild(el("path", { class:"wire", d:c.d }));
+  flows.appendChild(el("path", { class:"flow", d:c.d, stroke:c.color }));
+});
+svg.appendChild(wires);
+svg.appendChild(flows);
+
+const nodeEls = {};
+NODES.forEach(n=>{
+  const g = el("g", { class:"node", tabindex:"0", role:"button", "aria-pressed":"false",
+    "aria-label":n.label, "data-id":n.id });
+  g.appendChild(el("rect", { class:"halo", x:n.x-n.w/2-6, y:n.y-n.h/2-6, width:n.w+12, height:n.h+12,
+    rx:14, fill:n.hex, opacity:0.16, filter:"url(#glow)" }));
+  g.appendChild(el("rect", { class:"plate", x:n.x-n.w/2, y:n.y-n.h/2, width:n.w, height:n.h,
+    rx:10, fill:"#0D1017", stroke:n.hex }));
+  const labelHtml = n.sub ? `${n.label}<br><span class="node-sub">${n.sub}</span>` : n.label;
+  g.appendChild(foreign(n.x, n.y, n.w-16, n.h-8, "node-label", labelHtml));
+  g.addEventListener("click", ()=>selectNode(n.id));
+  g.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selectNode(n.id); }});
+  svg.appendChild(g);
+  nodeEls[n.id] = g;
+});
+
+let active = null;
+
+function selectNode(id){
+  if(active === id){ deselectAll(); return; }
+  active = id;
+  NODES.forEach(n=>{
+    nodeEls[n.id].classList.toggle("active", n.id === id);
+    nodeEls[n.id].classList.toggle("dim", n.id !== id);
+    nodeEls[n.id].setAttribute("aria-pressed", n.id === id ? "true" : "false");
+  });
+  renderPanel(NODES.find(n=>n.id===id));
+}
+
+function deselectAll(){
+  active = null;
+  NODES.forEach(n=>{
+    nodeEls[n.id].classList.remove("active","dim");
+    nodeEls[n.id].setAttribute("aria-pressed","false");
+  });
+  renderEmptyPanel();
+}
+
+function renderEmptyPanel(){
+  const panel = document.getElementById("panel");
+  panel.innerHTML = `<div class="panel-empty">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke-linecap="round"/>
+      </svg>
+      <div>Sélectionnez une étape du<br>pipeline pour afficher son<br>fonctionnement en détail.</div>
+    </div>`;
+}
+
+function renderPanel(n){
+  const panel = document.getElementById("panel");
+  panel.innerHTML = "";
+  const head = document.createElement("div");
+  head.className = "panel-head";
+  head.innerHTML = `<div><div class="num" style="color:${n.hex}">ÉTAPE DU PIPELINE</div>
+      <h2>${n.detail.title}</h2></div>`;
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.setAttribute("aria-label","Fermer");
+  closeBtn.innerHTML = "&times;";
+  closeBtn.addEventListener("click", deselectAll);
+  head.appendChild(closeBtn);
+  panel.appendChild(head);
+
+  const intro = document.createElement("p");
+  intro.className = "panel-intro";
+  intro.innerHTML = n.detail.intro;
+  panel.appendChild(intro);
+
+  if(n.detail.cards){
+    n.detail.cards.forEach(c=>{
+      const card = document.createElement("div");
+      card.className = "mini-card";
+      card.style.borderLeftColor = n.hex;
+      card.innerHTML = `<h3 style="color:${n.hex}">${c.t}</h3><p>${c.d}</p>`;
+      panel.appendChild(card);
+    });
+  }
+  if(n.detail.bullets){
+    const ul = document.createElement("ul");
+    ul.className = "bullets";
+    ul.style.color = n.hex;
+    ul.innerHTML = n.detail.bullets.map(b=>`<li style="color:#C9CEDA">${b}</li>`).join("");
+    panel.appendChild(ul);
+  }
+}
+
+renderEmptyPanel();
+
+// --- Tabs ---
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.setAttribute("aria-selected","false"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("show"));
+    btn.setAttribute("aria-selected","true");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("show");
+  });
+});
+
+// --- Erreurs courantes ---
+const ERRORS = [
+  "Utiliser uniquement la recherche vectorielle.",
+  "Mal transformer (ou ignorer) la requête initiale.",
+  "Ne pas utiliser le re-classement après la récupération.",
+  "Envoyer trop de morceaux (chunks) au LLM.",
+  "Ne pas évaluer la qualité de la récupération.",
+  "Utiliser une taille de chunk mal adaptée.",
+  "Supposer que la récupération retrouve toujours la bonne réponse.",
+];
+const crossIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round"/><line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round"/></svg>`;
+document.getElementById("errorsList").innerHTML = ERRORS.map(e=>`<li>${crossIcon}<span>${e}</span></li>`).join("");
+
+// --- Points clés ---
+const KEYS = [
+  "Utiliser la transformation de requête pour une meilleure récupération.",
+  "Combiner récupération dense et récupération creuse.",
+  "Re-classer les résultats pour une pertinence plus fine.",
+  "Optimiser le contexte avant de l'envoyer au LLM.",
+  "Évaluer votre système RAG à l'aide de métriques appropriées.",
+];
+const checkIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12.5 L9.5 18 L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+document.getElementById("keysList").innerHTML = KEYS.map(k=>`<li>${checkIcon}<span>${k}</span></li>`).join("");
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

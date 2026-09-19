@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les Design Patterns des Agents IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Basculer le thème">
+        <span class="moon">🌙</span>
+        <span class="sun">☀️</span>
+    </button>
+
+    <header>
+        <h1>Les Design Patterns des Agents IA</h1>
+        <p>Le bon modèle. Le bon cas d'usage. Un agent fiable.</p>
+    </header>
+
+    <section class="intro">
+        <p>La conception de systèmes d'Intelligence Artificielle robustes repose sur le choix de l'architecture appropriée. Ce cours détaille les sept principaux <strong>"Design Patterns"</strong> (modèles de conception) pour les agents IA, en expliquant leur fonctionnement et leurs cas d'usage optimaux. Comme de coutume dans l'ingénierie IA, nous conserverons la terminologie technique en anglais.</p>
+    </section>
+
+    <div class="controls">
+        <button class="btn-toggle" id="toggle-all">Tout déplier</button>
+    </div>
+
+    <main class="patterns">
+
+        <!-- PATTERN 1 : Augmented LLM -->
+        <div class="pattern-card" id="pattern-1">
+            <div class="card-header">
+                <span class="pattern-number">1</span>
+                <h2>Augmented LLM (Single-Shot)</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>One call, no loop. The model answers directly using retrieval, tools, or short-term memory.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Le tri, l'extraction de champs, la synthèse de documents et les transformations de données simples et propres.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="200" fill="#f8fbff"/>
+                      <defs>
+                        <marker id="ab1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4a90e2"/></marker>
+                      </defs>
+                      <rect class="node-white" x="20" y="80" width="80" height="40" rx="5" fill="#ffffff" stroke="#4a90e2" stroke-width="2"/>
+                      <text x="60" y="105" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">User Query</text>
+                      <line x1="100" y1="100" x2="140" y2="100" stroke="#4a90e2" stroke-width="2" marker-end="url(#ab1)"/>
+                      <rect x="150" y="70" width="100" height="60" rx="5" fill="#e6f2ff" stroke="#4a90e2" stroke-width="2"/>
+                      <text x="200" y="97" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#1a53ff">LLM</text>
+                      <text x="200" y="115" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#1a53ff">(Single Call)</text>
+                      <rect class="node-dash" x="300" y="20" width="150" height="30" rx="5" fill="#ffffff" stroke="#ccc" stroke-dasharray="4"/>
+                      <text x="375" y="40" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#555">Retrieval (RAG)</text>
+                      <line x1="300" y1="35" x2="250" y2="80" stroke="#ccc" stroke-width="1.5" marker-end="url(#ab1)"/>
+                      <rect class="node-dash" x="300" y="85" width="150" height="30" rx="5" fill="#ffffff" stroke="#ccc" stroke-dasharray="4"/>
+                      <text x="375" y="105" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#555">Tools (APIs, Functions)</text>
+                      <line x1="300" y1="100" x2="250" y2="100" stroke="#ccc" stroke-width="1.5" marker-end="url(#ab1)"/>
+                      <rect class="node-dash" x="300" y="150" width="150" height="30" rx="5" fill="#ffffff" stroke="#ccc" stroke-dasharray="4"/>
+                      <text x="375" y="170" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#555">Memory (Short-term)</text>
+                      <line x1="300" y1="165" x2="250" y2="120" stroke="#ccc" stroke-width="1.5" marker-end="url(#ab1)"/>
+                      <line x1="200" y1="130" x2="200" y2="170" stroke="#4a90e2" stroke-width="2" marker-end="url(#ab1)"/>
+                      <rect class="node-white" x="160" y="170" width="80" height="25" rx="5" fill="#ffffff" stroke="#4a90e2" stroke-width="2"/>
+                      <text x="200" y="187" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">Output</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 2 : ReAct Loop -->
+        <div class="pattern-card" id="pattern-2">
+            <div class="card-header">
+                <span class="pattern-number">2</span>
+                <h2>ReAct Loop</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Think → Do → Check → Go again. The agent reasons, uses tools, observes results, and re-evaluates until the goal is reached.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Tâches nécessitant un usage intensif d'outils, recherches dynamiques, problèmes complexes sans chemin de résolution fixe.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 230" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="230" fill="#f2fcf5"/>
+                      <defs>
+                        <marker id="ag2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2d6a4f"/></marker>
+                      </defs>
+                      <text x="40" y="115" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">Query</text>
+                      <line x1="65" y1="110" x2="105" y2="110" stroke="#2d6a4f" stroke-width="2" marker-end="url(#ag2)"/>
+                      <rect x="120" y="20" width="220" height="180" rx="10" fill="none" stroke="#2d6a4f" stroke-dasharray="5" stroke-width="1.5"/>
+                      <rect x="180" y="40" width="100" height="30" rx="5" fill="#d8f3dc" stroke="#2d6a4f" stroke-width="1.5"/>
+                      <text x="230" y="60" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#1b4332">Think (LLM)</text>
+                      <rect class="node-white" x="180" y="100" width="100" height="30" rx="5" fill="#ffffff" stroke="#2d6a4f" stroke-width="1.5"/>
+                      <text x="230" y="120" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#1b4332">Act (Tools, APIs)</text>
+                      <rect class="node-white" x="180" y="160" width="100" height="30" rx="5" fill="#ffffff" stroke="#2d6a4f" stroke-width="1.5"/>
+                      <text x="230" y="180" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#1b4332">Observe (Results)</text>
+                      <line x1="230" y1="70" x2="230" y2="90" stroke="#2d6a4f" stroke-width="2" marker-end="url(#ag2)"/>
+                      <line x1="230" y1="130" x2="230" y2="150" stroke="#2d6a4f" stroke-width="2" marker-end="url(#ag2)"/>
+                      <path d="M 180 175 Q 130 175 130 115 Q 130 55 170 55" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-dasharray="4" marker-end="url(#ag2)"/>
+                      <path d="M 280 175 Q 330 175 330 115 Q 330 55 290 55" fill="none" stroke="#2d6a4f" stroke-width="2" stroke-dasharray="4" marker-end="url(#ag2)"/>
+                      <line x1="340" y1="110" x2="370" y2="110" stroke="#2d6a4f" stroke-width="2" marker-end="url(#ag2)"/>
+                      <rect class="node-white" x="380" y="95" width="90" height="30" rx="5" fill="#ffffff" stroke="#2d6a4f" stroke-width="1.5"/>
+                      <text x="425" y="115" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">Final Ans</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 3 : Router -->
+        <div class="pattern-card" id="pattern-3">
+            <div class="card-header">
+                <span class="pattern-number">3</span>
+                <h2>Router</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Read the request first, then send it to the right specialist or model.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Routage des intentions multiples (mixed-intent flows), rationalisation des coûts à grande échelle.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 230" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="230" fill="#fff8f0"/>
+                      <defs>
+                        <marker id="ao3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e85d04"/></marker>
+                      </defs>
+                      <text x="250" y="30" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">User Query</text>
+                      <line x1="250" y1="40" x2="250" y2="60" stroke="#e85d04" stroke-width="2" marker-end="url(#ao3)"/>
+                      <polygon class="node-white" points="250,65 300,90 250,115 200,90" fill="#ffecd1" stroke="#e85d04" stroke-width="2"/>
+                      <text x="250" y="93" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#d00000">Router</text>
+                      <text x="250" y="105" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#d00000">(Triage)</text>
+                      <line x1="250" y1="115" x2="250" y2="135" stroke="#e85d04" stroke-width="2"/>
+                      <line x1="120" y1="135" x2="380" y2="135" stroke="#e85d04" stroke-width="2"/>
+                      <line x1="120" y1="135" x2="120" y2="150" stroke="#e85d04" stroke-width="2" marker-end="url(#ao3)"/>
+                      <line x1="250" y1="135" x2="250" y2="150" stroke="#e85d04" stroke-width="2" marker-end="url(#ao3)"/>
+                      <line x1="380" y1="135" x2="380" y2="150" stroke="#e85d04" stroke-width="2" marker-end="url(#ao3)"/>
+                      <rect class="node-white" x="80" y="155" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="120" y="172" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Small Model</text>
+                      <text x="120" y="184" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Fast)</text>
+                      <rect class="node-white" x="210" y="155" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="250" y="172" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Large Model</text>
+                      <text x="250" y="184" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Smart)</text>
+                      <rect class="node-white" x="340" y="155" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="380" y="172" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Specialist</text>
+                      <text x="380" y="184" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Tuned)</text>
+                      <!-- Convergence vers Output -->
+                      <line x1="120" y1="190" x2="120" y2="205" stroke="#e85d04" stroke-width="1.5"/>
+                      <line x1="250" y1="190" x2="250" y2="205" stroke="#e85d04" stroke-width="1.5"/>
+                      <line x1="380" y1="190" x2="380" y2="205" stroke="#e85d04" stroke-width="1.5"/>
+                      <line x1="120" y1="205" x2="380" y2="205" stroke="#e85d04" stroke-width="1.5"/>
+                      <line x1="250" y1="205" x2="250" y2="220" stroke="#e85d04" stroke-width="2" marker-end="url(#ao3)"/>
+                      <text x="250" y="227" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">Output</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 4 : Planner-Executor -->
+        <div class="pattern-card" id="pattern-4">
+            <div class="card-header">
+                <span class="pattern-number">4</span>
+                <h2>Planner-Executor</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Draft a plan, split it into pieces, run them (often in parallel), then combine the results.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Workflows longs et multicouches nécessitant une décomposition en étapes séquentielles ou parallèles.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="280" fill="#fcf4ff"/>
+                      <defs>
+                        <marker id="ap4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7209b7"/></marker>
+                      </defs>
+                      <text x="250" y="30" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">User Query</text>
+                      <line x1="250" y1="40" x2="250" y2="60" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <rect x="180" y="65" width="140" height="35" rx="5" fill="#f3d5fe" stroke="#7209b7" stroke-width="1.5"/>
+                      <text x="250" y="87" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#3a0ca3">Planner (LLM)</text>
+                      <line x1="250" y1="100" x2="250" y2="120" stroke="#7209b7" stroke-width="2"/>
+                      <line x1="120" y1="120" x2="380" y2="120" stroke="#7209b7" stroke-width="2"/>
+                      <line x1="120" y1="120" x2="120" y2="135" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <line x1="250" y1="120" x2="250" y2="135" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <line x1="380" y1="120" x2="380" y2="135" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <rect class="node-white" x="80" y="140" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="120" y="157" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Worker A</text>
+                      <text x="120" y="169" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Tool X)</text>
+                      <rect class="node-white" x="210" y="140" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="250" y="157" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Worker B</text>
+                      <text x="250" y="169" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Tool Y)</text>
+                      <rect class="node-white" x="340" y="140" width="80" height="35" rx="5" fill="#ffffff" stroke="#ccc" stroke-width="1.5"/>
+                      <text x="380" y="157" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#555">Worker C</text>
+                      <text x="380" y="169" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#777">(Tool Z)</text>
+                      <line x1="120" y1="175" x2="120" y2="190" stroke="#7209b7" stroke-width="1.5"/>
+                      <line x1="250" y1="175" x2="250" y2="190" stroke="#7209b7" stroke-width="1.5"/>
+                      <line x1="380" y1="175" x2="380" y2="190" stroke="#7209b7" stroke-width="1.5"/>
+                      <line x1="120" y1="190" x2="380" y2="190" stroke="#7209b7" stroke-width="1.5"/>
+                      <line x1="250" y1="190" x2="250" y2="205" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <rect class="node-white" x="180" y="210" width="140" height="30" rx="5" fill="#ffffff" stroke="#7209b7" stroke-width="1.5"/>
+                      <text x="250" y="230" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#333">Aggregate & Validate</text>
+                      <line x1="250" y1="240" x2="250" y2="255" stroke="#7209b7" stroke-width="2" marker-end="url(#ap4)"/>
+                      <rect x="190" y="255" width="120" height="20" rx="5" fill="#f3d5fe" stroke="#7209b7" stroke-width="1.5"/>
+                      <text x="250" y="269" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3a0ca3">Final Ans</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 5 : Evaluator-Optimizer -->
+        <div class="pattern-card" id="pattern-5">
+            <div class="card-header">
+                <span class="pattern-number">5</span>
+                <h2>Evaluator-Optimizer (Reflexive)</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Actor/critic approach. One model generates, another critiques, then it's rewritten. Gains flatten after 2–3 rounds.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Cas d'usage avec forte exigence de qualité (high quality bar) ou lorsque les erreurs coûtent cher.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="220" fill="#fff0f0"/>
+                      <defs>
+                        <marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c1121f"/></marker>
+                      </defs>
+                      <text x="80" y="70" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">User Query</text>
+                      <line x1="120" y1="65" x2="160" y2="65" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <rect x="170" y="50" width="100" height="35" rx="5" fill="#ffccd5" stroke="#c1121f" stroke-width="1.5"/>
+                      <text x="220" y="72" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#780000">Generate (LLM)</text>
+                      <line x1="220" y1="85" x2="220" y2="105" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <rect class="node-white" x="170" y="110" width="100" height="35" rx="5" fill="#ffffff" stroke="#c1121f" stroke-width="1.5"/>
+                      <text x="220" y="128" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#780000">Critique</text>
+                      <text x="220" y="140" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#780000">(LLM or Rules)</text>
+                      <line x1="220" y1="145" x2="220" y2="165" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <polygon class="node-white" points="220,170 260,190 220,210 180,190" fill="#ffffff" stroke="#c1121f" stroke-width="1.5"/>
+                      <text x="220" y="193" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#333">Good enough?</text>
+                      <line x1="180" y1="190" x2="130" y2="190" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <text x="155" y="185" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#c1121f">No</text>
+                      <rect class="node-dash" x="50" y="175" width="70" height="30" rx="5" fill="#ffffff" stroke="#c1121f" stroke-dasharray="3" stroke-width="1.5"/>
+                      <text x="85" y="195" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#780000">Rewrite (LLM)</text>
+                      <path d="M 85 175 Q 85 65 160 65" fill="none" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <text x="60" y="160" font-family="sans-serif" font-size="9" font-style="italic" text-anchor="middle" fill="#c1121f">Repeat (2–3 rounds)</text>
+                      <line x1="260" y1="190" x2="330" y2="190" stroke="#c1121f" stroke-width="2" marker-end="url(#ar5)"/>
+                      <text x="295" y="185" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#1b4332">Yes</text>
+                      <rect class="node-white" x="340" y="175" width="80" height="30" rx="5" fill="#ffffff" stroke="#c1121f" stroke-width="1.5"/>
+                      <text x="380" y="195" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#333">Final Ans</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 6 : Verifier-Gated -->
+        <div class="pattern-card" id="pattern-6">
+            <div class="card-header">
+                <span class="pattern-number">6</span>
+                <h2>Verifier-Gated</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Add a gatekeeper. The agent proposes an action, but an independent check must approve before it executes.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Paiements, autorisations, conformité légale (compliance) ou actions irréversibles.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="200" fill="#f1f5f9"/>
+                      <defs>
+                        <marker id="as6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker>
+                      </defs>
+                      <text x="60" y="100" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#333">User Query</text>
+                      <line x1="100" y1="95" x2="130" y2="95" stroke="#475569" stroke-width="2" marker-end="url(#as6)"/>
+                      <rect x="140" y="75" width="90" height="35" rx="5" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+                      <text x="185" y="97" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e293b">Generate (LLM)</text>
+                      <line x1="185" y1="110" x2="185" y2="130" stroke="#475569" stroke-width="2" marker-end="url(#as6)"/>
+                      <rect class="node-white" x="140" y="135" width="90" height="30" rx="5" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+                      <text x="185" y="151" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#1e293b">Verify</text>
+                      <text x="185" y="162" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#475569">(Code/Rules)</text>
+                      <line x1="230" y1="150" x2="260" y2="150" stroke="#475569" stroke-width="2" marker-end="url(#as6)"/>
+                      <polygon class="node-white" points="280,130 310,150 280,170 250,150" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+                      <text x="280" y="153" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#333">Pass?</text>
+                      <line x1="280" y1="130" x2="280" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#as6)"/>
+                      <text x="270" y="120" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#c1121f">No</text>
+                      <rect x="240" y="70" width="80" height="25" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+                      <text x="280" y="87" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#991b1b">Reject/Escalate</text>
+                      <line x1="310" y1="150" x2="350" y2="150" stroke="#475569" stroke-width="2" marker-end="url(#as6)"/>
+                      <text x="330" y="145" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#15803d">Yes</text>
+                      <rect x="360" y="135" width="80" height="30" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+                      <text x="400" y="151" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#166534">Execute</text>
+                      <text x="400" y="162" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#166534">(Take Action)</text>
+                      <!-- Output final -->
+                      <line x1="440" y1="150" x2="465" y2="150" stroke="#16a34a" stroke-width="2" marker-end="url(#as6)"/>
+                      <text x="485" y="154" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#166534">Output</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERN 7 : Multi-Agent + Memory -->
+        <div class="pattern-card" id="pattern-7">
+            <div class="card-header">
+                <span class="pattern-number">7</span>
+                <h2>Multi-Agent + Memory</h2>
+                <span class="toggle-icon">+</span>
+            </div>
+            <div class="card-content">
+                <div class="text-content">
+                    <h3>Concept</h3>
+                    <p>Specialized agents built on different stacks coordinate via open protocols (like MCP). Backed by governed long-term memory that outlives a single run.</p>
+                    <h3>Idéal pour</h3>
+                    <p>Systèmes d'entreprise multiplateformes qui doivent persister dans le temps et mémoriser l'état global.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+                      <rect class="svg-pattern-bg" x="0" y="0" width="500" height="240" fill="#f7fee7"/>
+                      <defs>
+                        <marker id="al7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4d7c0f"/></marker>
+                        <marker id="al7r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4d7c0f"/></marker>
+                      </defs>
+                      <rect x="60" y="40" width="100" height="40" rx="5" fill="#ecfccb" stroke="#4d7c0f" stroke-width="1.5"/>
+                      <text x="110" y="60" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#3f6212">Agent A</text>
+                      <text x="110" y="73" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#3f6212">(e.g. Code)</text>
+                      <rect x="340" y="40" width="100" height="40" rx="5" fill="#ecfccb" stroke="#4d7c0f" stroke-width="1.5"/>
+                      <text x="390" y="60" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#3f6212">Agent B</text>
+                      <text x="390" y="73" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#3f6212">(e.g. Research)</text>
+                      <rect class="node-white" x="200" y="110" width="100" height="40" rx="5" fill="#ffffff" stroke="#4d7c0f" stroke-width="1.5"/>
+                      <text x="250" y="130" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#3f6212">Agent C</text>
+                      <text x="250" y="143" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#3f6212">(e.g. Ops)</text>
+                      <!-- A2A Protocol (bidirectionnel A ↔ B) -->
+                      <line x1="160" y1="55" x2="340" y2="55" stroke="#4d7c0f" stroke-width="2" stroke-dasharray="4" marker-end="url(#al7)"/>
+                      <line x1="340" y1="65" x2="160" y2="65" stroke="#4d7c0f" stroke-width="2" stroke-dasharray="4" marker-end="url(#al7)"/>
+                      <text x="250" y="48" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#4d7c0f">A2A Protocol</text>
+                      <!-- Connexions A ↔ C bidirectionnelles -->
+                      <path d="M 110 80 L 110 125 L 190 125" fill="none" stroke="#4d7c0f" stroke-width="2" marker-end="url(#al7)"/>
+                      <path d="M 200 135 L 110 135 L 110 95" fill="none" stroke="#4d7c0f" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#al7)"/>
+                      <!-- Connexions B ↔ C bidirectionnelles -->
+                      <path d="M 390 80 L 390 125 L 310 125" fill="none" stroke="#4d7c0f" stroke-width="2" marker-end="url(#al7)"/>
+                      <path d="M 300 135 L 390 135 L 390 95" fill="none" stroke="#4d7c0f" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#al7)"/>
+                      <!-- MCP vers mémoire -->
+                      <line x1="250" y1="150" x2="250" y2="185" stroke="#4d7c0f" stroke-width="2" marker-end="url(#al7)"/>
+                      <text x="275" y="172" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#3f6212">MCP</text>
+                      <rect x="150" y="190" width="200" height="35" rx="5" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
+                      <text x="250" y="208" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#854d0e">Shared Memory</text>
+                      <text x="250" y="220" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#854d0e">(Governed Store)</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ========== THEME TOGGLE (avec persistance) ==========
+        (function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.setAttribute('data-theme', savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const current = html.getAttribute('data-theme');
+                const next = current === 'light' ? 'dark' : 'light';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+            });
+        })();
+
+        // ========== ACCORDION ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.pattern-card');
+            const toggleAllBtn = document.getElementById('toggle-all');
+            let isExpanded = false;
+
+            cards.forEach(card => {
+                const header = card.querySelector('.card-header');
+                header.addEventListener('click', () => {
+                    if (!card.classList.contains('active')) {
+                        cards.forEach(c => { if (c !== card && c.classList.contains('active')) c.classList.remove('active'); });
+                    }
+                    card.classList.toggle('active');
+                    updateToggleAllButton();
+                });
+            });
+
+            toggleAllBtn.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                cards.forEach(card => card.classList.toggle('active', isExpanded));
+                toggleAllBtn.textContent = isExpanded ? 'Tout replier' : 'Tout déplier';
+            });
+
+            function updateToggleAllButton() {
+                const activeCount = document.querySelectorAll('.pattern-card.active').length;
+                if (activeCount === cards.length) {
+                    isExpanded = true;
+                    toggleAllBtn.textContent = 'Tout replier';
+                } else {
+                    isExpanded = false;
+                    toggleAllBtn.textContent = 'Tout déplier';
+                }
+            }
+        });
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

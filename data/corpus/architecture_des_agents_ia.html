@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture des Agents IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="text-gray-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-[1200px] mx-auto flex flex-col gap-8">
+        
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight">
+                <span class="text-harness-600">Ingénierie du Harnais</span> 
+                <span class="text-gray-400 mx-2">vs.</span>
+                <span class="text-loop-600">Ingénierie des Boucles</span>
+                <br class="hidden md:block"/>
+                <span class="text-gray-400 mx-2">vs.</span>
+                <span class="text-graph-600">Ingénierie des Graphes</span>
+            </h1>
+            <p class="text-lg md:text-xl font-medium text-gray-600 italic">
+                Les <span class="text-blue-600 font-bold">3 Couches d'Ingénierie</span> Derrière les Agents IA Fiables
+            </p>
+        </div>
+
+        <!-- Main 3 Columns -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- COLUMN 1: Harnais (Orange) -->
+            <div class="border-2 border-harness-200 bg-white rounded-xl shadow-sm overflow-hidden relative">
+                <div class="bg-harness-100 p-4 border-b-2 border-harness-200 text-center">
+                    <h2 class="text-xl font-bold text-harness-800">Ingénierie du Harnais</h2>
+                    <div class="flex items-center justify-center mt-2">
+                        <div class="h-px bg-harness-400 w-8"></div>
+                        <span class="px-2 text-xs font-semibold text-harness-600 uppercase tracking-wider">L'Environnement</span>
+                        <div class="h-px bg-harness-400 w-8"></div>
+                    </div>
+                </div>
+                
+                <div class="p-6 flex flex-col items-center relative min-h-[500px]">
+                    <!-- Feedback Loop dashed line (Harness) -->
+                    <div class="absolute right-4 top-[100px] bottom-[140px] w-12 border-t-2 border-r-2 border-b-2 border-dashed border-harness-400 rounded-r-xl arrow-left opacity-60"></div>
+                    
+                    <!-- Node 1: Gather -->
+                    <div class="w-full max-w-[280px] bg-harness-100 border-2 border-harness-400 rounded-lg p-3 z-10 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-harness-600 group cursor-default">
+                        <div class="text-center font-bold text-harness-800 mb-2">Collecte</div>
+                        <div class="flex gap-2 text-xs font-medium">
+                            <div class="flex-1 bg-white border border-harness-300 rounded p-2 text-center flex items-center justify-center gap-1">
+                                <svg class="w-3 h-3 text-harness-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                                Zone de contexte
+                            </div>
+                            <div class="flex-1 bg-white border border-harness-300 rounded p-2 text-center flex items-center justify-center gap-1">
+                                <svg class="w-3 h-3 text-harness-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Zone de prompt
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-8 bg-harness-400 relative arrow-down text-harness-400"></div>
+
+                    <!-- Node 2: LLM Inference -->
+                    <div class="w-full max-w-[200px] bg-white border-2 border-harness-400 rounded-full p-3 z-10 transition-all duration-300 hover:scale-105 hover:shadow-md flex items-center justify-center gap-2 cursor-default">
+                        <svg class="w-6 h-6 text-harness-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                        <span class="font-bold text-harness-800 text-sm">Inférence LLM</span>
+                    </div>
+
+                    <!-- Connection Split -->
+                    <div class="w-0.5 h-6 bg-harness-400"></div>
+                    <div class="w-[200px] h-0.5 bg-harness-400 flex justify-between relative">
+                        <div class="w-0.5 h-4 bg-harness-400 absolute left-0 top-0 arrow-down text-harness-400"></div>
+                        <div class="w-0.5 h-4 bg-harness-400 absolute right-0 top-0 arrow-down text-harness-400"></div>
+                    </div>
+                    <div class="h-4"></div> <!-- Spacing -->
+
+                    <!-- Node 3: Tools & Sub-agents -->
+                    <div class="w-full max-w-[280px] flex justify-between z-10">
+                        <div class="w-[45%] bg-white border-2 border-harness-400 rounded-lg p-2 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default">
+                            <div class="flex justify-center mb-1"><svg class="w-4 h-4 text-harness-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                            <div class="font-bold text-harness-800 text-sm">Outils</div>
+                            <div class="text-[10px] text-gray-500">Exéc, récup</div>
+                        </div>
+                        <div class="w-[45%] bg-white border-2 border-harness-400 rounded-lg p-2 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-default">
+                            <div class="flex justify-center mb-1"><svg class="w-4 h-4 text-harness-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+                            <div class="font-bold text-harness-800 text-sm leading-tight">Sous-agents</div>
+                            <div class="text-[10px] text-gray-500">Spécialistes</div>
+                        </div>
+                    </div>
+
+                    <!-- Connection Join -->
+                    <div class="w-[200px] h-4 relative mt-2">
+                        <div class="w-0.5 h-4 bg-harness-400 absolute left-0 top-0"></div>
+                        <div class="w-0.5 h-4 bg-harness-400 absolute right-0 top-0"></div>
+                        <div class="w-full h-0.5 bg-harness-400 absolute bottom-0 left-0"></div>
+                        <div class="w-0.5 h-4 bg-harness-400 absolute left-1/2 bottom-[-16px] -translate-x-1/2 arrow-down text-harness-400"></div>
+                    </div>
+                    <div class="h-6"></div> <!-- Spacing -->
+
+                    <!-- Node 4: Verifier -->
+                    <div class="w-full max-w-[200px] bg-white border-2 border-harness-400 rounded-lg p-2 text-center z-10 transition-all duration-300 hover:scale-105 hover:shadow-md cursor-default">
+                        <div class="flex justify-center mb-1"><svg class="w-5 h-5 text-harness-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                        <div class="font-bold text-harness-800 text-sm">Vérificateur</div>
+                        <div class="text-[11px] text-gray-500">Tests, juge</div>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-8 bg-harness-400 relative arrow-down text-harness-400"></div>
+
+                    <!-- Node 5: Final Response -->
+                    <div class="w-full max-w-[200px] bg-harness-500 text-white font-bold rounded-lg p-3 text-center z-10 shadow-md transition-all duration-300 hover:bg-harness-600 hover:shadow-lg cursor-default">
+                        <div class="flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Réponse finale
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: Boucles (Blue) -->
+            <div class="border-2 border-loop-200 bg-white rounded-xl shadow-sm overflow-hidden relative">
+                <div class="bg-loop-100 p-4 border-b-2 border-loop-200 text-center">
+                    <h2 class="text-xl font-bold text-loop-800">Ingénierie des Boucles</h2>
+                    <div class="flex items-center justify-center mt-2">
+                        <div class="h-px bg-loop-400 w-8"></div>
+                        <span class="px-2 text-xs font-semibold text-loop-600 uppercase tracking-wider">Le Cycle de Rétroaction</span>
+                        <div class="h-px bg-loop-400 w-8"></div>
+                    </div>
+                </div>
+                
+                <div class="p-6 flex flex-col items-center relative min-h-[500px]">
+                    <!-- Feedback Loop dashed line (Loop) -->
+                    <div class="absolute right-4 top-[170px] bottom-[140px] w-12 border-t-2 border-r-2 border-b-2 border-dashed border-loop-400 rounded-r-xl arrow-left opacity-60"></div>
+                    
+                    <!-- Node 1: Goal -->
+                    <div class="w-full max-w-[280px] bg-loop-200 border border-loop-400 rounded-md p-3 text-center z-10 shadow-sm transition-all duration-300 hover:scale-105 cursor-default">
+                        <span class="font-bold text-loop-800 text-sm">Objectif + critères de succès</span>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-8 bg-loop-400 relative arrow-down text-loop-400"></div>
+
+                    <!-- Node 2: Harness Context -->
+                    <div class="w-full max-w-[280px] bg-loop-100 border-2 border-loop-400 rounded-lg p-3 text-center z-10 transition-all duration-300 hover:shadow-md cursor-default">
+                        <div class="font-bold text-loop-800 text-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Harnais
+                        </div>
+                        <div class="text-[11px] text-gray-600 mt-1">Collecter → Agir → Vérifier</div>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-8 bg-loop-400 relative arrow-down text-loop-400"></div>
+
+                    <!-- Node 3: Stopping Rules Container -->
+                    <div class="w-full max-w-[280px] bg-loop-50 border-2 border-loop-300 rounded-lg p-3 z-10 transition-all duration-300 hover:border-loop-500 hover:shadow-md cursor-default">
+                        <div class="text-center font-bold text-loop-800 text-sm mb-3">Règles d'arrêt</div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Rule 1 -->
+                            <div class="bg-white border border-loop-200 rounded p-2 text-center">
+                                <div class="font-semibold text-loop-700 text-[11px] leading-tight mb-1">Itérations max</div>
+                                <div class="text-[9px] text-gray-500 leading-tight">Limite stricte</div>
+                            </div>
+                            <!-- Rule 2 -->
+                            <div class="bg-white border border-loop-200 rounded p-2 text-center">
+                                <div class="font-semibold text-loop-700 text-[11px] leading-tight mb-1">Budget & temps</div>
+                                <div class="text-[9px] text-gray-500 leading-tight">Jeton / $ / sec</div>
+                            </div>
+                            <!-- Rule 3 -->
+                            <div class="bg-white border border-loop-200 rounded p-2 text-center">
+                                <div class="font-semibold text-loop-700 text-[11px] leading-tight mb-1">Pas de progrès</div>
+                                <div class="text-[9px] text-gray-500 leading-tight">Même appel & args</div>
+                            </div>
+                            <!-- Rule 4 -->
+                            <div class="bg-white border border-loop-200 rounded p-2 text-center">
+                                <div class="font-semibold text-loop-700 text-[11px] leading-tight mb-1">Vérif. d'achèvement</div>
+                                <div class="text-[9px] text-gray-500 leading-tight">Tests réussis</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-8 bg-loop-400 relative arrow-down text-loop-400"></div>
+
+                    <!-- Node 4: Final Response -->
+                    <div class="w-full max-w-[280px] bg-loop-500 text-white font-bold rounded-lg p-3 text-center z-10 shadow-md transition-all duration-300 hover:bg-loop-600 hover:shadow-lg cursor-default">
+                        <div class="flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Réponse finale
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: Graphes (Green) -->
+            <div class="border-2 border-graph-400 bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-graph-100 p-4 border-b-2 border-graph-400 text-center">
+                    <h2 class="text-xl font-bold text-graph-800">Ingénierie des Graphes</h2>
+                    <div class="flex items-center justify-center mt-2">
+                        <div class="h-px bg-graph-500 w-8"></div>
+                        <span class="px-2 text-xs font-semibold text-graph-600 uppercase tracking-wider">Topologie du Flux</span>
+                        <div class="h-px bg-graph-500 w-8"></div>
+                    </div>
+                </div>
+                
+                <div class="p-6 flex flex-col items-center relative min-h-[500px]">
+                    
+                    <!-- Node 1: Start -->
+                    <div class="w-auto px-6 py-2 bg-white border-2 border-graph-500 rounded-full text-center z-10 shadow-sm transition-transform hover:scale-105 cursor-default">
+                        <span class="font-bold text-graph-800 text-sm flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+                            Début
+                        </span>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-6 bg-graph-500 relative arrow-down text-graph-500"></div>
+
+                    <!-- Node 2: Task -->
+                    <div class="w-full max-w-[200px] bg-white border border-graph-400 rounded p-2 text-center z-10 shadow-sm transition-transform hover:scale-105 cursor-default">
+                        <span class="font-bold text-graph-700 text-sm flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4 text-graph-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                            Tâche
+                        </span>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-6 bg-graph-500 relative arrow-down text-graph-500"></div>
+
+                    <!-- Node 3: Decision (Diamond) -->
+                    <div class="relative w-16 h-16 flex items-center justify-center my-2 group z-10 cursor-default">
+                        <div class="absolute inset-0 border-2 border-graph-400 bg-graph-50 transform rotate-45 group-hover:bg-graph-100 transition-colors"></div>
+                        <span class="relative z-10 text-[10px] font-bold text-graph-800 text-center leading-tight">Décision</span>
+                    </div>
+
+                    <!-- Branching Paths -->
+                    <div class="flex w-[220px] justify-between relative mt-2">
+                        <div class="w-1/2 border-t-2 border-l-2 border-graph-400 border-dashed rounded-tl-lg h-4 relative">
+                             <div class="absolute bottom-[-10px] -left-[1px] w-0.5 h-3 bg-graph-400 arrow-down text-graph-400"></div>
+                        </div>
+                        <div class="w-1/2 border-t-2 border-r-2 border-graph-400 border-dashed rounded-tr-lg h-4 relative">
+                             <div class="absolute bottom-[-10px] -right-[1px] w-0.5 h-3 bg-graph-400 arrow-down text-graph-400"></div>
+                        </div>
+                    </div>
+
+                    <!-- Node 4: Branches -->
+                    <div class="flex w-[240px] justify-between z-10 mt-2">
+                        <div class="bg-white border border-graph-400 rounded-md px-3 py-1 shadow-sm text-[11px] font-bold text-graph-700 flex items-center gap-1 transition-transform hover:-translate-y-0.5">
+                            <svg class="w-3 h-3 text-graph-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                            Branche A
+                        </div>
+                        <div class="bg-white border border-graph-400 rounded-md px-3 py-1 shadow-sm text-[11px] font-bold text-graph-700 flex items-center gap-1 transition-transform hover:-translate-y-0.5">
+                            <svg class="w-3 h-3 text-graph-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                            Branche B
+                        </div>
+                    </div>
+
+                    <!-- Connection to Parallel Tasks -->
+                    <div class="flex w-[220px] justify-between relative mt-2 h-4">
+                        <div class="w-0.5 h-full bg-graph-400 border-l-2 border-dashed border-graph-400 relative arrow-down text-graph-400 ml-[1px]"></div>
+                        <div class="w-0.5 h-full bg-graph-400 border-r-2 border-dashed border-graph-400 relative arrow-down text-graph-400 mr-[1px]"></div>
+                    </div>
+
+                    <!-- Node 5: Parallel Tasks -->
+                    <div class="w-full max-w-[200px] border-2 border-dashed border-graph-500 bg-graph-50 rounded-lg p-2 text-center mt-2 z-10 hover:bg-graph-100 transition-colors cursor-default">
+                        <span class="font-bold text-graph-800 text-sm flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4 text-graph-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                            Tâches parallèles
+                        </span>
+                    </div>
+
+                    <!-- Connections down -->
+                    <div class="w-0.5 h-6 bg-graph-500 relative arrow-down text-graph-500 mt-1"></div>
+
+                    <!-- Node 6: Approval & Merge -->
+                    <div class="flex items-center gap-4 z-10 w-full justify-center">
+                        <div class="bg-white border border-graph-400 rounded p-2 text-[11px] font-bold text-graph-700 shadow-sm transition-transform hover:scale-105 flex items-center gap-1">
+                            <svg class="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Approbation
+                        </div>
+                        <div class="h-0.5 w-6 bg-graph-500 relative arrow-right text-graph-500"></div>
+                        <div class="bg-white border border-graph-400 rounded p-2 text-[11px] font-bold text-graph-700 shadow-sm transition-transform hover:scale-105 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                            Fusionner
+                        </div>
+                    </div>
+
+                    <!-- Connection -->
+                    <div class="w-0.5 h-6 bg-graph-500 relative arrow-down text-graph-500 mt-1 ml-[110px]"></div>
+
+                    <!-- Node 7: Finish -->
+                    <div class="w-auto px-6 py-2 bg-graph-500 text-white font-bold border-2 border-graph-600 rounded-full text-center z-10 shadow-md transition-transform hover:scale-105 ml-[110px] mt-1 cursor-default">
+                        <span class="text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Fin
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Section -->
+        <div class="bg-blue-50/40 border border-blue-200 rounded-2xl p-6 md:p-10 relative overflow-hidden mt-8">
+            <h2 class="text-center text-xl md:text-2xl font-extrabold text-blue-900 mb-8 bg-blue-100 inline-block px-6 py-2 rounded-full shadow-sm mx-auto flex w-max">
+                Comment elles fonctionnent ensemble
+            </h2>
+
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-8 relative max-w-5xl mx-auto">
+                
+                <!-- Left Annotations -->
+                <div class="lg:w-1/4 flex flex-col gap-12 text-sm text-gray-600 font-medium">
+                    <div class="relative group">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 bg-harness-100 text-harness-800 rounded font-bold text-xs">Couche externe</span>
+                        </div>
+                        <p class="mt-2 text-xs">Fournit le travail, l'objectif, les outils, la sécurité et la fondation.</p>
+                        <div class="hidden lg:block absolute top-2 -right-12 w-10 border-t border-dashed border-gray-400 arrow-right text-gray-400 group-hover:border-harness-500 group-hover:text-harness-500 transition-colors"></div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-xs italic text-gray-500">
+                        L'information circule vers l'intérieur
+                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </div>
+
+                    <div class="relative group">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 bg-graph-100 text-graph-800 rounded font-bold text-xs">Le Graphe vit à l'intérieur du Harnais.</span>
+                        </div>
+                        <p class="mt-2 text-xs">Orchestre le travail lui-même.</p>
+                        <div class="hidden lg:block absolute top-2 -right-8 w-6 border-t border-graph-500 arrow-right text-graph-500"></div>
+                    </div>
+                </div>
+
+                <!-- Nested Boxes Graphic -->
+                <div class="w-full lg:w-1/2 relative group">
+                    <!-- Outer: Harness -->
+                    <div class="border-2 border-harness-400 bg-white rounded-xl p-4 md:p-6 transition-all duration-300 hover:shadow-lg hover:border-harness-500">
+                        <div class="text-center font-extrabold text-harness-600 mb-4 text-lg">Ingénierie du Harnais</div>
+                        
+                        <!-- Middle: Graph -->
+                        <div class="border-2 border-graph-500 bg-graph-50 rounded-xl p-4 md:p-6 transition-all duration-300 hover:bg-graph-100">
+                            <div class="text-center font-extrabold text-graph-700 mb-4">Ingénierie des Graphes</div>
+                            
+                            <!-- Inner: Loop -->
+                            <div class="border-2 border-loop-500 bg-white rounded-xl p-6 flex flex-col items-center transition-all duration-300 shadow-inner">
+                                <div class="text-center font-extrabold text-loop-600 mb-6 text-sm">Ingénierie des Boucles</div>
+                                
+                                <div class="flex items-center justify-center gap-2 md:gap-4 w-full">
+                                    <!-- Loop 1 -->
+                                    <div class="w-12 h-12 rounded-full border-2 border-loop-400 bg-loop-50 flex items-center justify-center relative animate-pulse">
+                                        <svg class="w-5 h-5 text-loop-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <div class="absolute -bottom-5 text-[10px] font-bold text-loop-800">Boucle 1</div>
+                                    </div>
+                                    <div class="w-6 border-t-2 border-dashed border-gray-300 arrow-right text-gray-300"></div>
+                                    <!-- Loop 2 -->
+                                    <div class="w-12 h-12 rounded-full border-2 border-loop-400 bg-loop-50 flex items-center justify-center relative">
+                                        <svg class="w-5 h-5 text-loop-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <div class="absolute -bottom-5 text-[10px] font-bold text-loop-800">Boucle 2</div>
+                                    </div>
+                                    <div class="w-6 border-t-2 border-dashed border-gray-300 arrow-right text-gray-300"></div>
+                                    <!-- Loop N -->
+                                    <div class="w-12 h-12 rounded-full border-2 border-loop-400 bg-loop-50 flex items-center justify-center relative">
+                                        <svg class="w-5 h-5 text-loop-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <div class="absolute -bottom-5 text-[10px] font-bold text-loop-800">Boucle N</div>
+                                    </div>
+                                </div>
+                                <div class="h-4"></div> <!-- Padding for labels -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Annotations -->
+                <div class="lg:w-1/4 flex flex-col gap-12 text-sm text-gray-600 font-medium">
+                     <div class="relative group">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 bg-loop-100 text-loop-800 rounded font-bold text-xs">Les Boucles vivent à l'intérieur du Graphe.</span>
+                        </div>
+                        <p class="mt-2 text-xs">Garde chaque étape honnête.</p>
+                        <div class="hidden lg:block absolute top-4 -left-12 w-10 border-t border-loop-500 arrow-left text-loop-500"></div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs italic text-gray-500 justify-end lg:justify-start">
+                        <svg class="w-4 h-4 text-gray-400 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        Retour d'état vers l'extérieur
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Diagnostics Section -->
+        <div class="mt-12 mb-8">
+            <div class="flex items-center justify-center mb-8 relative">
+                <div class="w-full h-px bg-gray-300 absolute left-0 top-1/2 -z-10"></div>
+                <h2 class="text-xl md:text-2xl font-bold bg-[#f8fafc] px-6 text-gray-800 border-2 border-gray-200 rounded-full py-1">
+                    Diagnostiquer par l'Échec
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Harness Failures -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-harness-300 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-harness-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-harness-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Outils manquants, mauvaises permissions, mémoire faible</p>
+                        <span class="bg-harness-100 text-harness-700 text-[10px] font-bold px-2 py-1 rounded border border-harness-200">Harnais</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-harness-300 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-harness-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-harness-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Contexte perdu, état incohérent, données dispersées</p>
+                        <span class="bg-harness-100 text-harness-700 text-[10px] font-bold px-2 py-1 rounded border border-harness-200">Harnais</span>
+                    </div>
+                </div>
+
+                <!-- Loop Failures -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-loop-300 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-loop-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-loop-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Répète la mauvaise chose ou dérive avec le temps</p>
+                        <span class="bg-loop-100 text-loop-700 text-[10px] font-bold px-2 py-1 rounded border border-loop-200">Boucle</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-loop-300 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-loop-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-loop-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Mauvaises évaluations, vérifications faibles, pas de feedback</p>
+                        <span class="bg-loop-100 text-loop-700 text-[10px] font-bold px-2 py-1 rounded border border-loop-200">Boucle</span>
+                    </div>
+                </div>
+
+                <!-- Graph Failures -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-graph-400 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-graph-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-graph-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Mauvais ordre des étapes, problèmes de branchement, jointures brisées</p>
+                        <span class="bg-graph-100 text-graph-800 text-[10px] font-bold px-2 py-1 rounded border border-graph-300">Graphe</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 hover:shadow-md hover:border-graph-400 group cursor-default">
+                        <div class="p-2 bg-gray-100 rounded-lg group-hover:bg-graph-100 transition-colors">
+                            <svg class="w-6 h-6 text-gray-600 group-hover:text-graph-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 flex-1 leading-snug">Goulots d'étranglement, mauvaise parallélisation, orchestration lente</p>
+                        <span class="bg-graph-100 text-graph-800 text-[10px] font-bold px-2 py-1 rounded border border-graph-300">Graphe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

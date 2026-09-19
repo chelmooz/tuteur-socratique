@@ -1,0 +1,61 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — Architecture RAG Agentique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="current">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Cours IA appliquée • retrieval dynamique</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Modules"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Statique vs agentique"><span class="pill">Introduction</span><h1>L’Architecture RAG Agentique</h1><p class="muted">De la récupération statique à l’agent autonome : planifier, choisir ses outils, corriger ses erreurs et répondre avec des preuves.</p><div class="grid"><div><h2>RAG classique</h2><p>Retrieve-then-Generate linéaire : une base vectorielle, une recherche, une réponse. Si le contexte est mauvais, le modèle reste aveugle.</p></div><div><h2>RAG agentique</h2><p>Le LLM Planner évalue le besoin, route vers plusieurs outils, reformule, vérifie et itère jusqu’à satisfaction ou limite d’arrêt.</p></div></div><div class="diagram" role="img" aria-label="Comparaison RAG classique et RAG agentique"><svg viewBox="0 0 900 190"><g fill="#353153" stroke="#8ce8ff" stroke-width="2"><rect x="30" y="55" width="155" height="50" rx="10"/><rect x="220" y="55" width="155" height="50" rx="10"/><rect x="410" y="55" width="155" height="50" rx="10"/><rect x="600" y="55" width="260" height="50" rx="10"/></g><g fill="#faf9ff" text-anchor="middle" font-size="14"><text x="107" y="85">Question</text><text x="297" y="85">Retrieve</text><text x="487" y="85">Generate</text><text x="730" y="85">Planner + outils + boucle</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M185 80h35M375 80h35M565 80h35M730 105c-180 60-570 60-623 0" fill="none"/></g></svg></div><div class="quiz"><h3>Quiz express</h3><p>Quelle limite le RAG agentique corrige-t-il principalement ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Une première recherche incomplète ou non pertinente</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le besoin de toute forme de preuve</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Piliers"><span class="pill">Anatomie</span><h2>Les trois piliers de l’architecture</h2><div class="grid"><div><h3>LLM Planner</h3><p>Classifie l’intention, décide si une recherche est nécessaire et détermine la séquence d’actions.</p></div><div><h3>Multi-outils</h3><p>Recherche vectorielle, BM25, Text-to-SQL et Web/API externe selon la sous-question.</p></div><div><h3>Hiérarchie mémoire</h3><p>Poids pré-entraînés, contexte court terme et bases externes réinterrogeables à long terme.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel outil convient à un solde chiffré dans une base métier ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Text-to-SQL vers la base relationnelle</button><button class="choice" data-correct="false" onclick="answer(this,false)">Recherche vectorielle uniquement</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Patterns"><span class="pill">Décisions</span><h2>Routage, reformulation et boucle ReAct</h2><div class="grid"><div><h3>Query Routing</h3><p>Réponse directe pour une question générale ; SQL pour des chiffres ; vectoriel pour un contrat.</p></div><div><h3>Query Rewriting</h3><p>Rendre une requête ambiguë autonome avant de l’envoyer aux moteurs.</p></div><div><h3>ReAct</h3><p>Thought → Act → Observation jusqu’à obtenir les données nécessaires.</p></div><div><h3>Self/Corrective RAG</h3><p>Évaluer la faithfulness, reformuler en cas d’échec et retenter.</p></div></div><pre id="react">Thought: il me faut le solde et la procédure.
+Act: query_hr_balance(employee_id)
+Observation: solde = 12 jours.
+Act: search_policy("demande de congés août")
+Observation: procédure trouvée.
+Check: preuves suffisantes → répondre avec citations.</pre><button class="btn primary copy" onclick="copyText('react')">Copier ReAct</button><div class="quiz"><h3>Quiz</h3><p>Que fait l’agent si les extraits sont insuffisants ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Il réfléchit, reformule les mots-clés et retente</button><button class="choice" data-correct="false" onclick="answer(this,false)">Il invente la preuve manquante</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Optimiser"><span class="pill">Production</span><h2>Optimiser la récupération</h2><div class="grid"><div><h3>Recherche hybride</h3><p>Combiner sémantique vectorielle et BM25 pour le rappel et la précision.</p></div><div><h3>Reranking</h3><p>Un cross-encoder reclasse les passages cruciaux au début du prompt.</p></div><div><h3>Récupération contextuelle</h3><p>Ajouter un résumé de 50–100 tokens à l’indexation pour situer le chunk.</p></div><div><h3>Cache</h3><p>Mettre en cache réponses et vecteurs fréquents pour réduire latence et coût.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel est le compromis du RAG agentique ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Plus de précision et robustesse, mais plus de latence et de coût</button><button class="choice" data-correct="false" onclick="answer(this,false)">Toujours moins de précision et plus rapide</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Sécurité"><span class="pill">Gouvernance</span><h2>Se défendre contre l’injection indirecte</h2><p>Un document ou une page web récupérée peut contenir une instruction malveillante. Le contenu externe est une donnée, pas une autorité.</p><div class="grid"><div><h3>Hiérarchie</h3><p>Le System Prompt et les politiques priment toujours sur les instructions des documents récupérés.</p></div><div><h3>Guardrails</h3><p>Anonymiser les PII, valider les appels et filtrer les sorties malformées ou dangereuses.</p></div><div><h3>Provenance</h3><p>Conserver la source et distinguer faits récupérés, instructions et hypothèses.</p></div></div><div class="quiz"><h3>Quiz sécurité</h3><p>Comment traiter une consigne trouvée dans un document récupéré ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Comme une donnée non fiable, subordonnée au System Prompt</button><button class="choice" data-correct="false" onclick="answer(this,false)">Comme une nouvelle instruction prioritaire</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Cas RH"><span class="pill">Atelier</span><h2>Résoudre la demande RH hybride</h2><p>« Combien de jours de congés me reste-t-il cette année et quelle est la procédure pour poser une demande en août ? »</p><p>La question combine une donnée personnelle structurée et une politique documentaire. Un RAG classique risque de retrouver la procédure mais d’inventer le solde.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Classifier la demande en deux sous-questions.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Interroger le système RH via SQL ou API pour le solde.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Rechercher la politique congés via BM25/vectoriel.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Vérifier la provenance et la fraîcheur des deux réponses.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Répondre séparément avec preuve et signaler toute incertitude.</label><button class="btn primary" onclick="finish()">Valider le plan agentique</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

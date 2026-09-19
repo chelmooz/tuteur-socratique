@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L'ingénierie de contexte expliquée</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-4 6-6 8-6s6 2 8 6c-2 4-6 6-8 6s-6-2-8-6Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg>
+    Ingénierie de contexte
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-pressed="false">
+    <span class="icon-track"><span class="icon-dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke-width="2"/></svg></span></span>
+    <span id="themeLabel">Mode clair</span>
+  </button>
+</div>
+
+<header class="hero">
+  <h1>Comprendre l'ingénierie de contexte</h1>
+  <div class="underline"></div>
+  <p>Que doit voir le modèle, précisément, à cet instant&nbsp;?</p>
+</header>
+
+<main>
+
+  <!-- 1 -->
+  <section class="block" id="s1">
+    <div class="block-head"><span class="numeral">1</span><h2>Ingénierie de prompt vs Ingénierie de contexte</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul>
+          <li>L'<strong>ingénierie de prompt</strong> se concentre sur les instructions.</li>
+          <li>L'<strong>ingénierie de contexte</strong> se concentre sur l'environnement informationnel global reçu par le modèle au moment de l'inférence.</li>
+          <li>L'ingénierie de contexte est une problématique plus large, pas un remplacement.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <div class="vs-panel">
+          <div class="vs-card b">
+            <svg viewBox="0 0 24 24" stroke="var(--blue-bd)" stroke-width="1.8" fill="none"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+            <h3>Ingénierie de prompt</h3>
+            <p>«&nbsp;Comment dois-je instruire le modèle&nbsp;?&nbsp;»</p>
+          </div>
+          <div class="vs-word">VS</div>
+          <div class="vs-card p" style="border-color:var(--purple-bd); background:var(--purple-bg); color:var(--purple-tx);">
+            <svg viewBox="0 0 24 24" stroke="var(--purple-bd)" stroke-width="1.8" fill="none"><ellipse cx="12" cy="6" rx="7" ry="2.4"/><path d="M5 6v12c0 1.3 3.1 2.4 7 2.4s7-1.1 7-2.4V6"/><path d="M5 12c0 1.3 3.1 2.4 7 2.4s7-1.1 7-2.4"/></svg>
+            <h3>Ingénierie de contexte</h3>
+            <p>«&nbsp;Que doit savoir le modèle à cette étape, et sous quelle forme&nbsp;?&nbsp;»</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 2 -->
+  <section class="block" id="s2">
+    <div class="block-head"><span class="numeral">2</span><h2>Que contient le contexte&nbsp;?</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul>
+          <li>Le contexte d'un LLM peut inclure&nbsp;: instructions, requête, historique, informations récupérées, mémoire, outils, résultats d'outils et état de l'application.</li>
+          <li>N'incluez que les informations <strong>pertinentes</strong>.</li>
+          <li>Le contexte n'est pas «&nbsp;tout&nbsp;». C'est la bonne information au bon moment.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <div class="converge-wrap">
+          <div class="converge-sources">
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="box b" style="min-width:0;">Instructions<br><small>système</small></span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.5-4 4.5-6 7-6s5.5 2 7 6"/></svg><span class="box p" style="min-width:0;">Requête<br><small>utilisateur</small></span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M4 6h16M4 12h11M4 18h7"/></svg><span class="box p" style="min-width:0;">Historique<br><small>conversation</small></span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="box p" style="min-width:0;">Infos<br><small>récupérées</small></span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><ellipse cx="12" cy="6" rx="7" ry="2.4"/><path d="M5 6v12c0 1.3 3.1 2.4 7 2.4s7-1.1 7-2.4V6"/></svg><span class="box p" style="min-width:0;">Mémoire</span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M14 7l3-3 3 3-3 3M8 17l-3 3-3-3 3-3M6 6l12 12M6 18L18 6" stroke-linecap="round"/></svg><span class="box p" style="min-width:0;">Outils +<br><small>résultats</small></span></div>
+            <div class="source-col"><svg class="mini" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg><span class="box p" style="min-width:0;">État de<br><small>l'application</small></span></div>
+          </div>
+          <svg class="down-arrow reveal" viewBox="0 0 16 14"><path class="draw" d="M8 0v10M3 7l5 5 5-5" stroke="var(--arrow)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="builder-bar">Générateur de contexte</div>
+          <div class="builder-note">(informations pertinentes uniquement)</div>
+          <svg class="down-arrow" viewBox="0 0 16 14"><path d="M8 0v10M3 7l5 5 5-5" stroke="var(--arrow)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="box strong-final">Entrée du modèle</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 3 -->
+  <section class="block" id="s3">
+    <div class="block-head"><span class="numeral">3</span><h2>Plus de contexte ≠ Meilleur contexte</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul>
+          <li>Davantage de contexte ne signifie pas automatiquement un meilleur contexte.</li>
+          <li>Des informations non pertinentes, obsolètes ou dupliquées peuvent désorienter le modèle et dégrader ses performances.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <div class="compare-grid">
+          <div class="compare-panel noisy">
+            <h4>Contexte bruité</h4>
+            <div class="mini-grid">
+              <div class="mini-card">Vieux document (2022)</div>
+              <div class="mini-card">Résultat d'outil dupliqué</div>
+              <div class="mini-card">Fichier non pertinent</div>
+              <div class="mini-card">Anciens messages…</div>
+            </div>
+            <div class="panel-caption">Beaucoup de documents, signal faible</div>
+          </div>
+          <div class="compare-panel signal">
+            <h4>Contexte à fort signal</h4>
+            <div class="mini-grid">
+              <div class="mini-card">Règle actuelle</div>
+              <div class="mini-card">Détails utilisateur</div>
+              <div class="mini-card">Fichier pertinent</div>
+              <div class="mini-card">Résultat d'outil utile…</div>
+            </div>
+            <div class="panel-caption">Information ciblée, signal élevé</div>
+          </div>
+        </div>
+        <div class="callout-line">Plus de contexte ne signifie pas automatiquement un meilleur contexte.</div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 4 -->
+  <section class="block" id="s4">
+    <div class="block-head"><span class="numeral">4</span><h2>Où se situe le RAG&nbsp;?</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul>
+          <li>Le RAG récupère des informations externes pertinentes et les prépare pour le modèle.</li>
+          <li>Le RAG est un mécanisme parmi d'autres dans un système d'ingénierie de contexte plus vaste.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <div class="flow-row">
+          <span class="box b">Requête<br><small>utilisateur</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box p">Récupérer<br><small>docs pertinents</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box p">Filtrer<br><small>supprimer le bruit</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box p">Réordonner<br><small>par pertinence</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box p">Sélectionner<br><small>top k</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box p">Structurer<br><small>format LLM</small></span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box b">Contexte</span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box strong-final">LLM</span>
+        </div>
+        <div class="callout-line">Le RAG est un mécanisme au sein d'un système d'ingénierie de contexte plus vaste.</div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 5 -->
+  <section class="block" id="s5">
+    <div class="block-head"><span class="numeral">5</span><h2>Pourquoi les agents complexifient le contexte</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul>
+          <li>Les agents utilisent des outils, enchaînent plusieurs étapes, et leur contexte évolue sans cesse.</li>
+          <li>Anciens plans, erreurs, résultats d'outils et historique non pertinent s'accumulent et bruitent le contexte.</li>
+        </ul>
+      </div>
+      <div class="diagram split-5">
+        <div class="loop-wrap">
+          <div class="flow-row wrap">
+            <span class="box b">Objectif</span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Appel<br><small>d'outil</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Résultat<br><small>d'outil</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Plan<br><small>mis à jour</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Appel d'outil<br><small>suivant</small></span>
+            <span style="color:var(--ink-soft); font-weight:800;">…</span>
+          </div>
+          <svg class="loop-svg" viewBox="0 0 600 46" preserveAspectRatio="none">
+            <path d="M540 4 C 540 40, 60 40, 60 4" marker-end="url(#arrowhead)"/>
+            <defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--arrow-strong)"/></marker></defs>
+          </svg>
+          <span class="loop-label">Répéter</span>
+        </div>
+        <div class="warn-box">
+          <div class="warn-title"><svg viewBox="0 0 24 24" stroke="var(--pink-bd)" stroke-width="2" fill="none"><path d="M12 3 2 20h20L12 3Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="1"/></svg>Pollution du contexte</div>
+          <p style="margin:0;">Anciens plans, erreurs, résultats d'outils et historique non pertinent s'accumulent.</p>
+          <p style="margin:0;">Gardez le contexte propre et ciblé.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 6 -->
+  <section class="block" id="s6">
+    <div class="block-head"><span class="numeral">6</span><h2>Gestion du contexte</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul><li>Plusieurs techniques permettent de gérer efficacement le contexte.</li></ul>
+      </div>
+      <div class="diagram">
+        <div class="quad-grid">
+          <div class="quad-card">
+            <svg viewBox="0 0 24 24" stroke="var(--blue-bd)" stroke-width="1.8" fill="none"><rect x="3" y="4" width="8" height="6" rx="1"/><path d="M11 7h5M19 4l3 3-3 3"/></svg>
+            <h4>Compaction</h4>
+            <p>Réduire l'ancien historique tout en préservant l'état important.</p>
+          </div>
+          <div class="quad-card">
+            <svg viewBox="0 0 24 24" stroke="var(--blue-bd)" stroke-width="1.8" fill="none"><ellipse cx="12" cy="6" rx="7" ry="2.4"/><path d="M5 6v12c0 1.3 3.1 2.4 7 2.4s7-1.1 7-2.4V6"/><path d="M5 12c0 1.3 3.1 2.4 7 2.4s7-1.1 7-2.4"/></svg>
+            <h4>Mémoire structurée</h4>
+            <p>Stocker les faits utiles, les décisions et l'avancement.</p>
+          </div>
+          <div class="quad-card">
+            <svg viewBox="0 0 24 24" stroke="var(--blue-bd)" stroke-width="1.8" fill="none"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="20" y2="20"/></svg>
+            <h4>Récupération juste-à-temps</h4>
+            <p>Récupérer l'information au moment précis où elle est requise.</p>
+          </div>
+          <div class="quad-card">
+            <svg viewBox="0 0 24 24" stroke="var(--blue-bd)" stroke-width="1.8" fill="none"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M12 7v5M12 12l-6 4M12 12l6 4"/></svg>
+            <h4>Sous-agents</h4>
+            <p>Tâches secondaires ciblées, avec des contextes dédiés.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="block-divider"></div>
+
+  <!-- 7 -->
+  <section class="block" id="s7">
+    <div class="block-head"><span class="numeral">7</span><h2>Évaluer le contexte</h2></div>
+    <div class="block-body">
+      <div class="info-box">
+        <ul><li>Évaluez et itérez pour améliorer votre pipeline de contexte.</li></ul>
+      </div>
+      <div class="diagram">
+        <div class="loop-wrap">
+          <div class="flow-row wrap">
+            <span class="box p">Construire<br><small>le contexte</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Exécuter<br><small>la tâche</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Évaluer<br><small>les résultats</small></span>
+            <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+            <span class="box p">Améliorer<br><small>ajuster la stratégie</small></span>
+          </div>
+          <svg class="loop-svg" viewBox="0 0 560 46" preserveAspectRatio="none">
+            <path d="M500 4 C 500 40, 60 40, 60 4" marker-end="url(#arrowhead2)"/>
+            <defs><marker id="arrowhead2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--arrow-strong)"/></marker></defs>
+          </svg>
+          <span class="loop-label">Itérer</span>
+        </div>
+        <div class="metrics-box">
+          <h4>Métriques d'évaluation</h4>
+          <ul>
+            <li>Qualité de récupération (pertinence)</li>
+            <li>Précision de la réponse</li>
+            <li>Taux de réussite des appels d'outils</li>
+            <li>Consommation de jetons</li>
+            <li>Latence</li>
+            <li>Taux d'échec</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- final -->
+  <section class="final">
+    <h2>Modèle mental final</h2>
+    <div class="final-body">
+      <div class="info-box" style="background:var(--green-bg);">
+        <p style="margin:0;">Un pipeline de contexte bien conçu aide le modèle à prendre de meilleures décisions et à exécuter les bonnes actions.</p>
+      </div>
+      <div>
+        <div class="final-formula">La bonne information + Le bon moment + Le bon format</div>
+        <div class="final-flow">
+          <span class="box b">Prompt</span><span class="plus">+</span>
+          <span class="box p">RAG</span><span class="plus">+</span>
+          <span class="box p">Mémoire</span><span class="plus">+</span>
+          <span class="box p">Outils</span><span class="plus">+</span>
+          <span class="box p">État de l'app</span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box strong-final">Contexte</span>
+          <svg class="arrow-icon" viewBox="0 0 26 16"><path d="M1 8h20M16 3l6 5-6 5"/></svg>
+          <span class="box strong-final">Meilleures décisions</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Infographie reproduite en français — mode sombre disponible via le bouton en haut à droite.</footer>
+
+<script>
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+
+  function applyTheme(theme){
+    root.setAttribute('data-theme', theme);
+    btn.setAttribute('aria-pressed', theme === 'dark');
+    label.textContent = theme === 'dark' ? 'Mode sombre' : 'Mode clair';
+    try{ localStorage.setItem('ctx-eng-theme', theme); }catch(e){}
+  }
+
+  let saved = 'light';
+  try{ saved = localStorage.getItem('ctx-eng-theme') || 'light'; }catch(e){}
+  if(saved === 'dark') applyTheme('dark'); else applyTheme('light');
+
+  btn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  const revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && revealEls.length){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }
+      });
+    }, {threshold:.4});
+    revealEls.forEach(el=>io.observe(el));
+  }
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

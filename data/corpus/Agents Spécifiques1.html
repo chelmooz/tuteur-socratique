@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L'Ère des Agents Spécifiques et des Systèmes Multi-Agents</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="logo"> AI Agents Course</div>
+  <ul>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#anatomie">Anatomie</a></li>
+    <li><a href="#heritage">Héritage</a></li>
+    <li><a href="#composition">Composition</a></li>
+    <li><a href="#frameworks">Frameworks</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>L'Ère des Agents Spécifiques et des Systèmes Multi-Agents</h1>
+    <p class="subtitle">Du modèle de langage généraliste à l'architecture d'agents autonomes</p>
+    <p class="authors">Basé sur les travaux de Justin Shrader (Standard Agents) & Micheal Lanham (AI Agents in Action, Manning 2025)</p>
+    <div class="scroll-indicator">
+      <svg width="30" height="30" viewBox="0 0 30 30">
+        <path d="M15 5 L15 25 M8 18 L15 25 L22 18" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 1: INTRODUCTION -->
+<section id="intro" class="fade-in">
+  <h2>1. Introduction : De la Révolution Industrielle à l'Ère des Agents</h2>
+  
+  <p class="lead">
+    De la même manière que la révolution industrielle a été catalysée par la capacité à <strong>harnacher l'énergie grâce aux machines</strong>, notre ère actuelle est définie par notre capacité à <strong>harnacher l'intelligence grâce aux agents</strong>.
+  </p>
+
+  <h3>Définition Fondamentale de l'Agent</h3>
+  
+  <div class="quote">
+    Les agents sont des logiciels déterministes qui harnachent les résultats non déterministes produits par les modèles dans la poursuite d'un objectif précis.
+    <span class="quote-author">— Justin Shrader</span>
+  </div>
+
+  <p>Selon Micheal Lanham, un agent se distingue d'une simple interaction directe avec un LLM par son degré d'autonomie et ses capacités d'action.</p>
+
+  <!-- SVG: 4 Niveaux d'Interaction -->
+  <div class="svg-container">
+    <h3>📊 Taxonomie des Interactions LLM (Micheal Lanham)</h3>
+    <svg viewBox="0 0 900 420" width="100%" height="auto" style="background: #0f172a; border-radius: 8px; padding: 10px;">
+      <style>
+        .card { fill: #334155; stroke: #475569; stroke-width: 2px; rx: 8px; transition: all 0.3s ease; cursor: pointer; }
+        .card:hover { fill: #475569; stroke: #38bdf8; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4)); }
+        .text-title { font-weight: bold; fill: #38bdf8; font-size: 14px; text-anchor: middle; }
+        .text-desc { fill: #cbd5e1; font-size: 11px; text-anchor: middle; }
+        .arrow { stroke: #94a3b8; stroke-width: 2px; fill: none; marker-end: url(#head); }
+      </style>
+      
+      <defs>
+        <marker id="head" orient="auto" markerWidth="6" markerHeight="6" refX="5" refY="3">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+
+      <!-- Colonne 1: Direct -->
+      <g transform="translate(30, 20)">
+        <rect class="card" width="180" height="370" />
+        <text x="90" y="25" class="text-title">1. Direct</text>
+        <text x="90" y="42" class="text-desc">Sans agent intermédiaire</text>
+        <circle cx="90" cy="80" r="18" fill="#38bdf8" />
+        <path d="M75,105 Q90,95 105,105" stroke="#38bdf8" stroke-width="3" fill="none" />
+        <rect x="15" y="130" width="150" height="40" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="90" y="155" class="text-desc" fill="#fff">"Explique l'agent"</text>
+        <path d="M90,170 L90,200" class="arrow" />
+        <rect x="25" y="200" width="130" height="60" rx="6" fill="#0284c7" />
+        <text x="90" y="235" class="text-title" fill="#fff">Modèle LLM</text>
+        <path d="M90,260 L90,290" class="arrow" />
+        <rect x="15" y="290" width="150" height="70" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="90" y="315" class="text-desc">Réponse brute :</text>
+        <text x="90" y="335" class="text-desc" fill="#38bdf8">"Un agent est..."</text>
+      </g>
+
+      <!-- Colonne 2: Proxy -->
+      <g transform="translate(240, 20)">
+        <rect class="card" width="180" height="370" />
+        <text x="90" y="25" class="text-title">2. Agent Proxy</text>
+        <text x="90" y="42" class="text-desc">Reformulation / Outil</text>
+        <circle cx="90" cy="80" r="18" fill="#38bdf8" />
+        <rect x="15" y="130" width="150" height="40" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="90" y="155" class="text-desc" fill="#fff">"Crée une image..."</text>
+        <path d="M90,170 L90,200" class="arrow" />
+        <rect x="25" y="200" width="130" height="45" rx="6" fill="#0284c7" />
+        <text x="90" y="227" class="text-title" fill="#fff">LLM (Reformulateur)</text>
+        <path d="M90,245 L90,270" class="arrow" />
+        <rect x="25" y="270" width="130" height="40" rx="6" fill="#059669" />
+        <text x="90" y="295" class="text-title" fill="#fff" font-size="12px">Modèle Image</text>
+        <path d="M90,310 L90,330" class="arrow" />
+        <text x="90" y="350" class="text-desc" fill="#34d399">Résultat Visuel</text>
+      </g>
+
+      <!-- Colonne 3: Agent Interactif -->
+      <g transform="translate(450, 20)">
+        <rect class="card" width="180" height="370" />
+        <text x="90" y="25" class="text-title">3. Agent / Assistant</text>
+        <text x="90" y="42" class="text-desc">Validation humaine (HITL)</text>
+        <circle cx="90" cy="80" r="18" fill="#38bdf8" />
+        <rect x="15" y="120" width="150" height="35" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="90" y="142" class="text-desc" fill="#fff">"Météo à Calgary ?"</text>
+        <path d="M90,155 L90,180" class="arrow" />
+        <rect x="25" y="180" width="130" height="40" rx="6" fill="#0284c7" />
+        <text x="90" y="205" class="text-title" fill="#fff">LLM + API externe</text>
+        <path d="M90,220 L90,240" class="arrow" />
+        <rect x="15" y="240" width="150" height="45" rx="4" fill="#7c2d12" stroke="#ea580c"/>
+        <text x="90" y="260" class="text-desc" fill="#fed7aa">Demande d'accord ?</text>
+        <text x="90" y="275" class="text-desc" fill="#fff">[Utilisateur valide]</text>
+        <path d="M90,285 L90,310" class="arrow" />
+        <text x="90" y="335" class="text-desc" fill="#38bdf8">Exécution de l'API</text>
+      </g>
+
+      <!-- Colonne 4: Agent Autonome -->
+      <g transform="translate(660, 20)">
+        <rect class="card" width="180" height="370" stroke="#f59e0b" />
+        <text x="90" y="25" class="text-title" fill="#f59e0b">4. Autonome</text>
+        <text x="90" y="42" class="text-desc">Décisions indépendantes</text>
+        <circle cx="90" cy="80" r="18" fill="#f59e0b" />
+        <rect x="15" y="120" width="150" height="35" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="90" y="142" class="text-desc" fill="#fff">"Trie mes e-mails"</text>
+        <path d="M90,155 L90,180" class="arrow" />
+        <rect x="25" y="180" width="130" height="45" rx="6" fill="#b45309" />
+        <text x="90" y="207" class="text-title" fill="#fff">Boucle de Planification</text>
+        <path d="M90,225 L90,250" class="arrow" />
+        <circle cx="90" cy="270" r="18" fill="#d97706" />
+        <text x="90" y="274" class="text-title" fill="#fff" font-size="10px">Plan</text>
+        <path d="M90,290 L90,320" class="arrow" />
+        <text x="90" y="340" class="text-desc" fill="#fcd34d">Exécution &amp; Notif.</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- SECTION 2: ANATOMIE -->
+<section id="anatomie" class="fade-in">
+  <h2>2. Anatomie d'un Système d'Agents : Les 5 Composants Clés</h2>
+  
+  <p class="lead">
+    Selon Micheal Lanham, un agent unique ne se résume pas à un simple prompt : il s'agit d'une unité complexe combinant <strong>cinq composantes fondamentales</strong>.
+  </p>
+
+  <!-- SVG: Anatomie d'un Agent -->
+  <div class="svg-container">
+    <h3>🧬 Anatomie d'un Agent IA (Micheal Lanham)</h3>
+    <svg viewBox="0 0 800 500" width="100%" height="auto" style="background: #0f172a; border-radius: 8px;">
+      <style>
+        .core { fill: #0284c7; stroke: #38bdf8; stroke-width: 3px; }
+        .component { fill: #334155; stroke: #64748b; stroke-width: 2px; rx: 10px; transition: all 0.3s; cursor: pointer; }
+        .component:hover { fill: #475569; stroke: #38bdf8; }
+        .label { font-weight: bold; fill: #fff; font-size: 13px; text-anchor: middle; }
+        .sublabel { fill: #cbd5e1; font-size: 10px; text-anchor: middle; }
+        .connector { stroke: #38bdf8; stroke-width: 2px; fill: none; stroke-dasharray: 5 5; }
+      </style>
+
+      <!-- Core central -->
+      <circle cx="400" cy="250" r="70" class="core" />
+      <text x="400" y="245" class="label" font-size="16">AGENT</text>
+      <text x="400" y="265" class="sublabel">IA Autonome</text>
+
+      <!-- 5 Composants autour -->
+      <!-- 1. Profil -->
+      <g transform="translate(100, 80)">
+        <rect class="component" width="160" height="70" />
+        <text x="80" y="30" class="label" fill="#38bdf8">1. Profil &amp; Persona</text>
+        <text x="80" y="50" class="sublabel">Rôle, ton, règles</text>
+        <path d="M160,70 L330,180" class="connector" />
+      </g>
+
+      <!-- 2. Actions -->
+      <g transform="translate(540, 80)">
+        <rect class="component" width="160" height="70" />
+        <text x="80" y="30" class="label" fill="#34d399">2. Actions &amp; Outils</text>
+        <text x="80" y="50" class="sublabel">API, Code, Web</text>
+        <path d="M80,70 L370,180" class="connector" />
+      </g>
+
+      <!-- 3. Mémoire -->
+      <g transform="translate(50, 280)">
+        <rect class="component" width="160" height="70" />
+        <text x="80" y="30" class="label" fill="#f59e0b">3. Mémoire &amp; RAG</text>
+        <text x="80" y="50" class="sublabel">Vector DB, Contexte</text>
+        <path d="M160,100 L330,250" class="connector" />
+      </g>
+
+      <!-- 4. Raisonnement -->
+      <g transform="translate(590, 280)">
+        <rect class="component" width="160" height="70" />
+        <text x="80" y="30" class="label" fill="#a78bfa">4. Raisonnement</text>
+        <text x="80" y="50" class="sublabel">CoT, Tree of Thought</text>
+        <path d="M80,100 L370,250" class="connector" />
+      </g>
+
+      <!-- 5. Planification -->
+      <g transform="translate(320, 400)">
+        <rect class="component" width="160" height="70" />
+        <text x="80" y="30" class="label" fill="#f472b6">5. Planification</text>
+        <text x="80" y="50" class="sublabel">Feedback, Boucles</text>
+        <path d="M80,0 L80,180" class="connector" />
+      </g>
+
+      <!-- Icônes décoratives -->
+      <circle cx="180" cy="115" r="8" fill="#38bdf8" opacity="0.5">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="620" cy="115" r="8" fill="#34d399" opacity="0.5">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="130" cy="315" r="8" fill="#f59e0b" opacity="0.5">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="670" cy="315" r="8" fill="#a78bfa" opacity="0.5">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="1.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="400" cy="435" r="8" fill="#f472b6" opacity="0.5">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="1.6s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <!-- Grid des composants -->
+  <div class="components-grid">
+    <div class="component-card">
+      <svg class="icon" viewBox="0 0 50 50">
+        <circle cx="25" cy="20" r="10" fill="#38bdf8"/>
+        <path d="M10,45 Q25,35 40,45" stroke="#38bdf8" stroke-width="2" fill="none"/>
+      </svg>
+      <h4>1. Profil et Persona</h4>
+      <p>Définit le rôle, les antécédents, le ton (ex: style Julia Child pour la cuisine) et les règles immuables de l'agent.</p>
+    </div>
+
+    <div class="component-card">
+      <svg class="icon" viewBox="0 0 50 50">
+        <rect x="10" y="15" width="30" height="20" rx="3" fill="#34d399"/>
+        <path d="M15,25 L22,32 L35,18" stroke="#fff" stroke-width="2" fill="none"/>
+      </svg>
+      <h4>2. Actions et Outils</h4>
+      <p>Permet à l'agent d'agir sur son environnement : fonctions natives, appels API, recherche web, exécution sandboxée.</p>
+    </div>
+
+    <div class="component-card">
+      <svg class="icon" viewBox="0 0 50 50">
+        <ellipse cx="25" cy="25" rx="18" ry="12" fill="none" stroke="#f59e0b" stroke-width="2"/>
+        <ellipse cx="25" cy="25" rx="18" ry="12" fill="none" stroke="#f59e0b" stroke-width="2" transform="rotate(60 25 25)"/>
+        <ellipse cx="25" cy="25" rx="18" ry="12" fill="none" stroke="#f59e0b" stroke-width="2" transform="rotate(120 25 25)"/>
+      </svg>
+      <h4>3. Mémoire et Connaissance</h4>
+      <p>Bases vectorielles, documents structurés (PDF), listes. Réduit les tokens tout en augmentant la pertinence (RAG).</p>
+    </div>
+
+    <div class="component-card">
+      <svg class="icon" viewBox="0 0 50 50">
+        <path d="M10,40 L20,20 L30,30 L40,10" stroke="#a78bfa" stroke-width="2" fill="none"/>
+        <circle cx="40" cy="10" r="3" fill="#a78bfa"/>
+      </svg>
+      <h4>4. Raisonnement et Évaluation</h4>
+      <p>Auto-réflexion, Chain of Thought (CoT), Tree of Thought, vérification de cohérence.</p>
+    </div>
+
+    <div class="component-card">
+      <svg class="icon" viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="15" fill="none" stroke="#f472b6" stroke-width="2"/>
+        <path d="M25,10 L25,25 L35,30" stroke="#f472b6" stroke-width="2" fill="none"/>
+      </svg>
+      <h4>5. Planification et Rétroaction</h4>
+      <p>Séquencement des tâches, boucles de correction, adaptation face aux retours de l'environnement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: HERITAGE -->
+<section id="heritage" class="fade-in">
+  <h2>3. Le Problème de l'Intégration d'Entreprise & Les Limites de l'Héritage</h2>
+  
+  <h3>Pourquoi tout le monde veut construire des agents ?</h3>
+  <p class="lead">
+    Partout dans le monde corporate (agences immobilières, courtiers en assurance, groupes du Fortune 500), la demande d'agents personnalisés explose. La raison fondamentale est <strong>l'intégration des données métiers</strong>. Les entreprises réalisent que pour obtenir des gains de productivité spectaculaires, l'IA doit être connectée à leurs outils internes.
+  </p>
+
+  <h3>L'impasse de l'Héritage (Inheritance)</h3>
+  <p>Dans l'écosystème actuel, on tente de résoudre l'intégration en empilant les couches de contexte (approche par héritage similaire à la POO) :</p>
+
+  <!-- SVG: Problème de l'héritage -->
+  <div class="svg-container">
+    <h3>⚠️ L'Impasse de l'Approche par Héritage</h3>
+    <svg viewBox="0 0 800 350" width="100%" height="auto" style="background: #0f172a; border-radius: 8px;">
+      <style>
+        .layer { rx: 8px; transition: all 0.3s; cursor: pointer; }
+        .layer:hover { filter: brightness(1.3); }
+        .layer-text { font-weight: bold; fill: #fff; font-size: 13px; text-anchor: middle; }
+        .layer-desc { fill: #cbd5e1; font-size: 10px; text-anchor: middle; }
+        .warning { fill: #ef4444; font-weight: bold; font-size: 14px; text-anchor: middle; }
+      </style>
+
+      <!-- Couche 1: LLM de base -->
+      <rect x="200" y="20" width="400" height="50" class="layer" fill="#0284c7" />
+      <text x="400" y="45" class="layer-text">LLM de Base (GPT-4, Claude...)</text>
+      <text x="400" y="60" class="layer-desc">Modèle fondamental</text>
+
+      <!-- Flèche -->
+      <path d="M400,70 L400,90" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+      <defs>
+        <marker id="arrow" orient="auto" markerWidth="6" markerHeight="6" refX="5" refY="3">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/>
+        </marker>
+      </defs>
+
+      <!-- Couche 2: MCP -->
+      <rect x="180" y="90" width="440" height="50" class="layer" fill="#059669" />
+      <text x="400" y="115" class="layer-text">MCP (Model Context Protocol)</text>
+      <text x="400" y="130" class="layer-desc">Distributeur d'outils — seule brique réellement robuste</text>
+
+      <path d="M400,140 L400,160" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Couche 3: Skills -->
+      <rect x="160" y="160" width="480" height="50" class="layer" fill="#7c2d12" />
+      <text x="400" y="185" class="layer-text">Skills (Compétences Markdown)</text>
+      <text x="400" y="200" class="layer-desc">Documentation — accumulation dégrade les performances</text>
+
+      <path d="M400,210 L400,230" stroke="#ef4444" stroke-width="3" marker-end="url(#arrowRed)"/>
+      <defs>
+        <marker id="arrowRed" orient="auto" markerWidth="6" markerHeight="6" refX="5" refY="3">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/>
+        </marker>
+      </defs>
+
+      <!-- Conséquences -->
+      <rect x="100" y="230" width="600" height="100" rx="10" fill="#450a0a" stroke="#ef4444" stroke-width="2"/>
+      <text x="400" y="260" class="warning">⚠ CONSÉQUENCES POUR LES DSI ⚠</text>
+      <text x="400" y="285" class="layer-desc">Agents monolithiques = Cauchemar de maintenance</text>
+      <text x="400" y="305" class="layer-desc" fill="#fca5a5">Télémétrie • Portabilité • Composabilité • Sécurité</text>
+    </svg>
+  </div>
+
+  <div class="comparison">
+    <div class="comparison-card bad">
+      <h4 style="color: var(--accent-red);">❌ Approche par Héritage</h4>
+      <ul>
+        <li>Empilement de contextes dans un prompt géant</li>
+        <li>Dégradation des performances du modèle</li>
+        <li>Agents monolithiques impossibles à maintenir</li>
+        <li>Problèmes de télémétrie et portabilité</li>
+        <li>Risques de sécurité accrus</li>
+        <li>Absence de composabilité</li>
+      </ul>
+    </div>
+    <div class="comparison-card good">
+      <h4 style="color: var(--accent-green);">✅ Approche par Composition</h4>
+      <ul>
+        <li>Agents spécifiques par domaine</li>
+        <li>Isolation des contextes</li>
+        <li>Communication en langage naturel</li>
+        <li>Parallélisation massive</li>
+        <li>Permissions strictement bornées</li>
+        <li>Utilisation de petits modèles (SLM)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: COMPOSITION -->
+<section id="composition" class="fade-in">
+  <h2>4. La Solution d'Avenir : La Composition et les "Domain-Specific Agents"</h2>
+  
+  <p class="lead">
+    Plutôt que d'empiler des compétences dans un contexte géant, Justin Shrader propose de passer à la <strong>composition</strong> par le biais d'<strong>agents spécifiques à un domaine (Domain-Specific Agents)</strong>, inspirés du modèle organisationnel d'une équipe humaine d'experts (comme la mission spatiale Apollo 11).
+  </p>
+
+  <!-- SVG: Architecture Multi-Agents -->
+  <div class="svg-container">
+    <h3>🏗️ Architecture Multi-Agents par Composition (Justin Shrader)</h3>
+    <svg viewBox="0 0 800 450" width="100%" height="auto" style="background: #0f172a; border-radius: 8px; padding: 15px;">
+      <style>
+        .box-coord { fill: #0284c7; stroke: #38bdf8; stroke-width: 2px; rx: 10px; }
+        .box-agent { fill: #334155; stroke: #64748b; stroke-width: 2px; rx: 8px; transition: all 0.3s; cursor: pointer; }
+        .box-agent:hover { stroke: #38bdf8; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4)); }
+        .box-sub { fill: #059669; stroke: #34d399; stroke-width: 2px; rx: 6px; }
+        .txt-main { font-weight: bold; fill: #fff; font-size: 14px; text-anchor: middle; }
+        .txt-sub { fill: #cbd5e1; font-size: 11px; text-anchor: middle; }
+        .line-comm { stroke: #38bdf8; stroke-width: 2px; stroke-dasharray: 4; fill: none; }
+      </style>
+
+      <!-- Agent Coordinateur Principal -->
+      <rect x="250" y="20" width="300" height="60" class="box-coord" />
+      <text x="400" y="45" class="txt-main">Agent Coordinateur Principal</text>
+      <text x="400" y="62" class="txt-sub">Orchestration &amp; Langage Naturel</text>
+
+      <!-- Lignes de communication -->
+      <path d="M400,80 L400,130" stroke="#38bdf8" stroke-width="3" />
+      <path d="M200,130 L600,130" class="line-comm" />
+      
+      <path d="M200,130 L200,170" stroke="#94a3b8" stroke-width="2" />
+      <path d="M400,130 L400,170" stroke="#94a3b8" stroke-width="2" />
+      <path d="M600,130 L600,170" stroke="#94a3b8" stroke-width="2" />
+
+      <!-- Agents de Domaine (Niveau 2) -->
+      <rect x="110" y="170" width="180" height="65" class="box-agent" />
+      <text x="200" y="195" class="txt-main" font-size="13px">Agent Salesforce</text>
+      <text x="200" y="215" class="txt-sub">CRM &amp; Données Ventes</text>
+
+      <rect x="310" y="170" width="180" height="65" class="box-agent" />
+      <text x="400" y="195" class="txt-main" font-size="13px">Agent Google Workspace</text>
+      <text x="400" y="215" class="txt-sub">Sheets, Docs &amp; Mail</text>
+
+      <rect x="510" y="170" width="180" height="65" class="box-agent" />
+      <text x="600" y="195" class="txt-main" font-size="13px">Agent Juridique</text>
+      <text x="600" y="215" class="txt-sub">Conformité GDPR / OSHA</text>
+
+      <!-- Connexion Sous-Agent -->
+      <path d="M200,235 L200,280" stroke="#34d399" stroke-width="2" />
+      
+      <!-- Sous-Agent Spécialisé (Niveau 3) -->
+      <rect x="110" y="280" width="180" height="65" class="box-sub" />
+      <text x="200" y="305" class="txt-main" font-size="12px">Sous-Agent Assets</text>
+      <text x="200" y="325" class="txt-sub">Génération Images / SVG</text>
+
+      <!-- Légende Explicative -->
+      <rect x="50" y="375" width="700" height="55" fill="#1e293b" stroke="#475569" rx="6" />
+      <text x="400" y="397" class="txt-main" fill="#38bdf8" font-size="12px">Principe Clé : Isolation des Contextes</text>
+      <text x="400" y="415" class="txt-sub">Chaque sous-agent possède sa propre boucle, sa mémoire réduite et ses outils stricts, communiquant en anglais.</text>
+    </svg>
+  </div>
+
+  <h3>Avantages Majeurs des Agents Domain-Specific</h3>
+
+  <div class="advantages-list">
+    <div class="advantage-item">
+      <div class="number">01</div>
+      <h4>Efficacité en tokens (&gt;80%)</h4>
+      <p>Le coordinateur délègue en langage naturel. Le sous-agent ne reçoit que son prompt système, ses outils et le message ciblé, éliminant tout le bruit contextuel.</p>
+    </div>
+
+    <div class="advantage-item">
+      <div class="number">02</div>
+      <h4>Petits Modèles (SLM) rentables</h4>
+      <p>Modèles open-source légers, parfois plus de 100 fois moins chers que les modèles phares, pour des tâches ciblées sans sacrifier l'efficacité.</p>
+    </div>
+
+    <div class="advantage-item">
+      <div class="number">03</div>
+      <h4>Contrôle strict des permissions</h4>
+      <p>Contrairement à un grand agent universel qui peut "voler trop près du soleil", les agents de domaine ont des capacités strictement bornées.</p>
+    </div>
+
+    <div class="advantage-item">
+      <div class="number">04</div>
+      <h4>Mise à l'échelle (Scaling)</h4>
+      <p>Chaque agent s'exécute dans un environnement isolé, facilitant la parallélisation cloud massive.</p>
+    </div>
+  </div>
+
+  <!-- SVG: Comparaison Héritage vs Composition -->
+  <div class="svg-container">
+    <h3>⚖️ Héritage vs Composition : Le Paradigme Shift</h3>
+    <svg viewBox="0 0 800 300" width="100%" height="auto" style="background: #0f172a; border-radius: 8px;">
+      <style>
+        .side-title { font-weight: bold; font-size: 16px; text-anchor: middle; }
+        .item { fill: #334155; stroke: #475569; stroke-width: 1px; rx: 6px; }
+        .item-text { fill: #cbd5e1; font-size: 11px; text-anchor: middle; }
+        .vs-circle { fill: #f59e0b; }
+      </style>
+
+      <!-- Côté Héritage -->
+      <text x="200" y="30" class="side-title" fill="#ef4444">HÉRITAGE (Monolithique)</text>
+      <rect x="50" y="50" width="300" height="40" class="item" />
+      <text x="200" y="75" class="item-text">LLM + MCP + Skills + Tools + RAG + ...</text>
+      
+      <rect x="50" y="100" width="300" height="40" class="item" />
+      <text x="200" y="125" class="item-text">Contexte surchargé → Dégradation</text>
+      
+      <rect x="50" y="150" width="300" height="40" class="item" />
+      <text x="200" y="175" class="item-text">Un seul agent pour tout faire</text>
+
+      <rect x="50" y="200" width="300" height="40" class="item" fill="#450a0a" stroke="#ef4444"/>
+      <text x="200" y="225" class="item-text" fill="#fca5a5">❌ Fragile, coûteux, non-scalable</text>
+
+      <!-- VS -->
+      <circle cx="400" cy="150" r="30" class="vs-circle" />
+      <text x="400" y="157" font-weight="bold" fill="#0f172a" font-size="18" text-anchor="middle">VS</text>
+
+      <!-- Côté Composition -->
+      <text x="600" y="30" class="side-title" fill="#34d399">COMPOSITION (Multi-Agents)</text>
+      <rect x="450" y="50" width="300" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="600" y="75" class="item-text" fill="#6ee7b7">Coordinateur (Orchestration)</text>
+      
+      <rect x="450" y="100" width="140" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="520" y="125" class="item-text" fill="#6ee7b7">Agent A</text>
+      <rect x="610" y="100" width="140" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="680" y="125" class="item-text" fill="#6ee7b7">Agent B</text>
+      
+      <rect x="450" y="150" width="140" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="520" y="175" class="item-text" fill="#6ee7b7">Agent C</text>
+      <rect x="610" y="150" width="140" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="680" y="175" class="item-text" fill="#6ee7b7">Agent D</text>
+
+      <rect x="450" y="200" width="300" height="40" class="item" fill="#064e3b" stroke="#34d399"/>
+      <text x="600" y="225" class="item-text" fill="#6ee7b7">✓ Isolés, scalables, spécialisés</text>
+    </svg>
+  </div>
+</section>
+
+<!-- SECTION 5: FRAMEWORKS -->
+<section id="frameworks" class="fade-in">
+  <h2>5. Synthèse des Systèmes Multi-Agents (AutoGen vs CrewAI)</h2>
+  
+  <p class="lead">
+    Le livre de Micheal Lanham détaille deux frameworks incontournables pour implémenter ces architectures.
+  </p>
+
+  <!-- SVG: Comparaison Frameworks -->
+  <div class="svg-container">
+    <h3>🔧 AutoGen vs CrewAI : Deux Philosophies</h3>
+    <svg viewBox="0 0 800 400" width="100%" height="auto" style="background: #0f172a; border-radius: 8px;">
+      <style>
+        .frame-box { rx: 12px; transition: all 0.3s; cursor: pointer; }
+        .frame-box:hover { filter: brightness(1.2); }
+        .frame-title { font-weight: bold; font-size: 18px; text-anchor: middle; }
+        .frame-desc { font-size: 12px; text-anchor: middle; }
+        .feature { fill: #1e293b; stroke: #475569; stroke-width: 1px; rx: 6px; }
+        .feature-text { fill: #cbd5e1; font-size: 11px; }
+      </style>
+
+      <!-- AutoGen -->
+      <rect x="30" y="30" width="350" height="340" class="frame-box" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2"/>
+      <text x="205" y="65" class="frame-title" fill="#38bdf8">Microsoft AutoGen</text>
+      <text x="205" y="85" class="frame-desc" fill="#7dd3fc">Agents conversationnels flexibles</text>
+
+      <rect x="50" y="110" width="310" height="40" class="feature" />
+      <text x="60" y="135" class="feature-text">💬 Conversable Agents (group chats)</text>
+
+      <rect x="50" y="160" width="310" height="40" class="feature" />
+      <text x="60" y="185" class="feature-text">🔧 Skills en Python personnalisables</text>
+
+      <rect x="50" y="210" width="310" height="40" class="feature" />
+      <text x="60" y="235" class="feature-text"> Flux de discussion hiérarchiques</text>
+
+      <rect x="50" y="260" width="310" height="40" class="feature" />
+      <text x="60" y="285" class="feature-text">🎯 Idéal pour la flexibilité des workflows</text>
+
+      <rect x="50" y="310" width="310" height="40" class="feature" fill="#075985"/>
+      <text x="60" y="335" class="feature-text" fill="#fff">✓ AutoGen Studio (interface visuelle)</text>
+
+      <!-- CrewAI -->
+      <rect x="420" y="30" width="350" height="340" class="frame-box" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+      <text x="595" y="65" class="frame-title" fill="#34d399">CrewAI</text>
+      <text x="595" y="85" class="frame-desc" fill="#6ee7b7">Orienté entreprise &amp; rôles</text>
+
+      <rect x="440" y="110" width="310" height="40" class="feature" />
+      <text x="450" y="135" class="feature-text">👥 Rôles définis (Researcher, Writer...)</text>
+
+      <rect x="440" y="160" width="310" height="40" class="feature" />
+      <text x="450" y="185" class="feature-text">📋 Tâches séquentielles ou hiérarchiques</text>
+
+      <rect x="440" y="210" width="310" height="40" class="feature" />
+      <text x="450" y="235" class="feature-text">📊 Intégration AgentOps (observabilité)</text>
+
+      <rect x="440" y="260" width="310" height="40" class="feature" />
+      <text x="450" y="285" class="feature-text">💰 Analyse coûts tokens &amp; Repeat Thoughts</text>
+
+      <rect x="440" y="310" width="310" height="40" class="feature" fill="#065f46"/>
+      <text x="450" y="335" class="feature-text" fill="#fff">✓ Structuration enterprise-ready</text>
+    </svg>
+  </div>
+
+  <div class="comparison">
+    <div class="comparison-card">
+      <h4 style="color: var(--accent-cyan);">🤖 Microsoft AutoGen</h4>
+      <ul>
+        <li>Basé sur des <em>conversable agents</em></li>
+        <li>Flexibilité des flux de discussion</li>
+        <li>Group chats et hiérarchies</li>
+        <li>Intégration de "skills" en Python</li>
+        <li>AutoGen Studio pour prototypage visuel</li>
+        <li>Idéal pour la recherche et l'expérimentation</li>
+      </ul>
+    </div>
+    <div class="comparison-card">
+      <h4 style="color: var(--accent-green);">👥 CrewAI</h4>
+      <ul>
+        <li>Axé sur l'entreprise</li>
+        <li>Structuré autour de rôles définis</li>
+        <li>Tâches séquentielles ou hiérarchiques</li>
+        <li>Intégration native avec AgentOps</li>
+        <li>Analyse des coûts en tokens</li>
+        <li>Détection des "Repeat Thoughts"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Question finale -->
+  <div class="question-box">
+    <h3>❓ Question pour aller plus loin</h3>
+    <p>Dans le cadre de vos projets actuels en intelligence artificielle, quel domaine métier spécifique (ex: support client, génération de code, analyse financière) gagnerait le plus à être délégué à un <strong>Domain-Specific Agent</strong> plutôt qu'à un LLM monolithique ?</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>L'Ère des Agents Spécifiques et des Systèmes Multi-Agents</strong></p>
+  <p>Cours magistral basé sur les travaux de Justin Shrader & Micheal Lanham</p>
+  <div class="references">
+    <p>📚 Références : <em>Standard Agents</em> (Justin Shrader) | <em>AI Agents in Action</em> (Micheal Lanham, Manning 2025)</p>
+    <p style="margin-top: 15px; font-size: 0.85em;">© 2026 — Document pédagogique interactif</p>
+  </div>
+</footer>
+
+<script>
+  // Navigation fluide
+  document.querySelectorAll('nav a').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Animation au scroll (fade-in)
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Interactivité sur les cartes SVG
+  document.querySelectorAll('.card, .component, .box-agent, .frame-box').forEach(el => {
+    el.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Animation des nombres dans les avantages
+  const animateNumbers = () => {
+    document.querySelectorAll('.number').forEach(num => {
+      num.style.transition = 'transform 0.3s';
+    });
+  };
+
+  // Effet parallaxe léger sur le hero
+  window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const hero = document.querySelector('.hero-content');
+    if (hero && scrolled < window.innerHeight) {
+      hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+      hero.style.opacity = 1 - (scrolled / window.innerHeight);
+    }
+  });
+
+  console.log('🚀 Course loaded successfully!');
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — La Connaissance Persistante</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="current">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Architecture mémoire • systèmes IA</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Modules"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Principe"><span class="pill">Introduction</span><h1>La Connaissance Persistante</h1><p class="muted">Comment organiser des données à jour, unifiées et multi-sources pour qu’un agent puisse s’en souvenir et les interroger intelligemment.</p><p>Un agent sans mémoire recommence chaque conversation à zéro. Une mémoire fiable n’est pas une seule base universelle : elle combine cinq familles spécialisées derrière une couche d’orchestration.</p><div class="diagram" role="img" aria-label="Mémoire persistante polyglotte"><svg viewBox="0 0 900 190"><g fill="#164147" stroke="#68e5d7" stroke-width="2"><circle cx="450" cy="95" r="62"/><rect x="30" y="28" width="150" height="45" rx="10"/><rect x="30" y="120" width="150" height="45" rx="10"/><rect x="720" y="28" width="150" height="45" rx="10"/><rect x="720" y="120" width="150" height="45" rx="10"/><rect x="360" y="10" width="180" height="40" rx="10"/></g><g fill="#efffff" text-anchor="middle" font-size="14"><text x="450" y="100">Routeur agent</text><text x="105" y="56">Graph</text><text x="105" y="148">Documents</text><text x="795" y="56">Relationnel</text><text x="795" y="148">Objets</text><text x="450" y="36">Séries temporelles</text></g><g class="flow" stroke="#f8d477" stroke-width="3"><path d="M180 52l210 35M180 142l210-35M540 87l180-35M540 103l180 35M450 50v-5" fill="none"/></g></svg></div><div class="quiz"><h3>Quiz express</h3><p>Pourquoi une architecture de connaissance persistante est-elle polyglotte ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Chaque store est adapté à une nature de donnée et à un type de requête</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour multiplier les bases sans raison</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Graph"><span class="pill">Store 1</span><h2>Base Graph — quand la valeur est dans les relations</h2><p>Un graphe représente des entités comme des nœuds et des relations typées comme des arêtes : Personne → utilise → Projet.</p><div class="grid"><div><h3>Adapté à</h3><p>Parcours multi-sauts, dépendances, fraude, recommandations et mémoire relationnelle.</p></div><div><h3>Limite</h3><p>Moins adapté aux agrégations massives sur des millions de lignes.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle question appelle naturellement un graphe ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Quels projets relient A et B ?</button><button class="choice" data-correct="false" onclick="answer(this,false)">Quel est le chiffre d’affaires total du mois ?</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Documents"><span class="pill">Store 2</span><h2>Banque de documents — chercher du contenu</h2><p>Les PDFs, notes, pages wiki, contrats et tickets sont stockés comme unités semi-structurées, indexées en plein texte ou par embeddings pour un RAG.</p><div class="grid"><div><h3>Question type</h3><p>« Que dit la politique sur les congés ? »</p></div><div><h3>Force</h3><p>Recherche sémantique et plein texte sur un corpus souple.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel store convient à un corpus de contrats PDF ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Une banque de documents avec index textuel ou sémantique</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement une base de séries temporelles</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Relationnel"><span class="pill">Store 3</span><h2>Base relationnelle — garantir la cohérence</h2><p>Les tables, clés et transactions ACID forment la colonne vertébrale des données métier : clients, commandes, produits, facturation et inventaire.</p><pre id="relational">Client(id, nom)
+Commande(id, client_id, date)
+LigneCommande(commande_id, produit_id, quantite)
+JOIN Client → Commande → LigneCommande</pre><button class="btn primary copy" onclick="copyText('relational')">Copier le schéma</button><div class="quiz"><h3>Quiz</h3><p>Quel est l’atout principal du relationnel ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Cohérence transactionnelle et agrégations sur données structurées</button><button class="choice" data-correct="false" onclick="answer(this,false)">Stockage direct de vidéos sans métadonnées</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Temps & objets"><span class="pill">Stores 4-5</span><h2>Séries temporelles et stockage d’objets</h2><div class="grid"><div><h3>Séries temporelles</h3><p>Logs, métriques, capteurs et événements horodatés ; tendances, pics et anomalies.</p><p><strong>Exemple :</strong> « Quel pic d’erreurs 404 cette semaine ? »</p></div><div><h3>Objets</h3><p>Images, audio, vidéo et exports binaires récupérés par identifiant ou métadonnée.</p><p><strong>Exemple :</strong> « Récupère la capture du contrat signé. »</p></div></div><p>Les deux se complètent : les métadonnées et dates peuvent vivre dans une base relationnelle ou temporelle, tandis que le fichier reste dans le stockage d’objets.</p><div class="quiz"><h3>Quiz</h3><p>Où conserver une capture d’écran jointe à un ticket ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Dans un stockage d’objets, référencé par un identifiant</button><button class="choice" data-correct="false" onclick="answer(this,false)">Dans une colonne de graphe uniquement</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Router"><span class="pill">Orchestration</span><h2>Le routeur agentique choisit le bon store</h2><p>Le LLM Planner décompose la demande en sous-questions, route chaque partie vers la source appropriée puis fusionne les résultats.</p><pre id="router">Question : bug similaire, quand, capture jointe ?
+→ Documents / Graph : retrouver les tickets et incidents proches
+→ Relationnel / Temps : obtenir le client et l'horodatage
+→ Objets : récupérer la capture par son identifiant
+→ Agent : fusionner avec provenance</pre><button class="btn primary copy" onclick="copyText('router')">Copier le routage</button><div class="quiz"><h3>Quiz</h3><p>Qui décide vers quelle source router chaque sous-question ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Le planificateur agentique, puis il unifie les résultats</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le stockage d’objets seul</button><div class="feedback"></div></section>
+<section class="card module" data-title="Cas pratique"><span class="pill">Atelier Dupont</span><h2>Résoudre une demande support multi-sources</h2><p>« Le client Dupont a-t-il déjà signalé un bug similaire, quand, et peux-tu me montrer la capture d’écran qu’il avait jointe ? »</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Bug similaire → recherche sémantique dans les tickets et documents.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Liens entre incidents → graphe de connaissances si nécessaire.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Date du signalement → champ relationnel ou série temporelle.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Capture jointe → stockage d’objets avec identifiant.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Réponse finale → fusion des résultats avec provenance.</label><button class="btn primary" onclick="finish()">Valider le routage</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

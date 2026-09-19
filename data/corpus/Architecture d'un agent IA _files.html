@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<!-- saved from url=(0092)https://042950c9-e775-44bd-aff6-abdf19439925.frame.claudeusercontent.com/_f/1789597927-488a/ -->
+<html lang="fr" data-theme="dark" style="color-scheme: dark;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!-- frame-runtime --><script>window.__FRAME_PREAMBLE={"v":1,"cred":"cookie","capabilities":{"artifact":"artifact.O-h4mzdy.js","assets":"assets.DhQw8DTi.js","comments":"comments.DcGvuXoo.js","db":"db.DV02l9iB.js","downloads":"downloads.axDW2QAi.js","embed":"embed.swQslL0W.js","endpoints":"endpoints.BPfoKaE1.js","mcp":"mcp.C8qKIFvQ.js","network":"network.B5UA9Su4.js","permissions":"permissions.DWFFeHI0.js","room":"room.BF1j0KPr.js","sample":"sample.C7KQQdQj.js","self":"artifact.O-h4mzdy.js","user":"user.CCh6oTS_.js"},"transforms":"_transforms.BIL0COdN.js","comments":"_comments.CoT-GWno.js","translate":"_translate.DqxC5ek1.js","ldx":"_ldx.CqNtBrkk.js"}                                                                                                                                                                                                                                                                                                                                                                              </script><script>(function(){"use strict";var Rn=3e5;function tr(t,e){try{const n=t("navigation")[0],o=[n.responseStart,n.redirectEnd-n.redirectStart,n.domContentLoadedEventStart,e()];for(let a=0;a<o.length;a++){if(!(o[a]>=0&&o[a]<=3e5))return;o[a]=o[a]|0}return o}catch{return}}var rr=["light","dark","system"],nr=/^[A-Za-z0-9_-]{1,64}$/,wt=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,or=new Set(["class","hidden","value","checked","style","title","alt","placeholder","lang","dir","role","tabindex","disabled","readonly","contenteditable","open","colspan","rowspan"]);function ar(t){const e=t.toLowerCase();return e.startsWith("data-")||e.startsWith("aria-")||or.has(e)}var bt="data-ldx-props";function sr(t,e){if(e.toLowerCase()===bt)return!0;const n=t.getAttribute(bt);if(n===null)return!1;try{const o=JSON.parse(n);if(o===null||typeof o!="object"||Array.isArray(o))return!0;const a=e.toLowerCase();return Object.keys(o).some(s=>s.toLowerCase()===a)}catch{return!0}}var Tn="http://www.w3.org/1999/xhtml",lr="http://www.w3.org/2000/svg",ir=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),cr=new Set(["script","style"]);function ur(t){const e=t.localName.toLowerCase();return t.namespaceURI==="http://www.w3.org/1999/xhtml"?!ir.has(e):t.namespaceURI===lr?!cr.has(e):!1}function Ve(t,e){return t===e||(t===160||t===32)&&(e===160||e===32)}function fr(t,e){const n=t.length,o=e.length;let a=0;for(;a<n&&a<o&&Ve(t.charCodeAt(a),e.charCodeAt(a));)a++;let s=0;for(;s<n-a&&s<o-a&&Ve(t.charCodeAt(n-1-s),e.charCodeAt(o-1-s));)s++;return{p:a,s}}function dr(t,e){const n=t.firstChild;if(t.childNodes.length!==1||n===null||n.nodeType!==Node.TEXT_NODE){t.textContent=e;return}const o=n.data,a=o.length,s=e.length,{p:c,s:d}=fr(o,e);c===a&&d===0&&a===s||n.replaceData(c,a-c-d,e.slice(c,s-d));const O=n.data,S=t.ownerDocument.getSelection?.()??null,M=S!==null&&S.rangeCount>0&&(S.anchorNode===n||S.focusNode===n)?{anchor:S.anchorNode,anchorOffset:S.anchorOffset,focus:S.focusNode,focusOffset:S.focusOffset}:null;let v=-1,T=-1;for(let h=0;h<O.length&&h<e.length;h++){const I=O.charCodeAt(h),$=e.charCodeAt(h);I!==$&&Ve(I,$)&&(v<0&&(v=h),T=h)}const m=v>=0;if(m&&n.replaceData(v,T-v+1,e.slice(v,T+1)),m&&M!==null&&M.anchor!==null&&M.focus!==null)try{S.setBaseAndExtent(M.anchor,M.anchorOffset,M.focus,M.focusOffset)}catch{}}var hr=new Set(["html","head","body","frameset"]);function pr(t){return t.namespaceURI==="http://www.w3.org/1999/xhtml"&&hr.has(t.localName)}function mr(t){if(t===null||typeof t!="object")return!1;const e=t;if(typeof e.target!="string"||!nr.test(e.target)||e.text!==void 0&&typeof e.text!="string")return!1;if(e.attrsSet!==void 0){if(e.attrsSet===null||typeof e.attrsSet!="object")return!1;for(const[n,o]of Object.entries(e.attrsSet))if(!wt.test(n)||typeof o!="string")return!1}if(e.attrsRemoved!==void 0){if(!Array.isArray(e.attrsRemoved))return!1;for(const n of e.attrsRemoved)if(typeof n!="string"||!wt.test(n))return!1}return!0}function vr(t,e){if(t===null||typeof t!="object")return!1;const{seq:n,elements:o}=t;if(typeof n!="number"||!Number.isSafeInteger(n)||!Array.isArray(o)||o.length===0||o.length>64)return!1;for(let a=0;a<o.length;a++)if(!e(o[a]))return!1;return!0}function _r(t){return t===null||typeof t!="object"?!1:vr(t.__frame_patch,mr)}function yr(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_init;return e!==null&&typeof e=="object"}function gr(t){return t!==null&&typeof t=="object"&&t.__frame_size_poke===!0}function wr(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_host_visible;return e!==null&&typeof e=="object"&&typeof e.visible=="boolean"}function br(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_theme;if(e===null||typeof e!="object")return!1;const n=e.theme;return typeof n=="string"&&rr.includes(n)}var Er=["ok","empty","snapshot_error","snapshot_timeout","unclonable","oversize","unavailable","restore_error","withheld"],Sr=["TypeError","RangeError","ReferenceError","SyntaxError","DataCloneError","QuotaExceededError","AbortError","TimeoutError","SecurityError","Error","other"];function kr(t){return typeof t=="string"&&Sr.includes(t)?t:"other"}var Ar=Object.freeze({until:null,now:!1}),Rr="__claude_hot",Tr="__claude_hot_in",Or=/^__claude_hot(?:_in)?(?::|$)/,Et=/^[0-9a-z]{1,32}$/,We=t=>t===void 0?Rr:"__claude_hot:"+t,ye=t=>t===void 0?Tr:"__claude_hot_in:"+t;function Lr(t,e){const n=[];for(let o=0;o<t.length;o++){const a=t.key(o);a!==null&&a!==e&&Or.test(a)&&n.push(a)}for(const o of n)t.removeItem(o)}function Pr(t){let e=null;try{e=B(JSON.parse(t)?.hot)}catch{return null}return e===null||typeof e.k!="string"||!Et.test(e.k)?null:ae(e.g)?{k:e.k,g:e.g}:{k:e.k}}var On=262144,Mr=3e3,Nr=5e3,St=/^[a-z0-9._:-]{1,64}$/,Cr=["none","hot-restart","hard-reload"],jr=["asset","doc","added","removed"],Ir=1500,Fr=/^[0-9a-f]{64}$/;function B(t){return t!==null&&typeof t=="object"?t:null}function ae(t){return typeof t=="number"&&Number.isInteger(t)&&t>=0&&t<2**31}function kt(t){return t===void 0||typeof t=="number"&&Number.isFinite(t)}function xr(t){return t===void 0||typeof t=="string"&&St.test(t)}function At(t){const e=B(t);return e!==null&&(e.until===null||typeof e.until=="number"&&Number.isFinite(e.until))&&typeof e.now=="boolean"}function Xe(t){const e=B(t);return e!==null&&typeof e.ver=="string"&&e.ver.length<=128&&kt(e.seq)&&typeof e.handoff=="string"&&Er.includes(e.handoff)&&xr(e.note)}function Dr(t){const e=B(t);return e!==null&&ae(e.gen)&&(e.phase==="final"||e.phase==="pending")&&(e.from===null||Xe(e.from))}function Hr(t){const e=B(t);return e!==null&&e.kv===1&&ae(e.gen)&&Xe(e.from)&&Object.hasOwn(e,"data")}function qr(t){const e=B(t);return e!==null&&e.__frame_hot_snapshot===!0&&ae(e.gen)&&typeof e.timeoutMs=="number"&&e.timeoutMs>=0&&e.timeoutMs<=6e4&&(e.handoff===void 0||typeof e.handoff=="boolean")&&(e.deadline===void 0||At(e.deadline))&&kt(e.seq)&&(e.note===void 0||typeof e.note=="string")&&(e.key===void 0||typeof e.key=="string")}function Br(t){const e=B(t);return e!==null&&e.__frame_hot_start===!0&&ae(e.gen)&&Xe(e.from)}function Ur(t){return typeof t=="string"&&t.length>=1&&t.length<=128}function Rt(t){return B(t)!==null&&!Array.isArray(t)}function Gr(t){const e=B(t);return e!==null&&e.__frame_cap_grant===!0&&typeof e.cap=="string"&&Ur(e.ver)&&(e.grant===void 0||Rt(e.grant))&&(e.budgets===void 0||Rt(e.budgets)&&Object.values(e.budgets).every(Number.isFinite))&&(e.brokerGen===void 0||ae(e.brokerGen))}function zr(t){const e=B(t);return e!==null&&e.__frame_cap_rewired===!0&&(e.caps===void 0||Array.isArray(e.caps)&&e.caps.every(n=>typeof n=="string"))&&(e.brokerGen===void 0||ae(e.brokerGen))}function Tt(t){const e=B(t);return e!==null&&typeof e.ver=="string"&&e.ver.length<=128&&Number.isFinite(e.seq)}function Ot(t){if(t==null||typeof t=="string")return!0;const e=B(t);return e!==null&&typeof e.doc=="string"&&typeof e.profile=="string"}function Kr(t){const e=B(t);return e!==null&&typeof e.path=="string"&&jr.includes(e.kind)&&Ot(e.from)&&Ot(e.to)}function $r(t){return t===null?null:Object.freeze(t.filter(Kr))}function Vr(t){const e=B(t);return e!==null&&e.__frame_hot_update===!0&&Number.isFinite(e.id)&&Tt(e.from)&&Tt(e.to)&&(e.changed===null||Array.isArray(e.changed))&&Cr.includes(e.required)&&At(e.deadline)&&typeof e.verdictTimeoutMs=="number"&&e.verdictTimeoutMs>=0&&e.verdictTimeoutMs<=6e4&&(e.preflight===void 0||typeof e.preflight=="string"&&Fr.test(e.preflight))}var se=/^[\w.-]+\.js$/;function Wr(t,e,n){return n?"inert":typeof e=="string"&&se.test(e)?t?[e]:"inert":t?"inert":"framed"}var Lt=Object.freeze({[Symbol("claude.hot.restart")]:!0});function Pt(t,e){let n;try{n=t??sessionStorage}catch{return null}const o=We(e?.k),a=ye(e?.k);let s=null;try{s=n.getItem(o)}catch{}try{n.removeItem(o)}catch{}try{Lr(n,a)}catch{}let c=null;if(s!==null&&!(e!==null&&e.g===void 0))try{const d=JSON.parse(s);Hr(d)&&(e===null||d.gen===e.g)&&(c=d)}catch{}if(c===null)try{n.removeItem(a)}catch{}return c}function Xr(){const t=/^\/_f\/([^/]{1,128})\//.exec(location.pathname);return t?t[1]:""}var Yr=/^[^/\\?#]{1,128}$/,Mt=t=>Yr.test(t)&&t!=="."&&t!=="..";function Nt(t,e,n){const o=new URL(t),a="/_f/"+e+"/";if(!e||!o.pathname.startsWith(a)||!Mt(n))return null;const s=o.search.slice(1).split("&").filter(c=>!/^__frame_t(?:=|$)/.test(c)).join("&");return o.origin+"/_f/"+n+"/"+o.pathname.slice(a.length)+(s?"?"+s:"")+o.hash}var Ce="{}";function ge(t){if(!t)return null;const e={ver:t.ver,handoff:t.handoff};return t.seq!==void 0&&(e.seq=t.seq),t.note!==void 0&&(e.note=t.note),e}function Ct(t,e){return t!==null&&t.note===void 0&&e?.note!==void 0?{...t,note:e.note}:t}function jt(t){const e=t?.k;return e!==null&&typeof e=="object"?e:void 0}function Jr(t,e,n,o=null){const a=setTimeout,s=clearTimeout,c=queueMicrotask,d=performance.now.bind(performance),O=new TextEncoder;let S=null,M=null;try{S=history,M=S.replaceState.bind(S)}catch{}const v=(...r)=>{try{console.warn(...r)}catch{}};let T=Xr(),m=null;try{m=sessionStorage}catch{}const h={storage:m,fetch:typeof fetch=="function"?fetch.bind(globalThis):null,entry:location.origin+location.pathname+location.search,ver:T,key:o?.k};let I=o?.k;const $=typeof requestAnimationFrame=="function"?requestAnimationFrame:r=>a(()=>r(d()),16);let y=e?.data??{},N=ge(e?.from),A=e?.gen??0,F=e!==null,V=!1,Q=!1,W=null,Se=!1;const ke=new AbortController;let Ae=null,q=null,Re=null,Te=!1,i=()=>{};const p=new Promise(r=>{i=r});let g=!1,x=!1,C=!1,D,L=null,ce=!1,De=!1,re=!1,Oe=!1,ne=!1,de=!1;const oe=r=>{for(const u of[We(r),ye(r)])try{m?.removeItem(u)}catch{}},H=(r,u)=>{try{u!==null&&n.post(r,u)}catch{}},he=()=>ne||=re&&(q===null||Oe),X=()=>{const r={__frame_hot:!0,ready:q!==null,accept:Re!==null,demand:!0};de=!ne,de&&(r.booting=!0),g&&(r.readData=!0),C&&(r.threw=!0),L?.assess&&(r.preflight=!0),H(r,W)};let Le=!1,Pe=!1,l=!1,w=!1;const _=()=>{Le||!Se||l||(Le=!0,H({__frame_reveal_hold:!0},"*"))},P=()=>new Promise(r=>{let u,f=0;const b=j=>{if(u===void 0)u=j;else if(j!==u||++f>=8){r();return}try{$(b)}catch{r()}};try{$(b)}catch{r()}}),Y=()=>{l=!0,H({__frame_reveal_ready:!0},"*")},K=r=>{Pe||(Pe=!0,r.then(u=>{if(u===!1)return;let f=null;try{f=L?.settle?.()??null}catch{}return(f===null?P():new Promise(b=>{a(b,50),Promise.resolve(f).then(b,b)}).then(P)).then(Y)}))},Me=()=>{if(w||!l)return;w=!0;const r=()=>{try{L?.afterReveal?.()}catch{}};r(),P().then(()=>{r(),Y()})},He=(r=!1)=>{if(Te||q===null||!F||!Q)return;Te=!0;const u=q,f=y;c(()=>{let b;try{b=u(f)}catch(U){throw i(!1),U}let j=!1;try{j=typeof b?.then=="function"}catch{}if(!j){i(!0);return}Promise.resolve(b).then(()=>i(!0),U=>{i(!1),c(()=>{throw U})})}),K(r?p:n.dcl.then(()=>p))},qe=r=>typeof r=="string"&&St.test(r)?r:void 0,ct=r=>{const u={__frame_hot_restart:!0},f=qe(r?.note);f!==void 0&&(u.note=f),r?.required==="hard-reload"&&(u.required="hard-reload"),H(u,W)},Vt=Object.freeze({get data(){return Q||(x=!0),!F&&!g&&(g=!0,Q&&X()),y},get from(){return N},get gen(){return A},signal:ke.signal,snapshot(r){typeof r=="function"&&(Ae=r)},ready(r){typeof r!="function"||q!==null||(q=r,_(),X(),V&&H({__frame_hot_ready:!0,gen:A},W),He())},accept(r){typeof r=="function"&&(Re=r,X())},restart(r){const u={note:r?.note,required:r?.required};if(Q){ct(u);return}const f=D;D={note:qe(f?.note)??u.note,required:f?.required==="hard-reload"||u.required==="hard-reload"?"hard-reload":void 0}}});let Be=null,Wt=()=>{};const yn=new Promise(r=>{Wt=r});let gn=null;const Xt=()=>gn??=n.dcl.then(()=>{let r=!1;try{r=Be!==null&&Be.expect()}catch{}if(!r)return;const u=Be.maxMs;return new Promise(f=>{yn.then(f),a(f,u)})}),Yt=()=>{if(!ce||De||L===null)return;De=!0;const r=L;Xt().then(()=>{try{l||r.afterStart(jt(e),!1)}catch{}})},Jt=r=>{e!==null&&x&&(g=!0),y={},N=null,A=0;try{m?.removeItem(ye(o?.k))}catch{}e!==null&&!r&&K(n.dcl.then(()=>q!==null?p:void 0))},wn=()=>{ce=!0,K(Xt().then(()=>q!==null?p:void 0)),Yt()};try{addEventListener("error",()=>{C||q!==null||(C=!0,X())})}catch{}const Zt=()=>{a(()=>{!ne&&he()&&de&&X()},0)};try{re=document.readyState==="complete",re||addEventListener("load",()=>{re=!0,Zt()},{once:!0})}catch{re=!0}he(),p.then(()=>{Oe=!0,Zt()});let ue=-1,ut,ft,Ne=!0,dt=!1,ht,Ue=null;const pt=r=>{const u=Ue===null;Ue=Ne&&r[0]!=="withheld"?r:["withheld",r[1],Ce];let f=r[0];if(Ne&&f!=="withheld"){const j={ver:T,handoff:f};ut!==void 0&&(j.seq=ut),ft!==void 0&&(j.note=ft);try{if(m===null)throw new Error("no storage");m.setItem(We(I),'{"kv":1,"gen":'+ue+',"from":'+JSON.stringify(j)+(ht!==void 0?',"k":'+JSON.stringify(ht):"")+',"data":'+(f==="ok"?r[2]:Ce)+"}")}catch{f="unavailable"}}else{f="withheld",oe(I);try{L?.release?.()}catch{}}const b={__frame_hot_snapshotted:!0,gen:ue,handoff:f,bytes:r[1]};r[3]!==void 0&&(b.errName=r[3]),H(b,W),u&&(f==="snapshot_error"||f==="unclonable"||f==="oversize")&&v("claude.hot: snapshot",f,r[3])},pe=r=>{try{return kr(r?.name)}catch{return"other"}},me=(r,u,f=0)=>pt(u===void 0?[r,f,Ce]:[r,f,Ce,pe(u)]),bn=r=>{if(r.gen<=ue)return;const u=ue>=0;if(ue=r.gen,ut=r.seq,ft=qe(r.note),typeof r.key=="string"&&Et.test(r.key)&&r.key!==I&&(oe(I),I=r.key),Ne&&=r.handoff!==!1,u){Ue!==null?pt(Ue):dt&&H({__frame_hot_held:!0,gen:ue},W);return}ke.abort();const f=Object.freeze({handoff:Ne,timeoutMs:r.timeoutMs,deadline:r.deadline??Ar}),b=Ae,j=()=>{if(Ne)try{ht=L?.capture()}catch{}if(b===null){me("empty");return}let k=!1;const G=a(()=>{k||(k=!0,me("snapshot_timeout"))},Math.max(0,f.timeoutMs));Promise.resolve().then(()=>b(f)).then(ve=>{if(k)return;k=!0,s(G);let ee;try{ee=JSON.stringify(ve)}catch(mt){me("unclonable",mt);return}if(typeof ee!="string"){me("unclonable");return}let te=ee.length;try{te=O.encode(ee).length}catch{}if(te>262144){me("oversize",void 0,te);return}pt(["ok",te,ee])},ve=>{k||(k=!0,s(G),me("snapshot_error",ve))})};let U=null;try{U=L?.holdForIme()??null}catch{}if(U===null)j();else{dt=!0,H({__frame_hot_held:!0,gen:ue},W);const k=()=>{dt=!1,j()};U.then(k,k)}},En=r=>{if(!V||F||q===null||r.gen!==A)return;let u=null;try{u=Pt(m,o&&{k:o.k,g:r.gen})}catch{}if(u!==null&&u.gen!==r.gen){u=null;try{m?.removeItem(ye(o?.k))}catch{}}y=u?.data??{},N=Ct(ge(u?.from??r.from),ge(r.from)),u!==null&&(A=u.gen),F=!0,V=!1;const f=jt(u);p.then(b=>{try{b&&L?.afterStart(f,!0)}catch{}}),He(!0)};let Ge=0;const Sn=r=>{const u=Re;if(u===null||r.id<=Ge)return;Ge=r.id;const f=L?.assess;if(r.preflight===void 0||f===void 0){Qt(r,u);return}let b=!1;const j=G=>{b||(b=!0,s(k),r.id===Ge&&Qt(r,u,G))},U=()=>j(f.timeout(r)),k=a(U,Ir+100);f.run(r,window).then(j,U)},Qt=(r,u,f)=>{let b,j=!1,U=!1,k,G,ve=null;const ee=E=>{if(U)return!1;if(k!==void 0&&k!==E)return v(`claude.hot: u.${E}() ignored - u.${k}() was called first`),!1;const Z=k===void 0;return k=E,Z},te=E=>{k="restart",v(`claude.hot: ${E} - restarting`)},mt=()=>{if(!ee("adopt")||r.id!==Ge)return;const E=r.to.ver;if(ze.required!=="none"){te(`u.adopt() needs required 'none', it is '${ze.required}'`);return}if(!Mt(E)){te("u.adopt() cannot address this version");return}if(!T||E===T)return;const Z=T,J=h.entry;let Ke="",_t,_e=null,$e;try{Ke=location.href,_t=S.state,_e=Nt(Ke,Z,E),_e!==null&&(M(_t,"",_e),location.pathname.startsWith("/_f/"+E+"/")?_e=location.href:$e="navigate event canceled")}catch(gt){$e=pe(gt)}if($e!==void 0){G="adopt_failed",te(`adopt_failed ${$e}; URL not changed`);return}_e===null?(G="adopt_skipped",v(`claude.hot: adopt_skipped - page already left /_f/${Z}/; URL not changed, update still applied`)):G="adopted",T=h.ver=E;try{h.entry=Nt(J,Z,E)??J}catch{}const yt=_e;ve=()=>{if(T===E){if(yt!==null)try{if(location.href!==yt)v("claude.hot: adopt_revert_skipped - update not applied; URL left where the page navigated");else{if(M(_t,"",Ke),location.href!==Ke){v("claude.hot: adopt_revert_failed navigate event canceled - URL still at the new version");return}G="adopt_reverted",v("claude.hot: adopt_reverted - adopt() was called but the handler threw; URL restored")}}catch(gt){v(`claude.hot: adopt_revert_failed ${pe(gt)} - URL still at the new version`);return}T=h.ver=Z,h.entry=J,yt===null&&(G=void 0)}}},ze=Object.freeze({from:{ver:r.from.ver,seq:r.from.seq},to:{ver:r.to.ver,seq:r.to.seq},changed:$r(r.changed),required:r.required,deadline:r.deadline,adopt:mt,defer(){return ee("defer")&&ze.deadline.now&&te("u.defer() past the deadline"),Lt},restart(E){return ee("restart"),k==="restart"&&!U&&(b??=qe(E?.note),j||=E?.required==="hard-reload"),Lt},...f?.update}),kn=(E,Z)=>{U=!0,E==="threw"?(ve?.(),b??=pe(Z).toLowerCase()):k===void 0&&v(E==="timeout"?"claude.hot: accept handler did not answer in time - restarting":"claude.hot: accept handler settled without defer/restart/adopt - restarting");const J={__frame_hot_verdict:!0,id:r.id};J.verdict=E==="threw"||k===void 0||k==="restart"?"restart":k==="adopt"?"applied":"deferred",J.verdict==="restart"&&(j&&(J.required="hard-reload"),b!==void 0&&(J.note=b)),G!==void 0&&(J.verdict==="applied"||G!=="adopted")&&(J.adopt=G),H(Object.assign(J,f?.verdict),W)};let er=!1;const vt=(E,Z)=>er?!1:(er=!0,s(An),kn(E,Z),!0),An=a(()=>vt("timeout"),r.verdictTimeoutMs);Promise.resolve().then(()=>u(ze)).then(()=>vt("settled"),E=>{!vt("threw",E)&&k==="adopt"&&ct({note:pe(E).toLowerCase()}),v("claude.hot: accept",pe(E))})};try{t.hot===void 0&&Object.defineProperty(t,"hot",{value:Vt,writable:!1,configurable:!1,enumerable:!1})}catch{}return{hot:Vt,boot:h,afterConnect(){Se=!0,(e!==null||q!==null)&&_()},onInit(r,u){W=u,Q=!0;const f=Dr(r)?r:null;f?.phase==="final"&&e!==null&&e.gen===f.gen?(F=!0,N=Ct(N,ge(f.from)),wn()):(V=f?.phase==="pending",Jt(V),F=!V,A=f?.gen??0,N=ge(f?.from)),X(),de&&a(()=>{ne||(ne=!0,X())},Nr),V&&q!==null&&H({__frame_hot_ready:!0,gen:A},u),D!==void 0&&(ct(D),D=void 0),He()},onNoInit(){Q=!0,Jt(!1),F=!0,He()},onShell(r){return r?.__frame_revealed===!0?(Me(),!1):qr(r)?(bn(r),!0):Br(r)?(En(r),!0):Vr(r)?(Sn(r),!0):!1},attachExtras(r){L=r,Yt(),r.assess&&X()},inSlot:()=>ye(I),hydration(r,u){Be??={expect:r,maxMs:u}},hydrated(){Wt()},carried(){return F?y:{}},presented:()=>l}}var Ln="frame_ldx_runtime",Zr="frame_ldx_build",Pn="script#an-form",Qr=256;function It(t,e,n){for(const o of t)n(o)&&t.delete(o);t.size>=Qr&&!t.has(e)&&t.delete(t.values().next().value),t.add(e)}function Ye(t,e,n){try{const o=t[e];if(typeof o!="function")return;t[e]=function(...a){const s=o.apply(this,a);try{n(this)}catch{}return s}}catch{}}var Je;function en(){if(Je)return Je;const t={media:new Set,contexts:new Set,onStart:null,onPause:null};Je=t;const e=window.HTMLMediaElement?.prototype;e&&(Ye(e,"play",a=>{It(t.media,a,s=>s.paused),t.onStart?.(a)}),Ye(e,"pause",a=>t.onPause?.(a)));const n=window.AudioContext,o=window.AudioNode?.prototype;return n&&o&&Ye(o,"connect",a=>{const s=a.context;s instanceof n&&(It(t.contexts,s,c=>c.state==="closed"),t.onStart?.(s))}),t}function tn(t){let e=window;for(let n=0;e.parent&&e.parent!==e&&n<8;n++)if(e=e.parent,t(e))return!0;return!1}function rn(){let t=null;const e=()=>t??parent,n=o=>t?o===t:tn(a=>a===o);return{post(o,a){if(t){e().postMessage(o,a);return}let s=parent;for(let c=0;c<8&&(s.postMessage(o,a),!(!s.parent||s.parent===s));c++)s=s.parent},on(o){const a=s=>{const c=s.source;n(c)&&o(s.data,s.origin,s.isTrusted,()=>{t??=c})};return addEventListener("message",a),()=>removeEventListener("message",a)},port:o=>({post(a,s){if(s?.activation){e().postMessage(a,{targetOrigin:o,includeUserActivation:!0});return}if(s?.transfer){e().postMessage(a,o,s.transfer);return}e().postMessage(a,o)},on(a,s){const c=d=>{n(d.source)&&d.origin===o&&a(d.data,d)};return addEventListener("message",c,s),()=>removeEventListener("message",c,s)}})}}function nn(){const t={post:()=>{},on:()=>()=>{}};return{...t,port:()=>t}}var Ze="__frame_scroll",on=150,an=310,sn=160,ln=3e4;function cn(){let t=0,e=!1,n=!1,o=!1,a=0,s=null;const c=y=>{try{sessionStorage.setItem(Ze,JSON.stringify({y}))}catch{}},d=()=>{if(clearTimeout(t),s===null)return;const y=s;s=null,c(y)},O=()=>{if(e){e=!1;return}n=!0,s=scrollY,clearTimeout(t),t=setTimeout(d,on)};try{addEventListener("scroll",O,{passive:!0}),addEventListener("pagehide",d)}catch{}const S=()=>{let y;try{y=sessionStorage.getItem(Ze)}catch{return null}if(y===null)return null;let N;try{N=JSON.parse(y)}catch{N=null}const A=N?.y;if(!(typeof A=="number"&&Number.isFinite(A)&&A>=0)){try{sessionStorage.removeItem(Ze)}catch{}return null}return A};let M=!1;const v=y=>{try{const N=scrollY;scrollTo({top:y,left:0,behavior:"instant"}),a=y,o=!0,clearTimeout(t),s=null,c(y);const A=scrollY;A!==N&&(e=!0),A!==y&&!M&&(M=!0,addEventListener("load",()=>{try{if(scrollY===A){const F=S();v(F!==null?F:a)}}catch{}},{once:!0}))}catch{}},T=()=>{try{return!!location.hash}catch{return!0}};let m=!1;const h=()=>{try{if(m||innerWidth>an||innerHeight>sn)return;m=!0;const y=Date.now(),N=()=>{try{removeEventListener("resize",N)}catch{}if(Date.now()-y>ln||n||T())return;const A=S();v(A!==null?A:a)};addEventListener("resize",N)}catch{}};let I=!1,$=!1;return{restore(){if(I||(I=!0,T()))return;const y=S();y!==null&&(v(y),h())},promoted(){if($||($=!0,T()))return;const y=S();y!==null?(v(y),h()):o&&v(a)}}}function un(t,e,n,o){let a=null;try{a=window.trustedTypes?.createPolicy("frame-runtime",{createScriptURL:O=>O})??null}catch{}const s=window.Worker,c=s?.prototype,d=Object.freeze({Worker:s,workerOn:c?.addEventListener,workerPost:c?.postMessage,workerTerminate:c?.terminate,fetch:window.fetch.bind(window),preventDefault:Event.prototype.preventDefault,now:Date.now,policy:a,origins:e});n(t).then(O=>O?.bootTopLevel?O.bootTopLevel(d,o):o.settle()).catch(()=>o.settle())}var Mn="modulepreload",Nn=function(t){return"/"+t},Cn={},fn=function(e,n,o){let a=Promise.resolve();function s(c){const d=new Event("vite:preloadError",{cancelable:!0});if(d.payload=c,window.dispatchEvent(d),!d.defaultPrevented)throw c}return a.then(c=>{for(const d of c||[])d.status==="rejected"&&s(d.reason);return e().catch(s)})},dn=window===top,Ft=Object.getOwnPropertyDescriptor(window,"claude"),je=Wr(dn,window.__FRAME_PREAMBLE?.topLevel,Ft?.writable===!1),Qe=typeof je=="object"&&je[0],R=Qe?nn():rn();(function(){const t=Object.defineProperty,e=globalThis,n=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let o=0;for(let a=0;a<n.length;a++){const s=n[a];try{t(e,s,{value:void 0,writable:!1,configurable:!1})}catch{try{delete e[s]}catch{}try{t(e,s,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof e[s]=="function"&&o++}if(o&&je==="framed")try{R.post({__frame_rtc_lockdown_failed:o},"*")}catch{}})();var xt=1e4,hn=2e3,et=2e3,Dt=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function Ht(t){for(const e of Dt)if(e.endsWith(":*"))try{const n=new URL(t);if(`${n.protocol}//${n.hostname}:*`===e)return!0}catch{}else if(t===e)return!0;return!1}var we=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),Ie=window.__FRAME_PREAMBLE?.transforms,tt=window.__FRAME_PREAMBLE?.comments,rt=window.__FRAME_PREAMBLE?.translate,be=window.__FRAME_PREAMBLE?.ldx;function qt(t){return fn(()=>import("/_runtime/"+t),void 0)}var Ee=new Set,pn=setTimeout,mn=800+800*Math.random();function le(t){return qt(t).catch(()=>new Promise(e=>pn(e,mn)).then(()=>qt(t+"?r=1")).then(e=>(e!==void 0&&Ee.add(t),e)))}function Bt(t,e,n){return{contract:t.contract,changes:new Set(t.changes??[]),flags:new Set(t.flags??[]),capabilities:t.capabilities??{},capBudgets:t.capBudgets??{},brokerGen:t.brokerGen,transforms:new Map,shellOrigin:e,shell:n,mount:it,hooks:Fe,pipe:()=>({wrap:(o,a)=>(...s)=>{try{return a(...s)}catch(c){return Promise.reject(c)}}})}}var fe=null,z=null;function Ut(t,e,n){try{Object.defineProperty(t,e,{value:n,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(t,e,{value:n,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var nt=!1,Fe={editBefore:null,edit:null};function vn(t,e,n=!1){const o=[];let a;if(n)try{Fe.editBefore?.(t)}catch{}for(const s of t.elements){const c=document.querySelector(`[data-id="${s.target}"]`);if(!c){a=s.target;break}if([...Object.keys(s.attrsSet??{}),...s.attrsRemoved??[]].some(d=>!ar(d)||sr(c,d))){a=s.target;break}if(s.text!==void 0&&(!ur(c)||pr(c))){a=s.target;break}for(const[d,O]of Object.entries(s.attrsSet??{}))if(!zt(c,d)){try{c.setAttribute(d,O)}catch{}Gt(c,d,O)}for(const d of s.attrsRemoved??[])zt(c,d)||(c.removeAttribute(d),Gt(c,d,null));typeof s.text=="string"&&dr(c,s.text),o.push(s.target)}if(n)try{Fe.edit?.(t.seq,o,a)}catch{}if(a!==void 0){R.post({__frame_patch_miss:{seq:t.seq}},e);return}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:t.seq,targets:o}}))}catch{}}function Gt(t,e,n){if(!(t instanceof HTMLInputElement))return;const o=e.toLowerCase();o==="checked"?t.checked=n!==null:o==="value"&&t.type!=="file"&&(t.value=n??"")}function zt(t,e){const n=e.toLowerCase(),o=t;return n==="data-id"||(n==="value"||n==="checked")&&(o.__artifactSecret===!0||/^(password|hidden|file)$/.test(o.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${t.getAttribute("autocomplete")??""} ${o.autocomplete??""}`))}function Kt(t){const e=document.documentElement;t==="light"||t==="dark"?(e.dataset.theme=t,e.style.colorScheme=t,nt=!0):nt&&(delete e.dataset.theme,e.style.colorScheme="",nt=!1)}var ie=new Map,ot=null;function at(){let t;const e={u:new Promise(n=>{t=n}),r:n=>{e.done=!0,t(n)},done:!1,nulled:!1};return e}function xe(t,e){t.nulled=!0,t.ver=e,t.r(null)}function st(t,e){for(const[n,o]of ie)o.done||(e&&o.asked?e(n,o):xe(o,t))}var _n=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),lt=!1,it=(t,e)=>{let n=ie.get(t);if(n?.nulled&&lt)n=at(),ie.set(t,n);else if(!n||n.done){n?.nulled&&z&&R.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:t,phase:"install"}},z);return}const o=typeof e=="function"?Object.setPrototypeOf(e,_n):Object.assign(Object.create(null),e);typeof o.then=="function"&&delete o.then,n.want=void 0,n.r(Object.freeze(o))};function $t(){const t=Ft?.value??{};Ut(window,"claude",t);for(const e of Object.keys(we)){if(t[e]!==void 0){Ut(t,e,t[e]);continue}ie.set(e,at())}if(t.use===void 0){const e=n=>{if(typeof n!="string"||!Object.hasOwn(we,n))return Promise.resolve(null);let o=ie.get(n);return o?(ot&&(o.nulled||o.want!==void 0)&&(o=ot(n,o)),o.asked=!0,o.u):Promise.resolve(t[n]??null)};try{Object.defineProperty(t,"use",{value:e,writable:!0,configurable:!0,enumerable:!1})}catch{}}return t}if(je==="framed"){const t=Ie&&se.test(Ie)?le(Ie).catch(()=>{}):Promise.resolve(void 0),e=i=>{if(i.type==="auxclick"&&i.button!==1)return;const p=i.target,g=p&&p.closest?p.closest("a[href],area[href]"):null;if(!g)return;const x=g.getAttribute("href");if(!x)return;let C;try{C=new URL(x,document.baseURI)}catch{return}if((C.protocol==="http:"||C.protocol==="https:")&&C.origin!==location.origin){i.preventDefault();const D=(g.getAttribute("target")??"").toLowerCase(),L=i.type==="auxclick"||i.metaKey||i.ctrlKey||i.shiftKey||i.altKey||!["","_self","_top","_parent"].includes(D);R.post({__frame_nav:!0,url:C.href,newTab:L},"*")}};addEventListener("click",e,!0),addEventListener("auxclick",e,!0);const n={},o=i=>{i.isTrusted&&(n.pointer=!0)},a=i=>{i.isTrusted&&(n.click=!0)};addEventListener("pointermove",o,{capture:!0,passive:!0}),addEventListener("click",a,{capture:!0,passive:!0});const s={cb:null};addEventListener("keydown",i=>s.cb?.(i),!0);const c={cb:null};addEventListener("keydown",i=>c.cb?.(i));const d=en();t.then(i=>i?.installEscapeForward?.(s,p=>{z&&R.post(p,z)})),t.then(i=>{try{i?.installFocusKeep?.()}catch{}}),t.then(i=>{if(!i?.wireNav)return;const p=R.port("*");i.wireNav(p),removeEventListener("click",e,!0),removeEventListener("auxclick",e,!0),removeEventListener("pointermove",o,!0),removeEventListener("click",a,!0),i.wireEngagement?.(n,p,d)});let O=null;try{O=cn()}catch{}const S=document.readyState==="loading"?new Promise(i=>document.addEventListener("DOMContentLoaded",()=>i(),{once:!0})):Promise.resolve();let M=null,v=null;try{v=Pr(window.name),M=Pt(null,v)}catch{}const T=$t();let m=null;try{m=Jr(T,M,{post:(i,p)=>R.post(i,p),dcl:S},v)}catch{}t.then(i=>{try{m&&i?.installHotExtras?.(m)}catch{}});let h=null;const I=()=>Array.isArray(h?.flags)&&h.flags.includes("frame_ldx_runtime")&&!!be&&se.test(be)&&document.querySelector("script#an-form")!==null;try{m?.hydration(I,Mr)}catch{}let $=null,y=0;const N=R.on((i,p,g,x)=>{Ht(p)&&yr(i)&&(x(),h=i.__frame_init,z=p,N(),clearTimeout(y),$?.())});R.post({__frame_connect:!0},"*");try{m?.afterConnect()}catch{}const A=setTimeout,F=clearTimeout;let V=()=>NaN,Q=()=>[];try{V=performance.now.bind(performance),Q=performance.getEntriesByType.bind(performance)}catch{}let W=0;const Se=()=>{try{R.post({__frame_alive:!0},"*")}catch{}W=A(Se,hn)},ke=()=>F(W);Se(),addEventListener("load",ke,{once:!0});const Ae=new Promise(i=>{$=i,y=setTimeout(()=>{N(),i()},xt)}),q=new WeakSet;addEventListener("error",i=>{i.target&&q.add(i.target)},!0);const Re=()=>{let i=[];try{i=[...document.querySelectorAll("link[rel~=stylesheet]:not([rel~=alternate])")].filter(g=>!g.sheet&&!g.disabled&&!q.has(g)&&g.getAttribute("href")&&URL.canParse(g.href)&&(!g.media||matchMedia(g.media).matches))}catch{}let p=i.length;return p===0?Promise.resolve():new Promise(g=>{try{const x=et-V(),C=A(g,x>0?x<et?x:et:0),D=()=>{--p===0&&(F(C),g())};for(const L of i)L.addEventListener("load",D,{once:!0}),L.addEventListener("error",D,{once:!0})}catch{g()}})};S.then(()=>{try{O?.restore()}catch{}}),Promise.all([Ae,S,t]).then(([,,i])=>{if(h?.hostOverlays!==!0||!z)return;let p=!1;try{p=i?.declaresCover?.()===!0}catch{}R.post({__frame_layout:{cover:p}},z)});const Te={cb:null};R.on((i,p)=>{if(Ht(p)&&gr(i)){try{O?.promoted()}catch{}Te.cb?.()}}),Ae.then(async()=>{if(!h||!z){st();try{m?.onNoInit()}catch{}return}if(Kt(h.theme),h.hostVisible===!1&&t.then(l=>l?.applyHostVisible?.(!1,d)),h.hostKeys!==void 0){const l=z,w=h.hostKeys;t.then(_=>_?.installHostKeyForward?.(c,w,P=>R.post(P,l)))}try{m?.onInit(h.hot,z)}catch{}const i=z,p=R.port(i),g=(l,w)=>R.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:l,phase:w}},i),x=l=>R.post({__frame_cap_recovered:{cap:l}},i);let C=h.brokerGen;const D=()=>m?.boot.ver??"",L=D(),ce=(l,w)=>{const _=D();F(w.t),w.want=_,w.t=A(()=>{w.done||xe(w,_)},xt),R.post({__frame_cap_want:!0,cap:l,ver:_},i)},De=(l,w)=>{const _=ie.get(l.cap),P=we[l.cap];if(!w||!_||_.done||_.want!==l.ver||!se.test(P))return;if(F(_.t),_.want=void 0,C=l.brokerGen??C,l.ver!==D()){ce(l.cap,_);return}if(!l.grant||l.cap==="network"){xe(_,l.ver);return}const Y=fe,K=fe={...Y,capabilities:{...Y.capabilities,[l.cap]:l.grant},capBudgets:{...Y.capBudgets,[l.cap]:{...Y.capBudgets[l.cap],...l.budgets}}};le(P).then(Me=>{Ee.has(P)&&x(l.cap),K.brokerGen=C,lt=!0;try{Me?.install?.(K)}catch{g(l.cap,"install")}finally{lt=!1}},()=>g(l.cap)).then(()=>{_.done||xe(_,l.ver)})};let re=!1,Oe=!1;R.on((l,w,_)=>{if(w!==i)return;try{if(m?.onShell(l))return}catch{}if(br(l)&&Kt(l.__frame_theme.theme),Gr(l)&&De(l,_),_&&zr(l)&&(C=l.brokerGen??C),wr(l)){const K=l.__frame_host_visible.visible;t.then(Me=>Me?.applyHostVisible?.(K,d))}_r(l)&&vn(l.__frame_patch,i,_);const P=l?.__fc_mode;P&&typeof P=="object"&&!re&&tt&&se.test(tt)&&(re=!0,le(tt).then(K=>K.install?.(i,P.on===!0,p)).catch(()=>{}));const Y=l?.__ft_cmd;Y&&typeof Y=="object"&&!Oe&&rt&&se.test(rt)&&(Oe=!0,le(rt).then(K=>K.install?.(i,Y,p)).catch(()=>{}))});const ne=Object.keys(h.capabilities??{}).filter(l=>Object.hasOwn(we,l)).map(l=>[l,we[l]]).filter(l=>typeof l[1]=="string"&&se.test(l[1])),de=await Promise.allSettled(ne.map(([,l])=>le(l))),oe=await t,H=i;if(oe?.buildBoot||g("_transforms"),oe?.buildBoot)try{fe=oe.buildBoot(h,oe.TRANSFORMS??{},{shellOrigin:H,mount:it,hooks:Fe,shell:p},l=>R.post({__frame_cap_telemetry:l},H))}catch{g("_transforms","install"),fe=Bt(h,H,p)}else fe=Bt(h,H,p);oe?.buildBoot&&Ee.has(Ie??"")&&x("_transforms");const he=fe;he.brokerGen=C,de.forEach((l,w)=>{const[_,P]=ne[w];if(l.status!=="fulfilled"){g(_);return}Ee.has(P)&&x(_);try{l.value?.install?.(he)}catch{g(_,"install")}});const X=h.capWants===!0;X&&(ot=(l,w)=>{const _=D();if(!_)return w;if(!w.nulled)return w.want!==_&&ce(l,w),w;if(_===w.ver)return w;const P=at();return ie.set(l,P),ce(l,P),P}),st(L,X&&D()!==L?ce:void 0),await S,await Re(),ke();const Le=tr(Q,V);R.post(Le?{__frame_ready:!0,nav:Le}:{__frame_ready:!0},z),t.then(l=>{l?.installSizeReporter?.(H,Te,p),l?.installPaintReporter?.(p)});let Pe=!1;try{Pe=I()}catch{}be&&Pe?le(be).then(l=>l?.boot?.({shellOrigin:i,build:he.flags.has(Zr),hot:m?.hot??null,carried:m?.carried(),presented:()=>m?.presented()??!0})).catch(()=>!1).then(l=>{m?.hydrated(),l!==!0?g("_ldx"):Ee.has(be)&&x("_ldx")}):m?.hydrated()})}else Qe&&($t(),un(Qe,Dt,le,{settle:st,mount:it}))})();</script><!-- /frame-runtime -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture d'un agent IA (Copy)</title>
+<style>
+:root{
+  --bg:#f6f7fb;
+  --surface:#ffffff;
+  --text:#1c2230;
+  --text-muted:#5b6472;
+  --border-soft:#d8dce3;
+  --arrow:#8892a0;
+  --tooltip-bg:#1c2230;
+  --tooltip-text:#f6f7fb;
+
+  --purple-fill:#ece7fb; --purple-stroke:#8b7fd6; --purple-strong:#6f5fc9;
+  --green-fill:#e1f6ea;  --green-stroke:#4caf7d;  --green-strong:#2f8a5c;
+  --blue-fill:#e3f0fd;   --blue-stroke:#4f8fd1;   --blue-strong:#2f6cb0;
+  --orange-fill:#fdecc8; --orange-stroke:#e0a83e; --orange-strong:#b9832a;
+  --cyan-fill:#dcf3f5;   --cyan-stroke:#3fb4c2;   --cyan-strong:#278d99;
+  --pink-fill:#fbdde3;   --pink-stroke:#d9607a;   --pink-strong:#b8425c;
+  --teal-fill:#dcf5ee;   --teal-stroke:#34ab93;   --teal-strong:#1f8873;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141b; --surface:#1a1d27; --text:#e7e9ee; --text-muted:#a2a8b4;
+    --border-soft:#2c3040; --arrow:#8f97a6; --tooltip-bg:#e7e9ee; --tooltip-text:#12141b;
+    --purple-fill:#2b2748; --purple-stroke:#9d8fe8; --purple-strong:#c3b6ff;
+    --green-fill:#173026;  --green-stroke:#57c48a;  --green-strong:#8fe0b4;
+    --blue-fill:#152840;   --blue-stroke:#5fa3e6;   --blue-strong:#9cc6f2;
+    --orange-fill:#3a2c12; --orange-stroke:#e8bb5c; --orange-strong:#f3d38b;
+    --cyan-fill:#12333a;   --cyan-stroke:#54c4d4;   --cyan-strong:#8fdde8;
+    --pink-fill:#3a1c26;   --pink-stroke:#e97e97;   --pink-strong:#f3a8b8;
+    --teal-fill:#123329;   --teal-stroke:#4cc7ab;   --teal-strong:#8fe3ce;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141b; --surface:#1a1d27; --text:#e7e9ee; --text-muted:#a2a8b4;
+  --border-soft:#2c3040; --arrow:#8f97a6; --tooltip-bg:#e7e9ee; --tooltip-text:#12141b;
+  --purple-fill:#2b2748; --purple-stroke:#9d8fe8; --purple-strong:#c3b6ff;
+  --green-fill:#173026;  --green-stroke:#57c48a;  --green-strong:#8fe0b4;
+  --blue-fill:#152840;   --blue-stroke:#5fa3e6;   --blue-strong:#9cc6f2;
+  --orange-fill:#3a2c12; --orange-stroke:#e8bb5c; --orange-strong:#f3d38b;
+  --cyan-fill:#12333a;   --cyan-stroke:#54c4d4;   --cyan-strong:#8fdde8;
+  --pink-fill:#3a1c26;   --pink-stroke:#e97e97;   --pink-strong:#f3a8b8;
+  --teal-fill:#123329;   --teal-stroke:#4cc7ab;   --teal-strong:#8fe3ce;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+}
+header{ padding:28px 24px 4px; max-width:1600px; margin:0 auto; }
+header h1{ font-size:22px; margin:0 0 6px; font-weight:700; }
+header p{ margin:0; color:var(--text-muted); font-size:13.5px; }
+.diagram-wrap{
+  overflow-x:auto; padding:16px 8px 8px;
+}
+svg#diagram{ display:block; min-width:1300px; width:100%; height:auto; margin:0 auto; }
+.block{ cursor:pointer; }
+.block .shape{ transition:stroke-width .12s ease, filter .12s ease; }
+.block:hover .shape, .block:focus-visible .shape{ stroke-width:3.4; filter:brightness(1.03); }
+.block:focus-visible{ outline:none; }
+.block:focus-visible .shape{ stroke:var(--text); }
+.hit-area{ fill:transparent; }
+text{ font-family:"Segoe UI", Inter, system-ui, -apple-system, sans-serif; user-select:none; }
+.lbl-title{ fill:var(--text); font-weight:700; }
+.lbl-sub{ fill:var(--text-muted); font-weight:500; }
+.lbl-heading{ fill:var(--text); font-weight:700; }
+.arrow-line{ stroke:var(--arrow); stroke-width:2; fill:none; }
+.arrow-head{ fill:var(--arrow); }
+.icon{ fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.icon-purple{ stroke:var(--purple-strong); }
+.icon-green{ stroke:var(--green-strong); }
+.icon-blue{ stroke:var(--blue-strong); }
+.icon-orange{ stroke:var(--orange-strong); }
+.icon-cyan{ stroke:var(--cyan-strong); }
+.icon-pink{ stroke:var(--pink-strong); }
+.icon-teal{ stroke:var(--teal-strong); }
+.icon-text{ stroke:var(--text); }
+.outer-purple{ fill:var(--purple-fill); stroke:var(--purple-stroke); }
+.outer-blue{ fill:var(--blue-fill); stroke:var(--blue-stroke); }
+.fill-purple{ fill:var(--purple-fill); stroke:var(--purple-strong); }
+.fill-green{ fill:var(--green-fill); stroke:var(--green-strong); }
+.fill-blue{ fill:var(--blue-fill); stroke:var(--blue-strong); }
+.fill-orange{ fill:var(--orange-fill); stroke:var(--orange-strong); }
+.fill-cyan{ fill:var(--cyan-fill); stroke:var(--cyan-strong); }
+.fill-pink{ fill:var(--pink-fill); stroke:var(--pink-strong); }
+.box-base{ fill:var(--surface); stroke:var(--border-soft); }
+.outer-green{ fill:var(--green-fill); stroke:var(--green-stroke); }
+.outer-cyan-b{ fill:var(--cyan-fill); stroke:var(--cyan-stroke); }
+.outer-teal-b{ fill:var(--teal-fill); stroke:var(--teal-stroke); }
+.shape{ stroke-width:2; }
+footer{ max-width:1600px; margin:0 auto; padding:6px 24px 32px; color:var(--text-muted); font-size:12.5px; line-height:1.6; }
+footer .loop{ color:var(--text); font-weight:600; font-size:13px; }
+#tooltip{
+  position:fixed; pointer-events:none; max-width:290px;
+  background:var(--tooltip-bg); color:var(--tooltip-text);
+  padding:10px 13px; border-radius:9px; font-size:13px; line-height:1.45;
+  opacity:0; transform:translateY(4px); transition:opacity .12s ease, transform .12s ease;
+  z-index:60; box-shadow:0 6px 18px rgba(0,0,0,.22);
+}
+#tooltip.visible{ opacity:1; transform:translateY(0); }
+#tooltip .tt-title{ display:block; font-weight:700; margin-bottom:3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Architecture d'un agent IA</h1>
+  <p>Survolez (ou naviguez au clavier avec Tab) un bloc du schéma pour afficher sa description.</p>
+</header>
+
+<div class="diagram-wrap">
+<svg id="diagram" viewBox="0 0 1600 1000" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 Z" class="arrow-head"></path>
+  </marker>
+
+  <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"></path></symbol>
+  <symbol id="icon-chat" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 16l-3 4v-4"></path></symbol>
+  <symbol id="icon-mobile" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"></rect><line x1="11" y1="18" x2="13" y2="18"></line></symbol>
+  <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.3"></circle><circle cx="18" cy="6" r="2.3"></circle><circle cx="12" cy="18" r="2.3"></circle><path d="M8.2 6h7.6M7.3 8l3.6 8M16.7 8l-3.6 8"></path></symbol>
+  <symbol id="icon-clipboard" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><rect x="9" y="1.3" width="6" height="3" rx="1"></rect><line x1="8" y1="9.5" x2="16" y2="9.5"></line><line x1="8" y1="13.5" x2="16" y2="13.5"></line><line x1="8" y1="17.5" x2="13" y2="17.5"></line></symbol>
+  <symbol id="icon-brain" viewBox="0 0 24 24"><path d="M12 4.2c-1.7 0-3 1.2-3 2.8-1.6.3-2.7 1.6-2.7 3.1 0 .9.4 1.7 1 2.3-.5.6-.8 1.4-.8 2.2 0 1.9 1.6 3.4 3.6 3.4h.9V4.2Z"></path><path d="M12 4.2c1.7 0 3 1.2 3 2.8 1.6.3 2.7 1.6 2.7 3.1 0 .9-.4 1.7-1 2.3.5.6.8 1.4.8 2.2 0 1.9-1.6 3.4-3.6 3.4h-.9V4.2Z"></path></symbol>
+  <symbol id="icon-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.5v3.2M12 18.3v3.2M4.3 4.3l2.3 2.3M17.4 17.4l2.3 2.3M2.5 12h3.2M18.3 12h3.2M4.3 19.7l2.3-2.3M17.4 6.6l2.3-2.3"></path></symbol>
+  <symbol id="icon-wrench" viewBox="0 0 24 24"><path d="M6 21l6.2-6.2M14 4a4 4 0 1 1-5.7 5.7L4 14l3 3l4.3-4.3A4 4 0 1 1 18 4"></path></symbol>
+  <symbol id="icon-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path></symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 5-3.4 8-7 9-3.6-1-7-4-7-9V6Z"></path><path d="M9 12l2 2l4-4"></path></symbol>
+  <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.4 3 2.4 15 0 18M12 3c-2.4 3-2.4 15 0 18"></path></symbol>
+  <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.8 1A3.5 3.5 0 0 0 7 18Z"></path></symbol>
+  <symbol id="icon-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></symbol>
+  <symbol id="icon-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"></rect><rect x="8" y="6.3" width="2" height="2"></rect><rect x="14" y="6.3" width="2" height="2"></rect><rect x="8" y="10.3" width="2" height="2"></rect><rect x="14" y="10.3" width="2" height="2"></rect><rect x="8" y="14.3" width="2" height="2"></rect><rect x="14" y="14.3" width="2" height="2"></rect></symbol>
+  <symbol id="icon-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"></rect><rect x="5" y="8" width="14" height="12" rx="1"></rect><line x1="10" y1="12.5" x2="14" y2="12.5"></line></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2Z"></path><path d="M20 5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2Z"></path></symbol>
+  <symbol id="icon-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1"></rect><line x1="8" y1="20" x2="16" y2="20"></line><line x1="12" y1="16" x2="12" y2="20"></line><polyline points="6,13 9,9 12,12 16,7"></polyline></symbol>
+  <symbol id="icon-logs" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"></rect><line x1="7" y1="8" x2="17" y2="8"></line><line x1="7" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="13" y2="16"></line></symbol>
+  <symbol id="icon-pulse" viewBox="0 0 24 24"><polyline points="3,12 7,12 10,5 14,19 17,12 21,12"></polyline></symbol>
+  <symbol id="icon-plug" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 10h12l-2 5a4 4 0 0 1-8 0Z"></path><line x1="12" y1="19" x2="12" y2="22"></line></symbol>
+</defs>
+
+<!-- USER -->
+<g class="block" tabindex="0" role="img" data-title="Utilisateur" data-desc="Utilisateur final qui interagit avec l&#39;agent via la couche applicative (chat, web ou mobile).">
+  <rect class="hit-area" x="30" y="30" width="200" height="130"></rect>
+  <use href="#icon-user" x="90" y="42" width="70" height="70" class="icon icon-text"></use>
+  <text class="lbl-title" x="125" y="145" text-anchor="middle" font-size="20">User</text>
+</g>
+
+<!-- REQUEST / RESPONSE -->
+<g class="block" tabindex="0" role="img" data-title="Request" data-desc="Requête envoyée par l&#39;utilisateur vers la couche applicative, puis relayée à l&#39;agent.">
+  <rect class="hit-area" x="228" y="55" width="240" height="35"></rect>
+  <text class="lbl-title" x="348" y="68" text-anchor="middle" font-size="15">Request</text>
+  <line class="arrow-line" x1="230" y1="85" x2="463" y2="85" marker-end="url(#arrow)"></line>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Response" data-desc="Réponse renvoyée par l&#39;agent à l&#39;utilisateur via la couche applicative.">
+  <rect class="hit-area" x="228" y="140" width="240" height="40"></rect>
+  <line class="arrow-line" x1="463" y1="150" x2="230" y2="150" marker-end="url(#arrow)"></line>
+  <text class="lbl-title" x="348" y="172" text-anchor="middle" font-size="15">Response</text>
+</g>
+
+<!-- APPLICATION LAYER -->
+<rect class="shape outer-purple" x="470" y="20" width="690" height="170" rx="14"></rect>
+<g class="block" tabindex="0" role="img" data-title="Application Layer" data-desc="Couche applicative : point d&#39;entrée par lequel l&#39;utilisateur envoie ses requêtes et reçoit les réponses de l&#39;agent.">
+  <rect class="hit-area" x="475" y="25" width="680" height="45"></rect>
+  <text class="lbl-heading" x="815" y="55" text-anchor="middle" font-size="22">Application Layer</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Chat / Web / Mobile" data-desc="Canaux d&#39;accès à l&#39;agent : application de chat, interface web ou application mobile.">
+  <rect class="shape box-base" x="510" y="75" width="610" height="95" rx="10"></rect>
+  <use href="#icon-chat" x="640" y="99" width="46" height="46" class="icon icon-purple"></use>
+  <use href="#icon-mobile" x="702" y="99" width="46" height="46" class="icon icon-purple"></use>
+  <text class="lbl-title" x="900" y="128" text-anchor="middle" font-size="17">Chat / Web / Mobile</text>
+</g>
+
+<!-- Application Layer -> AI Agent -->
+<line class="arrow-line" x1="815" y1="191" x2="815" y2="229" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<!-- AI AGENT outer -->
+<rect class="shape outer-blue" x="280" y="230" width="880" height="460" rx="16"></rect>
+<g class="block" tabindex="0" role="img" data-title="AI Agent" data-desc="Cœur du système : orchestre le cycle Planifier → Raisonner → Exécuter → Observer, avec accès aux outils et à la mémoire.">
+  <rect class="hit-area" x="290" y="235" width="860" height="58"></rect>
+  <text class="lbl-heading" x="720" y="266" text-anchor="middle" font-size="24">AI Agent</text>
+</g>
+
+<!-- Orchestrator -->
+<g class="block" tabindex="0" role="img" data-title="Orchestrator (LangGraph)" data-desc="Pilote le workflow de l&#39;agent et gère l&#39;état entre les étapes de planification, raisonnement et exécution. Des frameworks comme LangGraph servent à gérer ce workflow et cet état.">
+  <rect class="shape fill-purple" x="310" y="300" width="820" height="70" rx="10"></rect>
+  <use href="#icon-share" x="335" y="317" width="36" height="36" class="icon icon-purple"></use>
+  <text class="lbl-title" x="386" y="330" font-size="19">Orchestrator</text>
+  <text class="lbl-sub" x="386" y="352" font-size="13">(LangGraph)</text>
+</g>
+
+<!-- 4 core boxes -->
+<g class="block" tabindex="0" role="img" data-title="Planner (Plan steps)" data-desc="Décompose un objectif complexe en étapes actionnables. La planification peut être itérative si de nouvelles informations changent l&#39;approche.">
+  <rect class="shape fill-green" x="310" y="390" width="185" height="140" rx="10"></rect>
+  <use href="#icon-clipboard" x="383" y="410" width="40" height="40" class="icon icon-green"></use>
+  <text class="lbl-title" x="403" y="478" text-anchor="middle" font-size="17">Planner</text>
+  <text class="lbl-sub" x="403" y="500" text-anchor="middle" font-size="12.5">(Plan steps)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Reasoning (LLM)" data-desc="Utilise le LLM pour décider de la prochaine action, à partir de l&#39;état courant, des observations et des informations disponibles.">
+  <rect class="shape fill-blue" x="520" y="390" width="185" height="140" rx="10"></rect>
+  <use href="#icon-brain" x="593" y="410" width="40" height="40" class="icon icon-blue"></use>
+  <text class="lbl-title" x="613" y="478" text-anchor="middle" font-size="17">Reasoning</text>
+  <text class="lbl-sub" x="613" y="500" text-anchor="middle" font-size="12.5">(LLM)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Execution (Run actions)" data-desc="Transforme les décisions en actions concrètes : appels API, requêtes base de données, exécution de code, recherches, opérations fichiers.">
+  <rect class="shape fill-orange" x="730" y="390" width="185" height="140" rx="10"></rect>
+  <use href="#icon-gear" x="803" y="410" width="40" height="40" class="icon icon-orange"></use>
+  <text class="lbl-title" x="823" y="478" text-anchor="middle" font-size="17">Execution</text>
+  <text class="lbl-sub" x="823" y="500" text-anchor="middle" font-size="12.5">(Run actions)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Tools (APIs / Services)" data-desc="Donnent à l&#39;agent des capacités au-delà du LLM seul. Les interfaces d&#39;outils doivent être explicites, contrôlées et observables.">
+  <rect class="shape fill-cyan" x="940" y="390" width="185" height="140" rx="10"></rect>
+  <use href="#icon-wrench" x="1013" y="410" width="40" height="40" class="icon icon-cyan"></use>
+  <text class="lbl-title" x="1033" y="478" text-anchor="middle" font-size="17">Tools</text>
+  <text class="lbl-sub" x="1033" y="500" text-anchor="middle" font-size="12.5">(APIs / Services)</text>
+</g>
+
+<line class="arrow-line" x1="497" y1="460" x2="518" y2="460" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+<line class="arrow-line" x1="707" y1="460" x2="728" y2="460" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+<line class="arrow-line" x1="917" y1="460" x2="938" y2="460" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<!-- Memory -->
+<g class="block" tabindex="0" role="img" data-title="Memory (Context + History)" data-desc="Permet à l&#39;agent de conserver et récupérer l&#39;information utile : mémoire court terme (tâche en cours), long terme (persistée), sémantique (faits/connaissances) et préférences utilisateur. Note : l&#39;état de l&#39;agent (besoin immédiat) est distinct de la mémoire persistée (information conservée pour un usage futur).">
+  <rect class="shape fill-pink" x="310" y="550" width="820" height="90" rx="10"></rect>
+  <use href="#icon-db" x="340" y="578" width="42" height="42" class="icon icon-pink"></use>
+  <text class="lbl-title" x="398" y="592" font-size="19">Memory</text>
+  <text class="lbl-sub" x="398" y="615" font-size="13.5">(Context + History)</text>
+</g>
+
+<!-- Guardrails -->
+<g class="block" tabindex="0" role="img" data-title="Guardrails (Safety / Policy)" data-desc="Garde-fous de sécurité et de politique qui encadrent en permanence les décisions et actions de l&#39;agent.">
+  <rect class="shape outer-green" x="40" y="340" width="210" height="280" rx="16"></rect>
+  <use href="#icon-shield" x="117" y="400" width="56" height="56" class="icon icon-green"></use>
+  <text class="lbl-title" x="145" y="480" text-anchor="middle" font-size="18">Guardrails</text>
+  <text class="lbl-sub" x="145" y="504" text-anchor="middle" font-size="13">(Safety / Policy)</text>
+</g>
+<line class="arrow-line" x1="252" y1="480" x2="278" y2="480" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<!-- External Tools / Systems -->
+<rect class="shape outer-purple" x="1220" y="230" width="340" height="460" rx="16"></rect>
+<g class="block" tabindex="0" role="img" data-title="External Tools / Systems" data-desc="Systèmes et outils externes que l&#39;agent peut solliciter via ses tools pour agir sur le monde réel.">
+  <rect class="hit-area" x="1225" y="235" width="330" height="85"></rect>
+  <use href="#icon-plug" x="1370" y="238" width="26" height="26" class="icon icon-purple"></use>
+  <text class="lbl-heading" x="1395" y="270" text-anchor="middle" font-size="17">External Tools</text>
+  <text class="lbl-heading" x="1395" y="294" text-anchor="middle" font-size="17">/ Systems</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Web Search" data-desc="Recherche web sollicitée par l&#39;agent pour obtenir des informations à jour.">
+  <use href="#icon-globe" x="1250" y="320" width="32" height="32" class="icon icon-purple"></use>
+  <text class="lbl-title" x="1298" y="341" font-size="16">Web Search</text>
+  <rect class="hit-area" x="1240" y="315" width="300" height="42"></rect>
+</g>
+<g class="block" tabindex="0" role="img" data-title="APIs" data-desc="Appels à des API externes pour déclencher des actions ou récupérer des données.">
+  <use href="#icon-cloud" x="1250" y="386" width="32" height="32" class="icon icon-purple"></use>
+  <text class="lbl-title" x="1298" y="407" font-size="16">APIs</text>
+  <rect class="hit-area" x="1240" y="381" width="300" height="42"></rect>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Databases" data-desc="Bases de données externes interrogées par l&#39;agent via ses outils.">
+  <use href="#icon-db" x="1250" y="452" width="32" height="32" class="icon icon-purple"></use>
+  <text class="lbl-title" x="1298" y="473" font-size="16">Databases</text>
+  <rect class="hit-area" x="1240" y="447" width="300" height="42"></rect>
+</g>
+<g class="block" tabindex="0" role="img" data-title="File System" data-desc="Lecture et écriture de fichiers sur le système de fichiers.">
+  <use href="#icon-folder" x="1250" y="518" width="32" height="32" class="icon icon-purple"></use>
+  <text class="lbl-title" x="1298" y="539" font-size="16">File System</text>
+  <rect class="hit-area" x="1240" y="513" width="300" height="42"></rect>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Enterprise Apps" data-desc="Intégration avec des applications d&#39;entreprise (CRM, ERP, etc.).">
+  <use href="#icon-building" x="1250" y="584" width="32" height="32" class="icon icon-purple"></use>
+  <text class="lbl-title" x="1298" y="605" font-size="16">Enterprise Apps</text>
+  <rect class="hit-area" x="1240" y="579" width="300" height="42"></rect>
+</g>
+<line class="arrow-line" x1="1162" y1="460" x2="1218" y2="460" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<!-- Vertical connector AI Agent -> Data layer / Observability -->
+<line class="arrow-line" x1="720" y1="691" x2="720" y2="729" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<!-- Data Layer -->
+<rect class="shape outer-cyan-b" x="40" y="730" width="760" height="210" rx="16"></rect>
+<g class="block" tabindex="0" role="img" data-title="Data Layer" data-desc="Couche de données utilisée par l&#39;agent pour la mémoire et la récupération d&#39;information (RAG).">
+  <rect class="hit-area" x="45" y="735" width="750" height="55"></rect>
+  <text class="lbl-heading" x="420" y="766" text-anchor="middle" font-size="20">Data Layer</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Vector DB (Embeddings)" data-desc="Base vectorielle : stocke les embeddings pour la recherche sémantique (RAG).">
+  <rect class="shape fill-cyan" x="70" y="800" width="150" height="120" rx="10"></rect>
+  <use href="#icon-db" x="128" y="815" width="34" height="34" class="icon icon-cyan"></use>
+  <text class="lbl-title" x="145" y="877" text-anchor="middle" font-size="15">Vector DB</text>
+  <text class="lbl-sub" x="145" y="898" text-anchor="middle" font-size="11.5">(Embeddings)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Relational DB (Structured)" data-desc="Base relationnelle : stocke les données structurées classiques de l&#39;application.">
+  <rect class="shape fill-cyan" x="253" y="800" width="150" height="120" rx="10"></rect>
+  <use href="#icon-db" x="311" y="815" width="34" height="34" class="icon icon-cyan"></use>
+  <text class="lbl-title" x="328" y="877" text-anchor="middle" font-size="15">Relational DB</text>
+  <text class="lbl-sub" x="328" y="898" text-anchor="middle" font-size="11.5">(Structured)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Object Storage (Files/Docs)" data-desc="Stockage d&#39;objets : fichiers et documents bruts utilisés par l&#39;agent.">
+  <rect class="shape fill-cyan" x="436" y="800" width="150" height="120" rx="10"></rect>
+  <use href="#icon-archive" x="494" y="815" width="34" height="34" class="icon icon-cyan"></use>
+  <text class="lbl-title" x="511" y="877" text-anchor="middle" font-size="15">Object Storage</text>
+  <text class="lbl-sub" x="511" y="898" text-anchor="middle" font-size="11.5">(Files/Docs)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Knowledge Base (RAG)" data-desc="Corpus documentaire structuré utilisé pour la génération augmentée par récupération (RAG).">
+  <rect class="shape fill-cyan" x="619" y="800" width="150" height="120" rx="10"></rect>
+  <use href="#icon-book" x="677" y="815" width="34" height="34" class="icon icon-cyan"></use>
+  <text class="lbl-title" x="694" y="877" text-anchor="middle" font-size="15">Knowledge Base</text>
+  <text class="lbl-sub" x="694" y="898" text-anchor="middle" font-size="11.5">(RAG)</text>
+</g>
+
+<!-- Observability & Infrastructure -->
+<rect class="shape outer-teal-b" x="830" y="730" width="730" height="210" rx="16"></rect>
+<g class="block" tabindex="0" role="img" data-title="Observability &amp; Infrastructure" data-desc="Supervise et fait tourner l&#39;agent en production : mesure sa santé, trace son exécution et fournit le calcul nécessaire.">
+  <rect class="hit-area" x="835" y="735" width="720" height="55"></rect>
+  <text class="lbl-heading" x="1195" y="766" text-anchor="middle" font-size="19">Observability &amp; Infrastructure</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Monitoring (Metrics)" data-desc="Métriques de santé et de performance du système en continu.">
+  <rect class="shape" x="845" y="800" width="150" height="120" rx="10" fill="var(--teal-fill)" stroke="var(--teal-strong)"></rect>
+  <use href="#icon-monitor" x="903" y="815" width="34" height="34" class="icon icon-teal"></use>
+  <text class="lbl-title" x="920" y="877" text-anchor="middle" font-size="15">Monitoring</text>
+  <text class="lbl-sub" x="920" y="898" text-anchor="middle" font-size="11.5">(Metrics)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Logging (Logs)" data-desc="Journaux détaillés des événements et décisions de l&#39;agent.">
+  <rect class="shape" x="1028" y="800" width="150" height="120" rx="10" fill="var(--teal-fill)" stroke="var(--teal-strong)"></rect>
+  <use href="#icon-logs" x="1086" y="815" width="34" height="34" class="icon icon-teal"></use>
+  <text class="lbl-title" x="1103" y="877" text-anchor="middle" font-size="15">Logging</text>
+  <text class="lbl-sub" x="1103" y="898" text-anchor="middle" font-size="11.5">(Logs)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Tracing (Traces)" data-desc="Traces de bout en bout pour comprendre le déroulé d&#39;une requête (retries, timeouts, latences).">
+  <rect class="shape" x="1211" y="800" width="150" height="120" rx="10" fill="var(--teal-fill)" stroke="var(--teal-strong)"></rect>
+  <use href="#icon-pulse" x="1269" y="815" width="34" height="34" class="icon icon-teal"></use>
+  <text class="lbl-title" x="1286" y="877" text-anchor="middle" font-size="15">Tracing</text>
+  <text class="lbl-sub" x="1286" y="898" text-anchor="middle" font-size="11.5">(Traces)</text>
+</g>
+<g class="block" tabindex="0" role="img" data-title="Compute (K8s / Cloud)" data-desc="Infrastructure d&#39;exécution (Kubernetes, cloud) qui héberge l&#39;agent.">
+  <rect class="shape" x="1394" y="800" width="150" height="120" rx="10" fill="var(--teal-fill)" stroke="var(--teal-strong)"></rect>
+  <use href="#icon-cloud" x="1452" y="815" width="34" height="34" class="icon icon-teal"></use>
+  <text class="lbl-title" x="1469" y="877" text-anchor="middle" font-size="15">Compute</text>
+  <text class="lbl-sub" x="1469" y="898" text-anchor="middle" font-size="11.5">(K8s / Cloud)</text>
+</g>
+
+<line class="arrow-line" x1="802" y1="835" x2="828" y2="835" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+
+<text x="1560" y="970" text-anchor="end" font-size="12" fill="var(--text-muted)" font-style="italic">Schéma original : Suresh Boddu</text>
+</svg>
+</div>
+
+<footer>
+  <p class="loop">Cycle : Plan → Reason → Execute → Observe → Replan</p>
+  <p>Un agent IA est plus qu'un LLM avec un prompt : c'est un système d'orchestration autour du modèle, complété en production par des guardrails, de l'observabilité, des retries, des timeouts, l'idempotence et la sécurité. L'état de l'agent (ce dont il a besoin maintenant) est distinct de la mémoire persistée (l'information conservée pour un usage futur).</p>
+</footer>
+
+<div id="tooltip" role="tooltip" class="" style="left: 64px; top: 251px;"><span class="tt-title">Utilisateur</span><span class="tt-desc">Utilisateur final qui interagit avec l'agent via la couche applicative (chat, web ou mobile).</span></div>
+
+<script>
+(function(){
+  var tooltip = document.getElementById('tooltip');
+  var ttTitle = tooltip.querySelector('.tt-title');
+  var ttDesc = tooltip.querySelector('.tt-desc');
+  var blocks = document.querySelectorAll('.block');
+
+  function fill(el){
+    ttTitle.textContent = el.getAttribute('data-title') || '';
+    ttDesc.textContent = el.getAttribute('data-desc') || '';
+  }
+
+  function positionAt(x, y){
+    var pad = 14;
+    tooltip.style.left = '0px';
+    tooltip.style.top = '0px';
+    var r = tooltip.getBoundingClientRect();
+    var left = x + pad;
+    var top = y + pad;
+    if (left + r.width > window.innerWidth - 10) left = x - r.width - pad;
+    if (top + r.height > window.innerHeight - 10) top = y - r.height - pad;
+    if (left < 8) left = 8;
+    if (top < 8) top = 8;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+  }
+
+  blocks.forEach(function(el){
+    el.addEventListener('mouseenter', function(evt){
+      fill(el);
+      tooltip.classList.add('visible');
+      positionAt(evt.clientX, evt.clientY);
+    });
+    el.addEventListener('mousemove', function(evt){
+      positionAt(evt.clientX, evt.clientY);
+    });
+    el.addEventListener('mouseleave', function(){
+      tooltip.classList.remove('visible');
+    });
+    el.addEventListener('focus', function(){
+      fill(el);
+      var r = el.getBoundingClientRect();
+      tooltip.classList.add('visible');
+      positionAt(r.left + r.width / 2, r.top);
+    });
+    el.addEventListener('blur', function(){
+      tooltip.classList.remove('visible');
+    });
+  });
+})();
+</script>
+
+
+</body></html>

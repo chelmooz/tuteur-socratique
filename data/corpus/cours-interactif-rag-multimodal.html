@@ -1,0 +1,60 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — RAG Multimodal</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Cours fondamental • RAG multimodal</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Principe"><span class="pill">Introduction</span><h1>Comprendre le RAG Multimodal</h1><p class="muted">Rechercher et interpréter ensemble textes, photos, schémas techniques, graphiques financiers et tableaux scannés.</p><p>Le défi n’est pas seulement de faire lire l’image au LLM final : il faut surtout décider comment l’image sera recherchée et reliée à la question.</p><div class="diagram"><svg viewBox="0 0 900 180"><g fill="#294566" stroke="#80e5ff" stroke-width="2"><rect x="25" y="65" width="150" height="50" rx="10"/><rect x="215" y="65" width="150" height="50" rx="10"/><rect x="405" y="65" width="150" height="50" rx="10"/><rect x="595" y="65" width="150" height="50" rx="10"/><rect x="785" y="65" width="90" height="50" rx="10"/></g><g fill="#eff7ff" text-anchor="middle" font-size="14"><text x="100" y="95">PDF</text><text x="290" y="95">Extraction</text><text x="480" y="95">Indexation</text><text x="670" y="95">Récupération</text><text x="830" y="95">Synthèse</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M175 90h40M365 90h40M555 90h40M745 90h40"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Quelle est la décision centrale du RAG multimodal ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Comment rechercher et relier l’image à la question</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement quelle couleur donner à l’interface</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Architecture A"><span class="pill">Paradigme A</span><h2>Embeddings dédiés et bases séparées</h2><p>Le texte et les images sont encodés par des modèles spécialisés, puis stockés dans deux espaces vectoriels.</p><pre id="a">Texte → encodeur texte → Vector DB Texte
+Image → encodeur vision (CLIP/SigLIP) → Vector DB Image
+Question → requêtes parallèles → passages + images → LLM multimodal</pre><button class="btn primary copy" onclick="copyText('a')">Copier le flux A</button><div class="grid"><div><h3>Forces</h3><p>Ingestion rapide et économique ; recherche visuelle naturelle de photos, objets, logos et motifs.</p></div><div><h3>Limites</h3><p>Deux index à maintenir, calibration de scores délicate, lecture moins précise des chiffres et schémas denses.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quand l’architecture A est-elle idéale ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Trouver une robe bleue ou une pièce mécanique par apparence</button><button class="choice" data-correct="false" onclick="answer(this,false)">Lire les valeurs exactes d’un graphique financier</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Architecture B"><span class="pill">Paradigme B</span><h2>Résumé vision et Multi-Vector Retriever</h2><p>Un LLM multimodal décrit l’image en texte riche lors de l’ingestion. Seul le résumé est vectorisé ; l’image brute reste liée par identifiant et est injectée à la synthèse.</p><pre id="b">Image → LLM Vision → résumé : axes, courbes, chiffres, légendes
+Résumé + chunks texte → Vector DB combinée
+Question → recherche textuelle → pointeur image brute
+Image originale + preuves → LLM multimodal</pre><button class="btn primary copy" onclick="copyText('b')">Copier le flux B</button><div class="grid"><div><h3>Forces</h3><p>Une base textuelle unique, recherche hybride facile, excellente lecture des chiffres, courbes et diagrammes.</p></div><div><h3>Limites</h3><p>Ingestion plus lente et coûteuse ; un résumé peut oublier un détail visuel.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Pourquoi conserver l’image brute dans l’architecture B ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour l’injecter à la réponse finale après l’avoir retrouvée via son résumé</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour ne jamais la montrer au modèle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Choisir"><span class="pill">Décision</span><h2>Choisir la bonne architecture</h2><div class="grid"><div><h3>Architecture A</h3><p><strong>Photos et catalogue visuel :</strong> formes, couleurs, textures, objets, vêtements, paysages.</p></div><div><h3>Architecture B</h3><p><strong>Contenu à lire :</strong> rapports financiers, graphiques, plans, schémas électriques, tableaux, essais cliniques.</p></div></div><p><strong>Règle d’or :</strong> si l’utilisateur questionne du texte, des diagrammes, des graphiques ou des chiffres, privilégier B. Si l’intérêt est purement visuel, privilégier A.</p><div class="quiz"><h3>Quiz</h3><p>Quelle architecture choisir pour analyser la courbe d’un rapport financier ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">B — résumé vision et Multi-Vector Retriever</button><button class="choice" data-correct="false" onclick="answer(this,false)">A — embeddings image seuls</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Atelier"><span class="pill">Pratique</span><h2>Concevoir un pipeline multimodal</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Extraire séparément textes et images du document.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Choisir A pour une recherche visuelle ou B pour une compréhension chiffrée.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Conserver les métadonnées de page et le lien vers l’image.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Récupérer les preuves textuelles et/ou l’image brute.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Faire synthétiser la réponse par un LLM multimodal avec provenance.</label><button class="btn primary" onclick="finish()">Valider le choix d’architecture</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

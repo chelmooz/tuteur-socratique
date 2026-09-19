@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Les 5 Niveaux de l’AI Engineering | API, RAG, Agents, Enterprise, Self-Improving</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">📈 <span>AI Engineering</span> Masterclass</div>
+        <div class="muted small">5 niveaux • API • RAG • Agents • Enterprise • Self-improving • Evals</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "ai-eng-five-levels-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express") {
+      return `
+        <div class="quiz" data-module="${moduleId}">
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "locator") estimateLevel();
+      if (id === "risk") updateRisk();
+      if (id === "metrics") showMetric();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    // ============ DIAGNOSTIC ============
+    const DIAG_TEXT = {
+      debutant: "Commencez par le niveau 1 avec un projet utile en une semaine, puis ajoutez tracking et évaluations avant de toucher au RAG. Ne sautez pas les fondations.",
+      builder: "Vous êtes probablement entre niveau 1 et 2. Concentrez-vous sur RAG évalué, chunking, retrieval metrics, puis agents read-only avec observabilité.",
+      senior: "Passez directement aux niveaux 4 et 5 : scaffolding, tracing, guardrails, coût/latence, évaluation anti-triche et boucles d’auto-amélioration supervisées."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.builder}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ LEVEL LOCATOR ============
+    const CAP_LABELS = {
+      "cap-api": "utiliser une API LLM avec une interface simple",
+      "cap-track": "tracker et tester prompts/sorties",
+      "cap-rag": "ajouter du RAG sur documents internes ou privés",
+      "cap-evals": "évaluer chaque composant et le système complet",
+      "cap-agent": "faire tourner une boucle agent avec outils",
+      "cap-observability": "avoir observabilité, sécurité et outils read-only d’abord",
+      "cap-multi": "coordonner plusieurs agents spécialisés avec un checker",
+      "cap-scaffold": "mettre tracing, guardrails, contrôle coût/latence",
+      "cap-self": "laisser un agent proposer/tester/garder des changements",
+      "cap-anticheat": "concevoir une évaluation que l’agent ne peut pas tricher"
+    };
+
+    const LEVEL_STEPS = [
+      { level: 1, label: "Niveau 1 — API + interface", req: ["cap-api"] },
+      { level: 2, label: "Niveau 2 — RAG + évaluations", req: ["cap-api", "cap-track", "cap-rag", "cap-evals"] },
+      { level: 3, label: "Niveau 3 — Agent outillé et observable", req: ["cap-api", "cap-track", "cap-rag", "cap-evals", "cap-agent", "cap-observability"] },
+      { level: 4, label: "Niveau 4 — Multi-agents enterprise", req: ["cap-api", "cap-track", "cap-rag", "cap-evals", "cap-agent", "cap-observability", "cap-multi", "cap-scaffold"] },
+      { level: 5, label: "Niveau 5 — Self-improving", req: ["cap-api", "cap-track", "cap-rag", "cap-evals", "cap-agent", "cap-observability", "cap-multi", "cap-scaffold", "cap-self", "cap-anticheat"] }
+    ];
+
+    function estimateLevel() {
+      const checked = id => !!document.getElementById(id)?.checked;
+      let achieved = 0;
+
+      for (const step of LEVEL_STEPS) {
+        if (step.req.every(checked)) achieved = step.level;
+        else break;
+      }
+
+      const out = $("#level-out");
+      if (!out) return;
+
+      if (!checked("cap-api")) {
+        out.textContent = "Niveau estimé : 0 — Vous n’avez pas encore coché l’usage d’une API LLM avec une interface. Commencez par un petit projet niveau 1 : un chatbot ou un summarizer utile dans votre vie réelle.";
+        return;
+      }
+
+      const current = LEVEL_STEPS[achieved - 1] || LEVEL_STEPS[0];
+      let text = "Niveau estimé : " + current.level + " — " + current.label + "\n\n";
+
+      if (achieved < 5) {
+        const next = LEVEL_STEPS[achieved];
+        const missing = next.req.filter(id => !checked(id)).map(id => CAP_LABELS[id]);
+        text += "Pour atteindre " + next.label + ", il manque :\n- " + missing.join("\n- ") + "\n\n";
+      } else {
+        text += "Vous avez coché toutes les capacités du niveau 5. Attention : le transcript rappelle que ce niveau s’apprend surtout en运行ant des systèmes en production pendant des années, pas en quelques semaines d’auto-formation.\n\n";
+      }
+
+      const warnings = [];
+      if (checked("cap-agent") && !checked("cap-evals")) warnings.push("Un agent sans évaluations robustes n’est pas un niveau 3 fiable : c’est une dette technique qui se paie en production.");
+      if (checked("cap-multi") && !checked("cap-observability")) warnings.push("Plusieurs agents sans observabilité = cascade d’erreurs invisible jusqu’au jour où un client la voit.");
+      if (checked("cap-self") && !checked("cap-anticheat")) warnings.push("Auto-amélioration sans évaluation anti-triche = reward hacking : l’agent optimise le score, pas le produit.");
+      if (checked("cap-rag") && !checked("cap-evals")) warnings.push("RAG sans métriques de retrieval et de fidélité, c’est une boîte noire qui invente des réponses avec confiance.");
+
+      if (warnings.length) {
+        text += "Alertes :\n- " + warnings.join("\n- ");
+      } else {
+        text += "Aucune alerte majeure sur les cases cochées. Prochaine étape : rendre le système mesurable, observable et sûr avant d’ajouter de la puissance.";
+      }
+
+      out.textContent = text;
+    }
+
+    // ============ RISK SIMULATOR ============
+    function updateRisk() {
+      const items = [
+        { id: "risk-ext", label: "Lit du contenu externe (web, docs, emails)" },
+        { id: "risk-write", label: "Peut écrire / modifier des données" },
+        { id: "risk-pay", label: "Peut dépenser de l’argent ou déclencher des paiements" },
+        { id: "risk-pii", label: "Accède à des données personnelles ou sensibles" },
+        { id: "risk-loop", label: "Tourne en boucle autonome sans validation humaine" },
+        { id: "risk-tools", label: "Beaucoup d’outils / large surface d’action" }
+      ];
+
+      const count = items.filter(i => document.getElementById(i.id)?.checked).length;
+      const fill = $("#risk-fill");
+      const label = $("#risk-label");
+      const advice = $("#risk-advice");
+
+      if (fill) fill.style.width = (count / items.length * 100) + "%";
+      if (label) {
+        if (count === 0) label.textContent = "Risque faible — agent lecture seule ou quasi inoffensif.";
+        else if (count <= 2) label.textContent = "Risque modéré — nécessite journalisation et limites claires.";
+        else if (count <= 4) label.textContent = "Risque élevé — observabilité, guardrails et validations humaines indispensables.";
+        else label.textContent = "Risque critique — agent trop puissant pour être déployé sans contrôles robustes.";
+      }
+
+      if (advice) {
+        const mitigations = [];
+        if (document.getElementById("risk-ext")?.checked) mitigations.push("Traitez le contenu externe comme non fiable : injection indirecte, données empoisonnées, instructions cachées.");
+        if (document.getElementById("risk-write")?.checked) mitigations.push("Commencez read-only. N’accordez l’écriture qu’après avoir prouvé la fiabilité de la boucle.");
+        if (document.getElementById("risk-pay")?.checked) mitigations.push("Paiements/actions irréversibles : validation humaine, plafonds, dry-run, logs immuables.");
+        if (document.getElementById("risk-pii")?.checked) mitigations.push("Données sensibles : moindre privilège, chiffrement, masquage dans les logs, contrôle d’accès avant retrieval.");
+        if (document.getElementById("risk-loop")?.checked) mitigations.push("Boucle autonome : max steps, timeout, budget tokens, interruption humaine, rollback.");
+        if (document.getElementById("risk-tools")?.checked) mitigations.push("Trop d’outils : sélection par étape, descriptions minimales, allowlist, tests d’attaque.");
+
+        advice.innerHTML = mitigations.length
+          ? "<strong>Mitigations recommandées :</strong><ul>" + mitigations.map(m => "<li>" + m + "</li>").join("") + "</ul>"
+          : "Cochez les capacités de votre agent pour voir les mitigations adaptées.";
+      }
+    }
+
+    // ============ METRICS MATCHER ============
+    const METRIC_TEXT = {
+      retrieval: "Niveau 2 — Qualité du retrieval\nMétriques utiles : recall@k, précision des chunks, MRR, similarité cosine, taux de chunks hors sujet.\nLe transcript insiste : avant de blâmer le LLM, vérifiez que le bon morceau de document est bien récupéré.",
+      faithfulness: "Niveau 2 — Fidélité de la réponse\nMétriques utiles : faithfulness / groundedness, answer relevancy, taux d’hallucination, citation des sources.\nIl ne suffit pas d’avoir une réponse fluide : il faut savoir si elle est réellement ancrée dans les documents récupérés.",
+      agent: "Niveau 3 — Fiabilité de l’agent\nMétriques utiles : task success rate, tool error rate, nombre moyen d’étapes, coût par tâche, décisions incorrectes, boucles infinies.\nAu niveau 3, on n’évalue plus une seule réponse : on évalue une séquence de décisions.",
+      enterprise: "Niveau 4 — Système en production\nMétriques utiles : succès end-to-end, P95/P99 latency, coût par requête, taux de contournement des guardrails, escalade humaine, incidents par million de requêtes.\nLe vrai travail est souvent dans le scaffolding autour des agents.",
+      self: "Niveau 5 — Auto-amélioration sûre\nMétriques utiles : amélioration mesurée du produit, divergence entre score et qualité réelle, reward hacking, taux de rollback, approbation humaine, couverture d’instrumentation.\nSi le scoring est faux, l’agent n’améliore pas le produit : il exploite la faille du scoring."
+    };
+
+    function showMetric() {
+      const key = $("#metric-select")?.value || "retrieval";
+      const out = $("#metric-out");
+      if (out) out.textContent = METRIC_TEXT[key] || "";
+    }
+
+    // ============ SCENARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        stuck_l1: "Cas : votre chatbot impressionne en démo mais casse dès qu’on change un prompt.\nDiagnostic : niveau 1 sans tracking ni évaluations.\nRemède : journalisez prompts/sorties, ajoutez des tests de parsing, des fallbacks, puis une petite suite d’eval avec 20 à 50 cas réels.",
+        rag_no_eval: "Cas : vous avez branché un RAG, mais le système répond à côté.\nDiagnostic : retrieval non évalué.\nRemède : mesurez recall@k et fidélité. Testez chunking, embedding, retriever séparément avant de toucher au prompt final.",
+        agent_danger: "Cas : un agent peut lire vos emails, appeler des API et acheter des choses.\nDiagnostic : pouvoir donné trop tôt.\nRemède : commencez read-only, instrumentez chaque tool call, imposez max steps/budget, validation humaine pour actions irréversibles.",
+        multi_break: "Cas : un agent se trompe, le suivant amplifie l’erreur, le client voit une réponse publique.\nDiagnostic : multi-agents sans checker ni tracing.\nRemède : routeur + spécialistes + agent de vérification. Tracez chaque décision. Cassez volontairement le système avec de faux inputs.",
+        self_cheat: "Cas : le tableau de bord affiche un score parfait, mais les utilisateurs se plaignent.\nDiagnostic : évaluation hackable.\nRemède : liez le score à la qualité produit réelle, multipliez les métriques, gardez un humain pour approuver les changements en production.",
+        portfolio: "Cas : vous voulez un portfolio qui montre une vraie progression d’AI engineer.\nParcours recommandé :\n- Niveau 1 : summarizer ou chatbot utile en Streamlit.\n- Niveau 2 : RAG sur vos notes/docs avec evals.\n- Niveau 3 : agent read-only avec tools et traces.\n- Niveau 4 : multi-agent avec checker, guardrails, coût/latence.\n- Niveau 5 : expérimentation d’auto-amélioration avec approbation humaine.\nExemples publics fournis : repos GitHub orientés DeepResearch agent, Supabase, Kimi K2/Claude Code, MVP Next.js/Stripe/Supabase."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "Niveau 1", back: "Projet utilisant une API de modèle avec une interface simple : chatbot, summarizer, Streamlit. Prompt engineering, sorties structurées, fallbacks, mais souvent pas de tracking ni d’evals.", tip: "0:35" },
+      { front: "Limite du niveau 1", back: "Le projet « marche seulement quand il marche ». Sans tracking des prompts ni métriques, on ne sait pas si les changements aident. Le modèle manque aussi de contexte interne à l’entreprise.", tip: "1:18" },
+      { front: "Niveau 2", back: "On ajoute du RAG pour donner au modèle accès à des connaissances internes. Mais la partie difficile n’est pas de brancher RAG : c’est de savoir si les réponses sont correctes et pourquoi elles échouent.", tip: "1:36" },
+      { front: "Compétences niveau 2", back: "Chunking, embeddings, vector database, stratégies de retrieval, évaluations par composant et pour le système entier, savoir ce que « bon » veut dire pour le client.", tip: "2:02" },
+      { front: "Passer de 1 à 2", back: "Prendre le chatbot existant et le brancher sur des données que le modèle n’a jamais vues : logs nutrition, recettes familiales, docs internes. Puis évaluer sérieusement.", tip: "2:26" },
+      { front: "Niveau 3", back: "Agents IA : un modèle qui peut utiliser des outils et prendre des décisions en boucle jusqu’à完成 une tâche. Recherche web, APIs, code, base de données.", tip: "4:17" },
+      { front: "Boucle agent", back: "Objectif → décider → agir → vérifier le résultat → décider la suite → répéter jusqu’à ce que la tâche soit finie.", tip: "4:23" },
+      { front: "Danger du niveau 3", back: "Chaque pouvoir donné à un agent est une nouvelle occasion que ça tourne mal. Une erreur à une étape contamine toutes les suivantes. Enjeux réels : carte bancaire, code, email.", tip: "4:52" },
+      { front: "Évaluation niveau 3", back: "On ne note plus une seule réponse : on note une série de décisions. Task success rate, tool errors, coût, steps, sécurité.", tip: "5:02" },
+      { front: "Passer de 2 à 3", back: "Donner des outils réels mais read-only d’abord. Faire tourner la boucle. Instrumenter l’observabilité. Être confiant avant d’autoriser écritures, achats ou actions irréversibles.", tip: "5:32" },
+      { front: "Niveau 4", back: "Systèmes enterprise à grande échelle : plusieurs agents spécialisés se passent le travail. Routeur, spécialistes, checker. C’est le niveau des postes à plus de 300 000 $/an mentionnés.", tip: "6:14" },
+      { front: "Réalité niveau 4", back: "Coordonner une équipe d’agents est très différent d’un seul agent. Chaque agent ajouté est une nouvelle source de panne. Une erreur se propage au suivant, devant de vrais clients.", tip: "6:51" },
+      { front: "Scaffolding", back: "En regardant le code derrière Claude Code, l’IA elle-même ne serait qu’une fine tranche. L’essentiel serait l’échafaudage : tracing, guardrails, coût, latência, fiabilité.", tip: "7:09" },
+      { front: "Passer de 3 à 4", back: "Découper le nutrition coach en planner, grocery list/order, checker. Casser volontairement le système : faux ingrédient, voir si le checker attrape l’erreur.", tip: "7:41" },
+      { front: "Niveau 5", back: "Se sortir du chemin : des systèmes qui s’améliorent eux-mêmes. L’agent observe la performance, propose un changement, l’applique, teste, garde ou jette, puis répète.", tip: "8:23" },
+      { front: "Au-delà du coding agent", back: "Le niveau 5 va plus loin que utiliser des agents de code ou le spec-driven development. Les top teams ne dirigent plus chaque changement à la main.", tip: "8:33" },
+      { front: "Exemple Karpathy", back: "Un projet où un seul agent a mené environ 700 expériences en deux jours, seul, et est revenu avec 20 façons de rendre l’entraînement de modèle plus rapide.", tip: "9:05" },
+      { front: "Exemple Anthropic", back: "Une grande partie du code mergé dans leur codebase serait désormais écrite par Claude. Le système commence à se construire lui-même.", tip: "9:14" },
+      { front: "Condition du niveau 5", back: "Ça ne marche que si l’agent peut juger correctement son propre travail encore et encore, sans humain qui vérifie chaque fois.", tip: "9:20" },
+      { front: "Reward hacking", back: "Si le scoring est même légèrement faux, l’agent ne répare pas le produit : il exploite la faille du scoring, fait grimper le score pendant que le produit empire.", tip: "9:28" },
+      { front: "Compétences niveau 5", back: "Concevoir une évaluation non trichable, lier la performance à la vraie qualité produit, tout instrumenter, savoir où l’humain doit rester : choix du problème, scoring, approbation production.", tip: "9:39" },
+      { front: "Temps requis niveau 5", back: "Pas un niveau atteignable en quelques semaines d’auto-formation. Ça vient d’années à faire tourner des systèmes en production, voir comment ils cassent, s’améliorer.", tip: "10:09" },
+      { front: "Message final", back: "La plupart des gens n’ont pas besoin du niveau 5. Une grande partie du travail en production est niveau 2 ou 3. Parfois un bon prompt et une évaluation simple suffisent pour être très utile.", tip: "10:19" },
+      { front: "Utiles, pas fancy", back: "Nous sommes embauchés pour être utiles, pas pour être sophistiqués. La valeur vient de systèmes fiables, mesurés, adaptés au besoin.", tip: "10:31" },
+      { front: "Progression globale", back: "API → RAG évalué → agent outillé observable → multi-agents enterprise scaffolté → self-improving avec évaluation anti-triche et humain aux points critiques.", tip: "0:13" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ EXAM ============
+    const FINAL_QUESTIONS = [
+      { q: "Quelle est la caractéristique principale du niveau 1 ?", o: ["Un projet API + interface simple, souvent sans tracking ni évaluation solide", "Un multi-agent enterprise", "Un système qui s’auto-améliore"], a: 0, e: "Niveau 1 : chatbot, summarizer, Streamlit, prompt engineering, mais pas forcément de métriques." },
+      { q: "Pourquoi un projet niveau 1 « marche seulement quand il marche » ?", o: ["Parce qu’on ne suit pas les prompts et qu’on n’a pas de métriques pour évaluer la qualité", "Parce que le modèle est trop petit", "Parce que l’interface est moche"], a: 0, e: "Sans tracking ni evals, impossible de savoir si un changement aide ou casse." },
+      { q: "Quelle est la vraie difficulté du niveau 2 après avoir ajouté du RAG ?", o: ["Savoir si les réponses sont correctes, pourquoi elles échouent, et comment mesurer chaque composant", "Installer une vector database", "Écrire un prompt système"], a: 0, e: "Brancher RAG est facile ; l’évaluer et le déboguer est le cœur du niveau 2." },
+      { q: "Au niveau 3, qu’est-ce qu’un agent ?", o: ["Un modèle qui utilise des outils et prend des décisions en boucle jusqu’à完成 une tâche", "Un chatbot avec plus de boutons", "Une base vectorielle"], a: 0, e: "Décider, agir, vérifier le résultat, recommencer." },
+      { q: "Pourquoi les agents sont-ils dangereux selon le transcript ?", o: ["Chaque pouvoir donné est une nouvelle occasion d’erreur, et une erreur se propage dans la suite des décisions", "Parce qu’ils sont lents", "Parce qu’ils coûtent gratuit"], a: 0, e: "Carte bancaire, code, email : les enjeux deviennent réels." },
+      { q: "Quelle est la bonne première étape pour passer au niveau 3 ?", o: ["Donner des outils read-only, faire tourner la boucle, instrumenter l’observabilité avant d’autoriser écritures ou paiements", "Donner immédiatement tous les droits", "Supprimer les évaluations"], a: 0, e: "Fiabilité et sécurité avant puissance." },
+      { q: "Que caractérise le niveau 4 ?", o: ["Plusieurs agents spécialisés coordonnés, avec checker, tracing, guardrails, coût et latence maîtrisés", "Un seul agent qui fait tout", "Un prompt système très long"], a: 0, e: "Enterprise scale : le scaffolding autour des agents devient l’essentiel." },
+      { q: "Quel exemple de test le transcript propose pour un système niveau 4 ?", o: ["Casser volontairement le système, par exemple donner un faux ingrédient au planner et voir si le checker l’attrape", "Supprimer la base de données", "Changer de navigateur"], a: 0, e: "Red-teamer son propre pipeline multi-agents." },
+      { q: "Quel est le risque majeur au niveau 5 si l’évaluation est mal conçue ?", o: ["L’agent exploite la faille du scoring et améliore le score pendant que le produit empire", "Le modèle devient trop petit", "Les tokens deviennent gratuits"], a: 0, e: "Reward hacking : score parfait, produit pire." },
+      { q: "Quel est le message final du cours ?", o: ["La plupart des systèmes utiles sont niveau 2 ou 3 ; on est embauché pour être utile, pas fancy", "Il faut absolument atteindre le niveau 5", "Les prompts suffisent toujours"], a: 0, e: "Un bon prompt et une évaluation simple peuvent déjà créer beaucoup de valeur." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous comprenez la progression des 5 niveaux : API, RAG évalué, agents observables, multi-agents enterprise, self-improving sûr. Vous pouvez positionner vos projets et choisir la prochaine compétence à travailler."
+          : (correct >= 5 ? "Bases correctes. Revoyez la différence entre brancher RAG et l’évaluer, les dangers des agents, et le reward hacking au niveau 5." : "Reprenez les modules 1 à 3, puis le simulateur de niveau et les flashcards avant de réessayer.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d’abord l’examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Les 5 niveaux de l’AI Engineering",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-5-niveaux-ai-engineering.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Construisez un projet niveau 1 utile en une semaine, puis ajoutez tracking, fallbacks et 20 évaluations simples avant de passer au RAG.";
+      if (d.level === "senior") return "Focus niveau 4/5 : tracing, guardrails, coût/latence, évaluation anti-triche, boucles d’auto-amélioration avec approbation humaine.";
+      return "Consolidez le niveau 2 : RAG évalué par composant, puis niveau 3 avec agents read-only observables avant toute action irréversible.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Les 5 niveaux de projets en AI Engineering</h1>
+          <p class="lead">
+            Qu’est-ce qui sépare les projets d’AI engineering entry-level des systèmes construits par les équipes derrière
+            Claude et Codex ? L’écart peut sembler immense, mais il existe en réalité une progression assez claire que suivent
+            la plupart des AI engineers. Ce cours cartographie les cinq niveaux, du débutant complet aux équipes au sommet
+            du domaine, avec pour chacun les compétences, les pièges et le prochain projet à construire.
+            <span class="source">⏱ 0:00</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 960 300" role="img" aria-label="Échelle des 5 niveaux d AI engineering">
+              <defs>
+                <marker id="arrow-ladder" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <path class="dash" d="M80 245 L230 205 L400 165 L600 115 L820 55" marker-end="url(#arrow-ladder)" />
+
+              <rect x="30" y="215" width="140" height="70" class="node" />
+              <text x="100" y="243" text-anchor="middle">Niveau 1</text>
+              <text x="100" y="265" text-anchor="middle" class="sub">API + interface</text>
+
+              <rect x="180" y="175" width="150" height="70" class="node green" />
+              <text x="255" y="203" text-anchor="middle">Niveau 2</text>
+              <text x="255" y="225" text-anchor="middle" class="sub">RAG + evals</text>
+
+              <rect x="350" y="135" width="160" height="70" class="node yellow" />
+              <text x="430" y="163" text-anchor="middle">Niveau 3</text>
+              <text x="430" y="185" text-anchor="middle" class="sub">Agents outillés</text>
+
+              <rect x="540" y="85" width="170" height="70" class="node purple" />
+              <text x="625" y="113" text-anchor="middle">Niveau 4</text>
+              <text x="625" y="135" text-anchor="middle" class="sub">Enterprise scale</text>
+
+              <rect x="740" y="25" width="180" height="70" class="node red pulse" />
+              <text x="830" y="53" text-anchor="middle">Niveau 5</text>
+              <text x="830" y="75" text-anchor="middle" class="sub">Self-improving</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez situer vos projets, identifier le niveau manquant, choisir la prochaine compétence à travailler et éviter les pièges classiques : démo fragile, RAG non évalué, agent trop puissant, multi-agents sans scaffolding, auto-amélioration trichable.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, 5 modules de niveaux, simulateur de positionnement, simulateur de risque agent, sélecteur de métriques, scénarios, flashcards, examen chronométré, certificat et checklist de progression.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Une feuille de route claire : quel projet construire maintenant, quelles métriques ajouter, quand donner des outils à un agent, quand passer au multi-agents, et pourquoi la plupart des équipes n’ont pas besoin du niveau 5.</p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Message central du transcript</h3>
+            <p>Beaucoup d’aspirants AI engineers restent bloqués parce qu’ils construisent les mauvais types de projets. La progression n’est pas « faire plus impressionnant » : c’est rendre le système plus mesurable, plus fiable, plus sûr, puis enfin plus autonome. <strong>Nous sommes embauchés pour être utiles, pas fancy.</strong> <span class="source">⏱ 10:31</span></p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('level1')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Où en êtes-vous aujourd’hui ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je n’ai pas encore de projet IA structuré.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : j’ai un chatbot ou une app API, je veux passer à quelque chose de plus solide.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="senior"> Senior : je construis des agents ou des systèmes, je veux la fiabilité enterprise / avancée.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="emploi"> Obtenir un poste d’AI engineer.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="production"> Mettre un système IA en production fiable.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="culture"> Comprendre la progression des projets IA.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l’essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours avec simulateurs.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "level1", title: "1. Niveau 1 : API + interface", express: true,
+        content: `
+          <h1>Niveau 1 — Le projet API avec interface simple</h1>
+          <p class="lead">
+            Au niveau 1, vous construisez des projets en utilisant une API de modèle de langage avec une interface simple.
+            Par exemple un chatbot qui répond aux questions clients, ou une petite fonctionnalité qui résume des articles.
+            La plupart du temps, vous utilisez l’API OpenAI ou Anthropic et vous mettez quelque chose d’rapide comme une app
+            Streamlit devant. <span class="source">⏱ 0:35</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Ce que vous faites probablement</h3>
+              <ul>
+                <li>Appeler un LLM via API.</li>
+                <li>Construire une interface simple.</li>
+                <li>Faire du prompt engineering.</li>
+                <li>Sorties structurées.</li>
+                <li>Tests de parsing.</li>
+                <li>Fallbacks quand le modèle flanche.</li>
+              </ul>
+            </div>
+            <div class="card bad">
+              <h3>Ce qui manque souvent</h3>
+              <ul>
+                <li>Tracking des prompts.</li>
+                <li>Tests systématiques des prompts.</li>
+                <li>Métriques de qualité de sortie.</li>
+                <li>Contexte interne à votre entreprise.</li>
+                <li>Évaluation reproductible.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>Le conseil du transcript pour un débutant absolu</h3>
+            <p>Commencez par des tutoriels YouTube gratuits pour comprendre quels outils existent et comment les pièces s’assemblent. Puis passez un week-end à construire quelque chose qui résout un vrai problème dans votre vie, par exemple un <strong>meal prep coach</strong>. <span class="source">⏱ 1:04</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>Pourquoi ce niveau ne suffit pas</h3>
+            <p>Quoi que vous construisiez marchera probablement « seulement quand ça marche ». Comme vous ne suivez pas vos prompts, vous ne savez pas si vos changements aident réellement. Vous n’avez pas de métriques pour évaluer la qualité des sorties. Et votre bot ne sait que ce sur quoi il a été entraîné, plus ce qu’il trouve sur le web : il lui manque beaucoup de contexte utile que votre entreprise possède. <span class="source">⏱ 1:18</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est l’exemple typique de projet niveau 1 ?", o: ["Un chatbot ou un summarizer avec API LLM et interface simple", "Un système multi-agents tracé", "Un agent d’auto-amélioration"], a: 0, e: "Streamlit + OpenAI/Anthropic API, prompt engineering, sorties structurées." },
+            { q: "Quelle est la faiblesse majeure du niveau 1 ?", o: ["On ne track ni ne teste les prompts, donc on n’a pas de métriques fiables", "Les API sont payantes", "Streamlit est trop lent"], a: 0, e: "Le projet marche seulement quand il marche." }
+          ], "level1")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('level1')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('level1')">Niveau 2 : RAG évalué →</button>
+          </div>
+        `
+      },
+      {
+        id: "level2", title: "2. Niveau 2 : RAG + evals", express: true,
+        content: `
+          <h1>Niveau 2 — Ajouter du contexte interne et évaluer sérieusement</h1>
+          <p class="lead">
+            Quand vous commencez à adresser les problèmes du niveau 1, vous atteignez le niveau 2. Vous savez qu’il faut construire
+            un système plus robuste. Peut-être qu’on vous demande un système capable d’utiliser la documentation interne de votre équipe.
+            Vous ajoutez donc du Retrieval Augmented Generation. <span class="source">⏱ 1:36</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 220" role="img" aria-label="Pipeline RAG niveau 2">
+              <defs>
+                <marker id="arrow-rag2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="20" y="70" width="130" height="70" class="node" />
+              <text x="85" y="98" text-anchor="middle">Docs internes</text>
+              <text x="85" y="120" text-anchor="middle" class="sub">PDF, wiki, logs</text>
+              <path class="dash" d="M150 105 L190 105" marker-end="url(#arrow-rag2)" />
+
+              <rect x="190" y="70" width="120" height="70" class="node green" />
+              <text x="250" y="98" text-anchor="middle">Chunking</text>
+              <text x="250" y="120" text-anchor="middle" class="sub">morceaux</text>
+              <path class="dash green" d="M310 105 L350 105" marker-end="url(#arrow-rag2)" />
+
+              <rect x="350" y="70" width="130" height="70" class="node purple" />
+              <text x="415" y="98" text-anchor="middle">Embeddings</text>
+              <text x="415" y="120" text-anchor="middle" class="sub">vecteurs</text>
+              <path class="dash purple" d="M480 105 L520 105" marker-end="url(#arrow-rag2)" />
+
+              <rect x="520" y="70" width="130" height="70" class="node yellow" />
+              <text x="585" y="98" text-anchor="middle">Vector DB</text>
+              <text x="585" y="120" text-anchor="middle" class="sub">retrieval</text>
+              <path class="dash yellow" d="M650 105 L690 105" marker-end="url(#arrow-rag2)" />
+
+              <rect x="690" y="70" width="110" height="70" class="node" />
+              <text x="745" y="98" text-anchor="middle">LLM</text>
+              <text x="745" y="120" text-anchor="middle" class="sub">réponse</text>
+              <path class="dash" d="M800 105 L840 105" marker-end="url(#arrow-rag2)" />
+
+              <rect x="840" y="70" width="80" height="70" class="node red pulse" />
+              <text x="880" y="98" text-anchor="middle">Evals</text>
+              <text x="880" y="120" text-anchor="middle" class="sub">mesure</text>
+            </svg>
+          </div>
+
+          <div class="card info">
+            <h3>Ce que le RAG apporte</h3>
+            <p>Il permet au modèle d’interagir avec des bases de connaissances internes pour lui donner du contexte afin de répondre à des questions spécifiques à votre équipe ou entreprise. <span class="source">⏱ 1:45</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>La partie facile vs la partie difficile</h3>
+            <p><strong>Facile :</strong> ajouter du RAG.</p>
+            <p><strong>Difficile :</strong> savoir s’il vous donne de bonnes réponses, et quand il se trompe, comprendre pourquoi et comment le réparer. Cela implique de comprendre comment chunker correctement vos documents, comment les embedder pour les stocker dans une vector database, et toutes les différentes façons de trouver les bons chunks quand une nouvelle question arrive. <span class="source">⏱ 1:55</span></p>
+          </div>
+
+          <div class="card warn">
+            <h3>Évaluations spécialisées</h3>
+            <p>Il faut aussi mettre en place des méthodes d’évaluation vraiment spécialisées pour chaque composant du système, ainsi que pour le système dans son ensemble. Non seulement vous devez savoir quelles métriques utiliser, mais vous devez aussi savoir à quoi ressemble « bon » et comment mesurer si les réponses servent réellement le besoin client. <span class="source">⏱ 2:12</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Passer du niveau 1 au niveau 2</h3>
+            <p>Prenez le chatbot déjà construit et branchez-le sur quelque chose que le modèle n’a jamais vu. Pour l’agent nutrition coach, partagez vos journaux nutrition ou vos recettes de famille préférées. Une fois perfectionné, vous aurez un système IA réellement utile : vous pourrez poser des questions sur vos propres données et obtenir des réponses personnalisées. <span class="source">⏱ 2:26</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la partie difficile du niveau 2 ?", o: ["Évaluer si le RAG donne de bonnes réponses et comprendre pourquoi il échoue", "Installer une vector database", "Écrire un prompt"], a: 0, e: "Brancher RAG est facile ; le mesurer et le déboguer est le vrai travail." },
+            { q: "Quelles compétences le niveau 2 exige-t-il ?", o: ["Chunking, embeddings, retrieval, évaluations par composant et système", "Seulement du prompt engineering", "Seulement du Streamlit"], a: 0, e: "Il faut savoir quelles métriques utiliser et ce que « bon » veut dire." }
+          ], "level2")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('level2')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('level2')">Niveau 3 : Agents →</button>
+          </div>
+        `
+      },
+      {
+        id: "level3", title: "3. Niveau 3 : Agents", express: true,
+        content: `
+          <h1>Niveau 3 — Les agents IA : pouvoir, boucle, danger</h1>
+          <p class="lead">
+            Quand vous commencez à construire des systèmes IA plus complexes, l’étape naturelle suivante est de vouloir que l’IA
+            puisse agir, pas seulement répondre. Cela nous amène au niveau 3 : les agents IA. Un agent est un modèle qui peut
+            utiliser des outils et prendre des décisions tout seul. <span class="source">⏱ 4:17</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 240" role="img" aria-label="Boucle agent niveau 3">
+              <defs>
+                <marker id="arrow-agent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="85" width="130" height="70" class="node" />
+              <text x="95" y="113" text-anchor="middle">Objectif</text>
+              <text x="95" y="135" text-anchor="middle" class="sub">tâche à完成</text>
+              <path class="dash" d="M160 120 L210 120" marker-end="url(#arrow-agent)" />
+
+              <rect x="210" y="85" width="140" height="70" class="node purple pulse" />
+              <text x="280" y="113" text-anchor="middle">Modèle</text>
+              <text x="280" y="135" text-anchor="middle" class="sub">décide</text>
+              <path class="dash purple" d="M350 120 L400 120" marker-end="url(#arrow-agent)" />
+
+              <rect x="400" y="85" width="140" height="70" class="node green" />
+              <text x="470" y="113" text-anchor="middle">Outil</text>
+              <text x="470" y="135" text-anchor="middle" class="sub">web, API, DB</text>
+              <path class="dash green" d="M540 120 L590 120" marker-end="url(#arrow-agent)" />
+
+              <rect x="590" y="85" width="140" height="70" class="node yellow" />
+              <text x="660" y="113" text-anchor="middle">Observation</text>
+              <text x="660" y="135" text-anchor="middle" class="sub">résultat</text>
+
+              <path class="dash yellow" d="M660 155 L660 195 L280 195 L280 155" marker-end="url(#arrow-agent)" />
+              <text x="470" y="220" text-anchor="middle" class="sub">Répéter jusqu’à ce que la tâche soit finie</text>
+            </svg>
+          </div>
+
+          <div class="card info">
+            <h3>Comment ça marche</h3>
+            <p>Vous donnez un objectif à l’agent, et il travaille en boucle : décider quoi faire, prendre des actions, vérifier le résultat, déterminer son prochain mouvement, encore et encore, jusqu’à ce que le travail soit fait. Il peut chercher sur le web, appeler d’autres APIs, exécuter du code, ou mettre à jour une base de données. <span class="source">⏱ 4:23</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Exemples concrets</h3>
+              <ul>
+                <li>Un research agent qui gather des informations depuis des dizaines de sources et aide à écrire un brief.</li>
+                <li>Un customer support agent qui recherche des commandes et traite des demandes clients tout seul.</li>
+              </ul>
+            </div>
+            <div class="card bad">
+              <h3>Pourquoi c’est dangereux</h3>
+              <p>À mon avis, c’est le truc le plus fun en AI engineering en ce moment, mais aussi l’un des plus dangereux. Chaque pouvoir que vous donnez à un agent IA est une nouvelle occasion que les choses tournent très mal. <span class="source">⏱ 4:52</span></p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>L’évaluation change d’échelle</h3>
+            <p>Au niveau 2, une évaluation signifiait noter une seule réponse. Maintenant, vous notez tout un tas de décisions différentes. Si l’agent prend un mauvais tournant à n’importe quelle étape, tout ce qui suit est construit sur cette erreur. Sans compter qu’il y a de vraies conséquences quand votre agent se trompe avec votre carte bancaire, votre code ou votre email. Les enjeux sont intrinsèquement beaucoup plus élevés. <span class="source">⏱ 5:02</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Passer du niveau 2 au niveau 3</h3>
+            <p>Commencez par donner au système déjà existant un vrai set d’outils, mais gardez-les <strong>read-only</strong> au début. Pour le nutrition coach : l’agent peut chercher dans mes meal logs, utiliser un calculateur nutrition, chercher sur le web. Mais je ne le laisserais rien changer encore. Ensuite, faites tourner la boucle : décider, agir, vérifier, recommencer. Assurez-vous d’avoir l’observabilité instrumentée et d’être confiant que l’agent est fiable et sécurisé avant de lui donner plus de capacités, comme acheter mes courses de la semaine. <span class="source">⏱ 5:32</span></p>
+          </div>
+
+          <h2>Simulateur de risque agent</h2>
+          <div class="simulator">
+            <p class="muted small">Cochez les capacités de votre agent pour voir le niveau de risque et les mitigations.</p>
+            <div class="risk-box">
+              <label class="risk-item"><input type="checkbox" id="risk-ext" onchange="updateRisk()"> <span><span class="label">Contenu externe</span><span class="hint">Web, docs, emails, tickets</span></span></label>
+              <label class="risk-item"><input type="checkbox" id="risk-write" onchange="updateRisk()"> <span><span class="label">Écriture / modification</span><span class="hint">DB, fichiers, emails, code</span></span></label>
+              <label class="risk-item"><input type="checkbox" id="risk-pay" onchange="updateRisk()"> <span><span class="label">Paiements / dépenses</span><span class="hint">Achats, API payantes, crédits</span></span></label>
+              <label class="risk-item"><input type="checkbox" id="risk-pii" onchange="updateRisk()"> <span><span class="label">Données sensibles</span><span class="hint">PII, santé, finance, interne</span></span></label>
+              <label class="risk-item"><input type="checkbox" id="risk-loop" onchange="updateRisk()"> <span><span class="label">Boucle autonome</span><span class="hint">Sans validation humaine à chaque étape</span></span></label>
+              <label class="risk-item"><input type="checkbox" id="risk-tools" onchange="updateRisk()"> <span><span class="label">Beaucoup d’outils</span><span class="hint">Large surface d’action</span></span></label>
+            </div>
+            <div class="risk-meter"><div class="risk-fill" id="risk-fill"></div></div>
+            <p id="risk-label" class="muted"></p>
+            <div id="risk-advice" class="card" style="margin-top:0.8rem"></div>
+          </div>
+
+          ${quizHTML([
+            { q: "Qu’est-ce qu’un agent au niveau 3 ?", o: ["Un modèle qui utilise des outils et prend des décisions en boucle jusqu’à完成 une tâche", "Un chatbot avec historique", "Un RAG sans évaluation"], a: 0, e: "Décider, agir, vérifier, recommencer." },
+            { q: "Quelle est la bonne première étape avant de donner des pouvoirs à un agent ?", o: ["Outils read-only + observabilité + confiance avant écritures/paiements", "Donner tous les droits pour tester", "Supprimer les logs"], a: 0, e: "Chaque pouvoir est une nouvelle occasion que ça tourne mal." }
+          ], "level3")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('level3')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('level3')">Niveau 4 : Enterprise →</button>
+          </div>
+        `
+      },
+      {
+        id: "level4", title: "4. Niveau 4 : Enterprise", express: true,
+        content: `
+          <h1>Niveau 4 — Systèmes IA à échelle enterprise</h1>
+          <p class="lead">
+            Il y a encore un écart entre un agent unique utile pour vous ou comme outil interne, et un système multi-agents
+            pouvant être utilisé de manière fiable par potentiellement des millions d’utilisateurs. Ce qui nous amène au niveau 4 :
+            les systèmes IA à échelle enterprise. <span class="source">⏱ 6:14</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 260" role="img" aria-label="Multi-agents enterprise niveau 4">
+              <defs>
+                <marker id="arrow-ent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="20" y="95" width="130" height="70" class="node" />
+              <text x="85" y="123" text-anchor="middle">Requête</text>
+              <text x="85" y="145" text-anchor="middle" class="sub">client</text>
+              <path class="dash" d="M150 130 L200 130" marker-end="url(#arrow-ent)" />
+
+              <rect x="200" y="95" width="130" height="70" class="node purple" />
+              <text x="265" y="123" text-anchor="middle">Router</text>
+              <text x="265" y="145" text-anchor="middle" class="sub">classe / dirige</text>
+
+              <path class="dash purple" d="M330 110 L400 55" marker-end="url(#arrow-ent)" />
+              <path class="dash purple" d="M330 130 L400 130" marker-end="url(#arrow-ent)" />
+              <path class="dash purple" d="M330 150 L400 205" marker-end="url(#arrow-ent)" />
+
+              <rect x="400" y="25" width="150" height="60" class="node green" />
+              <text x="475" y="50" text-anchor="middle">Billing agent</text>
+              <text x="475" y="70" text-anchor="middle" class="sub">facturation</text>
+
+              <rect x="400" y="100" width="150" height="60" class="node yellow" />
+              <text x="475" y="125" text-anchor="middle">Tech agent</text>
+              <text x="475" y="145" text-anchor="middle" class="sub">technique</text>
+
+              <rect x="400" y="175" width="150" height="60" class="node" />
+              <text x="475" y="200" text-anchor="middle">Policy agent</text>
+              <text x="475" y="220" text-anchor="middle" class="sub">règles</text>
+
+              <path class="dash green" d="M550 55 L620 115" marker-end="url(#arrow-ent)" />
+              <path class="dash yellow" d="M550 130 L620 130" marker-end="url(#arrow-ent)" />
+              <path class="dash" d="M550 205 L620 145" marker-end="url(#arrow-ent)" />
+
+              <rect x="620" y="95" width="140" height="70" class="node red pulse" />
+              <text x="690" y="123" text-anchor="middle">Checker</text>
+              <text x="690" y="145" text-anchor="middle" class="sub">vérifie avant envoi</text>
+              <path class="dash red" d="M760 130 L820 130" marker-end="url(#arrow-ent)" />
+
+              <rect x="820" y="95" width="100" height="70" class="node green" />
+              <text x="870" y="123" text-anchor="middle">Client</text>
+              <text x="870" y="145" text-anchor="middle" class="sub">réponse finale</text>
+            </svg>
+          </div>
+
+          <div class="card info">
+            <h3>Ce que les gens construisent à ce niveau</h3>
+            <p>Quand les gens parlent de postes d’AI engineering payant au nord de 300 000 $ par an, c’est ce genre de systèmes que ces personnes construisent. Au lieu d’un agent essayant de tout faire, vous avez un tas d’agents spécialisés qui se passent le travail. Peut-être qu’un agent décompose la requête et la route. Plusieurs autres gèrent chacun leur partie. Et un dernier vérifie le travail avant que ça sorte. <span class="source">⏱ 6:16</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Exemple customer support</h3>
+            <p>Un système de support client où un agent révise et route le ticket, un billing agent et un technical agent gèrent leurs parties, et un final agent révise toute la réponse avant qu’un client ne la voie. Tout ça tournant pour des millions de personnes en même temps. <span class="source">⏱ 6:36</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>Coordonner une équipe est différent</h3>
+            <p>Coordonner une équipe d’agents est une toute autre chose que d’en faire tourner un seul. Chaque agent ajouté est une autre chose qui peut casser, et l’erreur d’un agent est passée directement au suivant. Et maintenant c’est live devant de vrais clients, où une mauvaise réponse est publique et potentiellement très coûteuse. <span class="source">⏱ 6:51</span></p>
+          </div>
+
+          <div class="card purple">
+            <h3>Le scaffolding devient l’essentiel</h3>
+            <p>Fait intéressant : quand des chercheurs ont regardé le code derrière Claude Code, l’IA actuelle n’était qu’une toute petite tranche. Presque tout le reste était l’échafaudage qui garde le tout tournant de manière fiable. Au-delà des choses des niveaux précédents — prompt engineering structuré, RAG, évaluation — cela peut inclure tracing pour voir exactement ce que chaque agent a fait quand quelque chose tourne mal, guardrails pour que personne ne puisse piéger votre agent afin qu’il leak des données, sans compter garder coût et latence sous contrôle. <span class="source">⏱ 7:09</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Passer du niveau 3 au niveau 4</h3>
+            <p>Je découperais mon nutrition coach en une petite équipe : un agent qui planifie les repas, un qui construit la liste de courses et peut-être même les commande, et un checker agent qui révise le plan avant que je le voie. Ensuite j’essaierais de le casser volontairement : donner au planner un faux ingrédient et voir si le checker l’attrape vraiment ou le laisse passer. La partie millions d’utilisateurs s’apprend probablement surtout sur le job, mais on peut construire quelque chose qui pourrait scaler en s’appuyant sur des services cloud et en pensant coût et fiabilité dès le départ. <span class="source">⏱ 7:41</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la caractéristique du niveau 4 ?", o: ["Plusieurs agents spécialisés coordonnés, avec checker, tracing, guardrails, coût et latence", "Un seul agent qui fait tout", "Un chatbot Streamlit"], a: 0, e: "Enterprise scale : le scaffolding autour des agents devient crucial." },
+            { q: "Que révèle l’analyse du code derrière Claude Code selon le transcript ?", o: ["L’IA elle-même n’est qu’une petite tranche ; l’essentiel est le scaffolding de fiabilité", "Le modèle fait tout", "Il n’y a pas d’évaluation"], a: 0, e: "Tracing, guardrails, coût, latence, orchestration." }
+          ], "level4")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('level4')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('level4')">Niveau 5 : Self-improving →</button>
+          </div>
+        `
+      },
+      {
+        id: "level5", title: "5. Niveau 5 : Self-improving", express: true,
+        content: `
+          <h1>Niveau 5 — Se sortir du chemin : systèmes qui s’améliorent seuls</h1>
+          <p class="lead">
+            Mais même au niveau 4, vous et votre équipe êtes toujours ceux qui construisent tout ça. Vous êtes une sorte de
+            goulot d’étranglement. Donc au niveau 5, vous vous sortez du chemin. C’est le travail le plus avancé en AI engineering
+            en ce moment. Et c’est là que vous arrêtez de construire le système à la main et commencez à donner aux agents le job
+            de le construire eux-mêmes. <span class="source">⏱ 8:23</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 240" role="img" aria-label="Boucle self-improving niveau 5">
+              <defs>
+                <marker id="arrow-self" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="85" width="140" height="70" class="node" />
+              <text x="100" y="113" text-anchor="middle">Performance</text>
+              <text x="100" y="135" text-anchor="middle" class="sub">état actuel</text>
+              <path class="dash" d="M170 120 L220 120" marker-end="url(#arrow-self)" />
+
+              <rect x="220" y="85" width="140" height="70" class="node purple pulse" />
+              <text x="290" y="113" text-anchor="middle">Proposer</text>
+              <text x="290" y="135" text-anchor="middle" class="sub">changement</text>
+              <path class="dash purple" d="M360 120 L410 120" marker-end="url(#arrow-self)" />
+
+              <rect x="410" y="85" width="130" height="70" class="node green" />
+              <text x="475" y="113" text-anchor="middle">Appliquer</text>
+              <text x="475" y="135" text-anchor="middle" class="sub">modifier</text>
+              <path class="dash green" d="M540 120 L590 120" marker-end="url(#arrow-self)" />
+
+              <rect x="590" y="85" width="130" height="70" class="node yellow" />
+              <text x="655" y="113" text-anchor="middle">Tester</text>
+              <text x="655" y="135" text-anchor="middle" class="sub">évaluer</text>
+
+              <path class="dash yellow" d="M655 155 L655 195 L290 195 L290 155" marker-end="url(#arrow-self)" />
+              <text x="475" y="220" text-anchor="middle" class="sub">Garder ou jeter, puis répéter — potentiellement pendant des heures ou des jours</text>
+            </svg>
+          </div>
+
+          <div class="card info">
+            <h3>Ce que ce n’est PAS</h3>
+            <p>Cela va bien au-delà du simple fait d’utiliser des coding agents pour écrire le code, ce que vous ferez à tous les niveaux. C’est même au-delà du spec-driven development où vous dites à l’agent ce que vous voulez qu’il construise puis le laissez l’implémenter. <span class="source">⏱ 8:33</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Ce que font les top teams</h3>
+            <p>Les équipes au sommet, comme celles qui construisent Claude Code et Codex, ne dirigent plus les agents à travers chaque changement. Elles ont commencé à construire des systèmes qui s’améliorent eux-mêmes. L’idée est de mettre en place un cycle où un agent regarde comment le système performe actuellement, propose un changement qui pourrait l’améliorer, fait ce changement, teste si ça a réellement aidé, puis le garde ou le jette. Ensuite il refait tout ça encore et encore, potentiellement pendant des heures ou des jours sans qu’un humain soit impliqué. <span class="source">⏱ 8:43</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card purple">
+              <h3>Exemple Karpathy</h3>
+              <p>Andrej Karpathy a mené un projet où un seul agent a fait environ 700 expériences en deux jours complètement seul, et est revenu avec 20 façons différentes de rendre l’entraînement de modèle plus rapide. <span class="source">⏱ 9:05</span></p>
+            </div>
+            <div class="card purple">
+              <h3>Exemple Anthropic</h3>
+              <p>Anthropic a récemment partagé que la plupart du code mergé dans leur propre codebase est désormais écrit par Claude. Donc ça commence essentiellement à se construire lui-même. <span class="source">⏱ 9:14</span></p>
+            </div>
+          </div>
+
+          <div class="card bad">
+            <h3>La condition critique</h3>
+            <p>Tout ce cycle ne fonctionne que si l’agent peut correctement juger son propre travail encore et encore sans que personne vérifie. Et ça s’avère plutôt difficile à bien faire, parce que si votre scoring est même un petit peu faux, l’agent ne réparera pas le produit. Il trouvera juste la faille dans votre scoring et l’exploitera, accumulant un super score pendant que le produit réel empire de façons que vous n’auriez peut-être même jamais pensé à mesurer. <span class="source">⏱ 9:20</span></p>
+          </div>
+
+          <div class="card warn">
+            <h3>Compétences sérieuses au niveau 5</h3>
+            <ul>
+              <li>Concevoir un système d’évaluation que l’agent ne peut pas tricher.</li>
+              <li>S’assurer que sa performance est liée à ce qui rend réellement le produit bon, pas juste à un nombre facile à manipuler.</li>
+              <li>Instrumenter tout, parce que vous ne pouvez plus le regarder tourner en live : vous ne pouvez lire que la trace laissée.</li>
+              <li>Savoir exactement où un humain doit encore être impliqué : choisir le problème, concevoir le scoring, approuver ce qui part en production la plupart du temps. <span class="source">⏱ 9:39</span></li>
+            </ul>
+          </div>
+
+          <div class="card good">
+            <h3>Attention : pas un niveau de quelques semaines</h3>
+            <p>Ce n’est pas un niveau que vous atteindrez en auto-formation pendant quelques semaines. Chaque compétence ici s’apprend en années à réellement faire tourner des systèmes en production, voir les façons dont ils cassent, et s’améliorer avec le temps. Heureusement, la plupart d’entre nous n’ont pas réellement besoin d’atteindre le niveau 5. Une grande partie de mon travail sur des systèmes IA en production chez Twitch est réalistement niveau 2 ou 3. Parfois, tout ce qu’il faut, c’est un prompt bien fait et une évaluation simple pour construire quelque chose de vraiment utile. <span class="source">⏱ 10:09</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Qu’est-ce que le niveau 5 ?", o: ["Des systèmes où des agents proposent, appliquent, testent, gardent ou jettent des changements pour s’améliorer", "Un chatbot avec plus d’outils", "Un RAG multi-collection"], a: 0, e: "Cycle d’auto-amélioration potentiellement sans humain à chaque itération." },
+            { q: "Quel est le risque principal si le scoring est faux au niveau 5 ?", o: ["L’agent exploite la faille du scoring et améliore le score pendant que le produit empire", "Le modèle devient trop lent", "Les coûts disparaissent"], a: 0, e: "Reward hacking : mesurer la bonne chose est difficile et crucial." }
+          ], "level5")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('level5')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('level5')">Simulateur de niveau →</button>
+          </div>
+        `
+      },
+      {
+        id: "locator", title: "🧭 Simulateur de niveau", express: true,
+        content: `
+          <h1>Où en êtes-vous sur l’échelle des 5 niveaux ?</h1>
+          <p class="lead">Cochez les capacités réellement présentes dans votre projet actuel. Le simulateur estime votre niveau et liste ce qui manque pour passer au suivant.</p>
+
+          <div class="simulator">
+            <div class="check-grid">
+              <label class="check-item"><input type="checkbox" id="cap-api" onchange="estimateLevel()"> <span><span class="label">API + interface</span><span class="hint">J’appelle un LLM via API avec une UI simple.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-track" onchange="estimateLevel()"> <span><span class="label">Tracking / tests</span><span class="hint">Je track prompts, sorties, fallbacks et tests de parsing.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-rag" onchange="estimateLevel()"> <span><span class="label">RAG</span><span class="hint">J’utilise des documents internes ou privés via retrieval.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-evals" onchange="estimateLevel()"> <span><span class="label">Evals par composant</span><span class="hint">J’évalue retrieval, fidélité, réponse et système complet.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-agent" onchange="estimateLevel()"> <span><span class="label">Boucle agent</span><span class="hint">Mon système décide, agit, vérifie, recommence.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-observability" onchange="estimateLevel()"> <span><span class="label">Observabilité / read-first</span><span class="hint">Je log tools, steps, coûts ; j’ai commencé read-only.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-multi" onchange="estimateLevel()"> <span><span class="label">Multi-agents + checker</span><span class="hint">Routeur, spécialistes, vérification avant sortie.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-scaffold" onchange="estimateLevel()"> <span><span class="label">Scaffolding enterprise</span><span class="hint">Tracing, guardrails, contrôle coût/latence.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-self" onchange="estimateLevel()"> <span><span class="label">Auto-amélioration</span><span class="hint">L’agent propose/teste/garde des changements.</span></span></label>
+              <label class="check-item"><input type="checkbox" id="cap-anticheat" onchange="estimateLevel()"> <span><span class="label">Eval anti-triche</span><span class="hint">Le scoring est lié à la vraie qualité produit et résiste à l’exploitation.</span></span></label>
+            </div>
+            <pre id="level-out" class="prompt" style="margin-top:0.8rem"></pre>
+          </div>
+
+          <div class="card info">
+            <h3>Lecture du transcript</h3>
+            <p>Beaucoup d’aspirants AI engineers restent bloqués parce qu’ils construisent les mauvais types de projets. Le simulateur sert à ça : ne pas confondre « ajouter un agent » et « atteindre le niveau 3 ». Sans évaluations, observabilité et garde-fous, un agent est souvent une dette technique déguisée en démo impressionnante. <span class="source">⏱ 0:19</span></p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('locator')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('locator')">Nutrition coach par niveau →</button>
+          </div>
+        `
+      },
+      {
+        id: "nutrition", title: "🥗 Exfil nutrition coach", express: false,
+        content: `
+          <h1>Le même projet aux 5 niveaux : nutrition coach</h1>
+          <p class="lead">Le transcript utilise un meal prep coach / nutrition coach comme fil rouge. Voici comment le même produit évolue à chaque niveau.</p>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-n1')">Niveau 1</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-n2')">Niveau 2</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-n3')">Niveau 3</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-n4')">Niveau 4</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-n5')">Niveau 5</button>
+            </div>
+
+            <div id="tab-n1" class="tab-panel active">
+              <div class="card info">
+                <h3>Niveau 1 — Prompt + interface</h3>
+                <p>Une app Streamlit qui demande « Que dois-je manger cette semaine ? » et envoie un prompt à un LLM. Sortie structurée : liste de repas. Quelques tests de parsing et fallback si le JSON est cassé.</p>
+                <p><strong>Limite :</strong> on ne sait pas si les changements de prompt améliorent réellement la qualité nutritionnelle, la variété ou l’adhérence utilisateur.</p>
+              </div>
+            </div>
+
+            <div id="tab-n2" class="tab-panel">
+              <div class="card good">
+                <h3>Niveau 2 — RAG sur données personnelles</h3>
+                <p>On branche le chatbot sur des données que le modèle n’a jamais vues : journaux nutrition, recettes de famille, contraintes alimentaires, stocks pantry. On chunk, embed, stocke dans une vector database, puis on évalue retrieval et fidélité.</p>
+                <p><strong>Métriques :</strong> le bon document est-il récupéré ? La réponse est-elle ancrée dans les logs/recettes ? Le plan respect-il les allergies ?</p>
+              </div>
+            </div>
+
+            <div id="tab-n3" class="tab-panel">
+              <div class="card warn">
+                <h3>Niveau 3 — Agent read-only puis actions</h3>
+                <p>L’agent peut chercher dans les meal logs, utiliser un calculateur nutrition, chercher des recettes sur le web. D’abord read-only. On instrumente chaque tool call, chaque étape, chaque coût. Ensuite seulement on envisage d’ajouter à la liste de courses ou commander.</p>
+                <p><strong>Risque :</strong> si l’agent achète des ingrédients interdits ou modifie des données, les conséquences sont réelles.</p>
+              </div>
+            </div>
+
+            <div id="tab-n4" class="tab-panel">
+              <div class="card purple">
+                <h3>Niveau 4 — Équipe d’agents</h3>
+                <p>Un planner agent conçoit les repas. Un grocery agent construit la liste et éventuellement commande. Un checker agent révise le plan avant présentation : allergies, budget, cohérence, faux ingrédients. On ajoute tracing, guardrails, contrôle coût/latence.</p>
+                <p><strong>Test rouge :</strong> injecter volontairement un faux ingrédient ou une allergie cachée et vérifier que le checker attrape l’erreur.</p>
+              </div>
+            </div>
+
+            <div id="tab-n5" class="tab-panel">
+              <div class="card bad">
+                <h3>Niveau 5 — Amélioration continue mesurée</h3>
+                <p>Un système observe les métriques produit : adhérence, satisfaction, diversité, coût, erreurs nutritionnelles. Il propose des changements de prompts, de tools, de policies ou de workflow. Il teste sur un harness d’évaluations non trichable, garde ou jette, puis répète. Un humain approuve les changements partant en production.</p>
+                <p><strong>Piège :</strong> si le score est juste « clics sur plan proposé », l’agent peut optimiser la nouveauté au détriment de la qualité réelle.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('nutrition')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('nutrition')">Métriques par niveau →</button>
+          </div>
+        `
+      },
+      {
+        id: "metrics", title: "📏 Métriques par niveau", express: false,
+        content: `
+          <h1>Quelles métriques à quel niveau ?</h1>
+          <p class="lead">Le transcript répète une idée : ajouter une techno n’est pas atteindre un niveau. Ce qui fait monter de niveau, ce sont les évaluations adaptées.</p>
+
+          <div class="simulator">
+            <label for="metric-select">Choisissez un contexte</label>
+            <select id="metric-select" onchange="showMetric()">
+              <option value="retrieval">Niveau 2 — Retrieval RAG</option>
+              <option value="faithfulness">Niveau 2 — Fidélité de réponse</option>
+              <option value="agent">Niveau 3 — Agent avec outils</option>
+              <option value="enterprise">Niveau 4 — Système enterprise multi-agents</option>
+              <option value="self">Niveau 5 — Auto-amélioration</option>
+            </select>
+            <pre id="metric-out" class="prompt" style="margin-top:0.8rem"></pre>
+          </div>
+
+          <div class="card info">
+            <h3>Principe directeur</h3>
+            <p>À chaque niveau, on passe d’évaluer une réponse à évaluer un processus, puis un système, puis une boucle d’amélioration. Si vous ne pouvez pas mesurer ce qui rend le système bon pour l’utilisateur, vous n’avez pas encore le niveau suivant — vous avez juste une démo plus complexe.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('metrics')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('metrics')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios", title: "🎬 Scénarios", express: false,
+        content: `
+          <h1>Scénarios : diagnostiquer et remédier</h1>
+          <p class="lead">Sélectionnez un scénario pour voir le diagnostic et le remède issus du transcript.</p>
+
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('stuck_l1')">Démo fragile</button>
+              <button class="tab-btn" onclick="chooseScenario('rag_no_eval')">RAG sans evals</button>
+              <button class="tab-btn" onclick="chooseScenario('agent_danger')">Agent trop puissant</button>
+              <button class="tab-btn" onclick="chooseScenario('multi_break')">Cascade multi-agents</button>
+              <button class="tab-btn" onclick="chooseScenario('self_cheat')">Score parfait, produit pire</button>
+              <button class="tab-btn" onclick="chooseScenario('portfolio')">Portfolio AI engineer</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>Leçon transversale</h3>
+            <p>La progression n’est pas linéaire en technologies seulement : API → RAG → agents → multi-agents → self-improving. Elle est linéaire en maturité de mesure et de contrôle : tracking → evals → observabilité → guardrails → évaluation anti-triche.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "🃏 Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. 25 cartes couvrant les 5 niveaux, avec ancres temporelles du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button>
+          </div>
+        `
+      },
+      {
+        id: "antipatterns", title: "🚫 Anti-patterns", express: true,
+        content: `
+          <h1>Anti-patterns : les pièges qui bloquent les carrières</h1>
+          <p class="lead">Le transcript met en garde : beaucoup construisent les mauvais types de projets, ceux qui n’atterrissent jamais en emploi. Voici les pièges à éviter.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Confondre démo et système</h3>
+              <p>Un chatbot Streamlit qui marche une fois n’est pas un système. Sans tracking, tests et métriques, vous ne savez pas si vos changements aident.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Brancher RAG sans évaluer retrieval</h3>
+              <p>Le problème n’est pas toujours le LLM. Souvent, le mauvais chunk n’a jamais été récupéré. Évaluez chunking, embedding, retrieval avant de toucher au prompt final.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Donner des outils d’écriture trop tôt</h3>
+              <p>Un agent qui peut modifier, acheter ou envoyer doit d’abord prouver sa fiabilité en read-only, avec observabilité et limites.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. Multi-agents sans checker ni tracing</h3>
+              <p>Une erreur d’un agent se propage au suivant. Sans vérification finale et trace complète, vous découvrez les bugs par les clients.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. Optimiser un score facile à hacker</h3>
+              <p>Au niveau 5, si le scoring ne reflète pas la vraie qualité produit, l’agent exploitera la faille du metric, pas le besoin utilisateur.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Viser le niveau 5 trop tôt</h3>
+              <p>Le niveau 5 vient d’années en production. La plupart des valeurs professionnelles sont au niveau 2 ou 3 : bons prompts, RAG évalué, agents sûrs.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est le piège classique d’un projet niveau 1 ?", o: ["Confondre une démo qui marche une fois avec un système mesurable", "Utiliser Python", "Faire un chatbot"], a: 0, e: "Sans tracking ni métriques, on navigue à vue." },
+            { q: "Pourquoi le niveau 5 n’est-il pas un objectif de débutant ?", o: ["Il exige des années en production et une évaluation non trichable ; la plupart des valeurs sont niveau 2/3", "Parce que c’est illégal", "Parce que les modèles ne peuvent pas"], a: 0, e: "Utiles, pas fancy." }
+          ], "antipatterns")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider que vous savez situer un projet, choisir la prochaine compétence et éviter les pièges des 5 niveaux.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l’examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et plan de progression</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et transformez la théorie en prochain projet réel.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">📈</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Les 5 Niveaux de l’AI Engineering : API, RAG, Agents, Enterprise, Self-improving</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Checklist de progression 12 points</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Construire un projet niveau 1 utile en une semaine, pas juste une démo.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Tracker prompts, sorties, erreurs et fallbacks dès le niveau 1.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Ajouter 20 à 50 cas de test réels avant de dire qu’un prompt est meilleur.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Brancher un RAG sur des données que le modèle n’a jamais vues.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Évaluer retrieval, chunking, embeddings et fidélité séparément.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Donner à un agent des outils read-only avant toute écriture ou paiement.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Instrumenter observabilité : steps, tool calls, tokens, coût, erreurs.</label>
+            <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Découper un agent monolithique en routeur + spécialistes + checker.</label>
+            <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Ajouter tracing, guardrails, budgets et limites de boucle.</label>
+            <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Casser volontairement le système avec de faux inputs et mesurer la détection.</label>
+            <label><input type="checkbox" id="c11" onchange="toggleCheck('c11')"> Si auto-amélioration : concevoir une évaluation anti-triche liée au produit réel.</label>
+            <label><input type="checkbox" id="c12" onchange="toggleCheck('c12')"> Garder un humain aux points critiques : problème, scoring, approbation production.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/12</span></p>
+
+          <h2>Ressources ancrées au transcript et au contexte fourni</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Transcript source</strong> : « The 5 levels of AI engineering projects ».</li>
+              <li><strong>Fil rouge</strong> : nutrition coach / meal prep coach, du prompt simple au système auto-amélioré.</li>
+              <li><strong>Chiffres clés</strong> : postes niveau 4 à plus de 300 000 $/an ; Karpathy ~700 expériences en 2 jours, 20 améliorations ; Anthropic : beaucoup de code mergé écrit par Claude.</li>
+              <li><strong>Message final</strong> : la plupart des travaux en production sont niveau 2 ou 3 ; on est embauché pour être utile, pas fancy.</li>
+              <li><strong>Contexte public fourni</strong> : Sean Chen — builder bilingue, fondateur AutoManus, chaîne de projets IA réels ; GitHub : DeepResearch backend, Supabase tips, Kimi K2/Claude Code, MVP Next.js/Stripe/Supabase. Utile comme exemples de projets portfolio progressifs.</li>
+              <li><strong>Formation citée dans le transcript</strong> : DataCamp Associate AI Engineer for Developers, avec IDE navigateur, projets et préparation certification.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l’examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l’accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.estimateLevel = estimateLevel;
+    window.updateRisk = updateRisk;
+    window.showMetric = showMetric;
+    window.chooseScenario = chooseScenario;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

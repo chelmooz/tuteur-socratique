@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Mémoire des Agents IA | SQLite, Vector DB, mem0, Zep, LangMem</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🧠 <span>Agent Memory</span> Masterclass</div>
+        <div class="muted small">SQLite • Vector DB • mem0 • Zep • LangMem • Waku / Hermes</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les sources du transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "agent-memory-masterclass-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      race: { seeded: false },
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { started: false, finished: false, score: 0, total: 8, passed: false, remaining: 360, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          race: STATE.race,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        STATE.theme = data.theme || "dark";
+        STATE.visited = new Set(data.visited || []);
+        STATE.quizScores = data.quizScores || {};
+        STATE.diagnostic = data.diagnostic || null;
+        STATE.path = data.path || "masterclass";
+        STATE.race = data.race || { seeded: false };
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        STATE.certName = data.certName || "";
+        STATE.sourcesHidden = !!data.sourcesHidden;
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 8;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quiz(items, moduleId, title = "Quiz express", id = "") {
+      return `
+        <div class="quiz" data-module="${moduleId}" ${id ? `id="${id}"` : ""}>
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const total = qs.length;
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + total;
+      STATE.quizScores[moduleId] = { correct, total };
+      saveState();
+      updateScore();
+    }
+
+    function copyText(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.innerText.trim();
+      const done = () => {
+        if (!btn) return;
+        const old = btn.textContent;
+        btn.textContent = "✅ Copié";
+        setTimeout(() => { btn.textContent = old; }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      const mods = visibleModules();
+      $("#nav").innerHTML = mods.map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">
+          ${m.title}
+        </button>
+      `).join("");
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `
+        <section id="${m.id}" class="section">
+          ${m.content}
+        </section>
+      `).join("");
+    }
+
+    function showSection(id) {
+      const mod = MODULES.find(m => m.id === id);
+      if (!mod) return;
+
+      if (STATE.path === "express" && mod.express === false) {
+        STATE.path = "masterclass";
+        saveState();
+        renderNav();
+      }
+
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "race") restoreRace();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0;
+      let total = 0;
+      Object.values(STATE.quizScores).forEach(s => {
+        correct += s.correct || 0;
+        total += s.total || 0;
+      });
+      if (STATE.exam.finished) {
+        correct += STATE.exam.score;
+        total += STATE.exam.total;
+      }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() {
+      STATE.theme = STATE.theme === "dark" ? "light" : "dark";
+      document.body.setAttribute("data-theme", STATE.theme);
+      saveState();
+    }
+
+    function toggleSources() {
+      STATE.sourcesHidden = !STATE.sourcesHidden;
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      saveState();
+    }
+
+    function toggleMobileNav() {
+      $("#sidebar").classList.toggle("mobile-open");
+    }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    const RACE_QUESTIONS = [
+      {
+        id: "jensen",
+        q: "Qu est-ce que Jensen Huang a renversé sur mon tapis blanc ?",
+        results: [
+          { l: "SQLite FTS5", t: "4.6 s", s: "correct", a: "Chili oil / huile piment sur le tapis blanc." },
+          { l: "mem0", t: "5.1 s", s: "correct", a: "Chili oil. Réponse courte et directe." },
+          { l: "LangMem", t: "7.5 s", s: "correct", a: "Trouve le fait via le store sous-jacent, mais plus lent." },
+          { l: "Zep", t: "en cours", s: "slow", a: "Le graphe temporel est encore en train d être construit." },
+          { l: "Contrôle", t: "0 s", s: "none", a: "Aucune information : pas de mémoire injectée." }
+        ],
+        note: "Le contrôle répond correctement qu il ne sait pas, car il n a aucun souvenir."
+      },
+      {
+        id: "paul",
+        q: "Combien Paul Graham me doit-il ? (posée en chinois)",
+        results: [
+          { l: "SQLite FTS5", t: "10.3 s", s: "partial", a: "Keyword search fragile en cross-language. Peut répondre en anglais ou rater la nuance." },
+          { l: "mem0", t: "6.2 s", s: "correct", a: "Paul Graham doit 20 quid / livres, pari sourdough à Lisbonne. Peut répondre en chinois." },
+          { l: "LangMem", t: "8.1 s", s: "correct", a: "Correct si le store sous-jacent gère bien la similarité." },
+          { l: "Zep", t: "lent", s: "slow", a: "Peut retenir la relation, mais latence élevée au seeding." },
+          { l: "Contrôle", t: "0 s", s: "none", a: "Aucune idée." }
+        ],
+        note: "C est le genre de test qui montre les limites du simple keyword search."
+      },
+      {
+        id: "elon",
+        q: "À quelle heure Elon Musk arrive-t-il ?",
+        results: [
+          { l: "SQLite FTS5", t: "4.9 s", s: "correct", a: "21h, car l ancienne valeur 19h a été rendue obsolète." },
+          { l: "mem0", t: "5.4 s", s: "correct", a: "21h avec supersede / invalidation temporelle." },
+          { l: "LangMem", t: "7.8 s", s: "correct", a: "Dépend du store, mais peut gérer l update." },
+          { l: "Zep", t: "lent", s: "partial", a: "Le graphe temporel est puissant, mais peut être overkill et lent." },
+          { l: "Contrôle", t: "0 s", s: "none", a: "Cherche dans le calendrier : aucun événement trouvé." }
+        ],
+        note: "Ici, la vraie compétence est le supersede : ne pas supprimer 19h, mais la marquer dépassée."
+      }
+    ];
+
+    function seedRace() {
+      const btn = $("#seed-btn");
+      const log = $("#race-log");
+      if (!btn || !log) return;
+      btn.disabled = true;
+      btn.textContent = "Seeding...";
+      log.innerHTML = "<p>Envoi des mêmes faits à SQLite, mem0, LangMem, Zep et au groupe contrôle.</p>";
+      setTimeout(() => {
+        STATE.race.seeded = true;
+        saveState();
+        btn.textContent = "✅ Stores seedés";
+        log.innerHTML += "<p>Zep construit encore son graphe temporel. C est normal : plus riche, mais plus lent.</p>";
+      }, 850);
+    }
+
+    function askRace(id) {
+      if (!STATE.race.seeded) {
+        alert("Commencez par seed les stores avec les mêmes faits.");
+        return;
+      }
+      const q = RACE_QUESTIONS.find(x => x.id === id);
+      const out = $("#race-results");
+      if (!q || !out) return;
+
+      out.innerHTML = `
+        <h4>${q.q}</h4>
+        ${q.results.map((r, i) => `
+          <div class="race-row" style="animation-delay:${i * 0.08}s">
+            <div class="head">
+              <span>${r.l}</span>
+              <span>
+                <span class="race-time">${r.t}</span>
+                <span class="race-status ${r.s}">${statusLabel(r.s)}</span>
+              </span>
+            </div>
+            <div class="race-answer">${r.a}</div>
+          </div>
+        `).join("")}
+        <p class="muted">${q.note}</p>
+      `;
+    }
+
+    function statusLabel(s) {
+      if (s === "correct") return "OK";
+      if (s === "partial") return "Partiel";
+      if (s === "slow") return "Lent";
+      return "Aucune info";
+    }
+
+    function restoreRace() {
+      const btn = $("#seed-btn");
+      const log = $("#race-log");
+      if (!btn || !log) return;
+      if (STATE.race.seeded) {
+        btn.disabled = true;
+        btn.textContent = "✅ Stores seedés";
+        log.innerHTML = "<p>Les faits ont déjà été envoyés. Vous pouvez poser les questions de test.</p>";
+      }
+    }
+
+    const FLASHCARDS = [
+      { front: "Amnésie par défaut", back: "Chaque appel LLM repart de zéro. La mémoire vient du harness, pas du modèle.", tip: "0:00" },
+      { front: "Mémoire procédurale", back: "Savoir-faire, skills, procédures réutilisables. Exemple : rechercher les vidéos IA du matin.", tip: "0:25" },
+      { front: "Mémoire sémantique", back: "Faits durables. Exemple : préférences, règles, procédures internes.", tip: "0:25" },
+      { front: "Mémoire épisodique", back: "Événements datés. Exemple : réunion d hier, avis reçu mardi, arrivée changée à 21h.", tip: "0:25" },
+      { front: "Do nothing", back: "memory.MD ou SOUL.MD est chargé directement dans le contexte. Simple, mais consomme des tokens.", tip: "5:08" },
+      { front: "Keyword search", back: "SQLite FTS5 cherche des mots-clés. Rapide, explicable, mais fragile en synonymes et cross-language.", tip: "5:47" },
+      { front: "RAG / vector", back: "Embeddings + similarité sémantique. Trouve des idées proches, pas seulement des mots identiques.", tip: "6:20" },
+      { front: "Graph RAG", back: "Vectorise nodes et edges. Utile pour relations et contexte riche, mais peut être overkill.", tip: "6:52" },
+      { front: "Retire / supersede", back: "Ne pas supprimer. Invalidé la valeur précédente avec une plage temporelle. L histoire reste traçable.", tip: "7:52" },
+      { front: "Reflect / dreaming", back: "Tâche différée qui fusionne doublons, retire obsolete, consolide faits et skills.", tip: "9:01" },
+      { front: "Zep", back: "Graphe temporel. Nodes, edges, validité. Puissant pour histoire vivante, lent au seeding.", tip: "16:32" },
+      { front: "LangMem", back: "Un package, pas un store. Utilise votre propre base et gère extraction / mise à jour.", tip: "17:21" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    function generateArchitecture() {
+      const useCase = $("#arch-usecase")?.value || "assistant_perso";
+      const volume = $("#arch-volume")?.value || "faible";
+      const temporal = $("#arch-temporal")?.value === "oui";
+      const relations = $("#arch-relations")?.value === "oui";
+      const multilingue = $("#arch-multilingue")?.value === "oui";
+      const complexite = $("#arch-complexite")?.value || "simple";
+
+      let stack = [];
+      let why = [];
+      let risks = [];
+      let prompt = "";
+
+      if (useCase === "assistant_perso") {
+        stack = ["SOUL.MD", "memory.MD", "skills/", "SQLite state.db + FTS5", "consolidation périodique"];
+        why = ["Simple à auditer", "Editable directement", "Suffisant pour un assistant personnel", "Évite la dépendance aux embeddings"];
+        risks = ["Le keyword search peut rater les synonymes", "Ne pas tout charger dans le contexte si memory.MD grossit"];
+      } else if (useCase === "support_interne") {
+        stack = ["memory.MD pour politiques stables", "Supabase PGVector pour documentation", "metadata : date, service, version", "reranker si beaucoup de chunks"];
+        why = ["Les procédures changent", "La recherche sémantique aide les formulations variées", "Les metadata permettent de filtrer"];
+        risks = ["Sans refresh, la base vectorielle devient obsolète", "Trop de chunks non pertinents diluent la réponse"];
+      } else if (useCase === "crm_relations") {
+        stack = relations ? ["mem0 graph memory", "ou Zep si historique temporel fort", "attributs source : email, réunion, web"] : ["mem0 row memory", "SQLite pour historique simple"];
+        why = ["Les relations comptent : personne, produit, événement, dette", "Le graphe révèle des liens indirects"];
+        risks = ["Overkill si peu d entités", "Zep peut être lent au seeding"];
+      } else if (useCase === "analyse_avis") {
+        stack = ["Supabase PGVector", "metadata : établissement, plateforme, note, date", "episodic log pour tendances", "SQLite pour requêtes simples"];
+        why = ["Beaucoup de texte court", "Filtres métadonnées indispensables", "La similarité aide à regrouper problèmes récurrents"];
+        risks = ["Attention aux doublons d avis", "Ne pas confondre note basse et contenu négatif"];
+      } else if (useCase === "agent_codage") {
+        stack = ["skills procéduraux", "state.db épisodique", "memory.MD pour conventions", "retrieval gate sélectif"];
+        why = ["Le code a besoin de procédures et d historique de tâches", "Moins besoin de graphe lourd"];
+        risks = ["Trop de mémoire non structurée pollue le contexte", "Il faut retirer les décisions dépassées"];
+      }
+
+      if (multilingue) {
+        stack.push("préférer embeddings / mem0 / vector plutôt que seul FTS5");
+        why.push("Le keyword search est fragile entre langues");
+      }
+      if (temporal) {
+        stack.push("supersede / invalidation temporelle obligatoire");
+        why.push("Les faits changent : conserver l histoire sans confondre le présent");
+      }
+      if (volume === "élevé") {
+        stack.push("consolidation + reflection différée");
+        why.push("Sinon la mémoire grossit sans devenir un actif");
+      }
+      if (complexite === "avancée") {
+        stack.push("retrieval gate + tracing + eval");
+        why.push("Pour mesurer quelle mémoire sert réellement la réponse");
+      }
+
+      prompt = `Tu es un agent IA avec une architecture mémoire explicite.
+
+Règles mémoire :
+- Consulte memory.MD pour les faits durables.
+- Consulte state.db pour les événements datés et l historique récent.
+- Utilise les skills pour les procédures.
+- Avant de répondre, décide si une retrieval est nécessaire.
+- Si une information est dépassée, ne la supprime pas : marque-la superseded avec date.
+- Cite la source interne quand c est possible.
+- Ne charge pas toute la mémoire dans le contexte : récupère seulement le nécessaire.
+
+Stack recommandée : ${stack.join(", ")}.`;
+
+      const out = $("#arch-output");
+      if (!out) return;
+      out.textContent =
+        "Cas d usage : " + useCase + "\n" +
+        "Complexité : " + complexite + "\n\n" +
+        "STACK RECOMMANDÉE\n- " + stack.join("\n- ") + "\n\n" +
+        "POURQUOI\n- " + why.join("\n- ") + "\n\n" +
+        " RISQUES À SURVEILLER\n- " + risks.join("\n- ") + "\n\n" +
+        "PROMPT SYSTÈME MÉMOIRE\n" + prompt;
+    }
+
+    const DIAG_TEXT = {
+      debutant: "Commencez par les piliers et évitez Zep / graph au début. Votre objectif : comprendre pourquoi la mémoire existe avant de choisir un outil.",
+      praticien: "Focus sur SQLite, vector stores, mem0 et la différence retire / delete. Vous pouvez coder un harness simple.",
+      expert: "Regardez directement la memory race, Zep temporal graph, LangMem et les trade-offs de latence / pertinence."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) {
+        alert("Répondez aux trois questions du diagnostic.");
+        return;
+      }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+          <p class="muted">Le mode express masque les modules avancés. Vous pouvez basculer en masterclass à tout moment depuis le diagnostic.</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.started = true;
+      STATE.exam.remaining = 360;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 6;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        const level = STATE.diagnostic?.level || "praticien";
+        let advice = "";
+        if (STATE.exam.passed) {
+          advice = "Vous pouvez architecturer une mémoire simple et justifier vos choix. Prochaine étape : ajouter retrieval gate, tracing et consolidation.";
+        } else if (correct >= 4) {
+          advice = "Bases solides. Revoyez retire vs delete, Graph RAG et la différence entre LangMem et un vrai store.";
+        } else {
+          advice = "Reprenez les piliers : ce qu est la mémoire, comment la retrouver, comment la maintenir. Évitez de choisir un outil avant d avoir clarifié l usage.";
+        }
+        res.innerHTML = `
+          <strong>Résultat : ${correct}/${qs.length}</strong><br>
+          ${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br>
+          <span class="muted">${advice}</span>
+        `;
+      }
+
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) {
+          res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        }
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) {
+        alert("Terminez d abord l examen final.");
+        return;
+      }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Agent Memory Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-agent-memory.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencer par memory.MD + SQLite FTS5, puis ajouter embeddings seulement si le keyword search échoue.";
+      if (d.level === "expert") return "Évaluer Zep ou mem0 graph uniquement si les relations et la temporalité créent de la valeur mesurable.";
+      return "Stack pragmatique : SOUL.MD, memory.MD, state.db, consolidation, retrieval gate, vector store si besoin.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    const MODULES = [
+      {
+        id: "home",
+        title: "🏠 Accueil",
+        express: true,
+        content: `
+          <h1>De l amnésie du LLM à la mémoire comme actif</h1>
+          <p class="lead">
+            Chaque appel à un grand modèle de langage commence sans mémoire. Si ChatGPT ou Claude semblent se souvenir de vous,
+            ce n est pas le modèle : c est un système mémoire construit autour du harness. Ce cours décompose cinq couches réelles
+            et vous apprend à choisir la bonne architecture.
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 230" role="img" aria-label="Cycle de l amnésie et de la mémoire agentique">
+              <defs>
+                <marker id="arrow-home" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="85" width="145" height="65" class="node" />
+              <text x="102" y="112" text-anchor="middle">Utilisateur</text>
+              <text x="102" y="132" text-anchor="middle" class="sub">question</text>
+
+              <path class="dash" d="M175 117 L245 117" marker-end="url(#arrow-home)" />
+
+              <rect x="245" y="85" width="155" height="65" class="node red pulse" />
+              <text x="322" y="112" text-anchor="middle">LLM call</text>
+              <text x="322" y="132" text-anchor="middle" class="sub">amnésie</text>
+
+              <path class="dash red" d="M400 117 L470 117" marker-end="url(#arrow-home)" />
+
+              <rect x="470" y="70" width="185" height="95" class="node purple pulse" />
+              <text x="562" y="102" text-anchor="middle">Harness mémoire</text>
+              <text x="562" y="124" text-anchor="middle" class="sub">text, SQL, vector, graph</text>
+              <text x="562" y="144" text-anchor="middle" class="sub">retrieval gate</text>
+
+              <path class="dash purple" d="M655 117 L725 117" marker-end="url(#arrow-home)" />
+
+              <rect x="725" y="85" width="145" height="65" class="node green" />
+              <text x="797" y="112" text-anchor="middle">Réponse</text>
+              <text x="797" y="132" text-anchor="middle" class="sub">contexte utile</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif final</h3>
+              <p>À la fin, vous serez capable de distinguer mémoire textuelle, keyword, vectorielle, graphique et temporelle, puis de choisir une couche mémoire pour un agent concret.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, trois piliers, comparaison de cinq layers, memory race, atelier d architecture et examen final.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Une stack mémoire défendable, un prompt système, une checklist de maintenance et un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('amnesia')">Sauter au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic",
+        title: "🎯 Diagnostic",
+        express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours : express ou masterclass, niveau et objectif.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau actuel sur les agents IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre harness, mémoire et RAG.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : j ai déjà branché un LLM sur des outils ou une base.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je conçois des systèmes multi-agents et je compare des architectures.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="choisir"> Choisir la bonne mémoire pour un usage.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="coder"> Coder ou améliorer un harness agentique.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comparer"> Comparer SQLite, vector DB, mem0, Zep, LangMem.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15 minutes, essentiel seulement.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 30-45 minutes, ateliers et détails.</label>
+            </div>
+
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "amnesia",
+        title: "1. Amnésie & Harness",
+        express: true,
+        content: `
+          <h1>Pourquoi chaque appel LLM commence par l amnésie</h1>
+          <p class="lead">
+            Le modèle ne conserve pas de poids mémoriel à long terme entre les appels. La continuité perçue par l utilisateur
+            est produite par un harness : récupération, injection de contexte, outils, tracing et mémoire structurée.
+            <span class="source">⏱ 0:00</span>
+          </p>
+
+          <div class="grid">
+            <div class="card purple">
+              <h3>Mémoire procédurale</h3>
+              <p>Le savoir-faire. Dans Waku / Hermes, cela ressemble à des skills : procédures déclenchables, routines, workflows.</p>
+            </div>
+            <div class="card info">
+              <h3>Mémoire sémantique</h3>
+              <p>Les faits durables : préférences, règles, procédures internes, faits à long terme. Souvent dans memory.MD.</p>
+            </div>
+            <div class="card warn">
+              <h3>Mémoire épisodique</h3>
+              <p>Les événements datés : hier, mardi dernier, réunion, avis reçu, changement d horaire. Souvent dans state.db.</p>
+            </div>
+          </div>
+
+          <div class="card bad">
+            <h3>Contre-exemple</h3>
+            <p>Si vous demandez au modèle de se souvenir tout seul sans système externe, vous obtenez soit de l hallucination, soit une réponse générique. La mémoire n est pas une propriété magique du LLM.</p>
+          </div>
+
+          <div class="prompt" id="snippet-amnesia">Règle d or :
+La mémoire d un agent est un système d ingénierie autour du modèle.
+Elle doit répondre à trois questions :
+1. Où est stocké le souvenir ?
+2. Comment l agent le retrouve-t-il ?
+3. Comment est-il maintenu dans le temps ?</div>
+          <button class="btn secondary small" onclick="copyText('snippet-amnesia', this)">Copier la règle d or</button>
+
+          ${quiz([
+            { q: "Pourquoi ChatGPT ou Claude semblent se souvenir de vous ?", o: ["Parce que le modèle a une mémoire interne permanente", "Parce qu un système mémoire est construit autour du harness", "Parce que les poids du modèle sont réécrits à chaque message"], a: 1, e: "Le modèle reste amnésique par appel. C est le harness qui récupère et injecte le contexte." },
+            { q: "Une skill relève surtout de quelle mémoire ?", o: ["Sémantique", "Épisodique", "Procédurale"], a: 2, e: "Une skill est un savoir-faire, une procédure réutilisable." }
+          ], "amnesia")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('amnesia')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('amnesia')">Les trois piliers →</button>
+          </div>
+        `
+      },
+      {
+        id: "pillars",
+        title: "2. Les 3 piliers",
+        express: true,
+        content: `
+          <h1>Que stocker ? Comment retrouver ? Comment maintenir ?</h1>
+          <p class="lead">
+            Sean Chen réduit la mémoire agentique à trois piliers. C est la grille de lecture la plus utile pour éviter
+            de choisir un outil avant d avoir compris le problème. <span class="source">⏱ 2:33</span>
+          </p>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'pillar-what')">1. Ce que c est</button>
+              <button class="tab-btn" onclick="switchTab(this, 'pillar-find')">2. Comment retrouver</button>
+              <button class="tab-btn" onclick="switchTab(this, 'pillar-maintain')">3. Comment maintenir</button>
+            </div>
+
+            <div id="pillar-what" class="tab-panel active">
+              <div class="grid">
+                <div class="card info">
+                  <h3>Texte / Markdown</h3>
+                  <p>memory.MD, SOUL.MD, skills. Simple, éditable, lisible par un humain. Risque : consommer le contexte si trop long.</p>
+                </div>
+                <div class="card warn">
+                  <h3>Table</h3>
+                  <p>SQLite state.db, Google Sheets, Postgres. Bon pour lignes, colonnes, historique, filtres simples.</p>
+                </div>
+                <div class="card purple">
+                  <h3>Graphe</h3>
+                  <p>Nodes et edges. Utile quand les relations portent du sens : personne, produit, événement, dette, révélation.</p>
+                </div>
+              </div>
+              <p class="muted">Les embeddings vectoriels ne sont pas un quatrième type ontologique : ils vivent dans un store, souvent des lignes avec colonne vector ou un graphe vectorisé.</p>
+            </div>
+
+            <div id="pillar-find" class="tab-panel">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Méthode</th><th>Principe</th><th>Quand l utiliser</th><th>Limite</th></tr></thead>
+                  <tbody>
+                    <tr><td>Do nothing</td><td>Charger memory.MD / SOUL.MD dans le contexte</td><td>Mémoire petite et critique</td><td>Gaspille des tokens si trop gros</td></tr>
+                    <tr><td>Keyword / FTS5</td><td>Cherche des mots exacts ou proches</td><td>Logs, state.db, simplicité</td><td>Fragile en synonymes et cross-language</td></tr>
+                    <tr><td>RAG vectoriel</td><td>Similarité sémantique via embeddings</td><td>Documents, avis, connaissances variées</td><td>Besoin d embedding, de fraîcheur et de reranking</td></tr>
+                    <tr><td>Graph RAG</td><td>Vectorise nodes et edges, traverse le graphe</td><td>Relations riches, contexte structurel</td><td>Peut être overkill et lent</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="pillar-maintain" class="tab-panel">
+              <div class="grid">
+                <div class="card good">
+                  <h3>Add / Update / Delete / Noop</h3>
+                  <p>Les opérations de base. Delete est souvent dangereux : il efface l histoire.</p>
+                </div>
+                <div class="card warn">
+                  <h3>Retire / Supersede</h3>
+                  <p>Invalidé l ancienne valeur dans une plage temporelle. Exemple : 1000 stars devient historique, 1300 stars est la valeur actuelle.</p>
+                </div>
+                <div class="card info">
+                  <h3>Attribute</h3>
+                  <p>Tracer la source : utilisateur, web, calendrier, document, autre agent. Sans source, pas d auditabilité.</p>
+                </div>
+                <div class="card purple">
+                  <h3>Reflect / Dreaming</h3>
+                  <p>Tâche différée qui fusionne doublons, retire obsolete, consolide faits et transforme épisodes en skills.</p>
+                </div>
+              </div>
+              <div class="prompt" id="snippet-pillars">Checklist de conception mémoire :
+- Type de stockage : texte, table, graphe ?
+- Mode de retrieval : contexte, keyword, vector, graph ?
+- Maintien : add, update, supersede, attribute, reflect ?
+- Source : qui a dit cela, quand, et peut-on le tracer ?
+- Fenêtre : combien de tokens cette mémoire consomme-t-elle ?</div>
+              <button class="btn secondary small" onclick="copyText('snippet-pillars', this)">Copier la checklist</button>
+            </div>
+          </div>
+
+          ${quiz([
+            { q: "Quelle est la différence entre delete et retire / supersede ?", o: ["Aucune", "Delete supprime, retire invalidé l ancienne info sans effacer l histoire", "Retire supprime plus vite"], a: 1, e: "Retire préserve la traçabilité : l ancienne valeur reste utile comme contexte historique." },
+            { q: "LangMem est surtout...", o: ["Un vector store", "Un graphe temporel", "Un package qui utilise votre propre store"], a: 2, e: "LangMem n est pas une base : c est une couche de gestion au-dessus de votre stockage." }
+          ], "pillars")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('pillars')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('pillars')">RAG vs no-RAG →</button>
+          </div>
+        `
+      },
+      {
+        id: "rag-vs",
+        title: "3. RAG, Graph RAG, no-RAG",
+        express: true,
+        content: `
+          <h1>RAG, agentic RAG, Graph RAG... et pourquoi Hermes / Waku n en utilisent pas toujours</h1>
+          <p class="lead">
+            Le mot RAG est souvent utilisé comme un réflexe. Or Hermes et Waku montrent qu on peut avoir une mémoire robuste
+            sans embeddings : texte, SQLite, skills, consolidation et retrieval gate. <span class="source">⏱ 0:58</span>
+          </p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>RAG classique</h3>
+              <p>Question → embedding → similarité → chunks → LLM. Linéaire. Utile pour documents, mais l agent ne décide pas vraiment.</p>
+            </div>
+            <div class="card good">
+              <h3>Agentic RAG</h3>
+              <p>L agent choisit ses outils : vector DB, SQL, web search, puis vérifie la pertinence, rerank, agrège et répond.</p>
+            </div>
+            <div class="card purple">
+              <h3>Graph RAG</h3>
+              <p>Vectorise relations et entités. Retourne un sous-graphe. Puissant pour liens implicites, mais coûteux.</p>
+            </div>
+            <div class="card info">
+              <h3>No-RAG / text-first</h3>
+              <p>memory.MD + SOUL.MD + state.db + skills. Simple, auditable, rapide à démarrer. Peut suffire largement.</p>
+            </div>
+          </div>
+
+          <div class="simulator">
+            <h3>Simulateur de retrieval</h3>
+            <p>Cliquez sur un type de question pour voir la méthode de récupération la plus pertinente.</p>
+            <div class="race-controls">
+              <button class="btn secondary small" onclick="pickRetrieval('simple')">Question simple sur une préférence</button>
+              <button class="btn secondary small" onclick="pickRetrieval('synonyme')">Formulation différente d un fait connu</button>
+              <button class="btn secondary small" onclick="pickRetrieval('relation')">Qui est lié à quoi dans un projet ?</button>
+              <button class="btn secondary small" onclick="pickRetrieval('agent')">L agent doit décider et croiser plusieurs sources</button>
+            </div>
+            <div id="retrieval-out" class="prompt" style="display:none"></div>
+          </div>
+
+          ${quiz([
+            { q: "Hermes et Waku utilisent-ils obligatoirement des embeddings vectoriels ?", o: ["Oui, toujours", "Non, ils peuvent reposer sur texte, SQLite et skills", "Seulement pour le system prompt"], a: 1, e: "Le transcript insiste : il y a des mémoires sans retrieval vectoriel." },
+            { q: "Quel avantage principal du Graph RAG ?", o: ["Il est toujours plus rapide", "Il rend visibles des relations entre entités", "Il remplace le LLM"], a: 1, e: "Le graphe porte du sens via nodes et edges, mais peut être overkill." }
+          ], "rag-vs")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('rag-vs')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('rag-vs')">Les 5 couches →</button>
+          </div>
+        `
+      },
+      {
+        id: "layers",
+        title: "4. Les 5 couches",
+        express: true,
+        content: `
+          <h1>SQLite, Supabase PGVector, mem0, Zep, LangMem</h1>
+          <p class="lead">
+            Chaque couche répond à un sous-problème. Le piège est de choisir l outil le plus sophistiqué avant d avoir
+            défini la nature de la mémoire nécessaire.
+          </p>
+
+          <details open>
+            <summary>Layer 1 : Plain text — SOUL.MD, memory.MD, skills</summary>
+            <p>
+              Le plus simple à comprendre et à éditer. SOUL.MD porte souvent le persona / système. memory.MD porte les faits durables.
+              Les skills portent les procédures. Hermes peut même avoir une personnalité Pikachu éditable directement.
+              <span class="source">⏱ 9:47</span>
+            </p>
+            <ul>
+              <li>Avantages : lisible, versionnable, auditable, zéro dépendance vectorielle.</li>
+              <li>Limites : consomme le contexte si trop long, retrieval pauvre si pas d index.</li>
+              <li>Maintenance : consolidation via modèle auxiliaire toutes les 5-10 conversations.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>Layer 2 : SQLite state.db + FTS5</summary>
+            <p>
+              Base relationnelle légère avec recherche par mots-clés. Bon pour historique, logs, événements datés.
+              <span class="source">⏱ 12:33</span>
+            </p>
+            <ul>
+              <li>Avantages : rapide, local, simple, SQL.</li>
+              <li>Limites : keyword search fragile en synonymes et cross-language.</li>
+              <li>Usage typique : mémoire épisodique et état de conversation.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>Layer 3 : Vector stores — Supabase PGVector, Weaviate, Pinecone</summary>
+            <p>
+              Les embeddings transforment texte en vecteurs numériques. La recherche devient sémantique : nourriture peut
+              rapprocher pomme, saucisse, recette, même sans mot exact. <span class="source">⏱ 13:13</span>
+            </p>
+            <ul>
+              <li>Avantages : robustesse linguistique, scalabilité documentaire.</li>
+              <li>Limites : coût d embedding, fraîcheur, metadata, reranking nécessaires.</li>
+              <li>Supabase : relationnel + extension vectorielle, pas un pur vector store natif.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>Layer 4 : mem0 — row memory et graph memory</summary>
+            <p>
+              mem0 propose une mémoire structurée en lignes ou en graphe. Exemple de row memory : un acheteur allemand exige
+              une certification vegan sur chaque SKU. C est un fait durable. <span class="source">⏱ 14:38</span>
+            </p>
+            <ul>
+              <li>Opérations : add, update, delete, noop, potentiellement supersede.</li>
+              <li>Graph memory : nodes, edges, traversal.</li>
+              <li>Incertitude : certaines fonctions avancées peuvent être côté enterprise / pro.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>Layer 5 : Zep — temporal graph memory</summary>
+            <p>
+              Zep fait évoluer un graphe dans le temps. Nodes, edges, validité. On ne supprime pas : on invalide dans une plage.
+              L edge peut porter du sens : Tom Holland a révélé la fin de son prochain film. <span class="source">⏱ 16:29</span>
+            </p>
+            <ul>
+              <li>Avantages : histoire vivante, relations, temporalité.</li>
+              <li>Limites : seeding lent, complexité, overkill pour petits cas d usage.</li>
+              <li>Le transcript souligne un pain point : la latence.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>Bonus : LangMem — un package, pas un store</summary>
+            <p>
+              LangMem ne fournit pas magiquement une base. Il s appuie sur votre store et gère extraction, résolution, mise à jour.
+              <span class="source">⏱ 17:20</span>
+            </p>
+          </details>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Couche</th><th>Force</th><th>Risque</th><th>Meilleur usage</th></tr></thead>
+              <tbody>
+                <tr><td>Plain text</td><td>Simple, éditable</td><td>Contexte gonflé</td><td>Assistant perso, skills, faits stables</td></tr>
+                <tr><td>SQLite FTS5</td><td>Rapide, local</td><td>Keyword fragile</td><td>Logs, épisodes, état</td></tr>
+                <tr><td>Vector DB</td><td>Sémantique</td><td>Obsolète sans refresh</td><td>Docs, avis, knowledge base</td></tr>
+                <tr><td>mem0</td><td>Row / graph managé</td><td>Boîte noire selon version</td><td>Mémoire applicative structurée</td></tr>
+                <tr><td>Zep</td><td>Temporal graph</td><td>Lent, overkill</td><td>Relations historiques complexes</td></tr>
+                <tr><td>LangMem</td><td>Flexible</td><td>Dépend du store</td><td>Prototypage LangChain / contrôle</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          ${quiz([
+            { q: "Quelle couche est la plus exposée au problème cross-language dans la memory race ?", o: ["Vector DB", "SQLite FTS5", "Zep graph"], a: 1, e: "Le keyword search peut rater si la mémoire est en anglais et la question en chinois." },
+            { q: "Pourquoi Zep peut être overkill ?", o: ["Parce qu il ne stocke rien", "Parce que le graphe temporel est lent et complexe pour petits usages", "Parce qu il supprime l historique"], a: 1, e: "Puissant pour relations temporelles, mais latency et complexité ne se justifient pas toujours." },
+            { q: "LangMem est...", o: ["Un store vectoriel", "Un package de gestion mémoire", "Un harness complet"], a: 1, e: "Il s appuie sur votre propre stockage." }
+          ], "layers")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('layers')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('layers')">Memory race →</button>
+          </div>
+        `
+      },
+      {
+        id: "race",
+        title: "5. Memory Race",
+        express: true,
+        content: `
+          <h1>La memory race : dîner, faits, questions, latences</h1>
+          <p class="lead">
+            Dans Waku Agent Arena, les mêmes faits sont envoyés à plusieurs couches mémoire, puis on pose les mêmes questions.
+            Le groupe contrôle n a aucune mémoire. <span class="source">⏱ 18:16</span>
+          </p>
+
+          <div class="card info">
+            <h3>Faits seedés</h3>
+            <ul>
+              <li>Jensen Huang a renversé du chili oil sur le tapis blanc.</li>
+              <li>Elon Musk devait arriver à 19h, puis l info est mise à jour : 21h.</li>
+              <li>Tom Holland a révélé la fin de son prochain film autour d un café.</li>
+              <li>Paul Graham doit 20 quid pour un pari sourdough à Lisbonne.</li>
+            </ul>
+          </div>
+
+          <div class="simulator">
+            <h3>Simulateur interactif</h3>
+            <div class="race-controls">
+              <button class="btn" id="seed-btn" onclick="seedRace()">1. Seed les stores</button>
+              <button class="btn secondary" onclick="askRace('jensen')">2. Question Jensen / chili oil</button>
+              <button class="btn secondary" onclick="askRace('paul')">3. Question Paul Graham en chinois</button>
+              <button class="btn secondary" onclick="askRace('elon')">4. Question Elon / supersede</button>
+            </div>
+            <div id="race-log" class="muted small"></div>
+            <div id="race-results"></div>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Enseignement 1</h3>
+              <p>SQLite est rapide et suffisant pour beaucoup de faits simples, mais montre ses limites en sémantique cross-language.</p>
+            </div>
+            <div class="card purple">
+              <h3>Enseignement 2</h3>
+              <p>Zep rend visible la relation : l edge Tom Holland → next film → revealed ending porte du sens.</p>
+            </div>
+            <div class="card warn">
+              <h3>Enseignement 3</h3>
+              <p>La vraie compétence n est pas de stocker plus, mais de savoir invalider sans effacer : supersede / retire.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('race')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('race')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards",
+        title: "6. Flashcards",
+        express: true,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. L objectif est de transformer la lecture en récupération active.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Atelier architecture →</button>
+          </div>
+        `
+      },
+      {
+        id: "workshop",
+        title: "7. Atelier",
+        express: true,
+        content: `
+          <h1>Atelier : concevez votre architecture mémoire</h1>
+          <p class="lead">Choisissez un cas d usage et générez une stack défendable, avec risques et prompt système.</p>
+
+          <div class="generator">
+            <div class="grid">
+              <div>
+                <label for="arch-usecase">Cas d usage</label>
+                <select id="arch-usecase">
+                  <option value="assistant_perso">Assistant personnel</option>
+                  <option value="support_interne">Support interne / documentation</option>
+                  <option value="crm_relations">CRM / relations</option>
+                  <option value="analyse_avis">Analyse d avis clients</option>
+                  <option value="agent_codage">Agent de codage</option>
+                </select>
+              </div>
+              <div>
+                <label for="arch-volume">Volume mémoire</label>
+                <select id="arch-volume">
+                  <option value="faible">Faible</option>
+                  <option value="moyen">Moyen</option>
+                  <option value="eleve">Élevé</option>
+                </select>
+              </div>
+              <div>
+                <label for="arch-temporal">Historique temporel nécessaire ?</label>
+                <select id="arch-temporal">
+                  <option value="non">Non</option>
+                  <option value="oui">Oui</option>
+                </select>
+              </div>
+              <div>
+                <label for="arch-relations">Relations entre entités importantes ?</label>
+                <select id="arch-relations">
+                  <option value="non">Non</option>
+                  <option value="oui">Oui</option>
+                </select>
+              </div>
+              <div>
+                <label for="arch-multilingue">Multi-langue ?</label>
+                <select id="arch-multilingue">
+                  <option value="non">Non</option>
+                  <option value="oui">Oui</option>
+                </select>
+              </div>
+              <div>
+                <label for="arch-complexite">Complexité acceptée</label>
+                <select id="arch-complexite">
+                  <option value="simple">Simple</option>
+                  <option value="moyenne">Moyenne</option>
+                  <option value="avancee">Avancée</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn" onclick="generateArchitecture()">Générer la stack</button>
+            <pre id="arch-output" class="prompt" style="display:none"></pre>
+            <button class="btn secondary small" id="copy-arch" style="display:none" onclick="copyText('arch-output', this)">Copier la stack</button>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('workshop')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('workshop')">Templates & code →</button>
+          </div>
+        `
+      },
+      {
+        id: "templates",
+        title: "8. Templates",
+        express: false,
+        content: `
+          <h1>Templates réutilisables</h1>
+          <p class="lead">Copiez ces blocs pour démarrer un harness mémoire sans repartir de zéro.</p>
+
+          <div class="card">
+            <h3>Prompt système mémoire-aware</h3>
+            <pre id="tpl-system" class="code">Tu es un agent IA avec mémoire structurée.
+
+Avant de répondre :
+1. Identifie le type de mémoire nécessaire : procédurale, sémantique ou épisodique.
+2. Consulte seulement les sources utiles : memory.MD, state.db, skills, vector store ou graphe.
+3. Si une information est dépassée, utilise la valeur courante et garde l ancienne comme historique.
+4. Cite la source interne si disponible.
+5. Ne charge pas toute la mémoire dans le contexte : fais un retrieval sélectif.
+
+Format de réponse :
+- Réponse directe.
+- Preuve / source.
+- Incertitude si la mémoire est contradictoire.</pre>
+            <button class="btn secondary small" onclick="copyText('tpl-system', this)">Copier</button>
+          </div>
+
+          <div class="card">
+            <h3>Prompt de consolidation / reflecting</h3>
+            <pre id="tpl-consolidation" class="code">Analyse les 10 derniers échanges.
+
+Tâches :
+- Extrais les faits durables vers memory.MD.
+- Extrais les événements datés vers state.db.
+- Transforme les procédures répétées en skills.
+- Fusionne les doublons.
+- Marque les informations dépassées comme superseded, sans les supprimer.
+- Ajoute la source : utilisateur, outil, document, web.
+
+Sortie :
+- JSON stable avec : fact, type, source, timestamp, status, supersedes.</pre>
+            <button class="btn secondary small" onclick="copyText('tpl-consolidation', this)">Copier</button>
+          </div>
+
+          <div class="card">
+            <h3>Retrieval gate pseudo-code</h3>
+            <pre id="tpl-gate" class="code">if question contient "toujours", "préfère", "règle":
+  récupérer memory.MD / faits sémantiques
+
+if question contient "hier", "la semaine dernière", "quand":
+  récupérer state.db / mémoire épisodique
+
+if question contient "comment faire", "procédure", "skill":
+  charger la skill correspondante
+
+if question longue, ambiguë ou multi-source:
+  activer vector search + reranker + éventuel web search
+
+toujours:
+  logger la requête, les sources récupérées et le score de pertinence</pre>
+            <button class="btn secondary small" onclick="copyText('tpl-gate', this)">Copier</button>
+          </div>
+
+          <div class="card">
+            <h3>Config memory race simplifiée</h3>
+            <pre id="tpl-race" class="code">{
+  "facts": [
+    "Jensen Huang a renversé du chili oil sur le tapis blanc.",
+    "Elon Musk arrive à 19h.",
+    "UPDATE : Elon Musk arrive finalement à 21h.",
+    "Tom Holland a révélé la fin de son prochain film.",
+    "Paul Graham doit 20 quid pour un pari sourdough à Lisbonne."
+  ],
+  "stores": ["sqlite_fts5", "mem0", "langmem", "zep", "control"],
+  "questions": [
+    "Qu a renversé Jensen Huang ?",
+    "Combien Paul Graham doit-il ? (en chinois)",
+    "À quelle heure Elon arrive-t-il ?"
+  ]
+}</pre>
+            <button class="btn secondary small" onclick="copyText('tpl-race', this)">Copier</button>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('templates')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('templates')">Erreurs fréquentes →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors",
+        title: "9. Erreurs",
+        express: true,
+        content: `
+          <h1>Erreurs fréquentes en mémoire agentique</h1>
+          <p class="lead">La mémoire devient un actif seulement si elle est curée. Sinon elle devient une dette contextuelle.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Supprimer au lieu de retirer</h3>
+              <p>On perd l histoire. Or 1000 stars il y a 25 jours peut expliquer 1300 stars aujourd hui.</p>
+            </div>
+            <div class="card bad">
+              <h3>Tout charger dans le contexte</h3>
+              <p>memory.MD trop gros = tokens gaspillés, attention diluée, coût accru.</p>
+            </div>
+            <div class="card bad">
+              <h3>Utiliser un graphe partout</h3>
+              <p>Zep / Graph RAG sont puissants, mais overkill pour beaucoup de petits assistants.</p>
+            </div>
+            <div class="card bad">
+              <h3>Oublier l attribution</h3>
+              <p>Sans source, impossible de savoir si le fait vient de l utilisateur, du web, d un doc ou d un autre agent.</p>
+            </div>
+            <div class="card bad">
+              <h3>Aucune reflection</h3>
+              <p>Doublons, contradictions et outdated s accumulent. Le dreaming différé est crucial.</p>
+            </div>
+          </div>
+
+          ${quiz([
+            { q: "Quelle erreur consiste à effacer une information historique utile ?", o: ["Supprimer au lieu de retirer", "Attribuer la source", "Faire une consolidation", "Utiliser SQLite"], a: 0, e: "Retire / supersede préserve la trace tout en invalidant la valeur passée." },
+            { q: "Pourquoi la reflection / dreaming est-elle utile ?", o: ["Pour rendre le LLM conscient", "Pour fusionner doublons et écarter l obsolete hors exécution critique", "Pour remplacer la base vectorielle"], a: 1, e: "C est un post-process de maintenance mémoire." },
+            { q: "Quand un graphe temporel devient-il pertinent ?", o: ["Toujours", "Quand relations + temporalité créent de la valeur mesurable", "Jamais"], a: 1, e: "Il faut justifier la complexité par un gain réel." }
+          ], "errors")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final",
+        title: "✅ Examen final",
+        express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">8 questions. 6 minutes. Seuil de réussite : 6/8. Le minuteur simule une contrainte réelle de conception : choisir vite et bien.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 6:00</div>
+          </div>
+
+          ${quiz([
+            { q: "Que se passe-t-il à chaque appel LLM sans harness mémoire ?", o: ["Le modèle apprend durablement", "L appel démarre amnésique", "La conversation est automatiquement sauvegardée"], a: 1, e: "La continuité vient du système autour du modèle." },
+            { q: "memory.MD chargé directement dans le contexte illustre quelle méthode de retrieval ?", o: ["Do nothing", "Graph RAG", "Supersede"], a: 0, e: "Rien à chercher : la mémoire est déjà dans la fenêtre." },
+            { q: "SQLite FTS5 est surtout utile pour...", o: ["La similarité sémantique", "La recherche par mots-clés", "Le graphe temporel"], a: 1, e: "FTS5 = full-text search / keyword." },
+            { q: "Un vector store résout principalement quel problème ?", o: ["Latence réseau", "Similarité sémantique", "Versionnage Git"], a: 1, e: "Les embeddings rapprochent des sens, pas seulement des mots." },
+            { q: "Supersede veut dire...", o: ["Supprimer immédiatement", "Invalidé l ancienne valeur sans effacer l histoire", "Changer de modèle"], a: 1, e: "C est la base d une mémoire temporelle traçable." },
+            { q: "Zep est particulièrement adapté à...", o: ["Un simple fichier texte", "Un graphe qui évolue dans le temps", "Un cache HTTP"], a: 1, e: "Temporal graph memory : nodes, edges, validité." },
+            { q: "LangMem est...", o: ["Un store vectoriel hébergé", "Un package au-dessus de votre store", "Un harness complet"], a: 1, e: "Il gère la mémoire, mais ne fournit pas forcément le stockage." },
+            { q: "Quelle est la thèse finale du cours ?", o: ["La mémoire est un accessoire", "La mémoire bien curée est l actif le plus précieux d un agent", "Il faut toujours utiliser Graph RAG"], a: 1, e: "Accumuler, maintenir, tracer : c est là que se crée la valeur." }
+          ], "final", "Examen final", "final-quiz")}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action",
+        title: "🏆 Certificat",
+        express: true,
+        content: `
+          <h1>Certificat et passage à l action</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et appliquez la checklist 7 jours.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" style="width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🧠</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Mémoire des Agents IA : SQLite, Vector DB, mem0, Zep, LangMem</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Checklist 7 jours</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Jour 1 : écrire SOUL.MD et memory.MD pour un agent simple.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Jour 2 : créer state.db SQLite et logger les conversations.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Jour 3 : implémenter une consolidation toutes les 5-10 échanges.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Jour 4 : ajouter un retrieval gate minimal.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Jour 5 : tester keyword vs vector sur 10 questions.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Jour 6 : implémenter supersede au lieu de delete.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Jour 7 : exporter un rapport JSON et décider de la couche suivante.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+          <h2>Ressources issues du transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Waku Agent</strong> : harness open source mentionné, avec arena mémoire et exemples de couches.</li>
+              <li><strong>Hermes</strong> : exemple de mémoire simple via SOUL.MD, memory.MD, skills, state.db.</li>
+              <li><strong>Sean Chen / seanchen.io</strong> : créateur du contenu, fondateur AutoManus, parcours MIT / Google / Walmart, canal bilingue IA.</li>
+              <li><strong>GitHub ShenSeanChen</strong> : dépôts liés à React, Supabase, Deep Research, RAG, Waku.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function pickRetrieval(type) {
+      const out = $("#retrieval-out");
+      if (!out) return;
+      const texts = {
+        simple: "Recommandation : Do nothing.\nSi le fait est court, stable et critique, il peut vivre dans memory.MD et être chargé directement dans le contexte.\nÉviter un vector store pour une préférence permanente simple.",
+        synonyme: "Recommandation : Vector search.\nLa question utilise des mots différents du souvenir. L embedding rapproche sens et variantes lexicales.",
+        relation: "Recommandation : Graph RAG ou mem0 graph.\nSi la réponse dépend de liens entre entités, un graphe peut révéler des connexions qu une simple ligne ne montre pas.",
+        agent: "Recommandation : Agentic RAG.\nL agent décide des outils, vérifie la pertinence, combine vector DB, SQL, web search, puis rerank avant génération."
+      };
+      out.style.display = "block";
+      out.textContent = texts[type] || "";
+    }
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      const first = visibleModules()[0]?.id || "home";
+      showSection(first);
+      updateScore();
+      updateChecklistProgress();
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.copyText = copyText;
+    window.seedRace = seedRace;
+    window.askRace = askRace;
+    window.renderFlashcard = renderFlashcard;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.generateArchitecture = generateArchitecture;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.pickRetrieval = pickRetrieval;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

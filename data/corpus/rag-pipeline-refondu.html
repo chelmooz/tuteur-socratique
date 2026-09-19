@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAG Blueprint — Architecture Python</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="Retour en haut"><span class="brand-mark">R</span><span>RAG Blueprint</span></a>
+      <div class="top-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false"><span id="themeIcon" aria-hidden="true">☼</span><span class="theme-label" id="themeLabel">Mode sombre</span><span class="switch" aria-hidden="true"></span></button></div>
+    </div>
+  </header>
+  <main id="top" class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div><p class="eyebrow">Référence technique · Python · RAG</p><h1 id="page-title">Construire une application RAG, de bout en bout.</h1><p class="hero-copy">Une architecture lisible et responsive pour passer du document brut à une application de recherche augmentée par génération.</p></div>
+      <aside class="hero-note"><strong>Le principe</strong><p>Préparer les documents, les représenter sous forme de vecteurs, retrouver le contexte utile, puis guider le modèle avec ce contexte.</p></aside>
+    </section>
+    <section aria-labelledby="steps-title">
+      <div class="toolbar"><div><h2 id="steps-title">Les 12 étapes du pipeline</h2><p id="resultCount" aria-live="polite">12 étapes disponibles</p></div><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Rechercher une étape…" autocomplete="off"></label></div>
+      <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+      <div class="steps" id="steps"></div><p class="empty" id="empty" hidden>Aucune étape ne correspond à votre recherche.</p>
+    </section>
+    <footer>Architecture refondue en HTML sémantique · thème clair/sombre mémorisé localement</footer>
+  </main>
+<script>
+(() => {
+  const steps = [
+    ['Chargement & découpage des documents','PDF, texte, web → chunks prêts à indexer',"from langchain_community.document_loaders import PyPDFLoader\nloader = PyPDFLoader('file.pdf')\ndocs = loader.load()\n\nfrom langchain_text_splitters import RecursiveCharacterTextSplitter\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=1000, chunk_overlap=200\n)\nsplits = splitter.split_documents(docs)",'Préparer les données pour la recherche'],
+    ['Création des embeddings','Convertir le texte en vecteurs numériques',"from langchain_openai import OpenAIEmbeddings\nembeddings = OpenAIEmbeddings(\n    model='text-embedding-3-small'\n)\nquery_embedding = embeddings.embed_query('Votre requête')",'Représenter le sens du texte sous forme de vecteurs'],
+    ['Stockage & recherche vectorielle','Indexer les chunks dans une base vectorielle',"from langchain_community.vectorstores import FAISS\nvectorstore = FAISS.from_documents(\n    documents=splits, embedding=embeddings\n)\nretriever = vectorstore.as_retriever(\n    search_kwargs={'k': 5}\n)",'Stocker et récupérer les documents pertinents'],
+    ['Techniques de récupération','Similarité simple ou MMR pour la diversité',"retriever = vectorstore.as_retriever(\n    search_type='mmr',\n    search_kwargs={'k': 5, 'fetch_k': 20}\n)\ndocs = retriever.invoke('query')",'Obtenir un contexte pertinent et peu redondant'],
+    ['Ré-classement (reranking)','Trier les documents par pertinence',"from sentence_transformers import CrossEncoder\nreranker = CrossEncoder(\n    'BAAI/bge-reranker-base'\n)\npairs = [(query, doc.page_content) for doc in docs]\nscores = reranker.predict(pairs)",'Améliorer la qualité des résultats récupérés'],
+    ['Construire le pipeline RAG','Relier récupération et génération',"from langchain.chains import RetrievalQA\nfrom langchain_openai import ChatOpenAI\nllm = ChatOpenAI(model='gpt-4o-mini')\nrag_chain = RetrievalQA.from_chain_type(\n    llm=llm, retriever=retriever\n)\nresult = rag_chain.invoke({'query': query})",'Combiner le contexte et le modèle'],
+    ['Ingénierie du prompt','Guider le modèle avec contexte + question',"from langchain.prompts import ChatPromptTemplate\nprompt = ChatPromptTemplate.from_template(\n    'Utilisez le contexte pour répondre.\\n'\n    'Contexte: {context}\\nQuestion: {question}'\n)",'Donner au modèle des instructions fiables'],
+    ['Mémoire conversationnelle','Conserver l’historique des échanges',"from langchain.memory import ConversationBufferMemory\nmemory = ConversationBufferMemory(\n    memory_key='chat_history',\n    return_messages=True\n)",'Créer une expérience conversationnelle'],
+    ['Outils, agents & données externes','Donner au modèle accès au monde réel',"from langchain.agents import Tool\nsearch_tool = Tool(\n    name='Search', func=search_function,\n    description='Recherche web récente.'\n)",'Étendre le RAG avec des outils'],
+    ['Évaluation & suivi','Mesurer fidélité, pertinence, précision',"from ragas import evaluate\nfrom ragas.metrics import faithfulness, answer_relevancy\nresult = evaluate(\n    dataset, metrics=[faithfulness, answer_relevancy]\n)",'Mesurer et améliorer la qualité'],
+    ['Déploiement en production','Exposer le pipeline via une API',"from fastapi import FastAPI\napp = FastAPI()\n\n@app.post('/query')\ndef query_rag(request: dict):\n    return {'answer': rag_chain.invoke(request)}",'Passer du prototype à une API'],
+    ['Utilités & extras','Réordonnancement, coûts, cache, secrets',"from langchain.cache import InMemoryCache\nfrom dotenv import load_dotenv\n\nload_dotenv()\n# Ajouter cache, logs et gestion des secrets",'Industrialiser l’application']
+  ];
+  const $ = id => document.getElementById(id);
+  const escapeHtml = value => value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const highlight = code => escapeHtml(code).replace(/(#.*)$/gm,'<span class="com">$1</span>').replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g,'<span class="str">$1</span>').replace(/\b(True|False)\b/g,'<span class="bool">$1</span>').replace(/\b(\d+)\b/g,'<span class="num">$1</span>').replace(/\b(from|import|def|return|for|in|class)\b/g,'<span class="kw">$1</span>');
+  const stepsEl = $('steps');
+  steps.forEach((step,i) => { const article=document.createElement('article'); article.className='step'; article.dataset.search=step.join(' ').toLowerCase(); article.innerHTML=`<div class="step-head"><div class="step-number">ÉTAPE</div><h3>${escapeHtml(step[0])}</h3><p class="tagline">${escapeHtml(step[1])}</p></div><div class="step-body"><pre><code>${highlight(step[2])}</code></pre><div class="purpose">${escapeHtml(step[3])}</div></div>`; stepsEl.appendChild(article); });
+  function update(){ const query=$('search').value.trim().toLowerCase(); let visible=0; document.querySelectorAll('.step').forEach(card=>{ const match=!query||card.dataset.search.includes(query); card.hidden=!match; if(match) visible++; }); $('empty').hidden=visible!==0; $('resultCount').textContent=query?`${visible} étape${visible>1?'s':''} trouvée${visible>1?'s':''}`:`${steps.length} étapes disponibles`; $('progressBar').style.width=`${visible/steps.length*100}%`; }
+  $('search').addEventListener('input',update); document.addEventListener('keydown',e=>{ if(e.key==='/' && document.activeElement!==$('search')){e.preventDefault();$('search').focus();} });
+  const root=document.documentElement, toggle=$('themeToggle');
+  const saved=localStorage.getItem('rag-theme'); const initial=saved|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  function setTheme(theme){ root.dataset.theme=theme; const dark=theme==='dark'; toggle.setAttribute('aria-pressed',String(dark)); $('themeLabel').textContent=dark?'Mode clair':'Mode sombre'; $('themeIcon').textContent=dark?'☾':'☼'; localStorage.setItem('rag-theme',theme); }
+  toggle.addEventListener('click',()=>setTheme(root.dataset.theme==='dark'?'light':'dark')); setTheme(initial); update();
+})();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

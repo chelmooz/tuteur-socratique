@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture et Entraînement des LLMs</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+    <header>
+        <h1>Construire et Entraîner des LLMs</h1>
+        <p>Du pré-entraînement à l'optimisation matérielle</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="card">
+            <h2>1. La Modélisation et le Pré-entraînement</h2>
+            <p>L'objectif fondamental du pré-entraînement est d'apprendre au modèle à modéliser la structure d'Internet. Les LLMs actuels sont des <strong>modèles auto-régressifs</strong> dont la tâche consiste à prédire le token suivant.</p>
+            
+            <div class="highlight-box">
+                <strong>La Règle de la Chaîne des Probabilités</strong><br>
+                La génération repose sur la probabilité conditionnelle, sans approximation :
+                $$ P(w_1, w_2, ..., w_T) = \prod_{t=1}^{T} P(w_t \mid w_1, ..., w_{t-1}) $$
+            </div>
+
+            <h3>La Tokenisation et les Données</h3>
+            <ul>
+                <li><strong>Tokens :</strong> Les modèles ne lisent pas des mots entiers pour gérer les fautes de frappe et les langues sans espaces. L'algorithme dominant est le <em>Byte Pair Encoding (BPE)</em>.</li>
+                <li><strong>Filtrage :</strong> Entraîner sur "tout internet" nécessite de nettoyer le HTML, retirer le contenu inapproprié (NSFW), dédupliquer les textes et filtrer la qualité via des classifieurs.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>2. Les Lois d'Échelle (Scaling Laws)</h2>
+            <p>Contrairement à l'apprentissage classique, avec les LLMs : <strong>plus le modèle est grand et plus il a de données, meilleure est la performance.</strong></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Impact Pratique</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Prédictibilité</strong></td>
+                        <td>On peut prédire la performance d'un modèle géant en entraînant de petits modèles, évitant un gaspillage massif de temps de calcul.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Loi de Chinchilla</strong></td>
+                        <td>Il faut utiliser environ <strong>20 tokens d'entraînement pour chaque paramètre</strong> du modèle.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coût (Ex: 400B params)</strong></td>
+                        <td>Nécessite ~16 000 GPUs H100 pendant 70 jours, pour un coût total estimé à 75 millions de dollars.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>3. Post-Entraînement : L'Alignement (Interactif)</h2>
+            <p>Le modèle pré-entraîné sait "parler", mais il faut l'aligner pour qu'il devienne un assistant utile. Cela commence par le <strong>SFT (Supervised Fine-Tuning)</strong>, puis passe par l'alignement des préférences.</p>
+            
+            <div class="interactive-section">
+                <div class="toggle-container">
+                    <button id="btn-rlhf" class="active" onclick="switchDiagram('rlhf')">Pipeline RLHF</button>
+                    <button id="btn-dpo" onclick="switchDiagram('dpo')">Pipeline DPO</button>
+                </div>
+                
+                <div id="diagram-container">
+                    </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>4. Systèmes et Infrastructure Matérielle</h2>
+            <p>L'optimisation de la puissance de calcul (Compute) est vitale. La communication entre les puces est le principal goulot d'étranglement.</p>
+            <ul>
+                <li><strong>Puissance Matricielle :</strong> Les GPUs sont pensés pour le débit massif. Les opérations doivent être matricielles pour ne pas brider les performances.</li>
+                <li><strong>Précision Mixte :</strong> Les calculs sont effectués en <strong>16-bits</strong> (pour la vitesse et la mémoire) mais les poids du modèle sont conservés en <strong>32-bits</strong> pour garder la précision des mises à jour (SGD).</li>
+                <li><strong>Operator Fusion :</strong> Pour éviter les allers-retours lents avec la mémoire DRAM du GPU, plusieurs opérations sont fusionnées dans un seul "fused kernel".</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialisation de Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+        const diagrams = {
+            rlhf: `
+                graph TD
+                A[Modèle Pré-entraîné] --> B[SFT : Supervised Fine-Tuning]
+                B --> C[Génération de Réponses Multiples]
+                C --> D[Humains évaluent les préférences]
+                D --> E[Entraînement du Reward Model]
+                E --> F[Optimisation de la Politique via PPO]
+                style E fill:#fef08a,stroke:#ca8a04
+                style F fill:#bfdbfe,stroke:#2563eb
+            `,
+            dpo: `
+                graph TD
+                A[Modèle Pré-entraîné] --> B[SFT : Supervised Fine-Tuning]
+                B --> C[Génération de Réponses Multiples]
+                C --> D[Humains évaluent les préférences]
+                D --> E[Direct Preference Optimization - DPO]
+                E --> F(Mise à jour directe des poids)
+                style E fill:#bbf7d0,stroke:#16a34a
+                style F fill:#bbf7d0,stroke:#16a34a
+            `
+        };
+
+        async function renderDiagram(type) {
+            const container = document.getElementById('diagram-container');
+            container.innerHTML = ''; // Nettoyer le conteneur
+            
+            try {
+                const { svg } = await mermaid.render('mermaid-graph', diagrams[type]);
+                container.innerHTML = svg;
+            } catch (error) {
+                container.innerHTML = '<p>Erreur de rendu du schéma.</p>';
+            }
+        }
+
+        function switchDiagram(type) {
+            // Gérer l'état des boutons
+            document.getElementById('btn-rlhf').classList.remove('active');
+            document.getElementById('btn-dpo').classList.remove('active');
+            document.getElementById(`btn-${type}`).classList.add('active');
+            
+            // Rendre le schéma correspondant
+            renderDiagram(type);
+        }
+
+        // Rendu initial
+        window.onload = () => switchDiagram('rlhf');
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

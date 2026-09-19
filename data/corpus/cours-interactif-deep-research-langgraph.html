@@ -1,0 +1,63 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — Deep Research avec LangGraph</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="current">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Guide débutant • Deep Research</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Modules"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Pourquoi"><span class="pill">Étape 1</span><h1>Construire un Agent IA de Recherche Approfondie</h1><p class="muted">À la fin de ce cours, vous saurez distinguer un appel LLM linéaire d’un agent Deep Research, modéliser son état et contrôler sa boucle de recherche.</p><div class="grid"><div><h2>Appel standard</h2><p>Une requête, une sortie immédiate, peu de vérification : les informations obsolètes ou manquantes peuvent produire une hallucination.</p></div><div><h2>Agent Deep Research</h2><p>Plan, requêtes ciblées, lecture des résultats, auto-évaluation des lacunes, nouvelle itération puis synthèse référencée.</p></div></div><div class="diagram" role="img" aria-label="Comparaison linéaire et cyclique"><svg viewBox="0 0 900 180"><g fill="#173b5c" stroke="#62e6ff" stroke-width="2"><rect x="35" y="65" width="170" height="50" rx="10"/><rect x="260" y="65" width="170" height="50" rx="10"/><rect x="485" y="65" width="170" height="50" rx="10"/><rect x="710" y="65" width="150" height="50" rx="10"/></g><g fill="#edf7ff" text-anchor="middle" font-size="15"><text x="120" y="95">Question</text><text x="345" y="95">Plan</text><text x="570" y="95">Recherche</text><text x="785" y="95">Synthèse</text></g><g class="flow" stroke="#b8a1ff" stroke-width="3"><path d="M205 90h50M430 90h50M655 90h50M785 125c-160 55-550 55-665 0" fill="none"/></g></svg></div></section>
+<section class="card module" data-title="Décomposer"><span class="pill">Étape 2</span><h2>Décomposer la problématique</h2><p>Un bon agent ne cherche pas au hasard. Pour comparer des frameworks en production, il répartit la question en axes vérifiables.</p><div class="grid"><div><h3>Maturité</h3><p>Robustesse, erreurs et disponibilité.</p></div><div><h3>État</h3><p>Persistance et reprise après interruption.</p></div><div><h3>Outils</h3><p>Function calling et contrôle des flux.</p></div><div><h3>Multi-agents</h3><p>Coordination et communication.</p></div><div><h3>Observabilité</h3><p>Logs, débogage et coûts de tokens.</p></div><div><h3>Déploiement</h3><p>Conteneurs, charge, latence et écosystème.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Pourquoi décomposer une question complexe ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour obtenir des objectifs de recherche clairs et vérifiables</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour multiplier les requêtes sans objectif</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="LangGraph"><span class="pill">Étape 3</span><h2>Modéliser le graphe LangGraph</h2><p>LangGraph permet des applications agentiques cycliques et stateful, contrairement à une chaîne strictement séquentielle.</p><div class="diagram" role="img" aria-label="Nœuds du graphe de recherche approfondie"><svg viewBox="0 0 900 180"><g fill="#173b5c" stroke="#62e6ff" stroke-width="2"><rect x="20" y="65" width="125" height="50" rx="10"/><rect x="170" y="65" width="145" height="50" rx="10"/><rect x="340" y="65" width="145" height="50" rx="10"/><rect x="510" y="65" width="145" height="50" rx="10"/><rect x="680" y="65" width="190" height="50" rx="10"/></g><g fill="#edf7ff" text-anchor="middle" font-size="13"><text x="82" y="95">Query</text><text x="242" y="95">Analyze</text><text x="412" y="95">Plan</text><text x="582" y="95">Search</text><text x="775" y="95">Need more?</text></g><g class="flow" stroke="#b8a1ff" stroke-width="3"><path d="M145 90h25M315 90h25M485 90h25M655 90h25M775 115c-170 55-500 55-650 0" fill="none"/></g></svg></div><pre id="state">AgentState:
+  question: str
+  research_plan: list[str]
+  search_results: list[dict]
+  evidence_gaps: list[str]
+  iteration: int</pre><button class="btn primary copy" onclick="copyText('state')">Copier le State</button><div class="quiz"><h3>Quiz express</h3><p>Que permet une arête conditionnelle « Need more research? » ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Boucler vers de nouvelles requêtes si des preuves manquent</button><button class="choice" data-correct="false" onclick="answer(this,false)">Terminer toujours après la première recherche</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Outils sûrs"><span class="pill">Étapes 4-6</span><h2>Installer, rechercher et protéger les secrets</h2><p>Le guide utilise LangGraph, langchain-openai, python-dotenv et tavily-python. La recherche Tavily retourne du texte pré-nettoyé, plus adapté aux agents.</p><pre id="install">python -m venv .venv
+source .venv/bin/activate
+python -m pip install langgraph langchain-openai python-dotenv tavily-python</pre><button class="btn primary copy" onclick="copyText('install')">Copier les commandes</button><p>Les clés doivent rester dans un fichier <code>.env</code> ignoré par Git. Ne jamais les placer dans le code ou un dépôt public.</p><div class="quiz"><h3>Quiz sécurité</h3><p>Où placer OPENAI_API_KEY et TAVILY_API_KEY ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Dans le code source versionné</button><button class="choice" data-correct="true" onclick="answer(this,true)">Dans .env, exclu par .gitignore, chargé par load_dotenv()</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Modules"><span class="pill">Étape 7</span><h2>Organiser le code par responsabilité</h2><div class="grid"><div><h3>state.py</h3><p>Schéma de données partagé qui transite de nœud en nœud.</p></div><div><h3>nodes.py</h3><p>Workers : appel LLM, interrogation Tavily et analyse.</p></div><div><h3>graph.py</h3><p>Wiring : arêtes standard, conditions et boucle de retour.</p></div><div><h3>main.py</h3><p>Runtime : question initiale et restitution du rapport.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Quel fichier relie les nœuds et configure les conditions ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">state.py</button><button class="choice" data-correct="true" onclick="answer(this,true)">graph.py</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Synthèse"><span class="pill">Étape 8</span><h2>Contrôler la boucle et restituer</h2><p>Le cycle initialise l’état, génère un plan, collecte les résultats, évalue les lacunes et relance une recherche ciblée. Il s’arrête quand les axes sont documentés ou quand la limite de boucles est atteinte.</p><div class="grid"><div><h3>Sortie de qualité</h3><p>Seuil de preuve suffisant, références et recommandations claires.</p></div><div><h3>Sortie de sécurité</h3><p>Maximum d’itérations, état épuré et coût d’API contrôlé.</p></div></div><label class="check"><input type="checkbox" onchange="saveChecks()"> Définir un plan et des sous-questions vérifiables.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Conserver seulement des résumés pertinents dans l’état.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ajouter une condition de sortie stricte.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Relancer avec une requête plus précise si une preuve manque.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Rédiger une synthèse structurée avec références.</label><button class="btn primary" onclick="finish()">Valider mon agent Deep Research</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

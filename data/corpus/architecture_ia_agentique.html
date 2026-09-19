@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture de l'IA : Agentique vs Non-Agentique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="text-gray-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-[1200px] mx-auto flex flex-col gap-6">
+
+        <div class="border-2 border-diagram-border rounded-xl p-6 md:p-8 bg-white shadow-sm overflow-x-auto">
+            
+            <!-- Header Section 1 -->
+            <div class="text-center mb-8 min-w-[800px]">
+                <h1 class="text-xl md:text-2xl font-bold">
+                    Ce ne sont <span class="bg-orange-200 px-3 py-1 rounded-md text-orange-900 mx-1">pas des IA Agentiques</span>
+                </h1>
+            </div>
+
+            <!-- 3 Columns Layout -->
+            <div class="grid grid-cols-3 gap-0 min-w-[800px] relative">
+                
+                <!-- Separators -->
+                <div class="absolute top-0 bottom-0 left-1/3 border-l-2 border-dashed border-gray-200"></div>
+                <div class="absolute top-0 bottom-0 left-2/3 border-l-2 border-dashed border-gray-200"></div>
+
+                <!-- Column 1: Chatbots LLM -->
+                <div class="flex flex-col items-center px-4 relative">
+                    <h2 class="text-sm font-bold text-gray-700 mb-4 bg-white z-10 px-2">Chatbots LLM</h2>
+                    
+                    <div class="flex flex-col items-center">
+                        <svg class="w-8 h-8 text-gray-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span class="text-xs font-semibold mt-1">Requête</span>
+                    </div>
+                    
+                    <div class="v-line h-6"></div>
+                    <div class="dot"></div>
+                    
+                    <div class="bg-diagram-blueBg rounded-xl p-4 w-full flex flex-col items-center my-2 border border-blue-50 relative">
+                        <div class="v-line h-4 absolute top-0"></div>
+                        
+                        <!-- Prompt Système -->
+                        <div class="node-box bg-white border border-gray-300 rounded-lg p-2 flex items-center gap-2 w-48 mt-2 justify-center shadow-sm">
+                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+                            <span class="text-xs font-bold">Prompt Système</span>
+                        </div>
+                        
+                        <div class="v-line h-8"></div>
+                        
+                        <!-- LLMs -->
+                        <div class="node-box bg-white border border-orange-300 rounded-lg p-2 flex items-center gap-2 w-32 justify-center shadow-sm">
+                            <span class="text-xs font-bold">LLMs</span>
+                            <svg class="w-5 h-5 text-orange-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M15.5,15.5C14.18,16.82 12,17.5 12,17.5C12,17.5 9.82,16.82 8.5,15.5C7.18,14.18 6.5,12 6.5,12C6.5,12 7.18,9.82 8.5,8.5C9.82,7.18 12,6.5 12,6.5C12,6.5 14.18,7.18 15.5,8.5C16.82,9.82 17.5,12 17.5,12C17.5,12 16.82,14.18 15.5,15.5Z" opacity="0.3"/><path d="M12,4C9,4 6.5,5.74 5.23,8.23C6.7,9.15 8,10.6 8.78,12.38C10.05,10.74 12,9.75 12,9.75C12,9.75 13.95,10.74 15.22,12.38C16,10.6 17.3,9.15 18.77,8.23C17.5,5.74 15,4 12,4M12,14.25C10.4,14.25 9,15.27 8.35,16.66C9.4,17.5 10.65,18 12,18C13.35,18 14.6,17.5 15.65,16.66C15,15.27 13.6,14.25 12,14.25Z"/></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="dot -mt-3"></div>
+                    <div class="v-line h-6"></div>
+                    
+                    <!-- Output -->
+                    <div class="border border-gray-400 bg-white rounded-full px-6 py-1 text-xs font-bold text-gray-700 node-box">
+                        Sortie
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center px-4 relative">
+                    <h2 class="text-sm font-bold text-gray-700 mb-4 bg-white z-10 px-2">RPA</h2>
+                    
+                    <div class="flex flex-col items-center">
+                        <svg class="w-8 h-8 text-gray-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span class="text-xs font-semibold mt-1">Requête</span>
+                    </div>
+                    
+                    <div class="v-line h-6"></div>
+                    
+                    <div class="bg-diagram-blueBg rounded-xl p-4 w-full flex flex-col items-center my-2 border border-blue-50 relative">
+                        <div class="v-line h-4 absolute top-0"></div>
+                        
+                        <!-- Script Trigger -->
+                        <div class="node-box bg-white border border-gray-300 rounded-lg p-2 flex items-center gap-2 mt-2 justify-center shadow-sm relative z-10">
+                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span class="text-xs font-bold">Déclencheur de Script</span>
+                        </div>
+                        
+                        <div class="v-line h-4"></div>
+                        <div class="diamond"></div>
+                        
+                        <!-- Split Flow Container -->
+                        <div class="flex w-full mt-4 relative justify-between px-2">
+                            <!-- Dashed connections for split -->
+                            <div class="absolute top-[-16px] left-1/4 right-1/4 h-4 border-t-2 border-l-2 border-r-2 border-dashed border-diagram-line rounded-t-md"></div>
+                            
+                            <!-- Left: Only Tools -->
+                            <div class="flex flex-col items-center w-1/2 mt-2">
+                                <div class="dot mb-2"></div>
+                                <div class="node-box bg-white border border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center text-center shadow-sm w-24 h-16">
+                                    <span class="text-[10px] font-bold leading-tight">Exécuter Uniquement les Outils</span>
+                                    <svg class="w-4 h-4 text-orange-500 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Use Tools + LLMs -->
+                            <div class="flex flex-col items-center w-1/2 mt-2">
+                                <div class="dot mb-2"></div>
+                                <div class="node-box bg-white border border-gray-300 rounded-lg p-1.5 flex flex-col items-center justify-center text-center shadow-sm w-20 mb-2">
+                                    <span class="text-[10px] font-bold">Utiliser des Outils</span>
+                                </div>
+                                <div class="v-line h-2"></div>
+                                <div class="node-box bg-white border border-orange-300 rounded-lg p-1.5 flex flex-col items-center justify-center text-center shadow-sm w-20">
+                                    <span class="text-[10px] font-bold">LLMs</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Join Flow Container -->
+                        <div class="relative w-full h-8 mt-4 flex justify-center items-end">
+                            <div class="absolute bottom-4 left-1/4 right-1/4 h-8 border-b-2 border-l-2 border-r-2 border-dashed border-diagram-line rounded-b-md"></div>
+                            <div class="dot absolute left-1/4 bottom-[-4px] transform -translate-x-1/2 z-10"></div>
+                            <div class="dot absolute right-1/4 bottom-[-4px] transform translate-x-1/2 z-10"></div>
+                            <div class="diamond absolute bottom-[-8px]"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="v-line h-6"></div>
+                    
+                    <!-- Output -->
+                    <div class="border border-gray-400 bg-white rounded-full px-6 py-1 text-xs font-bold text-gray-700 node-box z-10">
+                        Sortie
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center px-4 relative">
+                    <h2 class="text-sm font-bold text-gray-700 mb-4 bg-white z-10 px-2">RAG Simple</h2>
+                    
+                    <div class="flex flex-col items-center">
+                        <svg class="w-8 h-8 text-gray-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span class="text-xs font-semibold mt-1">Requête</span>
+                    </div>
+                    
+                    <div class="v-line h-6"></div>
+                    
+                    <div class="bg-diagram-blueBg rounded-xl p-4 w-full flex flex-col items-center my-2 border border-blue-50 relative">
+                        <div class="v-line h-4 absolute top-0"></div>
+                        
+                        <!-- Embedding -->
+                        <div class="node-box bg-white border border-red-300 rounded-lg p-2 flex items-center justify-center gap-2 mt-2 w-40 shadow-sm relative z-10">
+                            <span class="text-[11px] font-bold">Vectorisation (Embedding)</span>
+                            <svg class="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>
+                        </div>
+                        
+                        <!-- Split to 3 Databases -->
+                        <div class="w-full relative h-6 mt-2">
+                            <div class="absolute top-3 left-[15%] right-[15%] h-[1.5px] bg-diagram-line"></div>
+                            <div class="absolute top-3 left-[15%] w-[1.5px] h-3 bg-diagram-line"></div>
+                            <div class="absolute top-0 left-1/2 w-[1.5px] h-6 bg-diagram-line transform -translate-x-1/2"></div>
+                            <div class="absolute top-3 right-[15%] w-[1.5px] h-3 bg-diagram-line"></div>
+                        </div>
+
+                        <!-- 3 Data Sources -->
+                        <div class="flex justify-between w-full px-1 z-10 mt-1">
+                            <div class="flex flex-col items-center relative">
+                                <div class="dot mb-1"></div>
+                                <div class="node-box bg-white border border-gray-300 rounded p-1.5 flex flex-col items-center text-center w-16 h-16 shadow-sm justify-center">
+                                    <span class="text-[9px] font-bold leading-tight mb-1">Base de Connaissances</span>
+                                    <div class="flex gap-1"><svg class="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center relative">
+                                <div class="dot mb-1"></div>
+                                <div class="node-box bg-white border border-gray-300 rounded p-1.5 flex flex-col items-center text-center w-16 h-16 shadow-sm justify-center">
+                                    <span class="text-[9px] font-bold leading-tight mb-1">BDD Vectorielle</span>
+                                    <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center relative">
+                                <div class="dot mb-1"></div>
+                                <div class="node-box bg-white border border-gray-300 rounded p-1.5 flex flex-col items-center text-center w-16 h-16 shadow-sm justify-center">
+                                    <span class="text-[9px] font-bold leading-tight mb-1">Données Rech. Web</span>
+                                    <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Join to Data Augmentation -->
+                        <div class="w-full relative h-6 mt-1">
+                            <div class="absolute top-3 left-[15%] right-[15%] h-[1.5px] bg-diagram-line"></div>
+                            <div class="absolute top-0 left-[15%] w-[1.5px] h-3 bg-diagram-line"></div>
+                            <div class="absolute top-3 left-1/2 w-[1.5px] h-3 bg-diagram-line transform -translate-x-1/2"></div>
+                            <div class="absolute top-0 right-[15%] w-[1.5px] h-3 bg-diagram-line"></div>
+                        </div>
+
+                        <div class="node-box bg-white border border-gray-400 rounded-lg py-1.5 px-3 flex items-center justify-center shadow-sm relative z-10 w-44">
+                            <svg class="w-3 h-3 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-[10px] font-bold">Augmentation de Données</span>
+                        </div>
+                        
+                        <div class="v-line h-4"></div>
+                        
+                        <div class="node-box bg-white border border-orange-300 rounded-lg p-2 flex items-center justify-center gap-2 shadow-sm relative z-10 w-32">
+                            <span class="text-xs font-bold">LLMs</span>
+                            <svg class="w-5 h-5 text-orange-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12,4C9,4 6.5,5.74 5.23,8.23C6.7,9.15 8,10.6 8.78,12.38C10.05,10.74 12,9.75 12,9.75C12,9.75 13.95,10.74 15.22,12.38C16,10.6 17.3,9.15 18.77,8.23C17.5,5.74 15,4 12,4M12,14.25C10.4,14.25 9,15.27 8.35,16.66C9.4,17.5 10.65,18 12,18C13.35,18 14.6,17.5 15.65,16.66C15,15.27 13.6,14.25 12,14.25Z"/></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="dot -mt-3"></div>
+                    <div class="v-line h-6"></div>
+                    
+                    <!-- Output -->
+                    <div class="border border-gray-400 bg-white rounded-full px-6 py-1 text-xs font-bold text-gray-700 node-box">
+                        Sortie
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-2 border-diagram-border rounded-xl p-6 md:p-8 bg-white shadow-sm overflow-x-auto">
+            
+            <!-- Header Section 2 -->
+            <div class="text-center mb-8 min-w-[900px]">
+                <h1 class="text-xl md:text-2xl font-bold">
+                    Ceci est une <span class="bg-diagram-greenLight text-white px-3 py-1 rounded-md mx-1 shadow-sm">IA Agentique</span>
+                </h1>
+            </div>
+
+            <!-- Main Interactive Canvas -->
+            <div class="flex items-center justify-start min-w-[950px] relative mt-4">
+                
+                <!-- User Input -->
+                <div class="flex flex-col items-center mr-4 w-16">
+                    <svg class="w-10 h-10 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span class="text-sm font-semibold mt-1">Requête</span>
+                </div>
+                
+                <div class="h-line w-8"></div>
+                <div class="dot -ml-2 z-10"></div>
+                
+                <!-- Huge Box: Overall System -->
+                <div class="border-2 border-dashed border-gray-400 rounded-xl bg-gray-50/50 p-6 flex flex-1 items-stretch gap-6 relative">
+                    
+                    <div class="border border-gray-400 rounded-xl bg-white p-4 flex flex-col relative w-[420px] shadow-sm">
+                        
+                        <div class="absolute -bottom-6 left-6 font-bold text-gray-700">Agent 1</div>
+
+                        <div class="grid grid-cols-[100px_auto_100px] gap-3 relative h-full">
+                            
+                            <!-- Internal Connections (Absolute SVG lines for visual polish inside the box) -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+                                <!-- To Memory -->
+                                <path d="M 210 110 L 160 110 L 160 50 L 90 50" fill="none" stroke="#9ca3af" stroke-width="1.5" />
+                                <circle cx="120" cy="50" r="4" fill="#f97316" />
+                                <circle cx="160" cy="80" r="4" fill="#f97316" />
+                                
+                                <!-- To Tools -->
+                                <path d="M 210 110 L 260 110 L 260 50 L 330 50" fill="none" stroke="#9ca3af" stroke-width="1.5" />
+                                <circle cx="300" cy="50" r="4" fill="#f97316" />
+                                
+                                <!-- To Planning -->
+                                <path d="M 170 170 L 170 200 L 90 200" fill="none" stroke="#9ca3af" stroke-width="1.5" />
+                                <circle cx="170" cy="185" r="4" fill="#f97316" />
+                                
+                                <!-- To Feedback -->
+                                <path d="M 250 170 L 250 200 L 330 200" fill="none" stroke="#9ca3af" stroke-width="1.5" />
+                                
+                                <!-- Bottom Diamond Path -->
+                                <path d="M 210 170 L 210 280" fill="none" stroke="#9ca3af" stroke-width="1.5" />
+                                <circle cx="210" cy="220" r="4" fill="#f97316" />
+                            </svg>
+
+                            <!-- Top Left: Memory -->
+                            <div class="col-start-1 row-start-1 z-10 flex justify-center">
+                                <div class="node-box bg-orange-100 border border-orange-200 rounded-lg p-2 w-full flex flex-col items-center justify-center text-center h-16">
+                                    <svg class="w-5 h-5 text-orange-700 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                    <span class="text-[11px] font-bold text-orange-900">Mémoire</span>
+                                </div>
+                            </div>
+
+                            <!-- Top Right: Tools -->
+                            <div class="col-start-3 row-start-1 z-10 flex justify-center">
+                                <div class="node-box bg-gray-100 border border-gray-300 rounded-lg p-2 w-full flex flex-col items-center justify-center text-center h-16">
+                                    <svg class="w-5 h-5 text-gray-700 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span class="text-[11px] font-bold text-gray-800">Outils</span>
+                                </div>
+                            </div>
+
+                            <!-- Center: Orchestrator -->
+                            <div class="col-start-1 col-end-4 row-start-2 z-10 flex justify-center py-4">
+                                <div class="node-box bg-white border-2 border-gray-600 rounded-xl p-3 flex flex-col items-center shadow-md w-48 relative">
+                                    <!-- Connection from User Input -->
+                                    <div class="absolute -left-12 top-1/2 transform -translate-y-1/2 w-12 h-[1.5px] bg-diagram-line"></div>
+                                    <div class="dot absolute -left-6 top-1/2 transform -translate-y-1/2"></div>
+                                    
+                                    <span class="text-sm font-extrabold text-gray-800 mb-2">Orchestrateur</span>
+                                    <div class="flex items-center justify-center border border-orange-300 rounded-md px-3 py-1 mb-2 bg-orange-50 w-full gap-2">
+                                        <span class="text-xs font-bold text-orange-700">LLM</span>
+                                        <svg class="w-5 h-5 text-orange-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12,4C9,4 6.5,5.74 5.23,8.23C6.7,9.15 8,10.6 8.78,12.38C10.05,10.74 12,9.75 12,9.75C12,9.75 13.95,10.74 15.22,12.38C16,10.6 17.3,9.15 18.77,8.23C17.5,5.74 15,4 12,4Z"/></svg>
+                                    </div>
+                                    <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Agent ADK</span>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Left: Planning -->
+                            <div class="col-start-1 row-start-3 z-10 flex justify-center">
+                                <div class="node-box bg-blue-100 border border-blue-200 rounded-lg p-2 w-full flex flex-col items-center justify-center text-center h-16">
+                                    <svg class="w-5 h-5 text-blue-600 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                    <span class="text-[11px] font-bold text-blue-900">Planification</span>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Center: Decision Diamond to Output -->
+                            <div class="col-start-2 row-start-3 z-10 flex justify-center items-end relative h-24">
+                                <div class="diamond w-8 h-8 flex items-center justify-center absolute bottom-4">
+                                    <svg class="w-4 h-4 text-white transform -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Right: Feedback & Human -->
+                            <div class="col-start-3 row-start-3 z-10 flex flex-col items-center gap-2">
+                                <div class="node-box bg-gray-800 text-white rounded-lg p-2 w-full flex flex-col items-center justify-center text-center shadow-md">
+                                    <span class="text-[10px] font-bold leading-tight">Feedback</span>
+                                    <span class="text-[8px] opacity-80">ReAct & Réflexion</span>
+                                </div>
+                                <div class="node-box border border-gray-400 bg-white rounded-lg p-1 w-full text-center shadow-sm">
+                                    <span class="text-[9px] font-bold text-gray-700">Humain dans<br/>la Boucle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Arrow from Diamond -->
+                    <div class="absolute bottom-10 left-[80px] w-24 h-[1.5px] bg-diagram-line z-0"></div>
+                    <div class="dot absolute bottom-9 left-[120px] z-10"></div>
+                    <div class="absolute bottom-6 left-0 text-sm font-semibold">
+                        <svg class="w-4 h-4 inline transform rotate-180 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        Sortie
+                    </div>
+
+                    <div class="flex items-center relative z-10">
+                        <div class="h-line w-6"></div>
+                        <div class="dot -ml-3"></div>
+                        <div class="h-line w-6"></div>
+                        <div class="dot -ml-3"></div>
+                        <!-- Line extending to protocol box -->
+                        <div class="h-line w-12"></div>
+                    </div>
+
+                    <!-- Multi-Agent Protocol Box -->
+                    <div class="border border-gray-600 rounded-xl bg-white p-3 flex flex-col items-center justify-center relative w-[200px] shadow-sm node-box">
+                        <span class="text-xs font-bold text-center mb-1 leading-tight text-gray-800">Protocole Multi-agents</span>
+                        <span class="text-[9px] text-gray-500 mb-3 uppercase font-semibold">MCP + Protocole A2A</span>
+                        
+                        <div class="flex flex-col gap-2 w-full">
+                            <div class="border border-gray-300 rounded p-1.5 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-default">
+                                <svg class="w-4 h-4 text-blue-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18v.01M12 6v.01m-3.536 2.454a5 5 0 000 7.072m-2.828-9.899a9 9 0 000 12.728"/></svg>
+                                <span class="text-[10px] font-bold text-gray-700 leading-tight">Découvrir les Capacités des Agents</span>
+                            </div>
+                            <div class="border border-gray-300 rounded p-1.5 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-default">
+                                <svg class="w-4 h-4 text-orange-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                <span class="text-[10px] font-bold text-gray-700 leading-tight">Partager les Tâches</span>
+                            </div>
+                            <div class="border border-gray-300 rounded p-1.5 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-default">
+                                <svg class="w-4 h-4 text-green-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span class="text-[10px] font-bold text-gray-700 leading-tight">Mettre à Jour les Infos de la Tâche</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connections to Specialized Agents -->
+                    <div class="flex flex-col justify-between py-6 relative z-10 w-16">
+                        <!-- Top -->
+                        <div class="flex items-center">
+                            <div class="h-line flex-1"></div>
+                            <div class="dot -ml-2"></div>
+                            <svg class="w-3 h-3 text-diagram-line ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                        </div>
+                        <!-- Middle -->
+                        <div class="flex items-center">
+                            <div class="h-line flex-1"></div>
+                            <div class="dot -ml-2"></div>
+                            <svg class="w-3 h-3 text-diagram-line ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                        </div>
+                        <!-- Bottom -->
+                        <div class="flex items-center">
+                            <div class="h-line flex-1"></div>
+                            <div class="dot -ml-2"></div>
+                            <svg class="w-3 h-3 text-diagram-line ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                        </div>
+                        
+                        <!-- Return lines (visual simulation) -->
+                        <div class="absolute left-0 top-12 h-64 w-2 border-l-2 border-diagram-line opacity-50 border-dotted"></div>
+                    </div>
+
+                    <div class="flex flex-col justify-between h-full gap-4 flex-1">
+                        
+                        <!-- Coding Agent -->
+                        <div class="node-box bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col items-center justify-center h-28 shadow-sm relative">
+                            <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-50 border border-blue-200 rotate-45"></div>
+                            <svg class="w-8 h-8 text-blue-800 mb-2 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                            <span class="text-sm font-bold text-gray-800 z-10">Agent de Codage</span>
+                        </div>
+
+                        <!-- Retrieval Agent -->
+                        <div class="node-box bg-orange-50 border border-orange-200 rounded-xl p-4 flex flex-col items-center justify-center h-28 shadow-sm relative">
+                            <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-orange-50 border border-orange-200 rotate-45"></div>
+                            <svg class="w-8 h-8 text-orange-800 mb-2 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-sm font-bold text-gray-800 z-10">Agent de Recherche</span>
+                        </div>
+
+                        <!-- Citation Agent -->
+                        <div class="node-box bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col items-center justify-center h-28 shadow-sm relative">
+                            <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-green-50 border border-green-200 rotate-45"></div>
+                            <svg class="w-8 h-8 text-green-800 mb-2 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                            <span class="text-sm font-bold text-gray-800 z-10">Agent de Citation</span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

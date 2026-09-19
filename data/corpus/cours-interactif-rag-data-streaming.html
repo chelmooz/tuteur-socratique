@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — RAG temps réel avec Data Streaming</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="current">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<header><div class="wrap"><div class="top"><div><div class="eyebrow">Cours interactif • source : guide Confluent 2025</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" aria-label="Modules" id="tabs"></nav></div></header>
+<main class="wrap">
+<section class="card module active" data-title="Accueil"><span class="pill">Objectif</span><h1>Construire un RAG alimenté par des données fraîches</h1><p class="muted">À la fin de ce cours, vous serez capable de distinguer les étapes d’un pipeline RAG temps réel, de choisir où traiter les données et de concevoir un premier flux d’ingestion traçable.</p><div class="grid"><div><h2>Le problème</h2><p>Un LLM connaît beaucoup de choses, mais pas forcément les données métier actuelles, leurs sources ni leur niveau de confiance.</p></div><div><h2>La promesse</h2><p>Relier ingestion, recherche, génération et gouvernance pour répondre avec un contexte actuel et vérifiable.</p></div></div><div class="diagram" role="img" aria-label="Flux général du RAG, de la source à la réponse"><svg viewBox="0 0 900 150"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#5eead4"/></marker></defs><g fill="#102f4c" stroke="#55b8ff" stroke-width="2"><rect x="20" y="50" width="150" height="50" rx="10"/><rect x="205" y="50" width="150" height="50" rx="10"/><rect x="390" y="50" width="150" height="50" rx="10"/><rect x="575" y="50" width="140" height="50" rx="10"/><rect x="750" y="50" width="130" height="50" rx="10"/></g><g fill="#eef6ff" text-anchor="middle" font-size="16"><text x="95" y="80">Sources</text><text x="280" y="80">Stream</text><text x="465" y="80">Process</text><text x="645" y="80">Retrieve</text><text x="815" y="80">Réponse</text></g><g class="flow" stroke="#5eead4" stroke-width="3" marker-end="url(#a)"><path d="M170 75h30M355 75h30M540 75h30M715 75h30"/></g></svg></div></section>
+<section class="card module" data-title="Les 4 étapes"><span class="pill">Fondation</span><h2>Stream • Connect • Process • Govern</h2><p>Le guide organise la plateforme autour de quatre responsabilités complémentaires. Elles ne remplacent pas le RAG : elles rendent son alimentation fiable et opérable.</p><div class="grid"><div><h3>1. Stream</h3><p>Acheminer les événements et changements au fil de l’eau.</p></div><div><h3>2. Connect</h3><p>Relier documents, bases et systèmes métier hétérogènes.</p></div><div><h3>3. Process</h3><p>Nettoyer, enrichir, chunker, vectoriser et filtrer.</p></div><div><h3>4. Govern</h3><p>Contrôler qualité, accès, provenance, fraîcheur et conformité.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Quelle étape garantit principalement la provenance et les règles d’accès ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Stream</button><button class="choice" data-correct="false" onclick="answer(this,false)">Process</button><button class="choice" data-correct="true" onclick="answer(this,true)">Govern</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Augmenter les données"><span class="pill">Data augmentation</span><h2>Transformer une source en contexte exploitable</h2><p>Avant l’inférence, les données doivent être préparées : segmentation sémantique, embeddings, métadonnées de source et mise à jour du vector store.</p><div class="diagram" role="img" aria-label="Pipeline de préparation des données"><svg viewBox="0 0 800 150"><g fill="#122f47" stroke="#5eead4" stroke-width="2"><rect x="20" y="50" width="170" height="50" rx="10"/><rect x="225" y="50" width="170" height="50" rx="10"/><rect x="430" y="50" width="150" height="50" rx="10"/><rect x="615" y="50" width="160" height="50" rx="10"/></g><g fill="#eef6ff" text-anchor="middle" font-size="15"><text x="105" y="80">Document brut</text><text x="310" y="80">Chunks</text><text x="505" y="80">Embeddings</text><text x="695" y="80">Index à jour</text></g><g class="flow" stroke="#55b8ff" stroke-width="3"><path d="M190 75h35M395 75h35M580 75h35"/></g></svg></div><pre id="prompt">Tu es un tuteur scolaire. À partir des extraits récupérés, réponds avec : 1) une explication simple, 2) la source et sa date, 3) une question de vérification. Si le contexte est insuffisant, dis-le.</pre><button class="btn primary copy" onclick="copyText('prompt')">Copier le prompt</button><div class="quiz"><h3>Choix d’architecture</h3><p>Que faut-il conserver avec un chunk pour pouvoir expliquer sa provenance ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">L’identifiant de source et la date de mise à jour</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement sa couleur d’affichage</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Inférence & workflows"><span class="pill">Raisonnement</span><h2>Recherche, décomposition et décision</h2><p>Le guide montre qu’une question complexe peut être décomposée en sous-questions. Le système récupère plusieurs éléments, les compare puis les transmet au modèle avec des règles de contrôle.</p><div class="grid"><div><h3>Bon workflow</h3><ol><li>Clarifier la question.</li><li>Récupérer les passages pertinents.</li><li>Évaluer leur qualité.</li><li>Générer avec citations et limites.</li></ol></div><div><h3>Erreur fréquente</h3><p>Injecter tout le document brut dans le prompt et espérer que le modèle trouve seul la bonne information.</p><p class="muted">Contre-mesure : chunking, métadonnées, filtrage et fallback.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Que faire si les extraits récupérés sont partiellement pertinents ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Répondre avec assurance sans signaler la limite</button><button class="choice" data-correct="true" onclick="answer(this,true)">Filtrer, compléter la recherche ou demander une clarification</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Post-traitement & cas"><span class="pill">Production</span><h2>Contrôler la sortie avant de la montrer</h2><p>Le post-traitement sert à classer, filtrer et enrichir les résultats. Les architectures du guide s’appliquent à des recommandations produit, à l’analyse de sentiment et à un portail d’emploi.</p><div class="grid"><div><h3>Recommandation</h3><p>Combiner préférences, catalogue actuel et contraintes métier.</p></div><div><h3>Sentiment temps réel</h3><p>Analyser les nouveaux messages sans attendre une reconstruction complète du corpus.</p></div><div><h3>Portail d’emploi</h3><p>Relier offres, profils et critères explicites avec une recherche contextualisée.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Pourquoi le post-traitement est-il utile ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour contrôler la qualité et le format de la réponse finale</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour supprimer les sources après l’indexation</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Atelier & action"><span class="pill">Passage à l’action</span><h2>Concevoir votre premier flux RAG</h2><p>Utilisez cette checklist pour transformer un document scolaire en source exploitable par le Tuteur Scolastique.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Identifier la source, son propriétaire et sa date de mise à jour.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Découper par section et conserver le contexte pédagogique.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ajouter les métadonnées de niveau, matière et provenance.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Tester une question connue et vérifier la fidélité de la réponse.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Prévoir un refus explicite quand le contexte est insuffisant.</label><div class="card"><h3>Défi final</h3><p>Expliquez en trois phrases pourquoi un RAG temps réel est préférable à un PDF injecté en entier dans chaque prompt.</p><textarea id="reflection" rows="5" style="width:100%;background:#071827;color:white;border:1px solid var(--line);border-radius:8px;padding:10px" placeholder="Votre réponse..."></textarea></div><button class="btn primary" onclick="finish()">Valider le parcours</button><p id="result" class="score"></p></section>
+<footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer>
+</main>
+<script src="/course-kit.js"></script>
+</body></html>

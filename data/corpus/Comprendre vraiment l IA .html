@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Fondamentaux IA | Réseaux de Neurones, Tokens, Embeddings, Attention, Transformers, LLMs</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🧠 <span>Core AI Concepts</span> Masterclass</div>
+        <div class="muted small">Neurones • Training • Tokens • Embeddings • Attention • Transformers • Contexte • Scaling • LLMs</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "core-ai-concepts-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express") {
+      return `
+        <div class="quiz" data-module="${moduleId}">
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "nn") updateNeuron();
+      if (id === "tokens") runTokenizer();
+      if (id === "embeddings") renderEmbedMap("animals");
+      if (id === "attention") showAttention("computer");
+      if (id === "context") updateDesk();
+      if (id === "scaling") updateScaling();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    // ============ DIAGNOSTIC ============
+    const DIAG_TEXT = {
+      debutant: "Suivez les modules dans l ordre et jouez avec chaque simulateur : neurone, tokenizer, attention. Les analogies du cours (étudiant, bureau de travail) sont vos ancres.",
+      praticien: "Passez vite sur les bases, concentrez-vous sur l attention, le transformer, la fenêtre de contexte et les lois de scaling — c est là que se joue votre compréhension des systèmes réels.",
+      expert: "Allez directement aux subtilités : correction historique sur l attention, coût quadratique, limites du scaling, distinction base model vs assistant — puis validez avec l examen."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ SIMULATEUR DE NEURONE ============
+    function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+    function relu(z) { return Math.max(0, z); }
+
+    function updateNeuron() {
+      const w1 = Number($("#nw1")?.value ?? 0.8);
+      const w2 = Number($("#nw2")?.value ?? 0.3);
+      const bias = Number($("#nbias")?.value ?? -0.5);
+      const act = $("#nact")?.value || "sigmoid";
+      const x1 = 1.0, x2 = 0.6;
+
+      const z = w1 * x1 + w2 * x2 + bias;
+      let out = z;
+      if (act === "sigmoid") out = sigmoid(z);
+      if (act === "relu") out = relu(z);
+
+      $("#nv-w1").textContent = w1.toFixed(2);
+      $("#nv-w2").textContent = w2.toFixed(2);
+      $("#nv-bias").textContent = bias.toFixed(2);
+      $("#n-formula").textContent = `z = (${w1.toFixed(2)} × ${x1.toFixed(1)}) + (${w2.toFixed(2)} × ${x2.toFixed(1)}) + (${bias.toFixed(2)}) = ${z.toFixed(3)}`;
+      $("#n-out").textContent = out.toFixed(4);
+      $("#n-out-label").textContent = act === "none" ? "Sortie brute (z)" : "Sortie après activation " + act;
+
+      const fill = $("#n-out-bar");
+      if (fill) fill.style.width = Math.min(100, Math.max(0, out * 100)) + "%";
+    }
+
+    // ============ SIMULATEUR DE TOKENIZER ============
+    const TOKEN_IDS = { "cat": 8241, "kitten": 1793, "the": 279, "a": 262 };
+
+    function pseudoId(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+      }
+      return Math.abs(h % 48000) + 100;
+    }
+
+    function tokenToPill(tok) {
+      const lower = tok.toLowerCase();
+      const id = TOKEN_IDS[lower] !== undefined ? TOKEN_IDS[lower] : pseudoId(tok);
+      const known = TOKEN_IDS[lower] !== undefined ? ' style="border-color: var(--green);"' : "";
+      return `<span class="token-pill"${known}><span>${tok}</span><span class="tid">#${id}</span></span>`;
+    }
+
+    function splitWord(w) {
+      if (w.length <= 5) return [w];
+      if (w.length <= 9) return [w.slice(0, Math.ceil(w.length / 2)), w.slice(Math.ceil(w.length / 2))];
+      return [w.slice(0, 4), w.slice(4, Math.ceil(w.length / 2) + 2), w.slice(Math.ceil(w.length / 2) + 2)];
+    }
+
+    function runTokenizer() {
+      const input = $("#tok-input")?.value || "Write a story about a robot exploring Mars";
+      const out = $("#tok-output");
+      if (!out) return;
+
+      const words = input.split(/(\s+|[.,!?;:])/).filter(t => t.trim() !== "");
+      let pills = [];
+      let count = 0;
+
+      words.forEach(w => {
+        if (/^[.,!?;:]/.test(w)) {
+          pills.push(tokenToPill(w));
+          count++;
+        } else if (w.length > 8) {
+          splitWord(w).forEach(p => { pills.push(tokenToPill(p)); count++; });
+        } else {
+          pills.push(tokenToPill(w));
+          count++;
+        }
+      });
+
+      out.innerHTML = pills.join("");
+      const stats = $("#tok-stats");
+      if (stats) stats.innerHTML = `<span class="pill">${count} tokens</span><span class="pill">${input.split(/\s+/).filter(Boolean).length} mots</span><span class="pill muted">tokens en vert = IDs exacts du transcript (cat=8241, kitten=1793)</span>`;
+    }
+
+    // ============ CARTE D'EMBEDDINGS ============
+    function renderEmbedMap(mode) {
+      const wrap = $("#embed-map");
+      if (!wrap) return;
+
+      const animals = `
+        <svg class="schema" viewBox="0 0 800 340" role="img" aria-label="Carte d embeddings : les concepts proches sont proches">
+          <line x1="60" y1="290" x2="760" y2="290" stroke="var(--border)" stroke-width="2"/>
+          <line x1="60" y1="290" x2="60" y2="30" stroke="var(--border)" stroke-width="2"/>
+          <circle cx="200" cy="180" r="10" fill="var(--green)" class="pulse"/>
+          <text x="200" y="165" text-anchor="middle">cat</text>
+          <circle cx="260" cy="220" r="10" fill="var(--green)"/>
+          <text x="260" y="245" text-anchor="middle">kitten</text>
+          <circle cx="300" cy="130" r="10" fill="var(--green)"/>
+          <text x="300" y="115" text-anchor="middle">dog</text>
+          <circle cx="650" cy="90" r="10" fill="var(--red)"/>
+          <text x="650" y="75" text-anchor="middle">airplane</text>
+          <text x="410" y="320" text-anchor="middle" class="sub">Les concepts similaires (cat, kitten, dog) ont des vecteurs proches. Airplane est loin.</text>
+        </svg>`;
+
+      const royalty = `
+        <svg class="schema" viewBox="0 0 800 340" role="img" aria-label="Arithmétique vectorielle : king - man + woman ≈ queen">
+          <line x1="60" y1="290" x2="760" y2="290" stroke="var(--border)" stroke-width="2"/>
+          <line x1="60" y1="290" x2="60" y2="30" stroke="var(--border)" stroke-width="2"/>
+          <circle cx="180" cy="120" r="10" fill="var(--purple)"/>
+          <text x="180" y="105" text-anchor="middle">king</text>
+          <circle cx="180" cy="240" r="10" fill="var(--purple)"/>
+          <text x="180" y="265" text-anchor="middle">man</text>
+          <circle cx="480" cy="240" r="10" fill="var(--purple)"/>
+          <text x="480" y="265" text-anchor="middle">woman</text>
+          <circle cx="480" cy="120" r="12" fill="var(--green)" class="pulse"/>
+          <text x="480" y="105" text-anchor="middle">≈ queen</text>
+          <path class="dash purple" d="M195 120 L465 120" marker-end="url(#arr-emb)"/>
+          <path class="dash purple" d="M180 135 L180 225"/>
+          <path class="dash purple" d="M480 225 L480 135"/>
+          <defs>
+            <marker id="arr-emb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="var(--accent)" />
+            </marker>
+          </defs>
+          <text x="410" y="320" text-anchor="middle" class="sub">king − man + woman ≈ queen : la géométrie encode les relations entre idées.</text>
+        </svg>`;
+
+      const paris = `
+        <svg class="schema" viewBox="0 0 800 340" role="img" aria-label="Paris - France + Italy ≈ Rome">
+          <line x1="60" y1="290" x2="760" y2="290" stroke="var(--border)" stroke-width="2"/>
+          <line x1="60" y1="290" x2="60" y2="30" stroke="var(--border)" stroke-width="2"/>
+          <circle cx="180" cy="120" r="10" fill="var(--purple)"/>
+          <text x="180" y="105" text-anchor="middle">Paris</text>
+          <circle cx="180" cy="240" r="10" fill="var(--purple)"/>
+          <text x="180" y="265" text-anchor="middle">France</text>
+          <circle cx="480" cy="240" r="10" fill="var(--purple)"/>
+          <text x="480" y="265" text-anchor="middle">Italy</text>
+          <circle cx="480" cy="120" r="12" fill="var(--green)" class="pulse"/>
+          <text x="480" y="105" text-anchor="middle">≈ Rome</text>
+          <path class="dash purple" d="M195 120 L465 120"/>
+          <path class="dash purple" d="M180 135 L180 225"/>
+          <path class="dash purple" d="M480 225 L480 135"/>
+          <text x="410" y="320" text-anchor="middle" class="sub">Paris − France + Italy ≈ Rome : même relation capitale ↔ pays.</text>
+        </svg>`;
+
+      wrap.innerHTML = mode === "royalty" ? royalty : (mode === "paris" ? paris : animals);
+      $$("#embed-buttons button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+    }
+
+    // ============ DÉMO ATTENTION ============
+    function showAttention(mode) {
+      const out = $("#att-demo");
+      if (!out) return;
+
+      if (mode === "computer") {
+        out.innerHTML = `
+          <p><span class="att-word att-target">mouse</span> dans :</p>
+          <p style="font-size:1.05rem">"To open the file, I click the <strong>mouse</strong>."</p>
+          <div class="q">
+            ${[
+              ["open", 85], ["file", 92], ["click", 88], ["the", 10], ["I", 15]
+            ].map(([w, s]) => `
+              <div style="margin:0.4rem 0">
+                <div style="display:flex;justify-content:space-between"><span class="att-word">${w}</span><span class="muted small">${s}% attention</span></div>
+                <div class="att-weights-bar"><div class="att-weights-fill" style="width:${s}%"></div></div>
+              </div>
+            `).join("")}
+          </div>
+          <p class="muted">Résultat : la représentation de <strong>mouse</strong> se rapproche de <span class="pill">keyboard</span> <span class="pill">computer</span> plutôt que de <span class="pill">cheese</span> <span class="pill">animal</span>.</p>
+        `;
+      } else {
+        out.innerHTML = `
+          <p><span class="att-word att-target">mouse</span> dans :</p>
+          <p style="font-size:1.05rem">"The hungry cat chased the <strong>mouse</strong>."</p>
+          <div class="q">
+            ${[
+              ["cat", 95], ["chased", 82], ["hungry", 60], ["the", 8], [".", 5]
+            ].map(([w, s]) => `
+              <div style="margin:0.4rem 0">
+                <div style="display:flex;justify-content:space-between"><span class="att-word">${w}</span><span class="muted small">${s}% attention</span></div>
+                <div class="att-weights-bar"><div class="att-weights-fill" style="width:${s}%"></div></div>
+              </div>
+            `).join("")}
+          </div>
+          <p class="muted">Résultat : le même token <strong>mouse</strong> se rapproche cette fois de <span class="pill">cheese</span> <span class="pill">animal</span> plutôt que de <span class="pill">computer</span>.</p>
+        `;
+      }
+      $$("#att-buttons button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+    }
+
+    // ============ CALCULATEUR DE FENÊTRE DE CONTEXTE ============
+    function updateDesk() {
+      const prompt = Number($("#cw-prompt")?.value ?? 500);
+      const history = Number($("#cw-history")?.value ?? 1500);
+      const docs = Number($("#cw-docs")?.value ?? 4000);
+      const resp = Number($("#cw-resp")?.value ?? 1000);
+      const capacity = Number($("#cw-cap")?.value ?? 8192);
+
+      $("#cwv-prompt").textContent = prompt;
+      $("#cwv-history").textContent = history;
+      $("#cwv-docs").textContent = docs;
+      $("#cwv-resp").textContent = resp;
+      $("#cwv-cap").textContent = capacity.toLocaleString();
+
+      const total = prompt + history + docs + resp;
+      const overflow = Math.max(0, total - capacity);
+      const used = Math.min(total, capacity);
+
+      const bar = $("#desk-bar");
+      if (bar) {
+        const pct = (v) => Math.min(100, (v / capacity) * 100);
+        bar.innerHTML = `
+          <div class="desk-seg desk-prompt" style="width:${pct(prompt)}%" title="Prompt"></div>
+          <div class="desk-seg desk-history" style="width:${pct(history)}%" title="Historique"></div>
+          <div class="desk-seg desk-docs" style="width:${pct(docs)}%" title="Documents"></div>
+          <div class="desk-seg desk-resp" style="width:${pct(resp)}%" title="Réponse"></div>
+          ${overflow > 0 ? `<div class="desk-seg desk-overflow" style="width:100%">OVERFLOW +${overflow.toLocaleString()}</div>` : ""}
+        `;
+      }
+
+      const stats = $("#cw-stats");
+      if (stats) {
+        const comparisons = used * used;
+        stats.innerHTML = `
+          <span class="pill">Utilisé : ${used.toLocaleString()} / ${capacity.toLocaleString()} tokens</span>
+          <span class="pill">Comparaisons attention ≈ ${comparisons.toLocaleString()} (n²)</span>
+          ${overflow > 0 ? `<span class="pill" style="color:var(--red)">Dépassement : il faut rejeter, compacter ou supprimer des tokens — ou faire du RAG</span>` : `<span class="pill" style="color:var(--green)">Le bureau de travail n est pas encore plein</span>`}
+        `;
+      }
+    }
+
+    // ============ SIMULATEUR DE SCALING ============
+    function updateScaling() {
+      const params = Number($("#sc-params")?.value ?? 50);
+      const data = Number($("#sc-data")?.value ?? 50);
+      const compute = Number($("#sc-compute")?.value ?? 50);
+
+      $("#scv-params").textContent = params;
+      $("#scv-data").textContent = data;
+      $("#scv-compute").textContent = compute;
+
+      const scale = (params + data + compute) / 3;
+      const error = 4.2 * Math.pow(scale / 100 + 0.05, -0.9);
+
+      const fill = $("#sc-error-bar");
+      if (fill) fill.style.width = Math.min(100, (error / 4.5) * 100) + "%";
+      const out = $("#sc-out");
+      if (out) {
+        let msg = "";
+        if (scale < 35) msg = "Petit modèle : erreur élevée, mais testable à moindre coût. C est ainsi qu on estime les grands modèles avant de dépenser des millions.";
+        else if (scale < 70) msg = "Modèle moyen : l erreur baisse de façon prévisible. Des capacités comme le few-shot learning commencent à apparaître.";
+        else msg = "Grand modèle : erreur basse, mais les gains deviennent très coûteux. La qualité des données et l architecture comptent autant que la taille.";
+        out.textContent = msg;
+      }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "Réseau de neurones", back: "Modèle fait de couches d unités mathématiques (neurones) qui apprend des patterns à partir d exemples. Ce n est pas un cerveau numérique : c est une machine à apprendre des motifs.", tip: "0:44" },
+      { front: "Neurone", back: "Multiplie ses entrées par des poids, ajoute un biais, passe le résultat dans une fonction d activation. Les poids = boutons de volume, le biais = seuil.", tip: "1:20" },
+      { front: "Training", back: "Le modèle apprend : on montre des millions d exemples, on pénalise les erreurs, les poids se mettent à jour. Analogie : l étudiant qui révise.", tip: "2:41" },
+      { front: "Inference", back: "Le modèle répond : les poids sont figés, il utilise ce qu il sait déjà pour prédire le prochain token. Analogie : le jour de l examen.", tip: "3:47" },
+      { front: "Token", back: "Morceau de texte produit par le tokenizer. Pas toujours un mot complet : unbelievable peut devenir un / believ / able. Chaque token reçoit un ID numérique.", tip: "5:18" },
+      { front: "IDs de tokens", back: "De simples étiquettes, comme des codes-barres. cat = 8241, kitten = 1793. Ce ne sont pas des définitions.", tip: "6:26" },
+      { front: "Embedding", back: "Longue liste de nombres (vecteur) qui place chaque token dans un espace où les idées similaires sont proches. C est le pont entre tokens et sens.", tip: "6:48" },
+      { front: "king − man + woman", back: "≈ queen. La géométrie des vecteurs encode des relations entre idées. Illustration, pas loi parfaite.", tip: "8:04" },
+      { front: "Attention", back: "Chaque token compare son importance avec les autres tokens du contexte. Les scores agissent comme des boutons de volume : l information pertinente est amplifiée.", tip: "9:35" },
+      { front: "Attention Is All You Need", back: "Papier Google de 2017 qui introduit le transformer. Correction historique : l attention existait déjà avant 2017.", tip: "11:10" },
+      { front: "Transformer vs LLM", back: "Le transformer est l architecture (le plan du moteur) ; le LLM est le modèle entraîné (la voiture finie).", tip: "12:05" },
+      { front: "Encodage positionnel", back: "Ajoute l ordre des tokens au modèle. Sans lui, dog bites man et man bites dog contiendraient les mêmes pièces.", tip: "12:35" },
+      { front: "Fenêtre de contexte", back: "Espace de travail du modèle : prompt + historique + documents + réponse doivent y tenir. Une fois pleine, il faut rejeter, compacter ou supprimer.", tip: "14:26" },
+      { front: "Coût de l attention", back: "Quadratique : 10 tokens ≈ 100 comparaisons, 1000 ≈ 1 million. Doubler l entrée ≈ quadrupler le travail.", tip: "14:42" },
+      { front: "RAG", back: "Retrieval Augmented Generation : plutôt que tout coller dans le prompt, on ne récupère que l information nécessaire à la question courante.", tip: "16:09" },
+      { front: "Lois de scaling", back: "Paramètres + données + compute équilibrés = l erreur baisse de façon prévisible. On peut estimer un grand modèle en testant des petits.", tip: "16:37" },
+      { front: "Pre-training", back: "Entraînement auto-supervisé massif (prédire le prochain token sur des trillions de tokens). Produit le base model.", tip: "18:19" },
+      { front: "Post-training", back: "SFT, optimisation de préférences, RLHF : transforme le base model en assistant utile qui suit des instructions.", tip: "19:08" },
+      { front: "Base model vs assistant", back: "Le base model est déjà un LLM, mais optimisé pour continuer du texte. Le post-training en fait l assistant poli avec qui vous interagissez.", tip: "19:34" },
+      { front: "GPT-3", back: "175 milliards de paramètres. Mais le nombre de paramètres seul ne mesure pas l intelligence : données, architecture et compute comptent aussi.", tip: "20:33" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ SCÉNARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        semantic_search: "Cas : un utilisateur cherche « repair a dripping tap », mais l article s intitule « How to Fix a Leaky Faucet ».\nConcept mobilisé : EMBEDDINGS.\nMême si les mots diffèrent, les vecteurs de sens sont proches, donc la recherche sémantique retrouve le bon document.",
+        ambiguous: "Cas : le mot « bank » apparaît dans une phrase sur l argent, dans une autre sur une rivière.\nConcept mobilisé : ATTENTION contextuelle.\nUn embedding fixe donnerait une seule position ; l attention utilise le contexte pour choisir le bon sens.",
+        too_much_docs: "Cas : un assistant support doit connaître des milliers de pages de politiques internes.\nConcept mobilisé : FENÊTRE DE CONTEXTE + RAG.\nTout coller dans le prompt serait lent, coûteux, parfois impossible. On ne récupère que ce qui sert la question courante.",
+        cost_estimate: "Cas : votre direction veut savoir combien coûtera l entraînement d un modèle 10× plus grand.\nConcept mobilisé : LOIS DE SCALING.\nEn testant des modèles plus petits, on peut prédire la performance du grand avant de dépenser des millions.",
+        rude_model: "Cas : votre base model répond bien mais complète vos phrases au lieu de suivre vos instructions.\nConcept mobilisé : POST-TRAINING.\nSFT + optimisation de préférences + RLHF transforment le base model en assistant poli et utile.",
+        product_vs_model: "Cas : quelqu un dit « ChatGPT est un LLM ».\nConcept mobilisé : DISTINCTION LLM vs PRODUIT.\nLe LLM est le modèle ; ChatGPT est un produit assistant alimenté par un modèle, avec outils, sécurité et interface."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ EXAMEN ============
+    const FINAL_QUESTIONS = [
+      { q: "Comment un réseau de neurones reconnaît-il un chat ?", o: ["En suivant des règles écrites à la main", "En découvrant les patterns à partir d exemples", "En mesurant chaque caractéristique une par une"], a: 1, e: "Le monde réel est trop désordonné pour des règles manuelles : on laisse le réseau apprendre des données." },
+      { q: "Pendant l inférence, que font les poids du modèle ?", o: ["Ils continuent de se mettre à jour", "Ils restent figés : le modèle utilise ce qu il sait déjà", "Ils sont réinitialisés"], a: 1, e: "Training = apprentissage (poids changent). Inference = réponse (poids fixes)." },
+      { q: "Que peut-on dire du mot unbelievable pour un tokenizer ?", o: ["Il reste toujours entier", "Il peut être découpé en plusieurs morceaux comme un / believ / able", "Il est supprimé"], a: 1, e: "Un token n est pas toujours un mot complet." },
+      { q: "D où vient le sens pour le modèle ?", o: ["Des IDs de tokens", "Des embeddings, des vecteurs où les idées similaires sont proches", "De l alphabet"], a: 1, e: "Les IDs sont des codes-barres ; les embeddings portent le sens géométrique." },
+      { q: "Quelle correction historique le cours apporte-t-il sur l attention ?", o: ["Elle a été inventée par OpenAI", "Elle existait avant 2017 ; 2017 est la percée du transformer via Attention Is All You Need", "Elle n existe pas vraiment"], a: 1, e: "La percée est l architecture qui place le self-attention au centre." },
+      { q: "Quelle est la bonne analogie entre transformer et LLM ?", o: ["Le transformer est le plan du moteur, le LLM est la voiture finie", "Ils sont identiques", "Le LLM est le moteur, le transformer est la roue"], a: 0, e: "Transformer = architecture ; LLM = modèle entraîné." },
+      { q: "Pourquoi ajoute-t-on de l information positionnelle aux tokens ?", o: ["Pour décorer", "Pour distinguer dog bites man de man bites dog", "Pour accélérer le GPU"], a: 1, e: "Sans ordre, les deux phrases contiendraient les mêmes pièces." },
+      { q: "Que se passe-t-il quand on double la longueur d entrée pour l attention ?", o: ["Le travail reste identique", "Le travail peut être multiplié par environ quatre (coût quadratique)", "Le travail diminue"], a: 1, e: "Chaque token se compare à tous les autres : n² comparaisons." },
+      { q: "Que permettent les lois de scaling ?", o: ["De garantir qu un modèle sera parfait", "D estimer la performance d un grand modèle en testant des plus petits", "D éviter d entraîner des modèles"], a: 1, e: "L amélioration suit un pattern prévisible si on équilibre paramètres, données et compute." },
+      { q: "Quel est le rôle du post-training ?", o: ["Apprendre la langue au base model", "Transformer le base model en assistant utile qui suit des instructions", "Augmenter le nombre de paramètres"], a: 1, e: "SFT, optimisation de préférences et RLHF constituent le coaching après la large éducation du pre-training." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous maîtrisez la chaîne complète : neurones → tokens → embeddings → attention → transformer → contexte → scaling → LLM. Vous pouvez aborder les cours avancés (RAG, agents, fine-tuning) avec des fondations solides."
+          : (correct >= 5 ? "Bases correctes. Revoyez attention vs embedding, le coût quadratique et la distinction pre/post-training." : "Reprenez les simulateurs depuis le début : neurone, tokenizer, attention, puis refaites l examen.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d abord l examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Core AI Concepts Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-core-ai-concepts.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Refaites chaque simulateur une fois par semaine jusqu à pouvoir expliquer chaque concept avec vos propres mots.";
+      if (d.level === "expert") return "Passez aux applications : implémentez un petit transformer, mesurez le coût quadratique, construisez un RAG pour dépasser la fenêtre de contexte.";
+      return "Consolidez la chaîne tokens → embeddings → attention → transformer, puis explorez RAG et scaling dans des projets concrets.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ CONTENU DES MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Comprendre vraiment l IA : du neurone au LLM</h1>
+          <p class="lead">
+            Comment votre cerveau reconnaît-il un chat instantanément ? Pendant des décennies, les informaticiens ont essayé
+            d écrire des règles. Puis est venue une meilleure idée : laisser la machine découvrir les patterns à partir d exemples.
+            Ce cours premium démonte toute la chaîne, étape par étape, avec des simulateurs interactifs à chaque niveau.
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 960 200" role="img" aria-label="La chaîne complète du cours">
+              <defs>
+                <marker id="arrow-chain" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="15" y="70" width="105" height="60" class="node" />
+              <text x="67" y="95" text-anchor="middle">Neurones</text>
+              <text x="67" y="115" text-anchor="middle" class="sub">patterns</text>
+              <path class="dash" d="M120 100 L145 100" marker-end="url(#arrow-chain)" />
+
+              <rect x="145" y="70" width="105" height="60" class="node" />
+              <text x="197" y="95" text-anchor="middle">Tokens</text>
+              <text x="197" y="115" text-anchor="middle" class="sub">découpage</text>
+              <path class="dash" d="M250 100 L275 100" marker-end="url(#arrow-chain)" />
+
+              <rect x="275" y="70" width="105" height="60" class="node green" />
+              <text x="327" y="95" text-anchor="middle">Embeddings</text>
+              <text x="327" y="115" text-anchor="middle" class="sub">sens</text>
+              <path class="dash green" d="M380 100 L405 100" marker-end="url(#arrow-chain)" />
+
+              <rect x="405" y="70" width="105" height="60" class="node yellow" />
+              <text x="457" y="95" text-anchor="middle">Attention</text>
+              <text x="457" y="115" text-anchor="middle" class="sub">contexte</text>
+              <path class="dash" d="M510 100 L535 100" marker-end="url(#arrow-chain)" style="stroke: var(--yellow);" />
+
+              <rect x="535" y="70" width="105" height="60" class="node purple" />
+              <text x="587" y="95" text-anchor="middle">Transformer</text>
+              <text x="587" y="115" text-anchor="middle" class="sub">architecture</text>
+              <path class="dash purple" d="M640 100 L665 100" marker-end="url(#arrow-chain)" />
+
+              <rect x="665" y="70" width="105" height="60" class="node red" />
+              <text x="717" y="95" text-anchor="middle">Contexte</text>
+              <text x="717" y="115" text-anchor="middle" class="sub">fenêtre</text>
+              <path class="dash red" d="M770 100 L795 100" marker-end="url(#arrow-chain)" />
+
+              <rect x="795" y="70" width="150" height="60" class="node green pulse" />
+              <text x="870" y="95" text-anchor="middle">LLM</text>
+              <text x="870" y="115" text-anchor="middle" class="sub">prédiction token</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez expliquer comment un texte devient tokens, puis embeddings, comment l attention utilise le contexte, comment le transformer prédit le prochain token, et pourquoi la fenêtre, le scaling et le post-training comptent.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, 10 concepts progressifs, 6 simulateurs interactifs (neurone, tokenizer, embeddings, attention, bureau de contexte, scaling), flashcards, examen chronométré.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Un modèle mental complet de l IA moderne, des analogies réutilisables (étudiant, boutons de volume, bureau de travail), un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('nn')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau actuel en IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre, je veux comprendre de zéro.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : j utilise des LLMs, je veux comprendre ce qu il y a dessous.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je construis des systèmes IA, je veux les subtilités.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre les concepts pour mieux utiliser les IA.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="carriere"> Préparer une carrière en IA / AI engineering.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="technique"> Maîtriser les fondations avant le RAG, les agents, le fine-tuning.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours avec simulateurs.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "nn", title: "1. Réseaux de neurones", express: true,
+        content: `
+          <h1>Le réseau de neurones : une machine à apprendre des patterns</h1>
+          <p class="lead">
+            Au lieu d écrire des règles (« si fourrure + quatre pattes + oreilles pointues, alors chat »), on laisse la machine
+            découvrir les patterns à partir d exemples. Le réseau commence avec des poids presque aléatoires et apprend des
+            valeurs utiles à partir des données. <span class="source">⏱ 0:35</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 260" role="img" aria-label="Les trois couches d un réseau de neurones">
+              <defs>
+                <marker id="arrow-nn" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="40" y="80" width="180" height="100" class="node" />
+              <text x="130" y="115" text-anchor="middle">Input layer</text>
+              <text x="130" y="140" text-anchor="middle" class="sub">pixels bruts</text>
+
+              <path class="dash" d="M220 130 L280 130" marker-end="url(#arrow-nn)" />
+
+              <rect x="280" y="60" width="200" height="140" class="node purple pulse" />
+              <text x="380" y="105" text-anchor="middle">Hidden layers</text>
+              <text x="380" y="130" text-anchor="middle" class="sub">bords → formes</text>
+              <text x="380" y="152" text-anchor="middle" class="sub">yeux, oreilles, moustaches</text>
+              <text x="380" y="174" text-anchor="middle" class="sub">patterns de plus en plus utiles</text>
+
+              <path class="dash purple" d="M480 130 L540 130" marker-end="url(#arrow-nn)" />
+
+              <rect x="540" y="80" width="200" height="100" class="node green" />
+              <text x="640" y="115" text-anchor="middle">Output layer</text>
+              <text x="640" y="140" text-anchor="middle" class="sub">95% de chance d être un chat</text>
+            </svg>
+          </div>
+
+          <h2>À l intérieur d un neurone</h2>
+          <div class="grid">
+            <div class="card info">
+              <h3>Poids (weights)</h3>
+              <p>Des boutons de volume qui contrôlent quels signaux comptent. Chaque entrée est multipliée par son poids. <span class="source">⏱ 1:31</span></p>
+            </div>
+            <div class="card info">
+              <h3>Biais (bias)</h3>
+              <p>Décale le seuil d activation du neurone. <span class="source">⏱ 1:35</span></p>
+            </div>
+            <div class="card info">
+              <h3>Fonction d activation</h3>
+              <p>Décide avec quelle force le résultat avance vers la couche suivante. <span class="source">⏱ 1:38</span></p>
+            </div>
+          </div>
+
+          <h2>Simulateur : jouez avec un neurone</h2>
+          <div class="simulator">
+            <p class="muted">Modifiez les poids et le biais, choisissez l activation, et regardez la sortie changer. Entrées fixes : x₁ = 1.0, x₂ = 0.6.</p>
+            <div class="slider-row">
+              <label for="nw1">Poids w₁</label>
+              <input type="range" id="nw1" min="-2" max="2" step="0.05" value="0.8" oninput="updateNeuron()">
+              <span class="slider-val" id="nv-w1">0.80</span>
+            </div>
+            <div class="slider-row">
+              <label for="nw2">Poids w₂</label>
+              <input type="range" id="nw2" min="-2" max="2" step="0.05" value="0.3" oninput="updateNeuron()">
+              <span class="slider-val" id="nv-w2">0.30</span>
+            </div>
+            <div class="slider-row">
+              <label for="nbias">Biais</label>
+              <input type="range" id="nbias" min="-2" max="2" step="0.05" value="-0.5" oninput="updateNeuron()">
+              <span class="slider-val" id="nv-bias">-0.50</span>
+            </div>
+            <div class="slider-row">
+              <label for="nact">Activation</label>
+              <select id="nact" onchange="updateNeuron()">
+                <option value="sigmoid" selected>sigmoid</option>
+                <option value="relu">relu</option>
+                <option value="none">aucune (brute)</option>
+              </select>
+              <span class="slider-val"></span>
+            </div>
+            <div class="neuron-display">
+              <div id="n-formula">z = ...</div>
+              <div style="margin-top:0.5rem"><span id="n-out-label" class="muted small">Sortie</span> : <span class="neuron-output" id="n-out">0</span></div>
+              <div class="att-weights-bar" style="margin-top:0.6rem"><div class="att-weights-fill" id="n-out-bar" style="width:50%"></div></div>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>L émergence</h3>
+            <p>Un neurone seul ne fait presque rien. Mais empilez-en des milliers ou des millions sur plusieurs couches : les premières détectent des bords, les suivantes combinent les bords en formes, les couches profondes reconnaissent yeux, oreilles et moustaches, et les dernières assemblent le concept de chat. Personne ne programme chaque détecteur. <span class="source">⏱ 1:50</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi a-t-on abandonné les règles écrites à la main pour reconnaître un chat ?", o: ["Le monde réel est trop désordonné pour tout décrire manuellement", "Les règles étaient trop rapides", "Les ordinateurs refusaient"], a: 0, e: "Un chien peut aussi matcher les règles « fourrure, quatre pattes, oreilles pointues »." },
+            { q: "Que font les poids dans un neurone ?", o: ["Ils contrôlent, comme des boutons de volume, quels signaux comptent", "Ils stockent l image", "Ils affichent le résultat"], a: 0, e: "Chaque entrée est multipliée par son poids avant sommation." }
+          ], "nn")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('nn')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('nn')">Training vs Inference →</button>
+          </div>
+        `
+      },
+      {
+        id: "training", title: "2. Training vs Inference", express: true,
+        content: `
+          <h1>Deux modes totalement différents : apprendre et répondre</h1>
+          <p class="lead">
+            Un réseau non entraîné n est qu une machinerie vide. Comment découvre-t-il les bons poids ? Et une fois qu il les a,
+            comment s en sert-il pour nous répondre ? Ce sont deux modes distincts : l entraînement et l inférence.
+            <span class="source">⏱ 2:41</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 240" role="img" aria-label="Analogie de l étudiant : réviser puis passer l examen">
+              <defs>
+                <marker id="arrow-train" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="40" y="70" width="340" height="110" class="node purple" />
+              <text x="210" y="100" text-anchor="middle">TRAINING — l étudiant révise</text>
+              <text x="210" y="125" text-anchor="middle" class="sub">lit des livres, fait des exercices</text>
+              <text x="210" y="147" text-anchor="middle" class="sub">le modèle voit des millions d exemples</text>
+              <text x="210" y="169" text-anchor="middle" class="sub">les poids sont mis à jour</text>
+
+              <path class="dash purple" d="M380 125 L520 125" marker-end="url(#arrow-train)" />
+
+              <rect x="520" y="70" width="340" height="110" class="node green" />
+              <text x="690" y="100" text-anchor="middle">INFERENCE — le jour de l examen</text>
+              <text x="690" y="125" text-anchor="middle" class="sub">une question arrive, il répond</text>
+              <text x="690" y="147" text-anchor="middle" class="sub">aucun professeur pour corriger</text>
+              <text x="690" y="169" text-anchor="middle" class="sub">les poids sont figés</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card purple">
+              <h3>Training</h3>
+              <p>On montre des millions d exemples, comme « all that glitters... » et le modèle doit prédire « is not gold ». S il se trompe, on le pénalise et ses poids internes se mettent à jour. Répétez des milliards de fois, et vous obtenez quelque chose qui sait des choses. <span class="source">⏱ 3:28</span></p>
+            </div>
+            <div class="card green">
+              <h3>Inference</h3>
+              <p>Le modèle a fini d apprendre : on le déploie sur un serveur. Quand un utilisateur appelle l API, le modèle répond instantanément, sans mettre à jour ses poids. Il utilise ce qu il sait déjà pour prédire le prochain token. <span class="source">⏱ 3:47</span></p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>La formule à retenir</h3>
+            <p><strong>Training = quand le modèle apprend. Inference = quand le modèle répond.</strong> On entraîne une fois, puis on sert ce modèle à des millions d utilisateurs en mode inférence. <span class="source">⏱ 4:08</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que se passe-t-il avec les poids pendant l inférence ?", o: ["Ils restent figés : le modèle utilise ce qu il a appris", "Ils continuent d évoluer", "Ils sont réinitialisés à chaque requête"], a: 0, e: "L apprentissage est terminé ; seule la prédiction a lieu." },
+            { q: "Dans l analogie de l étudiant, le jour de l examen correspond à...", o: ["L inférence", "Le training", "La tokenization"], a: 0, e: "Plus de professeur pour corriger : il faut produire la réponse." }
+          ], "training")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('training')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('training')">Tokenization →</button>
+          </div>
+        `
+      },
+      {
+        id: "tokens", title: "3. Tokenization", express: true,
+        content: `
+          <h1>Les tokens : le modèle ne lit pas des mots</h1>
+          <p class="lead">
+            Quand vous tapez « Write a story about a robot exploring Mars », Claude ne reçoit pas une phrase complète.
+            Avant de traiter votre requête, un tokenizer découpe le texte en morceaux plus petits : les tokens.
+            <span class="source">⏱ 5:12</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Un token n est pas toujours un mot</h3>
+              <p>Le mot « unbelievable » peut devenir trois morceaux : un / believ / able. Un mot courant comme « the » reste entier, mais un nom rare ou un terme technique long peut être découpé en plusieurs tokens. <span class="source">⏱ 5:25</span></p>
+            </div>
+            <div class="card info">
+              <h3>Pourquoi découper ?</h3>
+              <p>L IA a besoin d un vocabulaire gérable : impossible de stocker chaque mot que les humains pourraient inventer. Elle apprend des motifs réutilisables : le suffixe « ing » apparaît dans running, writing, learning — appris une fois, réutilisé partout. <span class="source">⏱ 5:51</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Le modèle ne travaille jamais sur des lettres</h3>
+              <p>Chaque token reçoit un ID numérique. « cat » devient 8241, « kitten » devient 1793. Ce ne sont pas des définitions : de simples étiquettes, comme des codes-barres sur des produits. <span class="source">⏱ 6:26</span></p>
+            </div>
+          </div>
+
+          <h2>Simulateur de tokenizer</h2>
+          <div class="simulator">
+            <label for="tok-input">Votre texte</label>
+            <input id="tok-input" value="Write a story about a robot exploring Mars" oninput="runTokenizer()">
+            <div class="toolbar no-print">
+              <button class="btn small" onclick="runTokenizer()">Tokeniser</button>
+            </div>
+            <div id="tok-output" style="margin-top:0.8rem"></div>
+            <p id="tok-stats" class="muted small" style="margin-top:0.6rem"></p>
+          </div>
+
+          <div class="card good">
+            <h3>Ce que devient votre prompt</h3>
+            <p>Votre prompt devient une séquence de nombres, et le réseau de neurones effectue des calculs sur leurs représentations pour prédire quel token doit venir ensuite. <span class="source">⏱ 6:41</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Le mot unbelievable sera probablement vu par le modèle comme...", o: ["Un seul mot", "Plusieurs morceaux comme un / believ / able", "Un nombre"], a: 1, e: "Un token n est pas toujours un mot complet." },
+            { q: "Que sont les IDs numériques des tokens ?", o: ["Des définitions du mot", "De simples étiquettes, comme des codes-barres", "Des probabilités"], a: 1, e: "cat = 8241 ne dit pas au modèle que cat et kitten sont liés : c est le rôle des embeddings." }
+          ], "tokens")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('tokens')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('tokens')">Embeddings →</button>
+          </div>
+        `
+      },
+      {
+        id: "embeddings", title: "4. Embeddings", express: true,
+        content: `
+          <h1>Les embeddings : là où naît le sens</h1>
+          <p class="lead">
+            Un tokenizer transforme le texte en tokens, mais les tokens ne sont que des étiquettes. Si « cat » vaut 8241,
+            ce nombre ne dit pas au modèle que les chats et les chatons sont liés. D où vient le sens ? Des embeddings.
+            <span class="source">⏱ 6:52</span>
+          </p>
+
+          <div class="card info">
+            <h3>L idée : une carte de coordonnées</h3>
+            <p>Imaginez une carte avec un axe x et un axe y. Placez « cat » en un point, mais « kitten » et « dog » à proximité car ils sont liés. Placez « airplane » loin. On a transformé des mots en coordonnées où les idées similaires sont proches. Un embedding fait pareil, mais avec une longue liste de nombres (un vecteur) — des centaines ou des milliers de dimensions. <span class="source">⏱ 7:06</span></p>
+          </div>
+
+          <h2>Explorateur d embeddings</h2>
+          <div class="simulator">
+            <div class="tab-list no-print" id="embed-buttons">
+              <button class="tab-btn active" data-mode="animals" onclick="renderEmbedMap('animals')">Similarité</button>
+              <button class="tab-btn" data-mode="royalty" onclick="renderEmbedMap('royalty')">king − man + woman</button>
+              <button class="tab-btn" data-mode="paris" onclick="renderEmbedMap('paris')">Paris − France + Italy</button>
+            </div>
+            <div id="embed-map"></div>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Comparaison par distance</h3>
+              <p>Une recherche « repair a dripping tap » retrouve « How to Fix a Leaky Faucet » même si les mots diffèrent : les vecteurs sont proches. <span class="source">⏱ 7:52</span></p>
+            </div>
+            <div class="card good">
+              <h3>Représentations contextuelles</h3>
+              <p>Le mot « bank » change selon qu on parle d argent ou de berge de rivière. Les modèles modernes rendent ces représentations dépendantes du contexte. <span class="source">⏱ 8:33</span></p>
+            </div>
+            <div class="card purple">
+              <h3>Ce que cela alimente</h3>
+              <p>Recherche sémantique, systèmes de recommandation, RAG (retrieval augmented generation) et bases de données vectorielles. <span class="source">⏱ 8:40</span></p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>Nuance importante du cours</h3>
+            <p>Les équations king − man + woman ≈ queen sont des illustrations utiles, pas des lois parfaites. Mais elles révèlent quelque chose de puissant : la géométrie peut représenter des relations entre idées. <span class="source">⏱ 8:18</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est le pont entre les tokens et le sens ?", o: ["Les IDs de tokens", "Les embeddings", "Le tokenizer"], a: 1, e: "Les embeddings transforment de simples IDs en représentations mathématiques comparables." },
+            { q: "Pourquoi « repair a dripping tap » retrouve « How to Fix a Leaky Faucet » ?", o: ["Parce que les mots sont identiques", "Parce que les embeddings placent des idées similaires proches dans l espace vectoriel", "Par hasard"], a: 1, e: "La distance entre vecteurs mesure la proximité de sens." }
+          ], "embeddings")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('embeddings')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('embeddings')">Attention →</button>
+          </div>
+        `
+      },
+      {
+        id: "attention", title: "5. Attention", express: true,
+        content: `
+          <h1>L attention : l ingrédient du contexte</h1>
+          <p class="lead">
+            Un embedding traditionnel donne à un mot une seule coordonnée fixe — un seul point sur la carte pour deux sens
+            complètement différents. Comment le modèle sait-il quel sens vous vouliez ? L ingrédient manquant est le contexte :
+            chaque mot doit pouvoir examiner les mots autour de lui et décider lesquels comptent. <span class="source">⏱ 9:02</span>
+          </p>
+
+          <h2>Démo interactive : le mot « mouse »</h2>
+          <div class="simulator">
+            <div class="tab-list no-print" id="att-buttons">
+              <button class="tab-btn active" data-mode="computer" onclick="showAttention('computer')">« To open the file, I click the mouse »</button>
+              <button class="tab-btn" data-mode="animal" onclick="showAttention('animal')">« The hungry cat chased the mouse »</button>
+            </div>
+            <div id="att-demo"></div>
+          </div>
+
+          <div class="card info">
+            <h3>Des boutons de volume</h3>
+            <p>Les scores d attention fonctionnent comme des contrôles de volume : l information pertinente est montée, l information moins utile est descendue. Le modèle combine ces signaux pour créer une nouvelle représentation consciente du contexte. <span class="source">⏱ 10:07</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Têtes multiples</h3>
+              <p>Plusieurs têtes d attention en parallèle capturent différentes relations : une action, un pronom, le nom auquel il se réfère. Empilez les couches, et le modèle construit une image de plus en plus riche de la phrase. <span class="source">⏱ 10:44</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Correction historique</h3>
+              <p>L attention n a PAS été inventée en 2017 : elle existait déjà depuis plusieurs années. La percée est venue quand Google a publié « Attention Is All You Need » et introduit le transformer, qui place le self-attention au centre du modèle. <span class="source">⏱ 11:00</span></p>
+            </div>
+            <div class="card purple">
+              <h3>Pourquoi c est une révolution</h3>
+              <p>Au lieu de traiter les mots un par un, le transformer examine plusieurs relations à la fois, même entre des mots éloignés. Entraînement plus rapide, plus scalable — et la direction de l IA moderne a changé. ChatGPT, Claude, Gemini descendent de ce design. <span class="source">⏱ 11:24</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Que permet le mécanisme d attention ?", o: ["À chaque mot d examiner son contexte et de décider ce qui compte", "De supprimer les mots inutiles", "De traduire automatiquement"], a: 0, e: "Le même token « mouse » obtient une représentation différente selon la phrase." },
+            { q: "Quelle est la correction historique du cours ?", o: ["L attention a été inventée en 2017", "L attention existait avant 2017 ; 2017 marque la percée du transformer", "L attention n existe pas"], a: 1, e: "La percée est l architecture qui place le self-attention au centre." }
+          ], "attention")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('attention')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('attention')">Transformers →</button>
+          </div>
+        `
+      },
+      {
+        id: "transformers", title: "6. Transformers", express: true,
+        content: `
+          <h1>Le transformer : l architecture qui a tout changé</h1>
+          <p class="lead">
+            L attention n est qu un mécanisme. Il lui faut une architecture complète pour organiser ces calculs à travers les
+            couches et en faire un modèle fonctionnel. Cette architecture est le transformer — et non, on ne parle pas d Optimus Prime.
+            <span class="source">⏱ 11:47</span>
+          </p>
+
+          <div class="card warn">
+            <h3>Dissiper une confusion courante</h3>
+            <p>Un LLM et un transformer ne sont pas la même chose. Le LLM est un modèle entraîné conçu pour traiter et générer du langage. Le transformer est l architecture utilisée pour le construire — le plan qui dit comment l information circule. <strong>Analogie : le LLM est la voiture finie, le transformer est le plan de son moteur.</strong> <span class="source">⏱ 12:05</span></p>
+          </div>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 300" role="img" aria-label="Le pipeline du transformer">
+              <defs>
+                <marker id="arrow-tf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="20" y="110" width="110" height="80" class="node" />
+              <text x="75" y="140" text-anchor="middle">Prompt</text>
+              <text x="75" y="162" text-anchor="middle" class="sub">→ tokens</text>
+              <path class="dash" d="M130 150 L160 150" marker-end="url(#arrow-tf)" />
+
+              <rect x="160" y="110" width="110" height="80" class="node green" />
+              <text x="215" y="140" text-anchor="middle">Embeddings</text>
+              <text x="215" y="162" text-anchor="middle" class="sub">+ position</text>
+              <path class="dash green" d="M270 150 L300 150" marker-end="url(#arrow-tf)" />
+
+              <rect x="300" y="70" width="170" height="160" class="node purple pulse" />
+              <text x="385" y="100" text-anchor="middle">Bloc transformer</text>
+              <text x="385" y="125" text-anchor="middle" class="sub">1. Self-attention</text>
+              <text x="385" y="147" text-anchor="middle" class="sub">2. Feed-forward NN</text>
+              <text x="385" y="169" text-anchor="middle" class="sub">résiduelles + norm</text>
+              <text x="385" y="195" text-anchor="middle" class="sub">répété N couches</text>
+              <path class="dash purple" d="M470 150 L500 150" marker-end="url(#arrow-tf)" />
+
+              <rect x="500" y="110" width="130" height="80" class="node yellow" />
+              <text x="565" y="140" text-anchor="middle">Scores</text>
+              <text x="565" y="162" text-anchor="middle" class="sub">chaque token possible</text>
+              <path class="dash" d="M630 150 L660 150" marker-end="url(#arrow-tf)" style="stroke: var(--yellow);" />
+
+              <rect x="660" y="110" width="120" height="80" class="node green" />
+              <text x="720" y="140" text-anchor="middle">1 token</text>
+              <text x="720" y="162" text-anchor="middle" class="sub">sélectionné</text>
+              <path class="dash green" d="M780 150 L810 150" marker-end="url(#arrow-tf)" />
+
+              <rect x="810" y="110" width="110" height="80" class="node" />
+              <text x="865" y="140" text-anchor="middle">Répéter</text>
+              <text x="865" y="162" text-anchor="middle" class="sub">token par token</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Encodage positionnel</h3>
+              <p>Le modèle ajoute l ordre des tokens. Sinon, « dog bites man » et « man bites dog » contiendraient les mêmes pièces. <span class="source">⏱ 12:38</span></p>
+            </div>
+            <div class="card info">
+              <h3>Deux étapes par bloc</h3>
+              <p>Le self-attention mesure la pertinence des tokens entre eux (pronoms ↔ noms, mots ambigus, relations lointaines). Puis le feed-forward network traite cette information à chaque position. Connexions résiduelles et normalisation gardent le calcul stable. <span class="source">⏱ 12:50</span></p>
+            </div>
+            <div class="card info">
+              <h3>Pas de rôles fixes</h3>
+              <p>Les couches n ont pas de travail fixe, mais plus l information voyage profondément, plus sa représentation s affine : des mots et de la grammaire vers les relations, le ton, les instructions. <span class="source">⏱ 13:32</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la bonne analogie transformer / LLM ?", o: ["Transformer = plan du moteur, LLM = voiture finie", "Ils sont identiques", "Transformer = voiture, LLM = moteur"], a: 0, e: "L architecture est le plan ; le modèle entraîné est le produit fini." },
+            { q: "À quoi sert l information positionnelle ?", o: ["À distinguer dog bites man de man bites dog", "À accélérer l affichage", "À rien de particulier"], a: 0, e: "Sans ordre, les deux phrases contiennent exactement les mêmes pièces." }
+          ], "transformers")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('transformers')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('transformers')">Fenêtre de contexte →</button>
+          </div>
+        `
+      },
+      {
+        id: "context", title: "7. Fenêtre de contexte", express: true,
+        content: `
+          <h1>La fenêtre de contexte : le bureau de travail du modèle</h1>
+          <p class="lead">
+            Les transformers sont puissants parce que l attention laisse les tokens utiliser l information des autres tokens.
+            Mais cette capacité a un coût : chaque token se compare à tous les autres. Avec 10 tokens, ~100 comparaisons.
+            Avec 1 000, ~1 million. Doublez l entrée, le travail peut quadrupler. <span class="source">⏱ 14:33</span>
+          </p>
+
+          <div class="card info">
+            <h3>L analogie du bureau</h3>
+            <p>Pensez à la fenêtre comme au bureau de travail du modèle. Votre prompt, l historique de conversation, les documents de référence et la réponse du modèle doivent tous tenir sur ce bureau. Quand le bureau est plein, l application doit rejeter le texte en trop, compacter automatiquement le contexte, ou supprimer les anciens tokens. Une fois sortie de la fenêtre active, le modèle ne peut plus utiliser l information directement. <span class="source">⏱ 15:09</span></p>
+          </div>
+
+          <h2>Simulateur : remplissez le bureau</h2>
+          <div class="simulator">
+            <div class="slider-row">
+              <label for="cw-prompt">Prompt</label>
+              <input type="range" id="cw-prompt" min="0" max="8000" step="100" value="500" oninput="updateDesk()">
+              <span class="slider-val" id="cwv-prompt">500</span>
+            </div>
+            <div class="slider-row">
+              <label for="cw-history">Historique</label>
+              <input type="range" id="cw-history" min="0" max="8000" step="100" value="1500" oninput="updateDesk()">
+              <span class="slider-val" id="cwv-history">1500</span>
+            </div>
+            <div class="slider-row">
+              <label for="cw-docs">Documents</label>
+              <input type="range" id="cw-docs" min="0" max="16000" step="100" value="4000" oninput="updateDesk()">
+              <span class="slider-val" id="cwv-docs">4000</span>
+            </div>
+            <div class="slider-row">
+              <label for="cw-resp">Réservé réponse</label>
+              <input type="range" id="cw-resp" min="0" max="4000" step="100" value="1000" oninput="updateDesk()">
+              <span class="slider-val" id="cwv-resp">1000</span>
+            </div>
+            <div class="slider-row">
+              <label for="cw-cap">Capacité fenêtre</label>
+              <select id="cw-cap" onchange="updateDesk()">
+                <option value="4096">4 096 tokens</option>
+                <option value="8192" selected>8 192 tokens</option>
+                <option value="32768">32 768 tokens</option>
+                <option value="131072">131 072 tokens</option>
+              </select>
+              <span class="slider-val" id="cwv-cap">8 192</span>
+            </div>
+            <div id="desk-bar" class="desk-bar-wrap"></div>
+            <p id="cw-stats" class="small"></p>
+          </div>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Plus grand ≠ mémoire parfaite</h3>
+              <p>Une grande fenêtre ne garantit pas un rappel parfait : un détail important peut rester enterré dans des milliers de pages. Traiter des tokens inutiles coûte aussi du temps et de l argent. <span class="source">⏱ 15:35</span></p>
+            </div>
+            <div class="card good">
+              <h3>La solution : RAG</h3>
+              <p>Un assistant support peut avoir besoin de milliers de pages de politiques ; un assistant code d une base de code bien plus grande que sa fenêtre. Plutôt que tout coller dans le prompt : ne récupérer que l information nécessaire à la question courante. C est le Retrieval Augmented Generation. <span class="source">⏱ 16:07</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>La grande leçon</h3>
+            <p>En IA, augmenter l échelle apporte plus de capacité, mais aussi plus de coût. <span class="source">⏱ 16:28</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi le coût de l attention explose-t-il avec la longueur ?", o: ["Chaque token se compare à tous les autres : n² comparaisons", "À cause de la mémoire disque", "À cause du réseau"], a: 0, e: "10 tokens ≈ 100 comparaisons, 1000 ≈ 1 million." },
+            { q: "Que faire quand la fenêtre est pleine ?", o: ["Rejeter le texte, compacter le contexte ou supprimer d anciens tokens — ou faire du RAG", "Rien, le modèle gère", "Réinstaller le modèle"], a: 0, e: "Une fois hors de la fenêtre active, l information n est plus directement utilisable." }
+          ], "context")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('context')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('context')">Lois de scaling →</button>
+          </div>
+        `
+      },
+      {
+        id: "scaling", title: "8. Lois de scaling", express: true,
+        content: `
+          <h1>Les lois de scaling : l échelle comme levier prévisible</h1>
+          <p class="lead">
+            Pendant des années, le progrès de l IA semblait dépendre d algorithmes astucieux. Puis les chercheurs ont trouvé
+            un autre levier puissant : l échelle. En équilibrant paramètres, données et puissance de calcul, l erreur du modèle
+            baisse de façon prévisible. <span class="source">⏱ 16:37</span>
+          </p>
+
+          <h2>Simulateur : l effet de l échelle</h2>
+          <div class="simulator">
+            <div class="slider-row">
+              <label for="sc-params">Paramètres</label>
+              <input type="range" id="sc-params" min="1" max="100" step="1" value="50" oninput="updateScaling()">
+              <span class="slider-val" id="scv-params">50</span>
+            </div>
+            <div class="slider-row">
+              <label for="sc-data">Données</label>
+              <input type="range" id="sc-data" min="1" max="100" step="1" value="50" oninput="updateScaling()">
+              <span class="slider-val" id="scv-data">50</span>
+            </div>
+            <div class="slider-row">
+              <label for="sc-compute">Compute</label>
+              <input type="range" id="sc-compute" min="1" max="100" step="1" value="50" oninput="updateScaling()">
+              <span class="slider-val" id="scv-compute">50</span>
+            </div>
+            <p class="muted small">Erreur du modèle (plus la barre est courte, meilleure est la performance) :</p>
+            <div class="att-weights-bar"><div class="att-weights-fill" id="sc-error-bar" style="width:50%; background: linear-gradient(90deg, var(--red), var(--yellow), var(--green))"></div></div>
+            <p id="sc-out" class="muted" style="margin-top:0.6rem"></p>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Le mot clé : prévisible</h3>
+              <p>En testant des modèles plus petits, les chercheurs peuvent estimer comment un modèle bien plus grand se comportera — avant de dépenser des millions à l entraîner. <span class="source">⏱ 17:12</span></p>
+            </div>
+            <div class="card warn">
+              <h3>L échelle ne suffit pas</h3>
+              <p>Un modèle géant entraîné sur trop peu de données gaspille la puissance de calcul. La qualité des données, l architecture et l optimisation comptent toujours. Et les gains deviennent de plus en plus coûteux à mesure que les modèles grandissent. <span class="source">⏱ 17:22</span></p>
+            </div>
+            <div class="card purple">
+              <h3>Capacités émergentes</h3>
+              <p>En grandissant, les modèles ont développé le few-shot learning, le code, une génération de langage plus flexible — sans que chaque comportement soit programmé comme une règle séparée. Quand les entreprises ont compris que ces progrès étaient prévisibles et répétables, l investissement en puces, données et datacenters a explosé. <span class="source">⏱ 17:41</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Que permettent les lois de scaling ?", o: ["D estimer la performance d un grand modèle en testant des petits", "De garantir un modèle parfait", "D éviter tout entraînement"], a: 0, e: "L amélioration suit un pattern prévisible quand on équilibre les trois leviers." },
+            { q: "Quel est le piège du scaling ?", o: ["Ajouter seulement des GPU suffit toujours", "Sans assez de données et de qualité, un géant gaspille le compute — et les gains coûtent de plus en plus cher", "Le scaling n a aucun effet"], a: 1, e: "Données, architecture et optimisation restent indispensables." }
+          ], "scaling")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scaling')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scaling')">Pre vs Post-training →</button>
+          </div>
+        `
+      },
+      {
+        id: "prepost", title: "9. Pre vs Post-training", express: true,
+        content: `
+          <h1>Les deux étapes : pre-training et post-training</h1>
+          <p class="lead">
+            Absorber des patterns d un énorme jeu de données ne crée pas automatiquement un assistant IA utile.
+            Transformer un modèle en assistant utile demande deux grandes étapes. <span class="source">⏱ 18:01</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 230" role="img" aria-label="Pre-training puis post-training">
+              <defs>
+                <marker id="arrow-pp" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="40" y="65" width="340" height="110" class="node purple" />
+              <text x="210" y="95" text-anchor="middle">PRE-TRAINING — la grande éducation</text>
+              <text x="210" y="120" text-anchor="middle" class="sub">trillions de tokens, auto-supervisé</text>
+              <text x="210" y="142" text-anchor="middle" class="sub">tâche : prédire le prochain token</text>
+              <text x="210" y="164" text-anchor="middle" class="sub">→ produit le BASE MODEL</text>
+
+              <path class="dash purple" d="M380 120 L520 120" marker-end="url(#arrow-pp)" />
+
+              <rect x="520" y="65" width="340" height="110" class="node green" />
+              <text x="690" y="95" text-anchor="middle">POST-TRAINING — le coaching</text>
+              <text x="690" y="120" text-anchor="middle" class="sub">SFT, préférences, RLHF</text>
+              <text x="690" y="142" text-anchor="middle" class="sub">suivre des instructions, conversations sûres</text>
+              <text x="690" y="164" text-anchor="middle" class="sub">→ produit l ASSISTANT</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card purple">
+              <h3>Pre-training : auto-supervision massive</h3>
+              <p>Le transformer part de poids aléatoires et s entraîne sur un mélange énorme de texte et de code. Sa tâche : prédire le prochain token. S il lit « the sky is », il fait une prédiction ; le vrai token suivant fournit la correction. Personne n a besoin d étiqueter : le texte crée son propre signal d entraînement. Résultat : le base model, optimisé pour continuer du texte — pas forcément pour suivre des instructions. <span class="source">⏱ 18:22</span></p>
+            </div>
+            <div class="card green">
+              <h3>Post-training : le coaching</h3>
+              <p>Le modèle apprend à suivre des instructions, tenir des conversations, produire des réponses plus sûres et utiles. Méthodes : supervised fine-tuning, optimisation de préférences, reinforcement learning from human feedback. <span class="source">⏱ 19:08</span></p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>Point crucial du cours</h3>
+            <p>Un base model EST déjà un large language model. Le post-training en fait l assistant IA poli avec qui vous interagissez réellement. Analogie : le pre-training est une éducation large ; le post-training est le coaching pour appliquer cette éducation efficacement avec des humains. <span class="source">⏱ 19:32</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la tâche du modèle pendant le pre-training ?", o: ["Suivre des instructions humaines", "Prédire le prochain token (auto-supervisé)", "Classer des images"], a: 1, e: "Le texte crée son propre signal d entraînement : pas besoin d étiqueter." },
+            { q: "Quel est le statut du base model ?", o: ["Ce n est pas encore un LLM", "C est déjà un LLM, mais optimisé pour continuer du texte plutôt que suivre des instructions", "C est un produit fini"], a: 1, e: "Le post-training le transforme en assistant utile." }
+          ], "prepost")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('prepost')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('prepost')">Le LLM →</button>
+          </div>
+        `
+      },
+      {
+        id: "llm", title: "10. Le LLM", express: true,
+        content: `
+          <h1>Le Large Language Model : synthèse finale</h1>
+          <p class="lead">
+            Nous voici au terme dont tout le monde parle : le large language model. Un LLM est un réseau de neurones entraîné
+            sur d énormes quantités de texte et de code pour apprendre les patterns du langage. La plupart des LLMs génératifs
+            modernes utilisent l architecture transformer et commencent avec un objectif : prédire le prochain token.
+            <span class="source">⏱ 19:44</span>
+          </p>
+
+          <div class="card info">
+            <h3>La boucle simple qui produit tout</h3>
+            <p>Quand vous entrez un prompt, le modèle calcule les probabilités du prochain token possible. Il en sélectionne un, l ajoute à la séquence, et répète. Cette boucle simple produit des résultats complexes parce que l entraînement a encodé de vastes patterns dans les paramètres du modèle. <span class="source">⏱ 20:09</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card warn">
+              <h3>« Large » = paramètres</h3>
+              <p>Les paramètres sont les nombres appris, ajustés pendant l entraînement. Pour donner un ordre de grandeur : GPT-3 avait 175 milliards de paramètres. <span class="source">⏱ 20:27</span></p>
+            </div>
+            <div class="card bad">
+              <h3>Mais paramètres ≠ intelligence</h3>
+              <p>Le nombre de paramètres seul ne mesure pas l intelligence. La qualité des données, l architecture, les méthodes d entraînement et la puissance de calcul comptent aussi. <span class="source">⏱ 20:37</span></p>
+            </div>
+            <div class="card purple">
+              <h3>LLM ≠ produit assistant</h3>
+              <p>Un LLM est un modèle. ChatGPT, Claude et Gemini sont des produits assistants alimentés par des modèles de langage, souvent combinés avec des outils, des systèmes de sécurité et des interfaces utilisateur. <span class="source">⏱ 20:46</span></p>
+            </div>
+          </div>
+
+          <h2>Scénarios : quel concept pour quel problème ?</h2>
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('semantic_search')">Recherche sémantique</button>
+              <button class="tab-btn" onclick="chooseScenario('ambiguous')">Mot ambigu</button>
+              <button class="tab-btn" onclick="chooseScenario('too_much_docs')">Trop de documents</button>
+              <button class="tab-btn" onclick="chooseScenario('cost_estimate')">Estimer un coût</button>
+              <button class="tab-btn" onclick="chooseScenario('rude_model')">Model impoli</button>
+              <button class="tab-btn" onclick="chooseScenario('product_vs_model')">ChatGPT = LLM ?</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          ${quizHTML([
+            { q: "Combien de paramètres avait GPT-3 ?", o: ["175 milliards", "17 millions", "1 trillion"], a: 0, e: "Mais le nombre de paramètres seul ne mesure pas l intelligence." },
+            { q: "Quelle est la bonne distinction ?", o: ["ChatGPT, Claude et Gemini sont des LLM", "Un LLM est un modèle ; ChatGPT, Claude, Gemini sont des produits assistants alimentés par des modèles", "Il n y a aucune différence"], a: 1, e: "Les produits ajoutent outils, sécurité et interface autour du modèle." }
+          ], "llm")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('llm')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('llm')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "11. Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. 20 cartes couvrant tout le vocabulaire du cours, avec ancres temporelles du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Erreurs fréquentes →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors", title: "12. Erreurs fréquentes", express: true,
+        content: `
+          <h1>Anti-patterns et confusions à éliminer</h1>
+          <p class="lead">Le cours corrige explicitement plusieurs idées reçues. Les voici regroupées pour ne plus jamais vous tromper.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. « L attention a été inventée en 2017 »</h3>
+              <p>Faux : elle existait depuis plusieurs années. 2017 est la percée du transformer (Attention Is All You Need), qui la place au centre de l architecture.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. « Transformer = LLM »</h3>
+              <p>Non : le transformer est l architecture (plan du moteur), le LLM est le modèle entraîné (voiture finie).</p>
+            </div>
+            <div class="card bad">
+              <h3>3. « Plus de paramètres = plus intelligent »</h3>
+              <p>Le nombre seul ne mesure pas l intelligence : qualité des données, architecture, méthodes d entraînement et compute comptent tout autant.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. « Une grande fenêtre = mémoire parfaite »</h3>
+              <p>Un détail peut rester enterré dans des milliers de pages, et les tokens inutiles coûtent du temps et de l argent. D où le RAG.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. « Les IDs de tokens portent le sens »</h3>
+              <p>cat = 8241 n indique rien du sens : ce sont des codes-barres. Le sens vient des embeddings.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. « Le base model est un produit fini »</h3>
+              <p>Il est optimisé pour continuer du texte. Sans post-training, il peut répondre... ou partir dans une direction inattendue.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle affirmation est correcte ?", o: ["Plus la fenêtre est grande, meilleure est la mémoire", "Une grande fenêtre ne garantit pas un rappel parfait : un détail peut être enterré", "La fenêtre n a aucune importance"], a: 1, e: "Et traiter des tokens inutiles coûte du temps et de l argent." },
+            { q: "Pourquoi le cours insiste-t-il sur « prévisible » dans les lois de scaling ?", o: ["Parce qu on peut estimer un grand modèle avec de petits tests, avant de dépenser des millions", "Parce que c est un joli mot", "Parce que les modèles sont parfaits"], a: 0, e: "C est ce qui a déclenché l explosion des investissements." }
+          ], "errors")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider votre compréhension de toute la chaîne, du neurone au LLM.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et plan d action 7 jours</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et ancrez les concepts dans la pratique.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🧠</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Core AI Concepts : Neurones, Tokens, Embeddings, Attention, Transformers, Contexte, Scaling, LLMs</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Plan d action 7 jours</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Jour 1 : expliquez à voix haute la chaîne complète (neurone → token → embedding → attention → transformer → prédiction).</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Jour 2 : rejouez avec le simulateur de neurone et le tokenizer jusqu à prédire leurs résultats.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Jour 3 : testez la recherche sémantique : deux phrases aux mots différents mais au sens proche.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Jour 4 : prenez un mot ambigu (bank, mouse) et observez comment le contexte change le sens via l attention.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Jour 5 : mesurez la fenêtre de contexte de votre LLM habituel et simulez un dépassement avec le calculateur.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Jour 6 : comparez un base model et un assistant instructé sur la même requête.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Jour 7 : refaites l examen final et visez 9/10.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+          <h2>Ressources ancrées au transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Série</strong> : Core AI Concepts, Part One — la suite couvrira d autres notions annoncées (RAG détaillé, etc.).</li>
+              <li><strong>Papier clé</strong> : « Attention Is All You Need » (Google, 2017) — perceée du transformer.</li>
+              <li><strong>Analogies à réutiliser</strong> : l étudiant (training/inference), les boutons de volume (poids, attention), le bureau de travail (fenêtre de contexte), la voiture et le moteur (LLM et transformer).</li>
+              <li><strong>Repères chiffrés</strong> : cat = 8241, kitten = 1793, GPT-3 = 175B paramètres, 10 tokens ≈ 100 comparaisons.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.updateNeuron = updateNeuron;
+    window.runTokenizer = runTokenizer;
+    window.renderEmbedMap = renderEmbedMap;
+    window.showAttention = showAttention;
+    window.updateDesk = updateDesk;
+    window.updateScaling = updateScaling;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.chooseScenario = chooseScenario;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

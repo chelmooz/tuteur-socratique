@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comprendre RAG vs HyDE - Cours Interactif & Simulateur Vectoriel</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen antialiased flex flex-col selection:bg-cyan-500 selection:text-white">
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">
+            RAG vs HyDE
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Masterclass Architecture LLM & Embeddings</p>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <a href="#probleme" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Le Problème</a>
+        <a href="#architecture" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Architecture SVG</a>
+        <a href="#simulateur" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Simulateur 2D</a>
+        <a href="#comparatif" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Comparatif</a>
+        <a href="#quiz" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Quiz</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <!-- Theme Toggle Button -->
+        <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Changer de thème">
+          <!-- Sun Icon -->
+          <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Moon Icon -->
+          <svg id="moonIcon" class="w-5 h-5 block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+    <!-- Hero Banner -->
+    <section class="text-center space-y-4 max-w-4xl mx-auto pt-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        Deep-Dive Information Retrieval (IR)
+      </div>
+      <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+        Pourquoi le RAG classique échoue,<br class="hidden sm:block">
+        et comment <span class="bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent">HyDE</span> résout le problème.
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+        Dans un pipeline vectoriel standard, une question courte n'a pas la même signature géométrique que son paragraphe de réponse. Découvrez le mécanisme <strong class="text-emerald-500 font-medium">Hypothetical Document Embeddings</strong> qui révolutionne le matching sémantique.
+      </p>
+    </section>
+
+    <section id="probleme" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="inline-flex p-3 rounded-xl bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Le Décalage Sémantique Asymétrique</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            Les modèles d’embeddings (Dense Retrievers) calculent la proximité angulaire (similarité cosinus) entre deux textes. Or :
+          </p>
+          <div class="bg-slate-100 dark:bg-slate-800/80 rounded-xl p-4 border-l-4 border-amber-500 text-sm space-y-2">
+            <p class="font-semibold text-slate-900 dark:text-slate-100">
+              « Une question n'est pas sémantiquement similaire à sa réponse. »
+            </p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs">
+              La question <em>"Qu'est-ce que le Machine Learning ?"</em> partage une syntaxe interrogative et un profil lexical proche de <em>"Qu'est-ce que l'IA ?"</em> ou <em>"Comment apprendre le deep learning ?"</em>, plutôt qu'avec une définition encyclopédique factuelle.
+            </p>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            Résultat : la recherche vectorielle remonte souvent d'autres questions fréquemment posées (FAQ) ou des contextes hors-sujet, polluant la fenêtre d'attention du LLM final.
+          </p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+          <span>Problème de type : <strong>Query-to-Doc Mismatch</strong></span>
+          <span class="text-red-500 font-semibold">Taux de faux-positifs élevé</span>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="inline-flex p-3 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white">L'idée de génie de HyDE</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            Introduit par <em>Gao et al. (2022)</em>, <strong>HyDE</strong> (Hypothetical Document Embeddings) inverse le paradigme :
+          </p>
+          <ol class="list-decimal list-inside space-y-2 text-sm text-slate-600 dark:text-slate-300 pl-1">
+            <li>On demande d'abord à un LLM sans contexte : <span class="text-emerald-500 font-medium">"Rédige un paragraphe documentaire qui répondrait à la question."</span></li>
+            <li>On obtient un document <strong>hypothétique</strong> (H). Même s'il invente certains chiffres, son <em>style</em>, son <em>vocabulaire</em> et sa <em>structure</em> sont déclaratifs.</li>
+            <li>On vectorise <strong>H</strong> : le vecteur atterrit directement dans le cluster des documents réels !</li>
+            <li>La base vectorielle extrait les vrais passages fiables pour le LLM final.</li>
+          </ol>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+          <span>Transformation : <strong>Doc-to-Doc Matching</strong></span>
+          <span class="text-emerald-500 font-semibold">Précision de rappel optimale</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-lg space-y-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div>
+          <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+            <span>Schéma Architecture Interactif</span>
+            <span class="text-xs px-2.5 py-1 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-full font-mono uppercase font-semibold tracking-wider">Temps Réel</span>
+          </h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Comparez côte à côte ou simulez le cheminement des données étape par étape.
+          </p>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btnStepPrev" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            ◀ Étape précédente
+          </button>
+          <button id="btnStepPlay" class="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition flex items-center gap-1.5">
+            <svg id="playIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Lecture Auto</span>
+          </button>
+          <button id="btnStepNext" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            Étape suivante ▶
+          </button>
+          <button id="btnStepReset" class="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Step Indicator Tracker -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+        <div id="stepCard1" class="step-card p-3 rounded-xl border-2 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 transition-all cursor-pointer" onclick="goToStep(1)">
+          <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Étape 1</span>
+          <div class="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">Requête Utilisateur (Q)</div>
+        </div>
+        <div id="stepCard2" class="step-card p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 transition-all cursor-pointer" onclick="goToStep(2)">
+          <span class="text-xs font-bold text-slate-500">Étape 2</span>
+          <div class="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">Embed Direct vs LLM Hypothétique</div>
+        </div>
+        <div id="stepCard3" class="step-card p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 transition-all cursor-pointer" onclick="goToStep(3)">
+          <span class="text-xs font-bold text-slate-500">Étape 3</span>
+          <div class="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">Interrogation Vector DB</div>
+        </div>
+        <div id="stepCard4" class="step-card p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 transition-all cursor-pointer" onclick="goToStep(4)">
+          <span class="text-xs font-bold text-slate-500">Étape 4</span>
+          <div class="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">Génération Réponse Finale</div>
+        </div>
+      </div>
+
+      <!-- Dynamic Detailed Explanation of the current step -->
+      <div id="stepDescriptionBox" class="bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800/60 dark:to-slate-800/20 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 flex items-start gap-3">
+        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 mt-0.5">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="flex-grow">
+          <h4 id="stepDescTitle" class="font-bold text-slate-900 dark:text-white">Étape 1 : Saisie de la requête (Query)</h4>
+          <p id="stepDescText" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            L'utilisateur soumet une interrogation en langage naturel. À ce stade, la requête est identique pour les deux architectures.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-2">
+        
+        <!-- Left: Classic RAG Pipeline SVG -->
+        <div class="bg-slate-50/70 dark:bg-slate-950/40 p-4 sm:p-6 rounded-2xl border border-blue-200/80 dark:border-blue-900/40 relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+              <h4 class="font-bold text-base text-blue-600 dark:text-blue-400">Pipeline RAG Classique</h4>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-300/40">1 seul appel LLM</span>
+          </div>
+
+          <svg id="svgRag" viewBox="0 0 420 560" class="w-full h-auto max-w-md mx-auto select-none overflow-visible">
+            <defs>
+              <linearGradient id="gradRagBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#1d4ed8" />
+              </linearGradient>
+              <linearGradient id="gradOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#d97706" />
+              </linearGradient>
+              <filter id="shadowGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+              </filter>
+            </defs>
+
+            <!-- Connector Lines -->
+            <!-- Q to Embed -->
+            <path id="ragLine1" d="M 210 50 L 210 110" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Embed to Vector DB -->
+            <path id="ragLine2" d="M 210 170 L 210 240" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Vector DB to Context -->
+            <path id="ragLine3" d="M 210 300 L 210 360" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Context to Final LLM -->
+            <path id="ragLine4" d="M 210 415 L 210 460" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Query direct skip line to Final LLM (Prompt injection) -->
+            <path id="ragLineSkip" d="M 120 30 C 50 30 50 480 120 480" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 4" fill="none" opacity="0.45"/>
+
+            <!-- Node 1: User Query -->
+            <g id="nodeRag1" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(1)">
+              <rect x="120" y="10" width="180" height="42" rx="21" fill="#f59e0b" filter="url(#shadowGlow)"/>
+              <text x="210" y="32" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle">💬 Question Utilisateur (Q)</text>
+              <text x="210" y="45" fill="#fef3c7" font-size="9" text-anchor="middle">"Qu'est-ce que le ML ?"</text>
+            </g>
+
+            <!-- Node 2: Embedding Model -->
+            <g id="nodeRag2" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(2)">
+              <rect x="110" y="110" width="200" height="60" rx="14" fill="#2563eb" filter="url(#shadowGlow)"/>
+              <text x="210" y="135" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">Modèle d'Embedding</text>
+              <text x="210" y="153" fill="#bfdbfe" font-size="10" text-anchor="middle">Vectorise directement la question</text>
+              <circle cx="95" cy="140" r="14" fill="#3b82f6" stroke="#93c5fd" stroke-width="2"/>
+              <text x="95" y="144" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">E</text>
+            </g>
+
+            <!-- Node 3: Vector Database -->
+            <g id="nodeRag3" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(3)">
+              <rect x="115" y="240" width="190" height="60" rx="14" fill="#1e293b" stroke="#3b82f6" stroke-width="2" filter="url(#shadowGlow)"/>
+              <text x="210" y="265" fill="#60a5fa" font-size="13" font-weight="700" text-anchor="middle">🗄️ Base Vectorielle</text>
+              <text x="210" y="284" fill="#94a3b8" font-size="10" text-anchor="middle">Top-K recherche par cosinus</text>
+            </g>
+
+            <!-- Node 4: Context Retrieved -->
+            <g id="nodeRag4" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(3)">
+              <rect x="120" y="360" width="180" height="52" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2" class="dark:fill-slate-800 dark:stroke-slate-700"/>
+              <text x="210" y="382" fill="#e11d48" font-size="12" font-weight="700" text-anchor="middle">📄 Contexte Récupéré</text>
+              <text x="210" y="399" fill="#64748b" font-size="10" text-anchor="middle">⚠️ Bruit sémantique possible</text>
+            </g>
+
+            <!-- Node 5: Final LLM & Output -->
+            <g id="nodeRag5" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(4)">
+              <rect x="120" y="460" width="180" height="75" rx="16" fill="url(#gradRagBlue)" filter="url(#shadowGlow)"/>
+              <text x="210" y="488" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">🧠 LLM Générateur</text>
+              <rect x="135" y="505" width="150" height="22" rx="6" fill="#ffffff" fill-opacity="0.2"/>
+              <text x="210" y="519" fill="#ffffff" font-size="10" font-weight="600" text-anchor="middle">Réponse Finale (Output)</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right: HyDE Pipeline SVG -->
+        <div class="bg-emerald-50/40 dark:bg-slate-950/40 p-4 sm:p-6 rounded-2xl border border-emerald-300/80 dark:border-emerald-900/50 relative">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h4 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Pipeline HyDE (Hypothetical Doc)</h4>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40">Double appel LLM</span>
+          </div>
+
+          <svg id="svgHyde" viewBox="0 0 420 560" class="w-full h-auto max-w-md mx-auto select-none overflow-visible">
+            <defs>
+              <linearGradient id="gradHyde" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#047857" />
+              </linearGradient>
+            </defs>
+
+            <!-- Connector Lines -->
+            <!-- Q to LLM 1 -->
+            <path id="hydeLine1" d="M 210 45 L 210 90" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- LLM 1 to Hypo Doc -->
+            <path id="hydeLine2" d="M 210 140 L 210 175" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Hypo Doc to Embed -->
+            <path id="hydeLine3" d="M 210 225 L 210 260" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Embed to Vector DB -->
+            <path id="hydeLine4" d="M 210 310 L 210 345" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Vector DB to Context -->
+            <path id="hydeLine5" d="M 210 395 L 210 425" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Context to Final LLM -->
+            <path id="hydeLine6" d="M 210 465 L 210 495" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Query direct skip line to Final LLM -->
+            <path id="hydeLineSkip" d="M 300 25 C 380 25 380 520 310 520" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4" fill="none" opacity="0.45"/>
+
+            <!-- Node 1: User Query -->
+            <g id="nodeHyde1" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(1)">
+              <rect x="120" y="5" width="180" height="40" rx="20" fill="#f59e0b" filter="url(#shadowGlow)"/>
+              <text x="210" y="26" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="middle">💬 Question Utilisateur (Q)</text>
+              <text x="210" y="38" fill="#fef3c7" font-size="8.5" text-anchor="middle">"Qu'est-ce que le ML ?"</text>
+            </g>
+
+            <!-- Node 2: LLM Hypothétique (Zero-shot) -->
+            <g id="nodeHyde2" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(2)">
+              <rect x="110" y="90" width="200" height="50" rx="12" fill="#4f46e5" filter="url(#shadowGlow)"/>
+              <text x="210" y="112" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">🤖 LLM Générateur d'Hypothèse</text>
+              <text x="210" y="129" fill="#c7d2fe" font-size="9.5" text-anchor="middle">Rédige un faux document plausible</text>
+            </g>
+
+            <!-- Node 3: Document Hypothétique (H) -->
+            <g id="nodeHyde3" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(2)">
+              <rect x="105" y="175" width="210" height="50" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" class="dark:fill-amber-950/50 dark:stroke-amber-500/80"/>
+              <text x="210" y="196" fill="#b45309" class="dark:fill-amber-300" font-size="11" font-weight="700" text-anchor="middle">✨ Document Hypothétique (H)</text>
+              <text x="210" y="213" fill="#92400e" class="dark:fill-amber-400" font-size="9" text-anchor="middle">Forme déclarative adaptée</text>
+            </g>
+
+            <!-- Node 4: Embedding Model (Sur H !) -->
+            <g id="nodeHyde4" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(3)">
+              <rect x="110" y="260" width="200" height="50" rx="12" fill="#059669" filter="url(#shadowGlow)"/>
+              <text x="210" y="282" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Modèle d'Embedding (Contriever)</text>
+              <text x="210" y="298" fill="#a7f3d0" font-size="9" text-anchor="middle">Vectorise H (filtre le bruit/hallucinations)</text>
+            </g>
+
+            <!-- Node 5: Vector DB -->
+            <g id="nodeHyde5" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(3)">
+              <rect x="115" y="345" width="190" height="50" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#shadowGlow)"/>
+              <text x="210" y="367" fill="#34d399" font-size="12" font-weight="700" text-anchor="middle">🗄️ Base Vectorielle</text>
+              <text x="210" y="383" fill="#94a3b8" font-size="9.5" text-anchor="middle">Matching Document ↔ Document</text>
+            </g>
+
+            <!-- Node 6: Context Retrieved -->
+            <g id="nodeHyde6" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(4)">
+              <rect x="120" y="425" width="180" height="42" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2" class="dark:fill-emerald-950/40 dark:stroke-emerald-600"/>
+              <text x="210" y="443" fill="#047857" class="dark:fill-emerald-300" font-size="11" font-weight="700" text-anchor="middle">🎯 Vrai Contexte Ciblé</text>
+              <text x="210" y="457" fill="#059669" class="dark:fill-emerald-400" font-size="9" text-anchor="middle">Haute pertinence sémantique</text>
+            </g>
+
+            <!-- Node 7: Final LLM -->
+            <g id="nodeHyde7" class="transition-all duration-300 transform origin-center cursor-pointer" onclick="goToStep(4)">
+              <rect x="115" y="495" width="190" height="60" rx="14" fill="url(#gradHyde)" filter="url(#shadowGlow)"/>
+              <text x="210" y="520" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">🧠 LLM Final [Q + C + H]</text>
+              <text x="210" y="538" fill="#d1fae5" font-size="9.5" font-weight="600" text-anchor="middle">Réponse Factuelle & Précise</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulateur" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-lg space-y-8">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 dark:border-blue-800 mb-2">
+          Laboratoire Mathématique 2D
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+          Simulateur d'Espace Vectoriel : Pourquoi RAG se trompe de cible
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
+          Visualisez l'espace d'embedding projeté en 2D. Observez la séparation franche entre le <strong>cluster des Questions (syntaxe interrogative)</strong> et le <strong>cluster des Documents encyclopédiques (syntaxe explicative)</strong>.
+        </p>
+      </div>
+
+      <!-- Simulator Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
+        <div class="flex flex-wrap items-center gap-3">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Exemple de requête :</label>
+          <select id="querySelect" class="text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 font-medium">
+            <option value="ml">"Qu'est-ce que le Machine Learning ?"</option>
+            <option value="photo">"Comment fonctionne la photosynthèse ?"</option>
+            <option value="crypto">"Qu'est-ce que le consensus Proof of Work ?"</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Mode d'affichage :</span>
+          <div class="inline-flex p-1 bg-slate-200 dark:bg-slate-700 rounded-xl">
+            <button id="btnModeCompare" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition">
+              Les Deux (Superposition)
+            </button>
+            <button id="btnModeRagOnly" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+              RAG Classique Seul
+            </button>
+            <button id="btnModeHydeOnly" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+              HyDE Seul
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas container + Interactive detail panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Canvas area -->
+        <div class="lg:col-span-2 relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 p-2 shadow-inner">
+          <canvas id="vectorCanvas" class="w-full h-80 sm:h-96 rounded-xl cursor-crosshair"></canvas>
+          
+          <div class="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-xs bg-slate-900/80 backdrop-blur-md p-2 rounded-xl border border-slate-700/60 text-slate-300">
+            <div class="flex items-center gap-4">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Question Q</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Hypothèse H (HyDE)</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> FAQ / Questions similaires</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Vrais Documents de Cours</span>
+            </div>
+            <span class="text-[10px] text-slate-400">Survolez un point pour inspecter</span>
+          </div>
+        </div>
+
+        <!-- Metric & inspector readout -->
+        <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-4">
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+              Diagnostic de Distance Cosinus
+            </h4>
+
+            <!-- RAG Metric -->
+            <div id="metricRagCard" class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-900/50 mb-3">
+              <div class="flex items-center justify-between text-xs font-semibold mb-1 text-blue-600 dark:text-blue-400">
+                <span>RAG Classique (Distance Q → Doc)</span>
+                <span id="scoreRagBadge" class="font-mono text-red-500">Match FAQ (0.88)</span>
+              </div>
+              <p id="ragResultDesc" class="text-xs text-slate-600 dark:text-slate-400 leading-normal">
+                La question Q est trop proche du cluster FAQ. Le système extrait en premier la question <em>"Qu'est-ce que l'IA ?"</em> au lieu de la véritable explication.
+              </p>
+            </div>
+
+            <!-- HyDE Metric -->
+            <div id="metricHydeCard" class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/50">
+              <div class="flex items-center justify-between text-xs font-semibold mb-1 text-emerald-600 dark:text-emerald-400">
+                <span>HyDE (Distance H → Doc)</span>
+                <span id="scoreHydeBadge" class="font-mono text-emerald-500 font-bold">Match Parfait (0.94)</span>
+              </div>
+              <p id="hydeResultDesc" class="text-xs text-slate-600 dark:text-slate-400 leading-normal">
+                L'hypothèse H atterrit en plein cœur des paragraphes encyclopédiques. La base vectorielle extrait le cours complet sur l'apprentissage supervisé !
+              </p>
+            </div>
+          </div>
+
+          <!-- Tooltip detail box for hovered point -->
+          <div id="hoverInspector" class="p-3 rounded-xl bg-slate-200/70 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 text-xs">
+            <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Point sélectionné :</span>
+            <span id="hoverPointName" class="text-blue-500 font-semibold block">Survolez un nœud du graphe</span>
+            <span id="hoverPointSnippet" class="text-slate-500 dark:text-slate-400 text-[11px] block mt-1 italic">...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="comparatif" class="space-y-8">
+      <div class="text-center max-w-3xl mx-auto space-y-2">
+        <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+          Tableau Comparatif Approfondi
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          Les compromis à connaître pour un architecte IA en production.
+        </p>
+      </div>
+
+      <div class="overflow-x-auto bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 dark:bg-slate-800/80 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
+            <tr>
+              <th class="px-6 py-4 font-bold">Dimension</th>
+              <th class="px-6 py-4 text-blue-600 dark:text-blue-400 font-bold">RAG Standard</th>
+              <th class="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-bold">HyDE (Gao et al.)</th>
+              <th class="px-6 py-4 font-bold">Analyse / Recommandation</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-normal">
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Formulation de recherche</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300">Asymétrique (Requête interrogative vers Document déclaratif)</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300">Symétrique (Document fictif vers Documents réels)</td>
+              <td class="px-6 py-4 text-xs text-slate-500">HyDE résout mathématiquement l'asymétrie de forme.</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Appels LLM & Coût</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300"><strong>1 seul appel</strong> (Génération finale)</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300"><strong>2 appels</strong> (Hypothèse initiale + Génération finale)</td>
+              <td class="px-6 py-4 text-xs text-slate-500">HyDE est ~2x plus coûteux en tokens LLM.</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Latence (Time to First Token)</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300 font-mono text-xs text-emerald-600 dark:text-emerald-400">Rapide (~150ms - 400ms)</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300 font-mono text-xs text-amber-600 dark:text-amber-400">Modérée (~600ms - 1.2s)</td>
+              <td class="px-6 py-4 text-xs text-slate-500">Utiliser un petit modèle rapide (ex: Llama 3 8B, Gemini Flash) pour l'hypothèse.</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Sensibilité aux Hallucinations</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300">Nulle lors de l'embedding (recherche brute de la requête)</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300">Contrôlée par le Contriever / Bi-encoder dense</td>
+              <td class="px-6 py-4 text-xs text-slate-500">L'embedding compresse la structure et élimine les faux détails factuels.</td>
+            </tr>
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">Questions d'experts pointues</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-red-500">Très vulnérable aux formulations vagues</td>
+              <td class="px-6 py-4 text-slate-600 dark:text-slate-300 text-emerald-500 font-medium">Excellent (étend le vocabulaire technique)</td>
+              <td class="px-6 py-4 text-xs text-slate-500">Idéal pour les questions complexes où les mots-clés manquent dans la requête.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="quiz" class="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-lg space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Évaluation Interactive</span>
+          <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-1">
+            Testez vos connaissances sur HyDE
+          </h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Validez votre compréhension des mécanismes d'embeddings et de retrieval.</p>
+        </div>
+        <div class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-300 dark:border-slate-700 text-sm font-semibold flex items-center gap-2">
+          <span>Score :</span>
+          <span id="quizScoreText" class="text-blue-600 dark:text-blue-400 font-bold">0 / 3</span>
+        </div>
+      </div>
+
+      <!-- Quiz Questions -->
+      <div class="space-y-6" id="quizContainer">
+        <!-- Question 1 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3" data-q="1">
+          <p class="font-bold text-slate-900 dark:text-slate-100 text-base">
+            1. Pourquoi une question courte comme « Qu'est-ce que le ML ? » risque-t-elle de mal chercher en RAG standard ?
+          </p>
+          <div class="grid grid-cols-1 gap-2.5">
+            <button onclick="checkQuiz(1, 0, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              A) Parce que les bases vectorielles ne peuvent pas indexer les phrases de moins de 5 mots.
+            </button>
+            <button onclick="checkQuiz(1, 1, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              B) À cause du décalage sémantique : les embeddings rapprochent des questions similaires au lieu des paragraphes de réponses.
+            </button>
+            <button onclick="checkQuiz(1, 2, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              C) Parce qu'il est interdit d'utiliser un modèle d'embedding sans prompt explicite.
+            </button>
+          </div>
+          <div class="quiz-feedback hidden p-3 rounded-xl text-xs font-medium mt-2"></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3" data-q="2">
+          <p class="font-bold text-slate-900 dark:text-slate-100 text-base">
+            2. Dans HyDE, le premier document généré par le LLM contient une fausse date. Est-ce bloquant ?
+          </p>
+          <div class="grid grid-cols-1 gap-2.5">
+            <button onclick="checkQuiz(2, 0, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              A) Oui, la base de données refusera d'indexer un document faux.
+            </button>
+            <button onclick="checkQuiz(2, 1, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              B) Non, car le modèle d'embedding capture la structure et le lexique thématique, et le LLM final lira le vrai document extrait.
+            </button>
+            <button onclick="checkQuiz(2, 2, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              C) Oui, car le document hypothétique est injecté sans vérification dans la base de données finale.
+            </button>
+          </div>
+          <div class="quiz-feedback hidden p-3 rounded-xl text-xs font-medium mt-2"></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3" data-q="3">
+          <p class="font-bold text-slate-900 dark:text-slate-100 text-base">
+            3. Quel est le principal coût / inconvénient de l'adoption de HyDE ?
+          </p>
+          <div class="grid grid-cols-1 gap-2.5">
+            <button onclick="checkQuiz(3, 0, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              A) Une latence plus élevée et un coût accru car il nécessite deux inférences LLM au lieu d'une.
+            </button>
+            <button onclick="checkQuiz(3, 1, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              B) Il oblige à recréer entièrement la base vectorielle et à ré-indexer tous les documents existants.
+            </button>
+            <button onclick="checkQuiz(3, 2, this)" class="quiz-btn text-left p-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              C) Il ne fonctionne qu'avec des documents rédigés en anglais.
+            </button>
+          </div>
+          <div class="quiz-feedback hidden p-3 rounded-xl text-xs font-medium mt-2"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 text-center text-xs text-slate-500 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p>Module Pédagogique Interactif · Architecture RAG & Hypothetical Document Embeddings (HyDE)</p>
+      <p class="text-slate-400">Inspiré des travaux de <em>Luyu Gao et al. (Precise Zero-Shot Dense Retrieval without Relevance Labels)</em></p>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const html = document.documentElement;
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme-mode');
+      if (savedTheme === 'light') {
+        html.classList.remove('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      } else {
+        html.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = html.classList.toggle('dark');
+      localStorage.setItem('theme-mode', isDark ? 'dark' : 'light');
+      if (isDark) {
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+      // Redraw canvas with new background colors
+      if (typeof drawVectorSpace === 'function') drawVectorSpace();
+    });
+    initTheme();
+
+    let currentStep = 1;
+    let autoPlayInterval = null;
+
+    const stepMeta = {
+      1: {
+        title: "Étape 1 : Saisie de la requête (Query)",
+        desc: "L'utilisateur pose sa question brute : « Qu'est-ce que le Machine Learning ? ». Dans les deux cas, le point de départ est identique.",
+        ragActive: ['nodeRag1'],
+        hydeActive: ['nodeHyde1'],
+        ragLines: [],
+        hydeLines: []
+      },
+      2: {
+        title: "Étape 2 : Le tournant architectural !",
+        desc: "RAG classique envoie directement la question au modèle d'embedding. HyDE utilise un premier LLM pour synthétiser un document hypothétique (H) au format encyclopédique.",
+        ragActive: ['nodeRag2'],
+        hydeActive: ['nodeHyde2', 'nodeHyde3'],
+        ragLines: ['ragLine1'],
+        hydeLines: ['hydeLine1', 'hydeLine2']
+      },
+      3: {
+        title: "Étape 3 : Interrogation de la Base Vectorielle",
+        desc: "RAG cherche les vecteurs proches d'une question (haut risque de récupérer d'autres questions). HyDE cherche les vecteurs proches d'un document complet (matching précis document-à-document).",
+        ragActive: ['nodeRag3', 'nodeRag4'],
+        hydeActive: ['nodeHyde4', 'nodeHyde5', 'nodeHyde6'],
+        ragLines: ['ragLine2', 'ragLine3'],
+        hydeLines: ['hydeLine3', 'hydeLine4', 'hydeLine5']
+      },
+      4: {
+        title: "Étape 4 : Génération de la Réponse Finale",
+        desc: "Le LLM de synthèse reçoit la question originale et les documents authentiques récupérés (ainsi que H comme amorce pour HyDE) afin de formuler la réponse vérifiée sans hallucination.",
+        ragActive: ['nodeRag5'],
+        hydeActive: ['nodeHyde7'],
+        ragLines: ['ragLine4', 'ragLineSkip'],
+        hydeLines: ['hydeLine6', 'hydeLineSkip']
+      }
+    };
+
+    function updateStepUI() {
+      // Update tracker cards
+      for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`stepCard${i}`);
+        if (i === currentStep) {
+          card.className = "step-card p-3 rounded-xl border-2 border-blue-500 bg-blue-500/10 transition-all cursor-pointer shadow-md";
+        } else {
+          card.className = "step-card p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 transition-all cursor-pointer opacity-70";
+        }
+      }
+
+      // Update text
+      const meta = stepMeta[currentStep];
+      document.getElementById('stepDescTitle').textContent = meta.title;
+      document.getElementById('stepDescText').textContent = meta.desc;
+
+      // Update SVG node highlights
+      document.querySelectorAll('#svgRag g, #svgHyde g').forEach(g => {
+        g.style.opacity = '0.35';
+        g.classList.remove('node-pulse', 'node-pulse-hyde');
+      });
+      document.querySelectorAll('#svgRag path, #svgHyde path').forEach(p => {
+        p.classList.remove('flow-line-active');
+        p.style.stroke = '#64748b';
+        p.style.strokeWidth = '2';
+      });
+
+      // Highlight active elements
+      meta.ragActive.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.opacity = '1';
+          el.classList.add('node-pulse');
+        }
+      });
+      meta.hydeActive.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.opacity = '1';
+          el.classList.add('node-pulse-hyde');
+        }
+      });
+
+      meta.ragLines.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('flow-line-active');
+          el.style.stroke = '#3b82f6';
+          el.style.strokeWidth = '3.5';
+        }
+      });
+      meta.hydeLines.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('flow-line-active');
+          el.style.stroke = '#10b981';
+          el.style.strokeWidth = '3.5';
+        }
+      });
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      updateStepUI();
+    }
+
+    document.getElementById('btnStepNext').addEventListener('click', () => {
+      currentStep = currentStep < 4 ? currentStep + 1 : 1;
+      updateStepUI();
+    });
+
+    document.getElementById('btnStepPrev').addEventListener('click', () => {
+      currentStep = currentStep > 1 ? currentStep - 1 : 4;
+      updateStepUI();
+    });
+
+    document.getElementById('btnStepReset').addEventListener('click', () => {
+      stopAutoPlay();
+      currentStep = 1;
+      updateStepUI();
+    });
+
+    const btnStepPlay = document.getElementById('btnStepPlay');
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        btnStepPlay.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Lecture Auto</span>
+        `;
+      }
+    }
+
+    btnStepPlay.addEventListener('click', () => {
+      if (autoPlayInterval) {
+        stopAutoPlay();
+      } else {
+        btnStepPlay.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Pause</span>
+        `;
+        autoPlayInterval = setInterval(() => {
+          currentStep = currentStep < 4 ? currentStep + 1 : 1;
+          updateStepUI();
+        }, 2200);
+      }
+    });
+
+    updateStepUI();
+
+    const canvas = document.getElementById('vectorCanvas');
+    const ctx = canvas.getContext('2d');
+    const querySelect = document.getElementById('querySelect');
+    let viewMode = 'compare'; // 'compare', 'rag', 'hyde'
+    let hoveredPoint = null;
+
+    // Simulation Data presets
+    const dataset = {
+      ml: {
+        question: { label: "Q: « Qu'est-ce que le ML ? »", x: 0.28, y: 0.35, type: 'query' },
+        hyde: { label: "H: « Le ML est un sous-domaine de l'IA... »", x: 0.72, y: 0.68, type: 'hyde' },
+        clusterQuestions: [
+          { label: "FAQ: « C'est quoi l'Intelligence Artificielle ? »", x: 0.22, y: 0.28, type: 'faq', snippet: "FAQ générale sur l'informatique et les algorithmes." },
+          { label: "FAQ: « Pourquoi faire du Deep Learning ? »", x: 0.34, y: 0.22, type: 'faq', snippet: "Questions fréquentes des étudiants." },
+          { label: "FAQ: « Comment débuter en Python ? »", x: 0.25, y: 0.44, type: 'faq', snippet: "Guide FAQ pour installer Anaconda." }
+        ],
+        clusterDocs: [
+          { label: "Doc: « Manuel d'Apprentissage Automatique »", x: 0.75, y: 0.72, type: 'doc', snippet: "Chapitre 1 : Définition formelle, classification et régression supervisée." },
+          { label: "Doc: « Algorithmes d'optimisation par gradient »", x: 0.82, y: 0.64, type: 'doc', snippet: "Mécanismes de descente de gradient stochastique." },
+          { label: "Doc: « Évaluation : Précision, Recall, F1 »", x: 0.68, y: 0.78, type: 'doc', snippet: "Métriques statistiques de validation croisée." }
+        ],
+        ragDesc: "La question Q se situe dans le cluster syntaxique des questions interrogatives. Elle est attirée par l'entrée FAQ « C'est quoi l'IA ? ».",
+        hydeDesc: "L'hypothèse H générée au format déclaratif atterrit directement au cœur du cluster du « Manuel d'Apprentissage Automatique »."
+      },
+      photo: {
+        question: { label: "Q: « Comment fonctionne la photosynthèse ? »", x: 0.26, y: 0.30, type: 'query' },
+        hyde: { label: "H: « La photosynthèse transforme la lumière en glucose... »", x: 0.74, y: 0.65, type: 'hyde' },
+        clusterQuestions: [
+          { label: "FAQ: « Pourquoi les plantes sont-elles vertes ? »", x: 0.21, y: 0.25, type: 'faq', snippet: "Question fréquente d'école primaire." },
+          { label: "FAQ: « Quelle plante pour mon salon ? »", x: 0.32, y: 0.36, type: 'faq', snippet: "Guide d'achat plantes d'intérieur." }
+        ],
+        clusterDocs: [
+          { label: "Doc: « Biochimie cellulaire : Cycle de Calvin »", x: 0.76, y: 0.67, type: 'doc', snippet: "Réactions photochimiques des thylakoïdes et fixation du CO2." },
+          { label: "Doc: « Synthèse de l'ATP et chlorophylle »", x: 0.70, y: 0.61, type: 'doc', snippet: "Conversion d'énergie lumineuse en liaisons chimiques." }
+        ],
+        ragDesc: "RAG se laisse piéger par les questions de vulgarisation horticole.",
+        hydeDesc: "HyDE produit les termes techniques (chlorophylle, ATP, glucides) et cible le traité de biochimie."
+      },
+      crypto: {
+        question: { label: "Q: « Qu'est-ce que le consensus Proof of Work ? »", x: 0.30, y: 0.32, type: 'query' },
+        hyde: { label: "H: « Le PoW est un mécanisme cryptographique décentralisé... »", x: 0.78, y: 0.70, type: 'hyde' },
+        clusterQuestions: [
+          { label: "FAQ: « Faut-il acheter du Bitcoin aujourd'hui ? »", x: 0.24, y: 0.38, type: 'faq', snippet: "Discussion forum spéculation crypto." },
+          { label: "FAQ: « C'est quoi la Blockchain en 5 minutes ? »", x: 0.35, y: 0.25, type: 'faq', snippet: "Vidéo vulgarisation YouTube." }
+        ],
+        clusterDocs: [
+          { label: "Doc: « Livre blanc Bitcoin : Nakamoto Consensus »", x: 0.80, y: 0.73, type: 'doc', snippet: "Résolution de la preuve de travail par hachage SHA-256." },
+          { label: "Doc: « Tolérance aux pannes byzantines »", x: 0.73, y: 0.66, type: 'doc', snippet: "Démonstration formelle de la sécurité des réseaux P2P." }
+        ],
+        ragDesc: "RAG attire les questions de forums financiers grand public.",
+        hydeDesc: "HyDE rédige une explication sur le hachage et cible directement le Whitepaper de référence."
+      }
+    };
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = (rect.width > 600 ? 380 : 320) * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawVectorSpace();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawVectorSpace() {
+      const isDark = html.classList.contains('dark');
+      const w = canvas.width / window.devicePixelRatio;
+      const h = canvas.height / window.devicePixelRatio;
+      const data = dataset[querySelect.value];
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid background lines
+      ctx.strokeStyle = isDark ? '#1e293b' : '#334155';
+      ctx.lineWidth = 0.5;
+      const step = 35;
+      for (let x = 0; x < w; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Cluster areas (visual convex zones)
+      // Zone 1: Questions Cluster
+      ctx.fillStyle = isDark ? 'rgba(59, 130, 246, 0.07)' : 'rgba(59, 130, 246, 0.12)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.27, h * 0.32, w * 0.18, h * 0.24, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText("ZONE 1 : SYNTAXE INTERROGATIVE (FAQ / QUESTIONS)", w * 0.12, h * 0.12);
+
+      // Zone 2: Documents Cluster
+      ctx.fillStyle = isDark ? 'rgba(168, 85, 247, 0.08)' : 'rgba(168, 85, 247, 0.15)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.75, h * 0.68, w * 0.20, h * 0.25, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#c084fc';
+      ctx.fillText("ZONE 2 : CONTENUS DÉCLARATIFS (COURS / MANUELS)", w * 0.58, h * 0.95);
+
+      // Helper to convert normalized coordinates to canvas
+      const toCoords = (pt) => ({ x: pt.x * w, y: pt.y * h });
+
+      const qPos = toCoords(data.question);
+      const hPos = toCoords(data.hyde);
+
+      // Draw Documents points
+      data.clusterDocs.forEach(doc => {
+        const pos = toCoords(doc);
+        drawNode(pos.x, pos.y, '#c084fc', 6, doc.label, doc === hoveredPoint);
+      });
+
+      // Draw FAQ points
+      data.clusterQuestions.forEach(faq => {
+        const pos = toCoords(faq);
+        drawNode(pos.x, pos.y, '#60a5fa', 5, faq.label, faq === hoveredPoint);
+      });
+
+      // Draw RAG Matching Line (if active)
+      if (viewMode === 'compare' || viewMode === 'rag') {
+        const nearestFaq = toCoords(data.clusterQuestions[0]);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(qPos.x, qPos.y);
+        ctx.lineTo(nearestFaq.x, nearestFaq.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label
+        ctx.fillStyle = '#f87171';
+        ctx.font = '10px JetBrains Mono, monospace';
+        ctx.fillText("Mauvaise capture RAG (Top 1)", (qPos.x + nearestFaq.x) / 2 - 20, (qPos.y + nearestFaq.y) / 2 - 8);
+
+        // Draw Query Node
+        drawNode(qPos.x, qPos.y, '#fbbf24', 9, "Requête Q", data.question === hoveredPoint, true);
+      }
+
+      // Draw HyDE Matching Line (if active)
+      if (viewMode === 'compare' || viewMode === 'hyde') {
+        const targetDoc = toCoords(data.clusterDocs[0]);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(hPos.x, hPos.y);
+        ctx.lineTo(targetDoc.x, targetDoc.y);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#34d399';
+        ctx.font = '10px JetBrains Mono, monospace';
+        ctx.fillText("Match HyDE Précis (Top 1)", (hPos.x + targetDoc.x) / 2 - 30, (hPos.y + targetDoc.y) / 2 - 8);
+
+        // Draw HyDE Node
+        drawNode(hPos.x, hPos.y, '#34d399', 9, "Hypothèse H", data.hyde === hoveredPoint, true);
+      }
+    }
+
+    function drawNode(x, y, color, radius, label, isHovered, isKeyNode = false) {
+      ctx.save();
+      if (isHovered || isKeyNode) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.3;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Node label
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = isHovered ? 'bold 11px Inter, sans-serif' : '9.5px Inter, sans-serif';
+      ctx.fillText(label, x + radius + 4, y + 3);
+      ctx.restore();
+    }
+
+    // Mouse interactive inspection on canvas
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const w = canvas.width / window.devicePixelRatio;
+      const h = canvas.height / window.devicePixelRatio;
+      const data = dataset[querySelect.value];
+
+      const allNodes = [
+        data.question,
+        data.hyde,
+        ...data.clusterQuestions,
+        ...data.clusterDocs
+      ];
+
+      let found = null;
+      for (const node of allNodes) {
+        const nx = node.x * w;
+        const ny = node.y * h;
+        const dist = Math.hypot(mx - nx, my - ny);
+        if (dist < 18) {
+          found = node;
+          break;
+        }
+      }
+
+      hoveredPoint = found;
+      if (found) {
+        document.getElementById('hoverPointName').textContent = found.label;
+        document.getElementById('hoverPointSnippet').textContent = found.snippet || (found.type === 'query' ? "Requête originale posée par l'utilisateur." : "Hypothèse rédigée 'à chaud' par le premier LLM.");
+      }
+      drawVectorSpace();
+    });
+
+    querySelect.addEventListener('change', () => {
+      const data = dataset[querySelect.value];
+      document.getElementById('ragResultDesc').textContent = data.ragDesc;
+      document.getElementById('hydeResultDesc').textContent = data.hydeDesc;
+      drawVectorSpace();
+    });
+
+    // View mode switch buttons
+    const btnCompare = document.getElementById('btnModeCompare');
+    const btnRag = document.getElementById('btnModeRagOnly');
+    const btnHyde = document.getElementById('btnModeHydeOnly');
+
+    function setActiveModeButton(activeBtn) {
+      [btnCompare, btnRag, btnHyde].forEach(btn => {
+        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+      });
+      activeBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm transition";
+    }
+
+    btnCompare.addEventListener('click', () => {
+      viewMode = 'compare';
+      setActiveModeButton(btnCompare);
+      drawVectorSpace();
+    });
+    btnRag.addEventListener('click', () => {
+      viewMode = 'rag';
+      setActiveModeButton(btnRag);
+      drawVectorSpace();
+    });
+    btnHyde.addEventListener('click', () => {
+      viewMode = 'hyde';
+      setActiveModeButton(btnHyde);
+      drawVectorSpace();
+    });
+
+    // Initial canvas setup
+    setTimeout(resizeCanvas, 100);
+
+    const quizAnswers = {
+      1: 1, // B
+      2: 1, // B
+      3: 0  // A
+    };
+    const explanations = {
+      1: "Exact ! Une question interrogative est géométriquement plus proche d'autres formulations de questions que de véritables textes déclaratifs de cours.",
+      2: "Tout à fait ! Le bi-encoder extrait la signature sémantique thématique et compresse les détails factuels erronés, permettant d'extraire la source authentique.",
+      3: "Parfait ! HyDE effectue deux appels au modèle de fondation (un pour l'ébauche, un pour la réponse finale), augmentant le temps de calcul et le coût en tokens."
+    };
+
+    let userScores = {};
+
+    window.checkQuiz = function(questionNum, chosenIndex, btnElement) {
+      const parentCard = btnElement.closest('[data-q]');
+      const feedbackBox = parentCard.querySelector('.quiz-feedback');
+      const allButtons = parentCard.querySelectorAll('.quiz-btn');
+      const isCorrect = chosenIndex === quizAnswers[questionNum];
+
+      allButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+      });
+
+      if (isCorrect) {
+        btnElement.classList.remove('border-slate-200', 'dark:border-slate-700');
+        btnElement.classList.add('bg-emerald-100', 'dark:bg-emerald-950/60', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-200', 'font-semibold');
+        feedbackBox.className = "quiz-feedback block p-3 rounded-xl text-xs font-medium mt-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800";
+        feedbackBox.textContent = `✓ Bonne réponse ! ${explanations[questionNum]}`;
+        userScores[questionNum] = 1;
+      } else {
+        btnElement.classList.remove('border-slate-200', 'dark:border-slate-700');
+        btnElement.classList.add('bg-red-100', 'dark:bg-red-950/60', 'border-red-500', 'text-red-800', 'dark:text-red-200');
+        
+        // Highlight correct button
+        const correctBtn = allButtons[quizAnswers[questionNum]];
+        correctBtn.classList.add('border-emerald-500', 'text-emerald-600', 'dark:text-emerald-400', 'font-semibold');
+        
+        feedbackBox.className = "quiz-feedback block p-3 rounded-xl text-xs font-medium mt-2 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800";
+        feedbackBox.textContent = `✗ Incorrect. ${explanations[questionNum]}`;
+        userScores[questionNum] = 0;
+      }
+
+      // Update total score text
+      const totalScore = Object.values(userScores).reduce((a, b) => a + b, 0);
+      document.getElementById('quizScoreText').textContent = `${totalScore} / 3`;
+    };
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

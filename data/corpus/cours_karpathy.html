@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Software 1.0 → 2.0 → 3.0 — L'ascension des Transformers</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span> Software 1.0 → 3.0</div>
+  <nav class="navlinks">
+    <a href="#paradigmes">Paradigmes</a>
+    <a href="#prompt">Prompt engineering</a>
+    <a href="#histoire">Histoire</a>
+    <a href="#attention">Attention</a>
+    <a href="#nanogpt">nanoGPT</a>
+  </nav>
+  <button class="toggle-btn" id="themeToggle">
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    <span id="themeLabel">Mode clair</span>
+  </button>
+</div>
+
+<div class="hero">
+  <div>
+    <div class="eyebrow">Cours d'Architecture IA</div>
+    <h1>Le langage de programmation le plus puissant est <em>l'anglais</em></h1>
+    <p class="lead">Du code C++ explicite aux poids d'un réseau de neurones, jusqu'au <em>prompt</em> en langage naturel : ce support retrace les trois âges du logiciel, l'histoire de l'*Attention*, et le fonctionnement interne des architectures Transformers.</p>
+    <div class="meta-row">
+      <span>⏱ 50–70 minutes</span>
+      <span>🧠 D'après la conférence d'Andrej Karpathy (Stanford)</span>
+      <span>📎 RAG, LLM, nanoGPT, Prompting</span>
+    </div>
+  </div>
+  <div class="hero-figure">
+    <svg id="heroSvg" viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="harrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+        </marker>
+        <marker id="arrow-border" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--border)"></path>
+        </marker>
+      </defs>
+      
+      <!-- Lignes de flèches -->
+      <line x1="90" y1="140" x2="230" y2="140" stroke="var(--border)" stroke-width="2" marker-end="url(#arrow-border)"/>
+      <line x1="250" y1="140" x2="390" y2="140" stroke="var(--accent)" stroke-width="2" marker-end="url(#harrow)"/>
+
+      <!-- 1.0 -->
+      <rect x="30" y="100" width="80" height="80" rx="16" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+      <text x="70" y="135" text-anchor="middle" font-family="JetBrains Mono" font-size="16" font-weight="600" fill="var(--text-1)">C++</text>
+      <text x="70" y="205" text-anchor="middle" font-family="Fraunces" font-size="16" font-weight="600" fill="var(--text-1)">1.0</text>
+      <text x="70" y="225" text-anchor="middle" font-family="Inter" font-size="12" fill="var(--text-2)">Code explicite</text>
+
+      <!-- 2.0 -->
+      <g>
+        <rect x="200" y="100" width="80" height="80" rx="16" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <circle cx="225" cy="125" r="4" fill="var(--accent)"/>
+        <circle cx="255" cy="125" r="4" fill="var(--accent)"/>
+        <circle cx="225" cy="155" r="4" fill="var(--accent)"/>
+        <circle cx="255" cy="155" r="4" fill="var(--accent)"/>
+        <line x1="225" y1="125" x2="255" y2="155" stroke="var(--accent)" stroke-width="1.5"/>
+        <line x1="255" y1="125" x2="225" y2="155" stroke="var(--accent)" stroke-width="1.5"/>
+        <line x1="225" y1="125" x2="225" y2="155" stroke="var(--accent)" stroke-width="1.5"/>
+        <line x1="255" y1="125" x2="255" y2="155" stroke="var(--accent)" stroke-width="1.5"/>
+      </g>
+      <text x="240" y="205" text-anchor="middle" font-family="Fraunces" font-size="16" font-weight="600" fill="var(--text-1)">2.0</text>
+      <text x="240" y="225" text-anchor="middle" font-family="Inter" font-size="12" fill="var(--text-2)">Poids du réseau</text>
+
+      <!-- 3.0 -->
+      <rect x="370" y="100" width="80" height="80" rx="16" fill="var(--accent-light)" stroke="var(--accent-strong)" stroke-width="2"/>
+      <text x="410" y="142" text-anchor="middle" font-family="Fraunces" font-size="24" font-style="italic" font-weight="600" fill="var(--accent-strong)">Aa</text>
+      <text x="410" y="205" text-anchor="middle" font-family="Fraunces" font-size="16" font-weight="600" fill="var(--text-1)">3.0</text>
+      <text x="410" y="225" text-anchor="middle" font-family="Inter" font-size="12" fill="var(--text-2)">Prompt (anglais)</text>
+
+      <text x="240" y="280" text-anchor="middle" font-family="Inter" font-size="13" font-weight="500" fill="var(--text-2)">Trois artefacts finaux : l'algorithme, le dataset, le prompt.</text>
+    </svg>
+  </div>
+</div>
+
+<div class="toc">
+  <a href="#paradigmes"><span class="n">01</span> Paradigmes Logiciels</a>
+  <a href="#prompt"><span class="n">02</span> Prompt Engineering</a>
+  <a href="#histoire"><span class="n">03</span> Histoire des Modèles</a>
+  <a href="#pourquoi"><span class="n">04</span> Le Succès Transformer</a>
+  <a href="#attention"><span class="n">05</span> Graphes & Attention</a>
+  <a href="#nanogpt"><span class="n">06</span> Implémentation nanoGPT</a>
+</div>
+
+<main>
+
+<section id="paradigmes">
+  <div class="kicker">01 — Paradigmes</div>
+  <h2 class="section-title">Les trois âges de la programmation</h2>
+  <p>Historiquement, on distingue trois manières fondamentalement différentes de dicter un comportement à un ordinateur. À chaque étape de cette évolution, l'artefact technique final change de nature, et le métier du programmeur évolue en conséquence.</p>
+
+  <div class="grid-3">
+    <div class="era-card">
+      <span class="tag">SOFTWARE 1.0</span>
+      <h4>L'instruction explicite</h4>
+      <p>Un humain écrit l'algorithme ligne par ligne (C++, Python). C'est le paradigme dominant depuis l'aube de l'informatique. Extrêmement puissant, mais inefficace pour des tâches qu'on ne sait pas formaliser mathématiquement (ex: reconnaître un chat ou l'Autopilot d'une voiture).</p>
+    </div>
+    <div class="era-card">
+      <span class="tag">SOFTWARE 2.0</span>
+      <h4>Le <em>Data Engine</em></h4>
+      <p>La logique n'est plus codée : on compile des données d'entraînement. L'artefact final est constitué des <strong>poids du réseau de neurones</strong>. Le développeur devient un curateur de datasets gérant un <em>Data Engine</em> itératif.</p>
+    </div>
+    <div class="era-card">
+      <span class="tag">SOFTWARE 3.0</span>
+      <h4>Le <em>Prompt</em> naturel</h4>
+      <p>Un grand modèle de langage (LLM) agit comme un ordinateur généraliste reconfigurable à l'exécution. On le programme en décrivant en anglais le comportement souhaité. Le prompt devient l'artefact source.</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <!-- SVG Data Engine pour illustrer Software 2.0 -->
+    <svg viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+        </marker>
+      </defs>
+      <text x="300" y="20" text-anchor="middle" font-family="Inter" font-weight="600" font-size="14" fill="var(--text-1)">La boucle du Data Engine (Software 2.0)</text>
+      
+      <g font-family="Inter" font-size="13" font-weight="500" fill="var(--text-1)" text-anchor="middle">
+        <!-- Nœuds -->
+        <rect x="50" y="60" width="80" height="40" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="90" y="85">Collect</text>
+        
+        <rect x="160" y="60" width="80" height="40" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="200" y="85">Label</text>
+
+        <rect x="270" y="60" width="80" height="40" rx="8" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="310" y="85" fill="var(--accent-strong)">Train</text>
+
+        <rect x="380" y="60" width="80" height="40" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="420" y="85">Deploy</text>
+
+        <rect x="490" y="60" width="80" height="40" rx="8" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="530" y="85">Monitor</text>
+
+        <!-- Flèches -->
+        <line x1="130" y1="80" x2="152" y2="80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow-loop)"/>
+        <line x1="240" y1="80" x2="262" y2="80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow-loop)"/>
+        <line x1="350" y1="80" x2="372" y2="80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow-loop)"/>
+        <line x1="460" y1="80" x2="482" y2="80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow-loop)"/>
+        
+        <!-- Retour de Monitor vers Collect -->
+        <path d="M 530,100 C 530,140 90,140 90,100" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow-loop)"/>
+        <text x="310" y="130" fill="var(--text-2)" font-size="12" font-style="italic">Nouvelles données difficiles (Edge cases)</text>
+      </g>
+    </svg>
+    <figcaption>Dans le paradigme Software 2.0 (ex: Tesla Autopilot), le développeur itère sur cette boucle plutôt que sur le code de l'algorithme.</figcaption>
+  </div>
+
+  <div class="callout quote">« L'anglais est devenu le langage de programmation le plus tendance du moment. »</div>
+</section>
+
+<section id="prompt">
+  <div class="kicker">02 — Prompt engineering</div>
+  <h2 class="section-title">Programmer un LLM, un mot à la fois</h2>
+  <p>Un Modèle de Langage (LLM) cherche uniquement à prédire le mot suivant dans une séquence. Entraîné sur tout Internet, sa réponse par défaut est d'imiter <strong>la moyenne</strong> des données d'entraînement. Le <em>Prompt engineering</em> sert à le sortir de cette moyenne pour viser l'excellence.</p>
+
+  <h3>L'exemple du jongleur et du temps de calcul</h3>
+  <p>« Un jongleur jongle avec 16 balles. La moitié sont des balles de golf, et la moitié d'entre elles sont bleues. Combien y a-t-il de balles de golf bleues ? »</p>
+  <table class="cmp">
+    <tr><th>Formulation du <em>Prompt</em></th><th>Précision mesurée</th></tr>
+    <tr><td>Question posée directement (réponse impulsive)</td><td>≈ 17 %</td></tr>
+    <tr><td>« <em>Let's think step by step</em> »</td><td>≈ 78,7 %</td></tr>
+    <tr><td>« <em>Let's work this out in a step-by-step way to be sure we have the right answer.</em> »</td><td><strong>≈ 82 %</strong></td></tr>
+  </table>
+  <p>Leçon architecturale : un réseau Transformer n'a pas de « temps de réflexion » masqué. La quantité de calcul (FLOPs) par *token* produit est fixe. Il faut forcer le modèle à étaler son raisonnement sur plusieurs *tokens* (mots) pour lui donner le "temps" de résoudre le calcul.</p>
+
+  <h3>Le LLM comme Simulateur ou Backend (Software 3.0)</h3>
+  <p>Un <em>prompt</em> bien conçu conditionne le modèle à simuler des systèmes logiciels complets :</p>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Maison Connectée (JSON)</h4>
+      <p class="dim">Dans un hackathon, on a instancié un assistant domotique sans aucun code. Le <em>prompt</em> décrit l'état de la maison ("<em>The house is in St. Albans, UK</em>") et le schéma JSON attendu. Si on demande : "Éteins la lumière quand mon fils ira dormir dans 20 min", le LLM calcule l'heure exacte et renvoie l'objet JSON <code>Command</code> correspondant.</p>
+    </div>
+    <div class="card">
+      <h4>Backend d'application (API)</h4>
+      <p class="dim">Projet "<em>GPT is all you need for backend</em>" : le frontend envoie l'état actuel (ex: liste de tâches en JSON) et une instruction naturelle ("Supprime les deux dernières"). Le LLM applique la transformation et renvoie le nouvel état. Zéro ligne de Python ou Node.js côté serveur.</p>
+    </div>
+  </div>
+</section>
+
+<section id="histoire">
+  <div class="kicker">03 — Histoire</div>
+  <h2 class="section-title">De 2012 à « Attention Is All You Need »</h2>
+  <p>Avant 2012, chaque sous-domaine de l'IA (vision, texte, parole) possédait ses propres algorithmes et vocabulaires (SIFT pour les images, SVM, parsing syntaxique pour le texte). L'unification s'est faite par l'architecture Transformer.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 760 190" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="tarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--border)"></path>
+        </marker>
+      </defs>
+      <line x1="40" y1="40" x2="720" y2="40" stroke="var(--border)" stroke-width="2"/>
+      <g font-family="Inter" font-size="12" fill="var(--text-2)">
+        <circle cx="80" cy="40" r="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="80" y="70" text-anchor="middle" font-weight="700" fill="var(--text-1)">2012</text>
+        <text x="80" y="90" text-anchor="middle">Deep learning</text>
+
+        <circle cx="280" cy="40" r="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="280" y="70" text-anchor="middle" font-weight="700" fill="var(--text-1)">2014</text>
+        <text x="280" y="90" text-anchor="middle">Seq2Seq (RNN)</text>
+
+        <circle cx="480" cy="40" r="8" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="480" y="70" text-anchor="middle" font-weight="700" fill="var(--text-1)">2015</text>
+        <text x="480" y="90" text-anchor="middle">Création de</text>
+        <text x="480" y="108" text-anchor="middle">l'*Attention*</text>
+
+        <circle cx="680" cy="40" r="10" fill="var(--surface)" stroke="var(--accent-2)" stroke-width="3"/>
+        <text x="680" y="70" text-anchor="middle" font-weight="700" fill="var(--accent-2-strong)">2017</text>
+        <text x="680" y="90" text-anchor="middle">« Attention Is</text>
+        <text x="680" y="108" text-anchor="middle">All You Need »</text>
+      </g>
+    </svg>
+    <figcaption>L'évolution cruciale ayant mené à l'architecture de GPT.</figcaption>
+  </div>
+
+  <div class="callout quote">
+    « Dzmitry Bahdanau a conceptualisé l'Attention en 2015 en repensant à ses cours d'anglais au collège. Pour traduire, le regard fait des allers-retours entre la source et la cible (soft search). On ne mémorise pas toute la phrase d'un coup. »
+  </div>
+  <p>Ce mécanisme (*soft search*) a résolu le goulot d'étranglement (*bottleneck*) des RNN classiques (Seq2Seq), qui devaient compresser toute une phrase dans un seul vecteur de taille fixe. En 2017, l'article fondateur démontre qu'on peut supprimer les réseaux récurrents (RNN) pour ne garder que l'*Attention*.</p>
+</section>
+
+<section id="pourquoi">
+  <div class="kicker">04 — Architecture</div>
+  <h2 class="section-title">Pourquoi le Transformer domine-t-il ?</h2>
+  <p>L'architecture Transformer atteint un minimum local parfait dans l'espace de conception des réseaux de neurones en réunissant trois propriétés fondamentales :</p>
+
+  <div class="grid-3">
+    <div class="era-card">
+      <span class="tag">EXPRESSIF</span>
+      <h4>La passe *Forward*</h4>
+      <p>Puissance de calcul permettant un <em>in-context learning</em> (méta-apprentissage) directement dans les activations lors de la lecture du prompt, sans étape de <em>Fine-tuning</em> (Descente de gradient).</p>
+    </div>
+    <div class="era-card">
+      <span class="tag">OPTIMISABLE</span>
+      <h4>Flux des Gradients</h4>
+      <p>Grâce aux connexions résiduelles (type ResNet) et aux <em>Layer Norms</em>, les gradients d'erreur circulent parfaitement, évitant l'explosion ou la disparition qui frappait les réseaux profonds.</p>
+    </div>
+    <div class="era-card">
+      <span class="tag">EFFICIENT (GPUs)</span>
+      <h4>Large et peu profond</h4>
+      <p>Conçu spécifiquement pour exploiter le parallélisme massif des GPUs matériels. Contrairement aux RNN séquentiels, le Transformer traite tous les tokens simultanément.</p>
+    </div>
+  </div>
+</section>
+
+<section id="attention">
+  <div class="kicker">05 — Mathématiques</div>
+  <h2 class="section-title">L'Attention : *Message Passing* sur un graphe</h2>
+  <p>L'*Attention* n'est rien d'autre que la <strong>phase de communication</strong> sur un graphe orienté où chaque <em>token</em> (mot) est un nœud. Ensuite, le MLP (*Multi-Layer Perceptron*) représente la <strong>phase de calcul</strong> individuelle par nœud.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="qarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-strong)"></path>
+        </marker>
+      </defs>
+      
+      <!-- Graph Nodes -->
+      <g font-family="JetBrains Mono" font-size="13" font-weight="600" fill="var(--text-1)">
+        <circle cx="120" cy="50" r="30" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="120" y="55" text-anchor="middle">"Le"</text>
+        
+        <circle cx="350" cy="50" r="30" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="350" y="55" text-anchor="middle">"chat"</text>
+        
+        <circle cx="580" cy="50" r="30" fill="var(--surface-2)" stroke="var(--border)" stroke-width="2"/>
+        <text x="580" y="55" text-anchor="middle">"dort"</text>
+        
+        <!-- Active Node emitting Query -->
+        <circle cx="350" cy="180" r="34" fill="var(--accent-light)" stroke="var(--accent-strong)" stroke-width="3"/>
+        <text x="350" y="185" text-anchor="middle" fill="var(--accent-strong)">Query</text>
+      </g>
+      
+      <!-- Edges / Message Passing -->
+      <line x1="120" y1="80" x2="318" y2="155" stroke="var(--accent)" stroke-width="2" marker-end="url(#qarrow)"/>
+      <line x1="350" y1="80" x2="350" y2="140" stroke="var(--accent)" stroke-width="2" marker-end="url(#qarrow)"/>
+      <line x1="580" y1="80" x2="382" y2="155" stroke="var(--accent)" stroke-width="2" marker-end="url(#qarrow)"/>
+      
+      <!-- Labels -->
+      <g font-family="Inter" font-size="13" font-weight="500" fill="var(--text-2)">
+        <text x="210" y="115" text-anchor="middle">Key · Value</text>
+        <text x="490" y="115" text-anchor="middle">Key · Value</text>
+      </g>
+      
+      <rect x="180" y="200" width="340" height="30" rx="6" fill="var(--surface-2)"/>
+      <text x="350" y="220" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="var(--text-1)">
+        Score = Softmax( Q · K ) → Somme pondérée des V
+      </text>
+    </svg>
+    <figcaption>Mécanisme : Chaque nœud possède un vecteur privé. Il émet une *Query* (ce que je cherche), récupère les *Keys* des autres nœuds (ce qu'ils contiennent), et calcule un score pour agréger leurs *Values*.</figcaption>
+  </div>
+
+  <div class="grid-2">
+    <div class="card"><strong>Self-attention</strong><p class="dim">La <em>Query</em>, la <em>Key</em> et la <em>Value</em> proviennent du même groupe de tokens (ex: dans un encodeur, les mots de la phrase discutent tous entre eux).</p></div>
+    <div class="card"><strong>Cross-attention</strong><p class="dim">La <em>Query</em> vient du décodeur (le mot en train d'être généré), mais les <em>Keys</em> et <em>Values</em> proviennent de la sortie de l'encodeur.</p></div>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-head"><span>attention.py — Le cœur mathématique</span><button class="cb-copy">Copier</button></div>
+    <pre data-lang="python"><span class="tok-kw">def</span> <span class="tok-func">causal_self_attention</span>(x, Wq, Wk, Wv):
+    <span class="tok-comment"># x : (T, d_model) — T tokens, d_model dimensions</span>
+    Q = x @ Wq  <span class="tok-comment"># Query</span>
+    K = x @ Wk  <span class="tok-comment"># Key</span>
+    V = x @ Wv  <span class="tok-comment"># Value</span>
+
+    T = x.shape[0]
+    <span class="tok-comment"># Produit scalaire Q·K pour obtenir l'affinité</span>
+    scores = (Q @ K.T) / math.sqrt(Q.shape[-1])
+
+    <span class="tok-comment"># Masque causal (Auto-régressif) : Interdit de voir le futur</span>
+    <span class="tok-kw">for</span> i <span class="tok-kw">in</span> <span class="tok-func">range</span>(T):
+        <span class="tok-kw">for</span> j <span class="tok-kw">in</span> <span class="tok-func">range</span>(i + 1, T):
+            scores[i][j] = <span class="tok-func">float</span>(<span class="tok-string">"-inf"</span>)
+
+    <span class="tok-comment"># Normalisation et agrégation</span>
+    weights = softmax(scores, axis=-1)
+    <span class="tok-kw">return</span> weights @ V</pre>
+  </div>
+</section>
+
+<section id="nanogpt">
+  <div class="kicker">06 — Implémentation</div>
+  <h2 class="section-title">nanoGPT et le futur (Software 3.0)</h2>
+  <p>Un modèle GPT fonctionnel comme GPT-2 peut être réécrit en moins de 300 lignes de code (le projet <strong>nanoGPT</strong> d'A. Karpathy). Entraîné sur un dataset de 1 Mo (<em>Tiny Shakespeare</em>), le modèle génère des pièces de théâtre inédites mais crédibles au niveau caractère par caractère.</p>
+
+  <h3>Pistes futures de développement</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Le <em>Scratchpad</em> (Mémoire Externe)</h4>
+      <p class="dim">La fenêtre de contexte (RAM) du Transformer est limitée. L'avenir passe par l'enseignement au LLM de l'utilisation d'un <em>Scratchpad</em> : un bloc-notes externe (balises <code>&lt;scratchpad&gt;</code>) qu'il apprend à lire et écrire dynamiquement pour contourner ses limites de mémoire.</p>
+    </div>
+    <div class="card">
+      <h4><em>Mixture of Experts</em> (MoE)</h4>
+      <p class="dim">Transition des modèles monolithiques généralistes vers des réseaux combinant plusieurs experts très spécialisés par domaine (ex: un LLM purement médical activé à la demande).</p>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section id="quiz">
+  <div class="kicker">Évaluation</div>
+  <h2 class="section-title">Testez vos connaissances</h2>
+
+  <div class="quiz-card" id="quizCard">
+    <div class="quiz-progress" id="quizProgress">Question 1 / 5</div>
+    <div class="quiz-q" id="quizQuestion"></div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="quiz-explain" id="quizExplain"></div>
+    <div class="quiz-nav">
+      <button class="btn" id="quizNext" disabled>Suivant</button>
+    </div>
+  </div>
+
+  <div class="quiz-result" id="quizResult">
+    <div class="dim">Votre score</div>
+    <div class="score"><span id="scoreValue">0</span> / 5</div>
+    <p id="scoreMsg" class="dim"></p>
+    <button class="btn ghost" id="quizRestart">Recommencer</button>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Support technique basé sur la conférence de Stanford d'Andrej Karpathy. Optimisé pour la lecture écran et l'export PDF (Format A4).
+</footer>
+
+<script>
+/* ---------------- Gestion du thème ---------------- */
+(function(){
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  let theme = prefersLight ? 'light' : 'dark';
+  root.setAttribute('data-theme', theme);
+  updateBtn();
+
+  btn.addEventListener('click', function(){
+    theme = (theme === 'dark') ? 'light' : 'dark';
+    root.setAttribute('data-theme', theme);
+    updateBtn();
+  });
+
+  function updateBtn(){
+    if(theme === 'dark'){
+      label.textContent = 'Mode Clair';
+      icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+    } else {
+      label.textContent = 'Mode Sombre';
+      icon.innerHTML = '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>';
+    }
+  }
+})();
+
+/* ---------------- Coloration syntaxique ---------------- */
+(function(){
+  const KEYWORDS = {
+    python: ['def','for','in','range','import','return','if','else','float','math','axis','while']
+  };
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function highlight(code, lang){
+    let html = escapeHtml(code);
+    html = html.replace(/(#.*$)/gm, '<span class="tok-comment">$1</span>');
+    html = html.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, '<span class="tok-string">$1</span>');
+    const kws = KEYWORDS[lang] || [];
+    kws.forEach(function(k){
+      html = html.replace(new RegExp('\\b'+k+'\\b','g'), '<span class="tok-kw">'+k+'</span>');
+    });
+    return html;
+  }
+  document.querySelectorAll('.codeblock pre[data-lang]').forEach(function(pre){
+    const lang = pre.getAttribute('data-lang');
+    pre.innerHTML = highlight(pre.textContent, lang);
+  });
+  document.querySelectorAll('.cb-copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const pre = btn.closest('.codeblock').querySelector('pre');
+      navigator.clipboard.writeText(pre.textContent).then(function(){
+        const original = btn.textContent;
+        btn.textContent = 'Copié !';
+        setTimeout(function(){ btn.textContent = original; }, 1400);
+      });
+    });
+  });
+})();
+
+/* ---------------- Quiz interactif ---------------- */
+(function(){
+  const questions = [
+    {
+      q: "Dans le concept Software 2.0, qu'est-ce qui devient le nouvel artefact (le programme) ?",
+      options: [
+        "Le code source C++",
+        "Les poids du réseau de neurones formés via le Data Engine",
+        "Le prompt en langue anglaise",
+        "Les bases de données SQL"
+      ],
+      correct: 1,
+      explain: "En Software 2.0 (ex: Tesla Autopilot), le développeur ne code plus la logique, il accumule un dataset qui, une fois compilé, donne les poids du réseau."
+    },
+    {
+      q: "Pourquoi le prompt « Let's work this out step-by-step » améliore-t-il la précision (de 17% à 82%) ?",
+      options: [
+        "Car le modèle gagne l'accès à une calculette interne.",
+        "Il force le modèle à étaler le calcul sur plusieurs tokens, lui donnant plus de FLOPs (puissance de calcul) pour résoudre le problème.",
+        "Car l'anglais poli donne de meilleurs résultats statistiques."
+      ],
+      correct: 1,
+      explain: "Le LLM exécute un volume de calcul fixe par token généré. Générer les étapes intermédiaires lui accorde le temps de 'réflexion' nécessaire."
+    },
+    {
+      q: "Comment est née l'idée de l'Attention en 2015 ?",
+      options: [
+        "En étudiant l'architecture des GPUs matériels.",
+        "Par Dzmitry Bahdanau, inspiré par ses exercices de traduction scolaire où les yeux font des allers-retours entre la source et la cible.",
+        "Grâce à la découverte des LLM."
+      ],
+      correct: 1,
+      explain: "Le 'soft search' (Attention) mime le déplacement du regard lors d'une traduction pour éviter de devoir compresser toute une phrase dans un vecteur de taille fixe."
+    },
+    {
+      q: "Dans le mécanisme d'Attention vu comme un graphe orienté, que représente la Query ?",
+      options: [
+        "L'information brute que le nœud veut diffuser.",
+        "Ce que le nœud (token) recherche ou demande aux autres nœuds du réseau.",
+        "Le score de normalisation du Softmax."
+      ],
+      correct: 1,
+      explain: "Chaque nœud émet une Query (ce qu'il cherche) qui sera multipliée par les Keys (ce que les autres ont) pour déterminer le score d'affinité."
+    },
+    {
+      q: "Quelle solution architecturale est envisagée pour dépasser les limites de contexte (mémoire RAM) des LLM ?",
+      options: [
+        "Retourner aux RNN (réseaux récurrents).",
+        "Le Scratchpad : apprendre au modèle à lire et écrire sur un bloc-notes externe.",
+        "Augmenter indéfiniment la taille des puces GPU."
+      ],
+      correct: 1,
+      explain: "A. Karpathy mentionne l'usage d'un bloc-notes (Scratchpad) externe que le modèle peut manipuler dynamiquement, mimant la prise de notes humaine."
+    }
+  ];
+
+  let current = 0, score = 0, answered = false;
+  const progressEl = document.getElementById('quizProgress');
+  const qEl = document.getElementById('quizQuestion');
+  const optsEl = document.getElementById('quizOptions');
+  const explainEl = document.getElementById('quizExplain');
+  const nextBtn = document.getElementById('quizNext');
+  const quizCard = document.getElementById('quizCard');
+  const resultEl = document.getElementById('quizResult');
+  const scoreValueEl = document.getElementById('scoreValue');
+  const scoreMsgEl = document.getElementById('scoreMsg');
+
+  function render(){
+    const item = questions[current];
+    answered = false;
+    nextBtn.disabled = true;
+    nextBtn.textContent = (current === questions.length - 1) ? 'Voir le score' : 'Question suivante';
+    progressEl.textContent = 'Question ' + (current+1) + ' / ' + questions.length;
+    qEl.textContent = item.q;
+    explainEl.style.display = 'none';
+    explainEl.textContent = item.explain;
+    optsEl.innerHTML = '';
+    item.options.forEach(function(opt, i){
+      const b = document.createElement('button');
+      b.className = 'quiz-opt';
+      b.textContent = opt;
+      b.addEventListener('click', function(){ selectAnswer(i); });
+      optsEl.appendChild(b);
+    });
+  }
+
+  function selectAnswer(i){
+    if(answered) return;
+    answered = true;
+    const item = questions[current];
+    const buttons = optsEl.querySelectorAll('.quiz-opt');
+    buttons.forEach(function(b, idx){
+      b.disabled = true;
+      if(idx === item.correct) b.classList.add('correct');
+      else if(idx === i) b.classList.add('wrong');
+    });
+    if(i === item.correct) score++;
+    explainEl.style.display = 'block';
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.addEventListener('click', function(){
+    if(current < questions.length - 1) { current++; render(); } 
+    else { showResult(); }
+  });
+
+  function showResult(){
+    quizCard.style.display = 'none';
+    resultEl.style.display = 'block';
+    scoreValueEl.textContent = score;
+    scoreMsgEl.textContent = score === 5 ? 'Excellente maîtrise des architectures IA !' : 'Bonne base, n\'hésitez pas à relire les sections techniques.';
+  }
+
+  document.getElementById('quizRestart').addEventListener('click', function(){
+    current = 0; score = 0;
+    quizCard.style.display = 'block';
+    resultEl.style.display = 'none';
+    render();
+  });
+
+  render();
+})();
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

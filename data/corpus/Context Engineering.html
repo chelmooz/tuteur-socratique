@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Context Engineering | Write, Select, Compress, Isolate, Failure Modes, KV Cache, Multi-Agents</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🧠 <span>Context Engineering</span> Masterclass</div>
+        <div class="muted small">Write • Select • Compress • Isolate • Failure Modes • KV Cache • Multi-Agents</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "context-engineering-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express") {
+      return `
+        <div class="quiz" data-module="${moduleId}">
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "budget") updateBudget();
+      if (id === "kv-cache") updateKv();
+      if (id === "failures") resetFailureMatcher();
+      if (id === "workflow") initPhaseSim();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    // ============ DIAGNOSTIC ============
+    const DIAG_TEXT = {
+      debutant: "Commencez par la définition : prompt engineering vs context engineering, puis la fenêtre de contexte comme RAM. Les 4 stratégies seront votre boussole.",
+      builder: "Passez vite sur la théorie, concentrez-vous sur les failure modes, la compression des tool outputs, la sélection dynamique des outils et le KV cache.",
+      senior: "Allez directement aux architectures : isolation multi-agents, workflow par phases, plateforme comparison, autorité du contexte et pipeline commun."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.builder}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ CONTEXT BUDGET SIMULATOR ============
+    function updateBudget() {
+      const vals = {
+        system: Number($("#cb-system")?.value || 0),
+        tools: Number($("#cb-tools")?.value || 0),
+        toolResults: Number($("#cb-tool-results")?.value || 0),
+        rag: Number($("#cb-rag")?.value || 0),
+        history: Number($("#cb-history")?.value || 0),
+        memory: Number($("#cb-memory")?.value || 0),
+        state: Number($("#cb-state")?.value || 0)
+      };
+      const windowSize = Number($("#cb-window")?.value || 128000);
+      const total = Object.values(vals).reduce((a, b) => a + b, 0);
+      const pct = windowSize ? (total / windowSize) * 100 : 0;
+
+      $("#cbv-system").textContent = vals.system.toLocaleString("fr-FR");
+      $("#cbv-tools").textContent = vals.tools.toLocaleString("fr-FR");
+      $("#cbv-tool-results").textContent = vals.toolResults.toLocaleString("fr-FR");
+      $("#cbv-rag").textContent = vals.rag.toLocaleString("fr-FR");
+      $("#cbv-history").textContent = vals.history.toLocaleString("fr-FR");
+      $("#cbv-memory").textContent = vals.memory.toLocaleString("fr-FR");
+      $("#cbv-state").textContent = vals.state.toLocaleString("fr-FR");
+
+      const fill = $("#cb-fill");
+      const status = $("#cb-status");
+      const advice = $("#cb-advice");
+      if (fill) fill.style.width = Math.min(100, pct) + "%";
+
+      let statusClass = "status-good";
+      let statusText = "Contexte sain : vous êtes sous les seuils critiques.";
+      if (pct >= 80) {
+        statusClass = "status-bad";
+        statusText = "Contexte critique : dégradation forte, risque élevé d’oubli, d’erreurs et de coûts.";
+      } else if (pct >= 60) {
+        statusClass = "status-warn";
+        statusText = "Contexte à risque : la fenêtre se remplit, le raisonnement peut commencer à se dégrader.";
+      } else if (pct >= 40) {
+        statusClass = "status-warn";
+        statusText = "Zone d’attention : commencez à compresser, sélectionner et isoler avant saturation.";
+      }
+
+      if (status) {
+        status.className = "status-line " + statusClass;
+        status.textContent = "Utilisation : " + pct.toFixed(1) + "% — " + statusText;
+      }
+
+      const tips = [];
+      if (vals.tools > 10000) tips.push("Tool definitions lourdes : utilisez SELECT (RAG sur les outils, tool masking, jeu minimal viable).");
+      if (vals.toolResults > 20000) tips.push("Tool results accumulés : utilisez COMPRESS (résumé, clearing des anciens outputs, validation avant entrée).");
+      if (vals.history > 30000) tips.push("Historique trop long : COMPRESS avec résumé hybride, garder derniers messages verbatim, résumer l’ancien.");
+      if (vals.rag > 20000) tips.push("Documents RAG trop nombreux : SELECT + reranking + chunking + agentic retrieval.");
+      if (vals.system > 15000) tips.push("System prompt très long : vérifiez que chaque token est nécessaire ; structurez avec XML/markdown ; écrivez à la bonne altitude.");
+      if (vals.memory > 10000) tips.push("Mémoire volumineuse : WRITE vers stockage externe + SELECT au bon moment.");
+      if (vals.state > 8000) tips.push("Agent state lourd : persistez un to-do / progress file, compressez les marqueurs obsolètes.");
+      if (pct > 50 && (vals.toolResults + vals.history) > total * 0.55) tips.push("Risque lost in the middle : les instructions initiales peuvent être enfouies sous les outputs et l’historique.");
+
+      if (advice) advice.innerHTML = tips.length ? "<strong>Recommandations :</strong><ul>" + tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" : "Aucune alerte majeure. Continuez à surveiller la croissance à chaque tool call.";
+    }
+
+    // ============ KV CACHE CALCULATOR ============
+    function updateKv() {
+      const stable = Number($("#kv-stable")?.value || 20000);
+      const dynamic = Number($("#kv-dynamic")?.value || 3000);
+      const calls = Number($("#kv-calls")?.value || 30);
+
+      $("#kvv-stable").textContent = stable.toLocaleString("fr-FR");
+      $("#kvv-dynamic").textContent = dynamic.toLocaleString("fr-FR");
+      $("#kvv-calls").textContent = calls.toLocaleString("fr-FR");
+
+      const cachedPrice = 0.30;
+      const uncachedPrice = 3.00;
+
+      const stableCost = (stable * calls / 1_000_000) * cachedPrice;
+      const dynamicCost = (dynamic * calls / 1_000_000) * uncachedPrice;
+      const stableOrderCost = stableCost + dynamicCost;
+      const unstableCost = ((stable + dynamic) * calls / 1_000_000) * uncachedPrice;
+      const savings = unstableCost - stableOrderCost;
+
+      const out = $("#kv-out");
+      if (out) {
+        out.textContent =
+          "Coût avec préfixe stable et cache réutilisé : " + stableOrderCost.toFixed(4) + " USD\n" +
+          "Coût si le préfixe change à chaque appel : " + unstableCost.toFixed(4) + " USD\n" +
+          "Économie potentielle : " + savings.toFixed(4) + " USD (" + (unstableCost ? (savings / unstableCost * 100).toFixed(1) : "0") + "%)\n\n" +
+          "Lecture : garder stables system prompt, tool definitions et préfixe en haut du contexte permet de réutiliser le KV cache. Déplacer ou retirer des outils au milieu invalide le cache et force le recalcul, ce qui peut multiplier les coûts par 10 sur les tokens concernés.";
+      }
+    }
+
+    // ============ FAILURE MATCHER ============
+    const FAILURE_TEXT = {
+      poisoning: "Symptôme : une hallucination ou une erreur ancienne est reprise en boucle.\nFailure mode : CONTEXT POISONING.\nExplication : un mauvais output d’outil ou une inférence erronée entre dans le contexte, puis l’agent construit dessus étape après étape.\nFix : pruning actif, validation des tool outputs avant entrée, compression de l’historique d’échec une fois la résolution trouvée.",
+      distraction: "Symptôme : l’agent répète des patterns récents au lieu de raisonner.\nFailure mode : CONTEXT DISTRACTION.\nExplication : le contexte devient si long que le modèle sur-utilise son historique récent et sous-utilise ce qu’il a appris à l’entraînement.\nFix : résumer et élaguer agressivement, même avec une grande fenêtre de contexte.",
+      confusion: "Symptôme : l’agent appelle des outils hors sujet ou produit des réponses basses qualité.\nFailure mode : CONTEXT CONFUSION.\nExplication : contenu superflu, notamment trop de tool definitions, rend le raisonnement moins clair. Exemple : un modèle échoue avec 46 outils mais réussit avec 19, alors que la fenêtre avait la place.\nFix : sélection dynamique des outils, RAG sur les descriptions d’outils, jeu minimal viable, tool masking.",
+      clash: "Symptôme : l’agent suit tantôt une source, tantôt une autre, ou produit un comportement incohérent.\nFailure mode : CONTEXT CLASH.\nExplication : une nouvelle information contredit une information déjà présente, par exemple system prompt vs document récupéré.\nFix : établir une hiérarchie d’autorité, valider les nouvelles infos avant injection, utiliser sections structurées, XML tags, headers clairs."
+    };
+
+    function resetFailureMatcher() {
+      $$(".matcher-btn").forEach(b => b.classList.remove("active"));
+      const out = $("#failure-out");
+      if (out) out.textContent = "Sélectionnez un symptôme pour identifier le failure mode et la stratégie de remédiation.";
+    }
+
+    function chooseFailure(key) {
+      $$(".matcher-btn").forEach(b => b.classList.toggle("active", b.dataset.key === key));
+      const out = $("#failure-out");
+      if (out) out.textContent = FAILURE_TEXT[key] || "";
+    }
+
+    // ============ STRATEGY SELECTOR ============
+    function chooseStrategy(key) {
+      const texts = {
+        forget_rules: "Problème : l’agent oublie les fondamentaux entre les sessions ou après compaction.\nStratégie : WRITE.\nTactiques : rules files type CLAUDE.md, scratch pads, memory extraction, think tool, fichiers de progression.",
+        too_much: "Problème : le contexte est saturé par d’anciens tool outputs et l’historique.\nStratégie : COMPRESS.\nTactiques : chunking avant entrée, résumé continu, trimming, garder derniers messages verbatim, clear des résultats déjà utilisés, autocompact en secours.",
+        too_many_tools: "Problème : trop d’outils disponibles, l’agent hésite ou appelle les mauvais outils.\nStratégie : SELECT.\nTactiques : RAG sur tool definitions, tool masking, préfixes cohérents, hybrid strategy frontload + just-in-time retrieval.",
+        dirty_context: "Problème : une phase de recherche salit le contexte de la phase d’implémentation.\nStratégie : ISOLATE.\nTactiques : sous-agents avec fenêtres propres, parent reçoit seulement un résumé condensé, reset de contexte entre phases.",
+        contradiction: "Problème : documents récupérés et instructions se contredisent.\nStratégie : WRITE + SELECT.\nTactiques : hiérarchie d’autorité, sections structurées, validation avant injection, sourcing explicite, règles persistantes."
+      };
+      const out = $("#strategy-out");
+      if (out) out.textContent = texts[key] || "";
+    }
+
+    // ============ PHASE WORKFLOW SIMULATOR ============
+    const PHASES = [
+      { who: "Phase 1 — Recherche", text: "Fenêtre fraîche + objectif. Des sous-agents explorent le codebase, lisent des fichiers, tracent les data flows, font les grep/scan bruts. Les résultats sales restent dans leurs contextes." },
+      { who: "Stratégie Isolate", text: "Le parent ne reçoit pas tout le bruit de recherche. Chaque sous-agent travaille dans une fenêtre propre et rapporte un résumé condensé." },
+      { who: "Stratégie Write", text: "La recherche produit un artefact compact : research.md avec chemins, signatures, patterns existants, pièges." },
+      { who: "Reset de contexte", text: "La recherche brute consommait peut-être 60 à 80% du contexte. L’artefact compact ramène cela à environ 15 à 20%." },
+      { who: "Phase 2 — Planification", text: "Nouvelle fenêtre contenant seulement research.md + définition du problème. L’agent produit un plan d’implémentation détaillé." },
+      { who: "Checkpoint humain", text: "C’est le moment idéal pour relire la logique. Si une erreur de raisonnement existe, elle est encore bon marché à corriger." },
+      { who: "Phase 3 — Implémentation", text: "Encore une fenêtre fraîche, cette fois avec seulement le plan. L’agent exécute étape par étape." },
+      { who: "Stratégie Write continue", text: "Un progress.md suit ce qui est terminé et ce qui reste. Les tâches longues gardent un état externe sans encombrer la fenêtre." }
+    ];
+
+    let phaseStep = 0;
+
+    function initPhaseSim() {
+      phaseStep = 0;
+      const container = $("#phase-history");
+      if (!container) return;
+      container.innerHTML = PHASES.map((p, i) => `
+        <div class="phase-step" id="phase-step-${i}">
+          <span class="who">${p.who}</span>
+          <span>${p.text}</span>
+        </div>
+      `).join("");
+      const status = $("#phase-status");
+      if (status) status.textContent = "Cliquez sur Étape suivante pour dérouler le workflow par compaction intentionnelle.";
+      const nextBtn = $("#phase-next");
+      if (nextBtn) { nextBtn.disabled = false; nextBtn.textContent = "Étape suivante →"; }
+      const resetBtn = $("#phase-reset");
+      if (resetBtn) resetBtn.style.display = "inline-flex";
+    }
+
+    function nextPhaseStep() {
+      if (phaseStep >= PHASES.length) return;
+      const el = $("#phase-step-" + phaseStep);
+      if (el) el.classList.add("visible");
+      phaseStep++;
+      const status = $("#phase-status");
+      if (status) {
+        if (phaseStep < PHASES.length) status.textContent = "Étape " + phaseStep + "/" + PHASES.length + " — chaque phase produit un artefact compact, puis le contexte est réinitialisé.";
+        else status.textContent = "Workflow terminé : vous avez vu comment rester sous 40-60% de la fenêtre grâce à write, select, compress, isolate.";
+      }
+      if (phaseStep >= PHASES.length) {
+        const nextBtn = $("#phase-next");
+        if (nextBtn) nextBtn.disabled = true;
+      }
+    }
+
+    // ============ SCENARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        step_20_sloppy: "Cas : l’agent est bon pendant 15 étapes, puis devient bâclé, oublie la demande, appelle des outils bizarres.\nDiagnostic probable : context rot / distraction / confusion.\nRemèdes : compresser les anciens tool outputs, sélectionner seulement les outils pertinents, isoler les sous-tâches, écrire un plan externe.",
+        lost_instructions: "Cas : instructions originales enfouies sous 50 000 tokens de sorties d’outils.\nDiagnostic : lost in the middle.\nRemèdes : remettre les règles critiques en haut ou dans un rules file, résumer l’historique, nettoyer les résultats déjà utilisés, structurer avec sections XML/markdown.",
+        forty_six_tools: "Cas : un agent avec 46 outils échoue, mais réussit avec 19 outils.\nDiagnostic : context confusion.\nRemèdes : RAG sur les descriptions d’outils, tool masking, préfixes cohérents, jeu minimal viable, ne pas charger tout avant le travail.",
+        hallucination_loop: "Cas : un outil renvoie une donnée fausse à l’étape 5, et l’agent la répète à l’étape 18.\nDiagnostic : context poisoning.\nRemèdes : valider les outputs avant entrée, pruner les infos conflictuelles, compresser l’historique d’échec après résolution.",
+        contradictory_docs: "Cas : le system prompt dit une chose, un document RAG en dit une autre, l’agent oscille.\nDiagnostic : context clash.\nRemèdes : hiérarchie d’autorité explicite, sourcer les sections, valider les nouvelles infos avant injection, structurer le contexte.",
+        local_ollama_rag: "Cas : vous testez un RAG local avec Ollama, embeddings, Chroma, LangChain, puis ajoutez un agent.\nApplication context engineering : chunking = compress avant entrée ; retrieval = select ; résumé des docs = compress ; sous-agent recherche = isolate ; notes persistantes = write.\nAvantage local : itérer gratuitement sur les stratégies sans facture API, utile pour apprendre avant production.",
+        sean_portfolio: "Cas : vous voulez un portfolio qui montre du context engineering réel.\nParcours : reprendre un projet type DeepResearch backend, Supabase tips, Kimi K2/Claude Code ou MVP Next.js/Stripe/Supabase ; ajouter un pipeline de phases research/plan/implement ; logger les tokens, tool calls, compactions ; montrer un avant/après de fenêtre de contexte.\nMessage : un projet job-ready n’est pas juste « ça marche », c’est un système mesurable, compressé, isolé et défendable."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "Context engineering", back: "Discipline de concevoir tout le système d’information autour du modèle : system prompt, tool definitions, résultats d’outils, historique, mémoire, état. Faire voir la bonne info, au bon format, au bon moment.", tip: "1:41" },
+      { front: "Prompt engineering vs context engineering", back: "Prompt engineering = bonnes instructions pour un LLM. Context engineering inclut cela, puis ajoute outils, données externes, historique, mémoire, état dynamique. Le prompt engineering est un sous-ensemble.", tip: "1:05" },
+      { front: "Pourquoi les agents en ont besoin", back: "Un agent ne répond pas à une seule question : il agit step after step, browse, appelle APIs, écrit code, court commandes. Chaque étape ajoute du output au contexte, qui est fini.", tip: "1:21" },
+      { front: "Anthropic definition", back: "Context = set of tokens included when you sample from an LLM. Context engineering = optimizing utility of those tokens to consistently achieve desired outcome.", tip: "1:54" },
+      { front: "Gartner projection", back: "40% des applications enterprise intégreront des agents IA task-specific d’ici fin 2026, contre moins de 5% en 2025.", tip: "2:35" },
+      { front: "LangChain analogy", back: "LLM comme nouveau type d’OS : modèle = CPU, context window = RAM. Quand la RAM se remplit, le raisonnement dégrade : context drop.", tip: "3:07" },
+      { front: "Chroma study", back: "18 frontier models évalués. Tous dégradent avec l’augmentation de la longueur d’input, même bien sous la limite annoncée. Un modèle 200k peut dégrader à 50k. Déclin continu, pas cliff.", tip: "3:27" },
+      { front: "Raison technique", back: "Transformers : chaque token attends à chaque autre token, créant n² relations pairwise. Plus le contexte grandit, plus la capacité à capturer ces relations s’étire.", tip: "3:56" },
+      { front: "Lost in the middle", back: "Courbe d’attention en U : début et fin retenus, milieu raté. Baisse de 30+ points de précision quand l’info pertinente passe du début au milieu.", tip: "4:16" },
+      { front: "7 catégories de contexte", back: "System prompt, tool definitions, tool results, retrieved RAG knowledge, conversation history, memory, agent state.", tip: "4:49" },
+      { front: "System prompt d’un agent", back: "Pas juste « helpful assistant ». Il définit architecture, règles comportementales, control flow, approche des tâches, gestion d’erreurs, guardrails.", tip: "4:54" },
+      { front: "Tool definitions", back: "Chaque outil potentiellement appelable a besoin d’un schéma : ce qu’il fait, paramètres, quand l’utiliser. Ça peut coûter des milliers de tokens avant tout travail.", tip: "5:09" },
+      { front: "Tool results", back: "Chaque appel d’outil ajoute son résultat. Une page web peut faire 5 à 10k tokens, un fichier lu pareil.", tip: "5:18" },
+      { front: "Strategy 1 : Write", back: "Donner à l’agent des moyens de persister hors fenêtre : scratch pads, rules files, memory extraction. Évite de perdre l’info quand le contexte est compacté.", tip: "7:51" },
+      { front: "Think tool Anthropic", back: "Workspace dédié pour travailler certains problèmes. Sur un benchmark, amélioration de 54% sur certaines tâches.", tip: "8:24" },
+      { front: "Rules files", back: "Mémoire procédurale persistante, type CLAUDE.md. Chargées au début de chaque session : structure projet, conventions, tests, précautions.", tip: "8:35" },
+      { front: "Strategy 2 : Select", back: "Ne pas tout donner. Donner ce qui est nécessaire pour cette étape. Décider ce qui est pertinent parmi outils, docs, historique, mémoires.", tip: "9:09" },
+      { front: "Traditional vs agentic RAG", back: "Traditional RAG : pipeline statique, le système décide. Agentic RAG : l’agent décide quoi chercher, quels outils, comment raffiner, quand il en a assez. Retrieval itératif.", tip: "9:35" },
+      { front: "3 types de mémoire", back: "Episodic = few-shot examples passés. Semantic = faits appris. Procedural = instructions comportementales persistantes.", tip: "10:08" },
+      { front: "RAG-MCP result", back: "Sélection d’outils par retrieval sur descriptions : accuracy de 14% à 43%, tokens de prompt réduits environ de moitié.", tip: "10:57" },
+      { front: "Hybrid strategy Anthropic", back: "Frontloader l’essentiel pour vitesse (rules file), puis just-in-time retrieval pour le reste.", tip: "11:05" },
+      { front: "Strategy 3 : Compress", back: "Réduire le nombre de tokens tout préservant l’info qui compte. Avant entrée, pendant travail, après action.", tip: "11:27" },
+      { front: "Compression avant entrée", back: "Chunking, reranking, résumé des tool outputs on the fly pour que seuls les morceaux utiles entrent dans la fenêtre.", tip: "12:03" },
+      { front: "Compression pendant travail", back: "Résumé continu de l’historique, hybrid keep last 10 verbatim + summarize older, trimming heuristique, autocompact à 95% en secours.", tip: "12:18" },
+      { front: "Compression après action", back: "Tool result clearing : si un outil a été appelé il y a 15 steps et le résultat a servi, remplacer par une ligne ou supprimer.", tip: "13:03" },
+      { front: "Strategy 4 : Isolate", back: "Donner à différentes parties du travail leurs propres fenêtres. Rend les systèmes multi-agents possibles et évite la contamination de contexte.", tip: "13:22" },
+      { front: "Subagents", back: "Parent délègue sous-tâche focalisée. Sous-agent travaille proprement, rapporte résumé condensé. Le bruit de recherche ne pollue pas le parent.", tip: "14:02" },
+      { front: "Failure 1 : Poisoning", back: "Erreur/hallucination entre dans contexte puis est référencée en boucle. Fix : pruning, validation outputs, compression des tentatives échouées.", tip: "14:51" },
+      { front: "Failure 2 : Distraction", back: "Contexte si long que modèle sur-utilise history récente et sous-utilise training. Répète patterns au lieu de raisonner. Fix : summarize/prune aggressively.", tip: "15:34" },
+      { front: "Failure 3 : Confusion", back: "Contenu superflu mène à basses qualités, ex. trop d’outils. Fix : dynamic tool management, RAG over tool descriptions, masking.", tip: "15:59" },
+      { front: "Failure 4 : Clash", back: "Nouvelles infos contredisent infos existantes. Comportement incohérent. Fix : authority ordering, validation, structured sections/XML tags.", tip: "16:47" },
+      { front: "Mapping failures -> strategies", back: "Poisoning = compression/pruning. Distraction = compression. Confusion = selection. Clash = writing + selection.", tip: "17:50" },
+      { front: "Writing at right altitude", back: "System prompt agent : ni trop prescriptif (fragile), ni trop vague (inutilisable). Strong heuristics, pas rigid rules.", tip: "18:39" },
+      { front: "Minimal != short", back: "Un system prompt peut faire des milliers de tokens si chaque token est pertinent et nécessaire. Start minimal, iterate on failures.", tip: "19:46" },
+      { front: "Few-shot examples", back: "Montrer ce à quoi ressemble le bon comportement : sélection d’outils, raisonnement, exécution multi-étapes, plutôt que d’articuler toutes les règles.", tip: "19:56" },
+      { front: "MCP trap", back: "Model Context Protocol standardise connexion aux outils, mais rend trop facile de brancher beaucoup d’outils. Tool definitions peuvent manger des milliers de tokens avant travail.", tip: "20:26" },
+      { front: "KV cache", back: "Providers cachent key-value representations si préfixe du contexte reste stable entre appels. Changer le début invalide cache et force recomputation.", tip: "21:13" },
+      { front: "Claude Sonnet pricing example", back: "Cached input tokens : 30 cents / million. Uncached : 3 dollars / million. Différence x10. Sur 30-40 API calls par tâche, ça compte vite.", tip: "21:51" },
+      { front: "Tool masking vs removal", back: "Manus recommande garder définitions stables dans le préfixe caché, mais marquer certains outils unavailable pour la phase. Évite d’invalider cache.", tip: "22:04" },
+      { front: "Stable top, dynamic bottom", back: "Contenu stable en haut : system prompt, tool definitions. Contenu dynamique en bas : historique, step courant, agent state.", tip: "22:52" },
+      { front: "Frequent intentional compaction", back: "Méthode HumanLayer/Dexy Horthy : structurer le travail en phases, chaque phase produit artefact compact, nouvelle phase démarre fenêtre fraîche avec seulement artefact. Rester sous 40-60% contexte.", tip: "23:44" },
+      { front: "Research artifact", back: "Recherche brute peut consommer 60-80% contexte. research.md compact ramène à 15-20%. C’est compress + write + isolate.", tip: "24:42" },
+      { front: "Planning checkpoint", back: "Phase 2 : nouvelle fenêtre avec seulement research doc + problème. Produit plan. Point le plus important pour review humaine.", tip: "24:52" },
+      { front: "Implementation progress.md", back: "Phase 3 : fenêtre fraîche avec plan. progress.md track complété/restant pour tâches longues.", tip: "25:16" },
+      { front: "Claude Code approach", back: "Hybrid retrieval : CLAUDE.md upfront, Glob/Grep just-in-time, autocompact à 95%, subagents, memory tool. Philosophie : simplest thing that works.", tip: "25:43" },
+      { front: "Manus approach", back: "Infrastructure-heavy : KV cache aware ordering, tool masking, observation compression pipeline, persistent to-do list, file system as overflow memory.", tip: "26:32" },
+      { front: "ChatGPT agent approach", back: "GUI-first computer-using agent. Screenshots visuels dans contexte, tokens visuels chers, RL pour découvrir tool use, deep research/operators share state.", tip: "27:07" },
+      { front: "Google ADK principles", back: "Separate storage from presentation ; explicit transformations named ordered processors ; scope context by default, minimum required only.", tip: "28:07" },
+      { front: "Common pipeline", back: "Chaque turn : collect candidate info, select relevant + budget, compress/restructure, arrange for KV cache stable first/dynamic last, assemble + API call.", tip: "28:48" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ EXAM ============
+    const FINAL_QUESTIONS = [
+      { q: "Quelle est la différence centrale entre prompt engineering et context engineering ?", o: ["Prompt = bonnes instructions ; context = concevoir tout le système d’info autour du modèle à chaque étape", "Context est juste un prompt plus long", "Prompt engineering est mort"], a: 0, e: "Le prompt engineering est un sous-ensemble du context engineering." },
+      { q: "Pourquoi les agents ont-ils particulièrement besoin de context engineering ?", o: ["Parce qu’ils ajoutent automatiquement des outputs d’outils, décisions et résultats dans une fenêtre finie", "Parce qu’ils n’utilisent pas de prompts", "Parce qu’ils sont toujours déterministes"], a: 0, e: "Chaque step produit du contexte supplémentaire." },
+      { q: "Que montre l’étude Chroma citée dans la vidéo ?", o: ["Tous les modèles évalés dégradent avec la longueur d’input, même sous la limite annoncée", "Seuls les petits modèles dégradent", "La dégradation est un cliff brutal à 100%"], a: 0, e: "Déclin continu, gradient, pas cliff." },
+      { q: "Qu’est-ce que lost in the middle ?", o: ["Les modèles retiennent mieux début et fin, et ratent le milieu du contexte", "Les modèles oublient toujours le début", "Les modèles n’aiment pas les images"], a: 0, e: "Courbe d’attention en U, baisse de 30+ points quand l’info pertinente est au milieu." },
+      { q: "Laquelle fait partie des 7 catégories de contexte ?", o: ["Agent state", "GPU temperature", "Docker layer"], a: 0, e: "System prompt, tools, tool results, RAG, history, memory, agent state." },
+      { q: "Quelles sont les 4 stratégies core ?", o: ["Write, Select, Compress, Isolate", "Read, Plan, Act, Review", "Train, Tune, Deploy, Monitor"], a: 0, e: "Framework LangChain cité dans la vidéo." },
+      { q: "Que fait la stratégie Select pour les outils ?", o: ["Elle ne charge que les outils pertinents pour l’étape, par retrieval ou masking", "Elle supprime tous les outils", "Elle ajoute tous les MCP servers"], a: 0, e: "Trop d’outils confond le modèle même si la fenêtre a la place." },
+      { q: "Quel est un bon usage de Compress après action ?", o: ["Effacer ou résumer les tool results déjà utilisés", "Garder 10 steps de debugging mort dans le contexte", "Ajouter plus de docs sans reranking"], a: 0, e: "Tool result clearing : remplacer par une ligne ou supprimer." },
+      { q: "Pourquoi Isolate est crucial dans un workflow multi-phases ?", o: ["Il empêche la recherche brute de polluer le contexte de planification/implémentation", "Il rend le modèle plus gros", "Il supprime les tests"], a: 0, e: "Sous-agents avec fenêtres propres, parent reçoit résumé condensé." },
+      { q: "Quel principe KV cache est recommandé ?", o: ["Contenu stable en haut, contenu dynamique en bas ; éviter de rearranger le préfixe entre appels", "Changer les outils à chaque appel pour rester frais", "Mettre l’historique en haut"], a: 0, e: "Préfixe stable maximise cache reuse ; sinon recomputation et coûts x10 sur tokens concernés." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous comprenez le context engineering comme discipline : fenêtre finie, dégradation continue, 4 stratégies, failure modes, KV cache, workflow par phases et architectures de plateformes."
+          : (correct >= 5 ? "Bases correctes. Revoyez les failure modes, la distinction Select/Compress, et le principe stable top / dynamic bottom." : "Reprenez les modules définition, budget, stratégies et failures avant de réessayer.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d’abord l’examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Context Engineering Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-context-engineering.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencez par mesurer votre contexte actuel : tokens par catégorie, % de fenêtre, outils chargés. Puis appliquez Write et Compress sur un agent simple.";
+      if (d.level === "senior") return "Focus architecture : KV cache aware ordering, tool masking, isolation multi-agents, pipeline collect/select/compress/assemble, et évaluation des failure modes.";
+      return "Appliquez les 4 stratégies à votre agent : write rules/notes, select outils/docs, compress historique/results, isolate sous-tâches.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Context Engineering : pourquoi votre agent devient slopply à l’étape 15</h1>
+          <p class="lead">
+            Si vous avez construit des agents IA, vous avez probablement remarqué : les premières étapes fonctionnent bien.
+            L’agent choisit les bons outils, raisonne clairement, reste sur les rails. Puis vers l’étape 15 ou 20, il devient bâclé.
+            Il oublie la demande, appelle des outils qui n’ont pas de sens, ou produit des sorties de basse qualité.
+            La première hypothèse est souvent « le modèle est le problème ». Mais ce n’est généralement pas ça.
+            C’est plus souvent ce que le modèle voit. <span class="source">⏱ 0:00</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 960 280" role="img" aria-label="Le contexte comme RAM d un agent">
+              <defs>
+                <marker id="arrow-ctx" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="95" width="150" height="80" class="node" />
+              <text x="105" y="125" text-anchor="middle">Agent</text>
+              <text x="105" y="147" text-anchor="middle" class="sub">step 1...20</text>
+              <path class="dash" d="M180 135 L230 135" marker-end="url(#arrow-ctx)" />
+
+              <rect x="230" y="95" width="160" height="80" class="node purple pulse" />
+              <text x="310" y="125" text-anchor="middle">Context window</text>
+              <text x="310" y="147" text-anchor="middle" class="sub">RAM finie</text>
+              <path class="dash purple" d="M390 135 L440 135" marker-end="url(#arrow-ctx)" />
+
+              <rect x="440" y="95" width="150" height="80" class="node yellow" />
+              <text x="515" y="125" text-anchor="middle">Tokens accumulés</text>
+              <text x="515" y="147" text-anchor="middle" class="sub">tools, docs, history</text>
+              <path class="dash yellow" d="M590 135 L640 135" marker-end="url(#arrow-ctx)" />
+
+              <rect x="640" y="95" width="140" height="80" class="node red" />
+              <text x="710" y="125" text-anchor="middle">Dégradation</text>
+              <text x="710" y="147" text-anchor="middle" class="sub">context rot</text>
+              <path class="dash red" d="M780 135 L830 135" marker-end="url(#arrow-ctx)" />
+
+              <rect x="830" y="95" width="100" height="80" class="node green" />
+              <text x="880" y="125" text-anchor="middle">Engineering</text>
+              <text x="880" y="147" text-anchor="middle" class="sub">write/select...</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez définir le context engineering, diagnostiquer les failure modes, appliquer Write/Select/Compress/Isolate, optimiser le KV cache, et structurer un agent en phases compactées.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, simulateur de budget contexte, simulateur KV cache, matcher de failure modes, sélecteur de stratégies, workflow par phases, comparaison Claude Code / Manus / ChatGPT / Google ADK, flashcards, examen.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Une checklist de context engineering, un modèle mental de fenêtre de contexte comme RAM, et une méthode pour rendre un agent fiable sur des dizaines d’étapes.</p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Phrase clé</h3>
+            <p>« Organizing what the model sees is called context engineering, and it’s quickly becoming one of the most important skills for anyone working in this space. » <span class="source">⏱ 0:24</span></p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('definition')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau avec les agents IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre pourquoi les agents dérivent.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : je construis un agent, je veux le rendre fiable.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="senior"> Senior : je veux architecture, KV cache, multi-agents, plateformes.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre les concepts.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="debug"> Déboguer un agent qui devient slopply.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="production"> Concevoir un système fiable en production.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l’essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours avec simulateurs.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "definition", title: "1. Définition", express: true,
+        content: `
+          <h1>Prompt engineering vs context engineering</h1>
+          <p class="lead">
+            Vous avez sûrement entendu parler du prompt engineering : écrire de bonnes instructions pour un LLM, phraser clairement,
+            donner de bons exemples, dire au modèle quel rôle jouer. Ça marche très bien quand vous conversez avec ChatGPT.
+            Mais quand vous passez des chatbots aux agents, le prompt engineering cesse d’être suffisant. <span class="source">⏱ 1:05</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Prompt engineering</h3>
+              <p>Écrire de bonnes instructions initiales : clarté, exemples, rôle, format. Utile pour une conversation.</p>
+            </div>
+            <div class="card purple">
+              <h3>Context engineering</h3>
+              <p>Concevoir tout le système d’information autour du modèle : pas seulement l’instruction initiale, mais tout ce que le modèle voit à chaque étape.</p>
+            </div>
+            <div class="card warn">
+              <h3>Pourquoi les agents changent tout</h3>
+              <p>Un agent prend des actions : browse web, appelle APIs, écrit code, court commandes. Autonomement, step after step. Chaque step produit un output ajouté au contexte.</p>
+            </div>
+          </div>
+
+          <div class="card good">
+            <h3>Définition Anthropic</h3>
+            <p>Context = l’ensemble des tokens inclus quand vous samplez depuis un LLM. Context engineering = optimiser l’utilité de ces tokens pour atteindre de manière consistente un outcome désiré. En gros : faire en sorte que votre agent voie la bonne information, au bon format, au bon moment. <span class="source">⏱ 1:54</span></p>
+          </div>
+
+          <div class="card info">
+            <h3>Progression naturelle</h3>
+            <p>Anthropic décrit le context engineering comme la progression naturelle du prompt engineering. Il inclut tout ce que le prompt engineering fait — instructions claires, bons exemples, formatage structuré — mais ajoute une couche : gestion des outils, données externes, historique de messages, systèmes de mémoire, état dynamique. <span class="source">⏱ 2:11</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Le prompt engineering est...", o: ["Un sous-ensemble du context engineering", "Remplacé par les agents", "Identique au context engineering"], a: 0, e: "Context engineering inclut le prompt, plus outils, données, historique, mémoire, état." },
+            { q: "Pourquoi un agent nécessite plus que du prompt engineering ?", o: ["Parce qu’il ajoute automatiquement des outputs d’actions successives dans un contexte fini", "Parce qu’il n’a pas de system prompt", "Parce qu’il est déterministe"], a: 0, e: "Chaque step produit du contexte supplémentaire." }
+          ], "definition")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('definition')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('definition')">Fenêtre de contexte →</button>
+          </div>
+        `
+      },
+      {
+        id: "window", title: "2. Fenêtre = RAM", express: true,
+        content: `
+          <h1>La fenêtre de contexte est finie, et elle dégrade en gradient</h1>
+          <p class="lead">
+            L’adoption des agents accélère très vite. Gartner projette que 40% des applications enterprise intégreront
+            des agents IA task-specific d’ici fin 2026, contre moins de 5% en 2025. Les équipes qui comprennent le
+            context engineering seront celles dont les agents marcheront réellement de manière fiable. <span class="source">⏱ 2:31</span>
+          </p>
+
+          <div class="card info">
+            <h3>Analogie LangChain</h3>
+            <p>Pensez à un LLM comme un nouveau type d’操作系统. Le modèle lui-même est le CPU : il fait le thinking. La context window est la RAM : la mémoire de travail où vit tout ce que le modèle peut actuellement voir et raisonner. Comme votre ordinateur ralentit quand la RAM se remplit, le raisonnement de votre agent dégrade quand la fenêtre de contexte est encombrée. C’est le context drop. <span class="source">⏱ 3:07</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>Étude Chroma</h3>
+            <p>Chroma a évalué 18 frontier models : GPT-4.1, Claude 4, Gemini 2.5, Qwen 3, etc. Résultat : la performance de chaque modèle dégrade quand la longueur d’input augmente, même bien sous la limite annoncée de context window. Un modèle avec fenêtre 200k peut commencer à montrer une dégradation significative à 50k tokens. Le déclin est continu, pas un cliff soudain. <span class="source">⏱ 3:27</span></p>
+          </div>
+
+          <div class="card warn">
+            <h3>Raison technique</h3>
+            <p>Les transformers fonctionnent avec attention : chaque token attends à chaque autre token, créant n² relations pairwise. Quand le contexte grandit, la capacité du modèle à capturer toutes ces relations s’étire de plus en plus fin. C’est comme demander à une personne de suivre un nombre croissant de choses simultanément. À un moment, des choses tombent. <span class="source">⏱ 3:56</span></p>
+          </div>
+
+          <div class="card purple">
+            <h3>Lost in the middle</h3>
+            <p>Une équipe de recherche a trouvé que les LLMs exhibent une courbe d’attention en U. Ils retiennent bien l’information au début du contexte et à la fin, mais l’information au milieu est ratée. L’équipe a mesuré une baisse de plus de 30 points de précision quand l’information pertinente passait du début au milieu. Imaginez un agent dont les instructions originales sont enfouies sous 50 000 tokens de tool outputs : ces instructions disparaissent effectivement. <span class="source">⏱ 4:16</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Dans l’analogie LangChain, la context window est...", o: ["La RAM", "Le disque dur", "Le GPU"], a: 0, e: "Modèle = CPU, contexte = mémoire de travail." },
+            { q: "Que montre l’étude Chroma ?", o: ["La dégradation est continue et commence souvent bien sous la limite annoncée", "Les modèles ne dégradent jamais", "La dégradation est un cliff à 100%"], a: 0, e: "Un modèle 200k peut dégrader à 50k." }
+          ], "window")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('window')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('window')">7 catégories →</button>
+          </div>
+        `
+      },
+      {
+        id: "categories", title: "3. 7 catégories", express: true,
+        content: `
+          <h1>Ce qui compete pour l’espace dans la fenêtre</h1>
+          <p class="lead">
+            Nous savons que la fenêtre est finie et dégrade en se remplissant. Mais qu’est-ce qui occupe réellement cet espace ?
+            Il y a essentiellement sept catégories d’information dans le contexte d’un agent. <span class="source">⏱ 4:49</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>1. System prompt</h3>
+              <p>Identité de l’agent, règles comportementales, control flow logic, instructions pour approcher différents types de tâches. Dans un agent, ce n’est pas juste « helpful assistant » : ça peut définir l’architecture entière. <span class="source">⏱ 4:54</span></p>
+            </div>
+            <div class="card info">
+              <h3>2. Tool definitions</h3>
+              <p>Chaque outil potentiellement appelable a besoin d’un schéma décrivant ce qu’il fait, ses paramètres, quand l’utiliser. <span class="source">⏱ 5:09</span></p>
+            </div>
+            <div class="card info">
+              <h3>3. Tool call results</h3>
+              <p>Chaque appel d’outil ajoute son résultat. Une retrieval de page web peut faire 5 à 10k tokens. Un file read peut être similaire. <span class="source">⏱ 5:18</span></p>
+            </div>
+            <div class="card info">
+              <h3>4. Retrieved RAG knowledge</h3>
+              <p>Documents pullés depuis vector databases, search results, API responses. Tout ce que l’agent ou le système retrieve pour informer ses décisions. <span class="source">⏱ 5:29</span></p>
+            </div>
+            <div class="card info">
+              <h3>5. Conversation history</h3>
+              <p>Transcript complet de la session : messages user, réponses agent, reasoning, décisions antérieures. Croît linéairement à chaque turn. <span class="source">⏱ 5:40</span></p>
+            </div>
+            <div class="card info">
+              <h3>6. Memory</h3>
+              <p>Mémoire court terme de la session et long terme de sessions précédentes : préférences user, outcomes de tâches, patterns appris. <span class="source">⏱ 5:53</span></p>
+            </div>
+            <div class="card info">
+              <h3>7. Agent state</h3>
+              <p>Plan courant, to-do list, progress markers, scratchpad notes. Toute méta-info qui aide l’agent à suivre où il en est dans une tâche multi-étapes. <span class="source">⏱ 6:04</span></p>
+            </div>
+          </div>
+
+          <div class="card good">
+            <h3>Le problème en une phrase</h3>
+            <p>Le contexte n’est pas seulement « le prompt ». C’est un système vivant où instructions, outils, résultats, documents, historique, mémoire et état se battent pour la même RAM attentionnelle. <span class="source">⏱ 6:15</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Laquelle n’est PAS une des 7 catégories citées ?", o: ["GPU temperature", "Agent state", "Memory"], a: 0, e: "System prompt, tools, tool results, RAG, history, memory, agent state." },
+            { q: "Pourquoi les tool definitions peuvent-elles être un problème ?", o: ["Elles consomment des milliers de tokens avant même que le travail commence", "Elles sont toujours inutiles", "Elles ne rentrent jamais dans le contexte"], a: 0, e: "Surtout avec plusieurs MCP servers." }
+          ], "categories")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('categories')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('categories')">Simulateur budget →</button>
+          </div>
+        `
+      },
+      {
+        id: "budget", title: " Simulateur budget", express: true,
+        content: `
+          <h1>Simulateur : votre contexte est-il en train de pourrir ?</h1>
+          <p class="lead">Entrez des estimations de tokens par catégorie. Le simulateur calcule l’utilisation de la fenêtre et propose des stratégies Write / Select / Compress / Isolate.</p>
+
+          <div class="simulator">
+            <div class="grid">
+              <div>
+                <label for="cb-window">Taille de fenêtre</label>
+                <select id="cb-window" onchange="updateBudget()">
+                  <option value="32000">32k</option>
+                  <option value="128000" selected>128k</option>
+                  <option value="200000">200k</option>
+                  <option value="1000000">1M</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="budget-row">
+              <label for="cb-system">System prompt</label>
+              <input type="range" id="cb-system" min="0" max="50000" step="500" value="4000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-system">4 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-tools">Tool definitions</label>
+              <input type="range" id="cb-tools" min="0" max="50000" step="500" value="12000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-tools">12 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-tool-results">Tool results</label>
+              <input type="range" id="cb-tool-results" min="0" max="100000" step="1000" value="25000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-tool-results">25 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-rag">RAG docs</label>
+              <input type="range" id="cb-rag" min="0" max="80000" step="1000" value="10000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-rag">10 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-history">Conversation history</label>
+              <input type="range" id="cb-history" min="0" max="120000" step="1000" value="35000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-history">35 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-memory">Memory</label>
+              <input type="range" id="cb-memory" min="0" max="40000" step="500" value="5000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-memory">5 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="cb-state">Agent state</label>
+              <input type="range" id="cb-state" min="0" max="30000" step="500" value="3000" oninput="updateBudget()">
+              <span class="budget-val" id="cbv-state">3 000</span>
+            </div>
+
+            <div class="meter"><div class="meter-fill" id="cb-fill"></div></div>
+            <p id="cb-status" class="status-line"></p>
+            <div id="cb-advice" class="card"></div>
+          </div>
+
+          <div class="card info">
+            <h3>Seuil pratique</h3>
+            <p>La vidéo cite une bonne pratique de rester sous 40 à 60% de la fenêtre pour les tâches longues. Même si un modèle annonce 200k, la dégradation peut commencer bien avant. Le but n’est pas de remplir la fenêtre, mais de garder le ratio signal/bruit élevé.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('budget')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('budget')">Les 4 stratégies →</button>
+          </div>
+        `
+      },
+      {
+        id: "strategies", title: "4. Les 4 stratégies", express: true,
+        content: `
+          <h1>Write, Select, Compress, Isolate</h1>
+          <p class="lead">
+            LangChain a publié un framework largement cité qui organise toutes les techniques de context engineering
+            en quatre catégories : write, select, compress, isolate. Une fois que vous connaissez ces quatre buckets,
+            presque toute technique que vous rencontrez s’y range. <span class="source">⏱ 7:36</span>
+          </p>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-write')">Write</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-select')">Select</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-compress')">Compress</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-isolate')">Isolate</button>
+            </div>
+
+            <div id="tab-write" class="tab-panel active">
+              <div class="card info">
+                <h3>Problème résolu : les agents oublient</h3>
+                <p>Quand le contexte se remplit et est compacté, l’agent perd de l’information. S’il n’a rien écrit avant, cette info est disparue. Write = donner des moyens de persister hors fenêtre. <span class="source">⏱ 7:54</span></p>
+              </div>
+              <div class="grid">
+                <div class="card good">
+                  <h3>Scratch pads</h3>
+                  <p>Outil permettant à l’agent de prendre des notes pendant une tâche : findings intermédiaires, décisions, infos dont il aura besoin plus tard. Anthropic a un think tool ; sur un benchmark, +54% sur certaines tâches. <span class="source">⏱ 8:13</span></p>
+                </div>
+                <div class="card good">
+                  <h3>Rules files</h3>
+                  <p>Mémoire procédurale persistante. CLAUDE.md : instructions chargées au début de chaque session. Structure projet, conventions, tests, précautions. L’agent les lit à chaque démarrage. <span class="source">⏱ 8:35</span></p>
+                </div>
+                <div class="card good">
+                  <h3>Memory extraction</h3>
+                  <p>L’agent sauve facts, préférences user, patterns appris pour les retrieve across sessions. Système file-based qui vit entièrement hors contexte. <span class="source">⏱ 8:55</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-select" class="tab-panel">
+              <div class="card info">
+                <h3>Problème résolu : ne pas tout donner</h3>
+                <p>Donner au modèle ce dont il a besoin pour cette étape, pas tout ce que vous avez. Un agent avec dizaines d’outils, grande knowledge base et plusieurs sessions d’historique ne peut pas tout charger. <span class="source">⏱ 9:14</span></p>
+              </div>
+              <div class="card warn">
+                <h3>Traditional RAG vs Agentic RAG</h3>
+                <p>Traditional RAG : user pose question, système retrieve docs, les stuff dans prompt, terminé. Pipeline statique, le modèle n’a pas son mot. Agentic RAG : l’agent décide quoi chercher, quels outils, comment raffiner, quand il en a assez. Retrieval itératif. <span class="source">⏱ 9:35</span></p>
+              </div>
+              <div class="grid">
+                <div class="card good">
+                  <h3>Episodic memory</h3>
+                  <p>Few-shot examples : voici comment vous avez géré quelque chose de similaire avant.</p>
+                </div>
+                <div class="card good">
+                  <h3>Semantic memory</h3>
+                  <p>Repository de faits appris ou donnés à l’agent.</p>
+                </div>
+                <div class="card good">
+                  <h3>Procedural memory</h3>
+                  <p>Instructions comportementales standing, comme les rules files.</p>
+                </div>
+              </div>
+              <div class="card bad">
+                <h3>Le piège des outils</h3>
+                <p>40 outils = potentiellement 10 000 tokens de tool definitions avant tout travail. Trop d’outils ne gaspille pas seulement l’espace : ça confond activement le modèle. Fix : RAG sur les tool descriptions. Le papier RAG-MCP a trouvé accuracy de sélection de 14% à 43%, tout en coupant les tokens de prompt environ de moitié. <span class="source">⏱ 10:31</span></p>
+              </div>
+              <div class="card purple">
+                <h3>Hybrid strategy</h3>
+                <p>Anthropic conseille : frontloader l’essentiel pour vitesse, comme CLAUDE.md, mais laisser l’agent faire du just-in-time retrieval pour le reste. <span class="source">⏱ 11:05</span></p>
+              </div>
+            </div>
+
+            <div id="tab-compress" class="tab-panel">
+              <div class="card info">
+                <h3>Problème résolu : context rot</h3>
+                <p>Même avec bonne sélection, le contexte s’accumule. Chaque tool call, document retrieved, décision enregistrée reste dans la fenêtre. Compress = réduire le token count tout en préservant l’info qui compte. <span class="source">⏱ 11:19</span></p>
+              </div>
+              <div class="grid">
+                <div class="card good">
+                  <h3>Avant entrée</h3>
+                  <p>Chunking : casser grands documents en morceaux cohérents avant retrieval. Reranking : seuls les chunks les plus utiles entrent. Résumer tool outputs on the fly. <span class="source">⏱ 12:03</span></p>
+                </div>
+                <div class="card good">
+                  <h3>Pendant travail</h3>
+                  <p>Résumé continu de l’historique. Pattern hybride : garder derniers 10 messages verbatim, résumer tout plus ancien. Trimming heuristique. Claude Code a autocompact à 95% : safety net, mais mieux vaut compresser proactivement. <span class="source">⏱ 12:18</span></p>
+                </div>
+                <div class="card good">
+                  <h3>Après action</h3>
+                  <p>Tool result clearing : si un outil a été appelé 15 steps ago et le résultat a servi, drop raw output. Remplacer par one-line summary ou supprimer entièrement. <span class="source">⏱ 13:03</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-isolate" class="tab-panel">
+              <div class="card info">
+                <h3>Problème résolu : contamination</h3>
+                <p>Si un seul agent fait research, plan, code, test, debug dans une longue conversation, il remplira inévitablement son contexte. Mais le problème profond n’est pas seulement l’espace : c’est la contamination. Les recherches fichiers détaillées de la phase research sont encore dans le contexte quand l’agent passe à l’implémentation. Ce vieux contexte de recherche est maintenant du bruit. <span class="source">⏱ 13:29</span></p>
+              </div>
+              <div class="card good">
+                <h3>Subagents</h3>
+                <p>Parent délègue sous-tâche focalisée, par exemple « search the codebase for all files related to authentication », à un sous-agent. Le sous-agent travaille dans sa propre fenêtre propre. Quand il rapporte au parent, il ne renvoie qu’un résumé condensé. Toutes les opérations de recherche salissantes restent isolées et ne polluent jamais le parent. <span class="source">⏱ 14:02</span></p>
+              </div>
+              <div class="card purple">
+                <h3>Ce qui rend les multi-agents possibles</h3>
+                <p>Isolate est la stratégie qui rend les systèmes multi-agents utiles. Ce n’est pas juste « plusieurs agents » : c’est plusieurs fenêtres propres avec communication condensée. <span class="source">⏱ 13:25</span></p>
+              </div>
+            </div>
+          </div>
+
+          <h2>Sélecteur de stratégie</h2>
+          <div class="simulator">
+            <div class="matcher-grid">
+              <button class="matcher-btn" onclick="chooseStrategy('forget_rules')">Oublie les règles</button>
+              <button class="matcher-btn" onclick="chooseStrategy('too_much')">Contexte saturé</button>
+              <button class="matcher-btn" onclick="chooseStrategy('too_many_tools')">Trop d’outils</button>
+              <button class="matcher-btn" onclick="chooseStrategy('dirty_context')">Recherche salit contexte</button>
+              <button class="matcher-btn" onclick="chooseStrategy('contradiction')">Sources contradictoires</button>
+            </div>
+            <pre id="strategy-out" class="prompt">Sélectionnez un problème pour voir la stratégie adaptée.</pre>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle stratégie persiste des infos hors fenêtre ?", o: ["Write", "Select", "Isolate"], a: 0, e: "Scratch pads, rules files, memory extraction." },
+            { q: "Quelle stratégie gère trop d’outils ou trop de docs ?", o: ["Select", "Write", "Compress seulement"], a: 0, e: "Donner ce qui est nécessaire pour l’étape courante." },
+            { q: "Quelle stratégie empêche la recherche de polluer l’implémentation ?", o: ["Isolate", "Write", "Select"], a: 0, e: "Sous-agents avec fenêtres propres, résumé condensé au parent." }
+          ], "strategies")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('strategies')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('strategies')">Failure modes →</button>
+          </div>
+        `
+      },
+      {
+        id: "failures", title: "5. Failure modes", express: true,
+        content: `
+          <h1>Comment les agents échouent quand le contexte tourne mal</h1>
+          <p class="lead">
+            Comprendre les modes de défaillance est un bon moyen d’apprendre proactivement ce qu’on essaie d’éviter.
+            Drew Breunig a publié une série influente en deux parties mi-2025 identifiant quatre façons distinctes dont
+            les agents échouent à mesure que leur contexte grandit. <span class="source">⏱ 14:34</span>
+          </p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Context poisoning</h3>
+              <p>Une hallucination ou erreur entre dans le contexte, puis est référencée encore et encore dans les steps suivants. Un outil renvoie bad data, ou l’agent fait une inférence flawed 5 steps ago, et l’info reste là, construite dessus. <span class="source">⏱ 14:51</span></p>
+              <p><strong>Fix :</strong> context pruning, valider tool outputs avant entrée, compresser l’historique d’échec après résolution. Ne laissez pas 10 steps de debugging dead-end visibles quand seule la résolution compte.</p>
+            </div>
+            <div class="card warn">
+              <h3>2. Context distraction</h3>
+              <p>Le contexte devient si long que le modèle sur-utilise son history récente et sous-utilise ce qu’il a appris pendant training. L’agent arrête de penser par lui-même et répète des patterns de ce qu’il a récemment vu. Au lieu de synthétiser un plan novel, il rehash des actions passées. <span class="source">⏱ 15:34</span></p>
+              <p><strong>Fix :</strong> summarize et prune agressivement, même avec grande fenêtre.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Context confusion</h3>
+              <p>Contenu superflu entre dans le contexte et mène à des réponses basse qualité. Exemple classique : tool confusion. L’agent voit 46 tool definitions et commence à appeler des outils sans rapport avec la tâche. Un benchmark : un modèle Llama 3.1 8B quantized a échoué quand on lui donnait les 46 outils, mais a bien marché avec 19. La fenêtre avait la place, mais le modèle ne raisonnait pas clairement avec autant d’options. <span class="source">⏱ 15:59</span></p>
+              <p><strong>Fix :</strong> dynamic tool management, RAG-MCP, semantic retrieval over tool descriptions, jeu minimal viable.</p>
+            </div>
+            <div class="card purple">
+              <h3>4. Context clash</h3>
+              <p>Nouvelle information gatherée pendant le run contredit quelque chose déjà dans le contexte. System prompt dit une chose, retrieved document dit autre. L’agent ne peut pas réconcilier, produit comportement incohérent : tantôt une source, tantôt l’autre, tantôt quelque chose qui ne match ni l’une ni l’autre. <span class="source">⏱ 16:47</span></p>
+              <p><strong>Fix :</strong> établir autorité claire, valider nouvelles infos avant injection, structured sections, XML tags, headers clairs.</p>
+            </div>
+          </div>
+
+          <h2>Matcher : symptôme → failure mode → remède</h2>
+          <div class="simulator">
+            <div class="matcher-grid">
+              <button class="matcher-btn" data-key="poisoning" onclick="chooseFailure('poisoning')">Répète une erreur ancienne</button>
+              <button class="matcher-btn" data-key="distraction" onclick="chooseFailure('distraction')">Répète des patterns au lieu de raisonner</button>
+              <button class="matcher-btn" data-key="confusion" onclick="chooseFailure('confusion')">Appelle outils hors sujet</button>
+              <button class="matcher-btn" data-key="clash" onclick="chooseFailure('clash')">Suit sources contradictoires</button>
+            </div>
+            <pre id="failure-out" class="prompt"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>Mapping final</h3>
+            <p>Poisoning est résolu par compression et pruning. Distraction par compression. Confusion par selection. Clash par writing et selection. Tout revient à Write, Select, Compress, Isolate. <span class="source">⏱ 17:50</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Un agent répète une hallucination ancienne. Quel failure mode ?", o: ["Context poisoning", "Context clash", "KV cache miss"], a: 0, e: "Une erreur entre dans le contexte puis est construite dessus." },
+            { q: "Un agent échoue avec 46 outils mais réussit avec 19. Quel failure mode ?", o: ["Context confusion", "Context poisoning", "Context isolation"], a: 0, e: "Trop de contenu superflu confond le raisonnement." }
+          ], "failures")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('failures')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('failures')">System prompt & tools →</button>
+          </div>
+        `
+      },
+      {
+        id: "best-practices", title: "6. System prompt & tools", express: true,
+        content: `
+          <h1>Best practices : system prompt d’agent et définitions d’outils</h1>
+          <p class="lead">
+            Deux choses sur lesquelles vous travaillerez en premier quand vous construisez un agent : le system prompt
+            et les tool definitions. L’approche est très différente d’un chatbot. <span class="source">⏱ 18:03</span>
+          </p>
+
+          <div class="card info">
+            <h3>System prompt d’un agent</h3>
+            <p>Un system prompt de chatbot set le tone : « you are a helpful assistant, be concise and friendly ». Un system prompt d’agent définit son architecture. Il spécifie control flow : comment approcher différents types de tâches, quels outils utiliser dans quelles situations, que faire en cas d’erreur, quels safety guardrails suivre. C’est plus proche d’une job description pour un employé autonome. <span class="source">⏱ 18:12</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Writing at the right altitude</h3>
+            <p>Anthropic a un concept utile : la zone Goldilocks. Trop prescriptif est mauvais : « if user mentions billing and refund and amount over $100, call tool X » est fragile et cassera sur chaque edge case non anticipé. Trop vague est aussi mauvais : « be helpful and use appropriate tools » ne donne rien à l’agent. Le sweet spot : assez spécifique pour guider le comportement autonome, assez flexible pour laisser le modèle appliquer son jugement dans des situations novel. Vous donnez de fortes heuristiques, pas des règles rigides. <span class="source">⏱ 18:39</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card warn">
+              <h3>Structurez</h3>
+              <p>Organisez avec XML tags ou markdown headers : background information, instructions, tool guidance. Sections distinctes aident le modèle à parser quelle info vient de quelle source. <span class="source">⏱ 19:25</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Start minimal, iterate</h3>
+              <p>Ne tentez pas d’anticiper chaque edge case upfront. Run l’agent sur vraies tâches, observez où il casse, ajoutez instructions pour ces failure modes spécifiques. Minimal ne veut pas dire court : des milliers de tokens sont OK si chaque token est pertinent. <span class="source">⏱ 19:35</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Few-shot examples</h3>
+              <p>Au lieu d’articuler chaque rule en mots, montrez ce à quoi ressemble le bon comportement : sélection d’outils, bon reasoning, proper multi-step execution. <span class="source">⏱ 19:56</span></p>
+            </div>
+          </div>
+
+          <div class="card bad">
+            <h3>Tool definitions et MCP</h3>
+            <p>Chaque outil potentiellement appelable a besoin d’un schéma : ce qu’il fait, paramètres, quand l’utiliser. Chaque définition devrait être self-contained, robuste aux erreurs, avec instructions claires. En production, c’est de plus en plus géré via MCP, Model Context Protocol, standard pour connecter agents à outils et data sources externes. Vous hookez un serveur MCP pour GitHub, un pour database, un pour file system. Chaque serveur expose ses tools via interface consistente. Le catch : MCP rend très facile de plugger beaucoup d’outils, et c’est exactement le trap. Avec 4 ou 5 MCP servers, les tool definitions peuvent manger des milliers de tokens avant tout travail. <span class="source">⏱ 20:09</span></p>
+          </div>
+
+          <div class="card purple">
+            <h3>Deux approches pour scaler les outils</h3>
+            <p>1. Tool masking : garder définitions stables dans le préfixe caché, marquer certains outils unavailable pour la phase courante. 2. RAG-based tool selection : semantic retrieval pour pré-sélectionner seulement les tools pertinents. Elles ne sont pas mutuellement exclusives. Masking marche bien quand le jeu est modéré ; RAG selection quand vous avez vraiment beaucoup d’outils. <span class="source">⏱ 21:00</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Un system prompt d’agent devrait être...", o: ["Assez spécifique pour guider, assez flexible pour laisser le jugement", "Toujours le plus court possible", "Toujours une liste de règles rigides"], a: 0, e: "Writing at the right altitude : strong heuristics, not rigid rules." },
+            { q: "Quel est le piège MCP ?", o: ["Il rend trop facile de brancher beaucoup d’outils, consommant des milliers de tokens avant travail", "Il interdit les tools", "Il remplace le system prompt"], a: 0, e: "Curate minimal viable set, ou utilisez masking / RAG selection." }
+          ], "best-practices")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('best-practices')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('best-practices')">KV cache →</button>
+          </div>
+        `
+      },
+      {
+        id: "kv-cache", title: "7. KV cache", express: true,
+        content: `
+          <h1>KV cache : pourquoi l’ordre du contexte coûte cher</h1>
+          <p class="lead">
+            Beaucoup de gens construisant des agents ne connaissent même pas le KV cache. Pourtant, il change la façon
+            dont vous devez organiser le contexte. <span class="source">⏱ 21:13</span>
+          </p>
+
+          <div class="card info">
+            <h3>Mécanisme</h3>
+            <p>Quand vous envoyez des tokens à un LLM, le modèle compute des key-value representations pour chaque token. C’est computationnellement expensive, donc les inference providers cachent ces representations. Si le début de votre contexte, le préfixe, reste le même entre API calls, le provider peut réutiliser le cache et seulement processer les nouveaux tokens à la fin, ce qui est beaucoup plus rapide et bon marché. Mais si vous rearrangez ou changez la partie early de votre contexte entre calls, vous invalidez le cache et le provider doit recomputer tout from scratch. <span class="source">⏱ 21:18</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>Exemple de prix</h3>
+            <p>Avec Claude Sonnet, cached input tokens coûtent 30 cents par million, tandis qu’uncached tokens coûtent 3 dollars par million : différence x10. Pour un agent faisant 30 ou 40 API calls par tâche, ça s’additionne très vite. <span class="source">⏱ 21:51</span></p>
+          </div>
+
+          <h2>Simulateur KV cache</h2>
+          <div class="simulator">
+            <div class="budget-row">
+              <label for="kv-stable">Tokens stables dans préfixe</label>
+              <input type="range" id="kv-stable" min="0" max="80000" step="1000" value="20000" oninput="updateKv()">
+              <span class="budget-val" id="kvv-stable">20 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="kv-dynamic">Tokens dynamiques par appel</label>
+              <input type="range" id="kv-dynamic" min="0" max="20000" step="250" value="3000" oninput="updateKv()">
+              <span class="budget-val" id="kvv-dynamic">3 000</span>
+            </div>
+            <div class="budget-row">
+              <label for="kv-calls">Nombre d’API calls</label>
+              <input type="range" id="kv-calls" min="1" max="100" step="1" value="30" oninput="updateKv()">
+              <span class="budget-val" id="kvv-calls">30</span>
+            </div>
+            <pre id="kv-out" class="prompt"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>Recommandation Manus</h3>
+            <p>Tool masking plutôt que tool removal. Gardez toutes les tool definitions stables dans le contexte. Elles siègent near le top dans le préfixe qui gets cached, mais vous marquez certains tools unavailable pour la phase courante. Les définitions sont toujours là pour cache stability, mais l’agent sait ne pas les utiliser. Ils utilisent aussi des naming prefixes consistants pour aider l’agent à raisonner sur les catégories d’outils. <span class="source">⏱ 22:04</span></p>
+          </div>
+
+          <div class="card purple">
+            <h3>Principe large</h3>
+            <p>Contenu stable va en haut du contexte : system prompt, tool definitions, tout ce qui ne change pas entre turns. Contenu dynamique — conversation history, current step, agent state — va en bas. <span class="source">⏱ 22:52</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que se passe-t-il si vous rearrangez le préfixe du contexte entre appels ?", o: ["Vous invalidez le KV cache et forcez la recomputation", "Le modèle devient plus créatif", "Les tokens deviennent gratuits"], a: 0, e: "Préfixe stable = cache reuse ; préfixe changeant = coût et latence." },
+            { q: "Qu’est-ce que le tool masking ?", o: ["Garder les définitions stables mais marquer certains outils unavailable pour la phase", "Supprimer les outils du contexte à chaque step", "Ajouter tous les MCP servers"], a: 0, e: "Manus recommande masking pour préserver le cache." }
+          ], "kv-cache")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('kv-cache')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('kv-cache')">Workflow par phases →</button>
+          </div>
+        `
+      },
+      {
+        id: "workflow", title: "8. Workflow par phases", express: true,
+        content: `
+          <h1>Put it all together : frequent intentional compaction</h1>
+          <p class="lead">
+            Dexy Horthy, CEO de HumanLayer, a présenté une méthodologie à l’AI Engineer Code Summit qui est un exemple
+            très clean de tout cela. Son équipe aurait utilisé cette méthode pour shipper environ 35 000 lignes de code
+            dans un large codebase Rust en une seule session de 7 heures. <span class="source">⏱ 23:30</span>
+          </p>
+
+          <div class="card info">
+            <h3>Core idea</h3>
+            <p>Frequent intentional compaction : structurer proactivement le travail de l’agent en phases, où chaque phase produit un artefact compacté, comme un structured markdown summary, et chaque nouvelle phase démarre avec une fresh context window contenant seulement cet artefact. De cette façon, vous restez délibérément sous 40 à 60% de la context window. <span class="source">⏱ 23:44</span></p>
+          </div>
+
+          <h2>Simulateur de workflow</h2>
+          <div class="simulator">
+            <p class="muted small" id="phase-status"></p>
+            <div id="phase-history" class="phase-log"></div>
+            <div class="toolbar no-print">
+              <button class="btn" id="phase-next" onclick="nextPhaseStep()">Étape suivante →</button>
+              <button class="btn secondary" id="phase-reset" onclick="initPhaseSim()" style="display:none">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Phase 1 : Research</h3>
+              <p>Avant code, l’agent explore codebase, lit fichiers, trace data flows, map architecture. Sous-agents handle raw file searches et code analysis. Résultats grep et file contents restent dans leurs contextes : isolate. Output : research file compact markdown avec file paths, function signatures, existing patterns, gotchas : write. Raw research peut consommer 60-80% contexte, artefact compresse à 15-20% : compress. <span class="source">⏱ 24:05</span></p>
+            </div>
+            <div class="card good">
+              <h3>Phase 2 : Planning</h3>
+              <p>Brand new context window contenant seulement research document et problem definition. L’agent produit detailed implementation plan. C’est aussi le point le plus important pour human review : si erreur logique, vous l’attrapez ici où fixer est easy. <span class="source">⏱ 24:52</span></p>
+            </div>
+            <div class="card good">
+              <h3>Phase 3 : Implementation</h3>
+              <p>Another fresh context window, cette fois contenant seulement le plan. L’agent le suit step by step. Pour tâches complexes nécessitant multiple compaction cycles, un progress.md track ce qui est complété et ce qui reste : write. <span class="source">⏱ 25:16</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Ressemblance avec production</h3>
+            <p>La vidéo note que cette approche est très similaire à ce que la formatrice fait daily chez Twitch, et qu’on verra une version de cela dans la plupart des systèmes production. <span class="source">⏱ 25:33</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que signifie frequent intentional compaction ?", o: ["Structurer le travail en phases avec artefacts compacts et resets de contexte", "Attendre 95% puis paniquer", "Garder tout l’historique verbatim"], a: 0, e: "Chaque phase produit un artefact, nouvelle phase repart propre." },
+            { q: "Pourquoi la phase planning est-elle cruciale ?", o: ["C’est le meilleur point pour human review avant que les erreurs coûtent cher", "Parce qu’elle supprime les outils", "Parce qu’elle remplace les tests"], a: 0, e: "Erreur logique attrapée tôt = fix easy." }
+          ], "workflow")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('workflow')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('workflow')">Plateformes →</button>
+          </div>
+        `
+      },
+      {
+        id: "platforms", title: "9. Plateformes", express: false,
+        content: `
+          <h1>Claude Code, Manus, ChatGPT agent, Google ADK</h1>
+          <p class="lead">Comment les grandes plateformes approchent le context engineering. Les principes sont communs, mais les contraintes diffèrent.</p>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-claude')">Claude Code</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-manus')">Manus</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-chatgpt')">ChatGPT agent</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-adk')">Google ADK</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-pipeline')">Pipeline commun</button>
+            </div>
+
+            <div id="tab-claude" class="tab-panel active">
+              <div class="card info">
+                <h3>Claude Code</h3>
+                <p>CLI coding agent d’Anthropic, un des meilleurs exemples documentés de context engineering en pratique. Hybrid retrieval model : CLAUDE.md files loaded upfront at start of every session for foundational context, puis agent utilise tools comme Glob et Grep pour just-in-time navigation du codebase. Il n’essaie pas de pre-index everything, mais explore on demand. <span class="source">⏱ 25:43</span></p>
+              </div>
+              <ul>
+                <li>Autocompaction déclenchée à 95% context utilization.</li>
+                <li>Préserve architectural decisions dans les five most recently accessed files.</li>
+                <li>Peut spawn subagents pour tâches complexes, donnant à chacun une clean context window.</li>
+                <li>Memory tool pour persister info across sessions.</li>
+                <li>Philosophie : do the simplest thing that works. Ne pas overengineer la context pipeline. Laisser le modèle être smart sur ce dont il a besoin et lui donner les tools pour aller le chercher.</li>
+              </ul>
+            </div>
+
+            <div id="tab-manus" class="tab-panel">
+              <div class="card purple">
+                <h3>Manus</h3>
+                <p>Approche plus infrastructure-heavy qu’Anthropic. Ils ont servi hundreds of thousands of users avec un general-purpose agent, donc efficiency at scale est importante. <span class="source">⏱ 26:32</span></p>
+              </div>
+              <ul>
+                <li>Standout contribution : KV cache aware context ordering.</li>
+                <li>Structurer chaque contexte pour que le préfixe reste stable across turns, maximisant cache reuse.</li>
+                <li>Tool masking plutôt que dynamic removal.</li>
+                <li>Observation compression pipeline traitant chaque tool output avant qu’il entre dans le contexte de l’agent.</li>
+                <li>Persistent to-do list pour state tracking.</li>
+                <li>File system as overflow memory pour evicted context.</li>
+              </ul>
+            </div>
+
+            <div id="tab-chatgpt" class="tab-panel">
+              <div class="card warn">
+                <h3>OpenAI ChatGPT agent</h3>
+                <p>Évolué depuis le produit Operator, architecturalement différent de Claude Code et Manus. Powered par un computer-using agent model, GUI-first approach. Au lieu de text-based tool calls, l’agent interagit avec un visual browser. Screenshots get added to context as visual snapshots, et le modèle raise over ce qu’il voit sur l’écran plus son history de past screenshots and actions. <span class="source">⏱ 27:07</span></p>
+              </div>
+              <ul>
+                <li>Défi différent : visual tokens sont expensive, donc l’agent doit être sélectif sur combien de screenshots garder.</li>
+                <li>OpenAI utilise reinforcement learning pour découvrir optimal tool use strategies. Plutôt que programmer explicitement quand utiliser chaque tool, ils train l’agent across thousands of virtual machines et le laissent apprendre ce qui marche.</li>
+                <li>Deep research et operators share state, enabling fluid transitions between browsing, text analysis, code execution.</li>
+                <li>Contraste avec Claude Code : Claude Code est code-centric avec large context windows et text-based tool calls ; ChatGPT agent est visual et general purpose. Les deux ont besoin de context engineering, mais challenges et solutions diffèrent.</li>
+              </ul>
+            </div>
+
+            <div id="tab-adk" class="tab-panel">
+              <div class="card good">
+                <h3>Google ADK</h3>
+                <p>L’approche la plus principled architecturalement. Ils ont codifié trois design principles pour agent context. <span class="source">⏱ 28:07</span></p>
+              </div>
+              <ol>
+                <li>Separate storage from presentation : durable state de l’agent n’est pas la même chose que ce qui apparaît dans chaque API call.</li>
+                <li>Use explicit transformations : named ordered processors qui transforment le contexte en steps testables et composables, plutôt qu’ad hoc string concatenation.</li>
+                <li>Scope context by default : chaque model call inclut seulement le minimum required information, et rien ne land dans le contexte sauf si explicitement included.</li>
+              </ol>
+              <p class="muted small">C’est une approche plus engineering-discipline de l’assemblage du contexte : le traiter comme un pipeline avec stages clairs plutôt qu’un prompt auquel vous continuez juste à append.</p>
+            </div>
+
+            <div id="tab-pipeline" class="tab-panel">
+              <div class="card info">
+                <h3>Pipeline commun</h3>
+                <p>Quand vous regardez across all these platforms, un pipeline commun émerge. Sur chaque agent turn, le système passe roughly par les mêmes steps. <span class="source">⏱ 28:48</span></p>
+              </div>
+              <ol>
+                <li>Collect all candidate information : user input, conversation history, tool results, retrieved documents, agent state.</li>
+                <li>Select what’s relevant for current step and remaining token budget.</li>
+                <li>Compress : summarize, truncate, restructure selected content to fit in context.</li>
+                <li>Arrange everything for maximum KV cache reuse : stable content first, dynamic content last.</li>
+                <li>Assemble final context and make API call.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('platforms')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('platforms')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "sponsor", title: "⭐ Kimi K2.6", express: false,
+        content: `
+          <h1>Modèles agentic : Kimi K2.6 et coût de long horizon</h1>
+          <p class="lead">Même avec perfect context engineering, vous bénéficiez d’un modèle built for this kind of work. La vidéo cite Kimi K2.6 comme exemple de modèle open-source conçu pour problèmes agentiques longue durée.</p>
+
+          <div class="card purple">
+            <h3>Ce que dit la vidéo</h3>
+            <p>Kimi vient de sortir K2.6, un LLM open-source qui hit state-of-the-art on SWE-bench Pro. Leur team l’a démontré sur une tâche où un agent a run autonomously pendant 13 heures, fait over 1 000 tool calls, modifié 4 000 lignes de code, et nearly tripled throughput sur un codebase déjà optimized. Il a fait tout ça while being significantly more cost-effective, especially for long horizon agentic tasks. <span class="source">⏱ 6:25</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Moins d’étapes, moins de bruit</h3>
+              <p>K2.6 reacherait les mêmes outcomes avec about 35% fewer steps que la version précédente. Fewer unnecessary tool calls means less junk in the context window, which means le model stays sharp for even longer.</p>
+            </div>
+            <div class="card good">
+              <h3>Agent swarm</h3>
+              <p>Ils ont aussi un agent swarm où vous pouvez spin up 300 subagents in parallel. Chacun gets its own clean context window, does focused work, and reports back. C’est l’application directe de Isolate.</p>
+            </div>
+            <div class="card info">
+              <h3>Full stack</h3>
+              <p>Kimi Code est un CLI agent like Claude Code. Ils ont un website builder avec solid front-end design et slide generation. Plus K2.6 est open source si vous voulez le run locally.</p>
+            </div>
+          </div>
+
+          <div class="card info">
+            <h3>Lien avec le cours</h3>
+            <p>Un modèle agentic fort réduit la pression sur le contexte en faisant moins d’appels inutiles, mais ne remplace pas le context engineering. Write, Select, Compress, Isolate restent nécessaires pour fiabilité, coût et debuggabilité.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('sponsor')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('sponsor')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios", title: "🎬 Scénarios", express: false,
+        content: `
+          <h1>Scénarios : diagnostiquer et réparer</h1>
+          <p class="lead">Sélectionnez un scénario pour voir le diagnostic, le failure mode probable et les stratégies à appliquer.</p>
+
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('step_20_sloppy')">Sloppy à l’étape 20</button>
+              <button class="tab-btn" onclick="chooseScenario('lost_instructions')">Instructions enfouies</button>
+              <button class="tab-btn" onclick="chooseScenario('forty_six_tools')">46 outils</button>
+              <button class="tab-btn" onclick="chooseScenario('hallucination_loop')">Hallucination en boucle</button>
+              <button class="tab-btn" onclick="chooseScenario('contradictory_docs')">Docs contradictoires</button>
+              <button class="tab-btn" onclick="chooseScenario('local_ollama_rag')">RAG local Ollama</button>
+              <button class="tab-btn" onclick="chooseScenario('sean_portfolio')">Portfolio Sean Chen</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>Leçon transversale</h3>
+            <p>Presque tous les scénarios reviennent à la même question : qu’est-ce que le modèle voit maintenant, est-ce que c’est utile, et peut-on le rendre plus compact, plus pertinent, ou plus isolé ?</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "🃏 Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. 50 cartes couvrant tout le transcript, avec ancres temporelles.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button>
+          </div>
+        `
+      },
+      {
+        id: "antipatterns", title: "🚫 Anti-patterns", express: true,
+        content: `
+          <h1>Anti-patterns de context engineering</h1>
+          <p class="lead">Les erreurs les plus courantes que le cours met en évidence, regroupées pour ne plus jamais les commettre.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Blâmer le modèle trop vite</h3>
+              <p>Quand un agent devient slopply à l’étape 15-20, la première hypothèse est souvent le modèle. C’est plus souvent ce que le modèle voit.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Remplir la fenêtre parce qu’elle est grande</h3>
+              <p>Une fenêtre 200k n’est pas un objectif. La dégradation commence souvent bien avant, en gradient.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Charger tous les outils MCP</h3>
+              <p>Trop de tool definitions confond le modèle même si la fenêtre a la place. Utilisez select, masking, RAG over tools.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. Garder tous les tool results</h3>
+              <p>Un résultat déjà utilisé il y a 15 steps est souvent du bruit. Compressez, résumez, clear.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. Ne rien écrire hors contexte</h3>
+              <p>Quand la compaction arrive, si l’agent n’a pas de scratchpad, rules file ou memory, l’info est perdue.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Mélanger research et implémentation</h3>
+              <p>La contamination de contexte fait que le modèle raisonne sur du bruit de recherche pendant qu’il devrait écrire du code propre. Isolate.</p>
+            </div>
+            <div class="card bad">
+              <h3>7. Changer le préfixe à chaque appel</h3>
+              <p>Invalidation KV cache : coûts et latence explosent. Stable top, dynamic bottom.</p>
+            </div>
+            <div class="card bad">
+              <h3>8. System prompt trop rigide ou trop vague</h3>
+              <p>Writing at the right altitude : fortes heuristiques, pas règles fragiles, pas vagues généralités.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la première hypothèse souvent fausse quand un agent dérive ?", o: ["Le modèle est le problème", "Le contexte est le problème", "Les tools sont parfaits"], a: 0, e: "C’est plus souvent ce que le modèle voit." },
+            { q: "Pourquoi changer le préfixe du contexte est-il coûteux ?", o: ["Ça invalide le KV cache et force la recomputation", "Ça rend le prompt plus court", "Ça supprime la mémoire"], a: 0, e: "Stable content first, dynamic content last." }
+          ], "antipatterns")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider que vous pouvez diagnostiquer et corriger un agent qui dérive à cause du contexte.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l’examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et checklist de production</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et appliquez la checklist de context engineering à votre prochain agent.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🧠</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Context Engineering : Write, Select, Compress, Isolate, Failure Modes, KV Cache, Multi-Agents</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Checklist de context engineering 16 points</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Mesurer les tokens par catégorie : system, tools, results, RAG, history, memory, state.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Rester sous 40-60% de la fenêtre pour les tâches longues, même si le modèle annonce plus.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Utiliser Write : scratchpad, rules file, memory extraction, progress.md.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Utiliser Select : ne charger que docs/outils pertinents pour l’étape courante.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Utiliser RAG sur tool descriptions ou tool masking si beaucoup d’outils.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Utiliser Compress avant entrée : chunking, reranking, résumé on the fly.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Utiliser Compress pendant travail : résumé hybride, trimming, autocompact en secours.</label>
+            <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Utiliser Compress après action : clear/remplacer anciens tool results déjà utilisés.</label>
+            <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Utiliser Isolate : sous-agents pour recherche, parent reçoit résumé condensé.</label>
+            <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Diagnostiquer poisoning, distraction, confusion, clash avant de blâmer le modèle.</label>
+            <label><input type="checkbox" id="c11" onchange="toggleCheck('c11')"> Valider tool outputs externes avant qu’ils entrent dans le contexte.</label>
+            <label><input type="checkbox" id="c12" onchange="toggleCheck('c12')"> Établir une hiérarchie d’autorité : system prompt > retrieved facts > history, ou selon votre design.</label>
+            <label><input type="checkbox" id="c13" onchange="toggleCheck('c13')"> Structurer avec XML tags / markdown headers pour sourcer chaque section.</label>
+            <label><input type="checkbox" id="c14" onchange="toggleCheck('c14')"> Garder contenu stable en haut pour KV cache : system prompt, tool definitions.</label>
+            <label><input type="checkbox" id="c15" onchange="toggleCheck('c15')"> Mettre contenu dynamique en bas : history, current step, agent state.</label>
+            <label><input type="checkbox" id="c16" onchange="toggleCheck('c16')"> Structurer les longues tâches en phases : research artifact, plan, implementation, progress file.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/16</span></p>
+
+          <h2>Ressources ancrées au transcript et au contexte fourni</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Transcript source</strong> : « Context Engineering » par Marina, senior applied scientist at Twitch working on Gen AI.</li>
+              <li><strong>Sources citées</strong> : Anthropic engineering blog, LangChain, Chroma study, RAG-MCP paper, Drew Breunig failure modes, Manus, OpenAI, Google ADK, HumanLayer / Dexy Horthy.</li>
+              <li><strong>Chiffres clés</strong> : Gartner 40% enterprise apps avec agents d’ici fin 2026 ; Chroma 18 frontier models ; lost in the middle 30+ points ; RAG-MCP 14% → 43% ; Claude Sonnet cached 0.30$/M vs uncached 3$/M ; HumanLayer 35k lignes Rust en 7h ; Kimi K2.6 13h autonomes, 1000+ tool calls, 4000 lignes modifiées, ~35% fewer steps, 300 subagents.</li>
+              <li><strong>Sean Chen / contexte fourni</strong> : builder bilingue, fondateur AutoManus, MIT business analytics, Google/Walmart, chaîne de projets IA réels. GitHub épinglé : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend, yt-supabase-tips-kanban, yt-kimi-k2-claude. Ces repos sont d’excellents terrains pour appliquer write/select/compress/isolate à des agents réels.</li>
+              <li><strong>Ollama / contexte fourni</strong> : mini-cours local LLM, RAG, embeddings, Python, agents. Utile pour tester context engineering localement, sans coût API, avant de passer en production.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l’examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l’accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.updateBudget = updateBudget;
+    window.updateKv = updateKv;
+    window.chooseFailure = chooseFailure;
+    window.resetFailureMatcher = resetFailureMatcher;
+    window.chooseStrategy = chooseStrategy;
+    window.nextPhaseStep = nextPhaseStep;
+    window.initPhaseSim = initPhaseSim;
+    window.chooseScenario = chooseScenario;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

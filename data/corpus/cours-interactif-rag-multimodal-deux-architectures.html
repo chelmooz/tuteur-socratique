@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAG Multimodal — Deux architectures</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="current">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">RAG Multimodal • PDF + images</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Problème"><span class="pill">Pourquoi ?</span><h1>RAG multimodal : deux architectures</h1><p class="muted">Comment rendre les images d’un PDF « cherchables » comme du texte.</p><p>Un RAG classique retrouve des passages textuels. Or un PDF contient aussi des graphiques, schémas, tableaux et images. Il faut donc choisir comment représenter ces éléments avant de les rechercher.</p><div class="diagram"><svg viewBox="0 0 900 180"><g fill="#334876" stroke="#58c9f5" stroke-width="2"><rect x="25" y="65" width="150" height="50" rx="10"/><rect x="215" y="65" width="180" height="50" rx="10"/><rect x="435" y="35" width="180" height="50" rx="10"/><rect x="435" y="100" width="180" height="50" rx="10"/><rect x="655" y="65" width="200" height="50" rx="10"/></g><g fill="#f4f7ff" text-anchor="middle" font-size="14"><text x="100" y="95">PDF</text><text x="305" y="95">Extraction</text><text x="525" y="65">Images</text><text x="525" y="130">Textes</text><text x="755" y="95">LLM + réponse</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M175 90h40M395 90l40-35M395 90l40 35M615 60l40 25M615 125l40-25"/></g></svg></div><p><strong>Les cinq étapes communes :</strong> collecte du PDF → extraction texte/images → mise en mémoire → question et recherche → synthèse par un LLM multimodal.</p><div class="quiz"><h3>Quiz</h3><p>Quelle est la question centrale du RAG multimodal ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Comment représenter et retrouver les images d’un document</button><button class="choice" data-correct="false" onclick="answer(this,false)">Comment supprimer toutes les images du corpus</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Architecture A"><span class="pill">A • Deux bases</span><h2>Empreintes multimodales et bases séparées</h2><p>Les images extraites sont encodées par un modèle multimodal et stockées dans une base vectorielle dédiée. Les textes disposent de leur propre pipeline d’embeddings textuels et de base.</p><div class="grid"><div><h3>Recherche images</h3><p>Image extraite → empreinte multimodale → base image → images pertinentes.</p></div><div><h3>Recherche textes</h3><p>Texte extrait → empreinte textuelle → base texte → passages pertinents.</p></div></div><p>Les deux résultats sont réunis pour la synthèse par le LLM multimodal.</p><div class="quiz"><h3>Quiz</h3><p>Quel est le principal avantage de l’architecture A ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Elle préserve l’information visuelle brute</button><button class="choice" data-correct="false" onclick="answer(this,false)">Elle ne nécessite aucune base vectorielle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Architecture B"><span class="pill">B • Base combinée</span><h2>Résumés d’images et base vectorielle unifiée</h2><p>Un LLM multimodal décrit chaque image en texte. Ces résumés sont vectorisés comme les autres passages et rangés dans une base commune avec les textes du PDF.</p><div class="grid"><div><h3>Images</h3><p>Image extraite → LLM multimodal → résumé textuel → embedding textuel.</p></div><div><h3>Retrieveur multi-vecteurs</h3><p>Une recherche et un espace communs pour textes et descriptions d’images.</p></div></div><p>Lorsque le résumé est retrouvé, l’application peut récupérer l’image originale pour l’afficher au LLM.</p><div class="quiz"><h3>Quiz</h3><p>Quelle est la limite principale de l’architecture B ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Des détails visuels peuvent être perdus dans le résumé</button><button class="choice" data-correct="false" onclick="answer(this,false)">Elle nécessite deux recherches parallèles obligatoires</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Comparer"><span class="pill">Décision</span><h2>Comparer les deux architectures</h2><table class="compare"><tr><th>Critère</th><th>A — Deux bases séparées</th><th>B — Base combinée</th></tr><tr><td>Représentation</td><td>Empreinte visuelle directe</td><td>Résumé textuel produit par une IA</td></tr><tr><td>Bases</td><td>Deux, une par modalité</td><td>Une seule</td></tr><tr><td>Recherche</td><td>Deux recherches parallèles</td><td>Une recherche unifiée</td></tr><tr><td>Force</td><td>Préservation des informations visuelles</td><td>Simplicité et embeddings textuels classiques</td></tr><tr><td>Faiblesse</td><td>Modèle multimodal et double maintenance</td><td>Dépendance à la qualité du résumé</td></tr></table><div class="quiz"><h3>Quiz</h3><p>Quelle architecture choisir si chaque détail graphique est critique ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">A, avec empreintes visuelles directes</button><button class="choice" data-correct="false" onclick="answer(this,false)">B, même si le résumé supprime des détails</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Choisir"><span class="pill">Cas d’usage</span><h2>Choisir avec une règle simple</h2><div class="grid"><div><h3>Choisir A si…</h3><p>Les diagrammes, tableaux, positions spatiales ou détails visuels sont critiques ; vous disposez d’un LLM multimodal et acceptez deux bases.</p></div><div><h3>Choisir B si…</h3><p>La simplicité opérationnelle prime, les images peuvent être décrites fidèlement et un embedding textuel commun facilite la recherche.</p></div></div><p><strong>Analogie :</strong> A = deux catalogues, photos et fiches séparés, consultés ensemble. B = un catalogue unique où un expert rédige une fiche pour chaque tableau.</p><div class="quiz"><h3>Quiz</h3><p>Quel compromis décrit correctement B ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Recherche unifiée plus simple, mais dépendante de la qualité des résumés</button><button class="choice" data-correct="false" onclick="answer(this,false)">Deux bases plus complexes, mais détails visuels toujours bruts</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Checklist"><span class="pill">Implémentation</span><h2>Checklist de conception</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Séparer extraction texte et extraction des images.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Définir si les détails visuels bruts sont indispensables.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Choisir empreintes multimodales ou résumés textuels.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Conserver le lien entre le résultat retrouvé et l’image originale.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Tester la précision sur questions textuelles et visuelles.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Mesurer coût, latence, qualité des résumés et maintenance.</label><button class="btn primary" onclick="finish()">Valider l’architecture</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

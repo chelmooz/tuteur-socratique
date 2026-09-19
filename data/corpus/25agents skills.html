@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Masterclass : Agent Skills | Workflows d'ingénierie pour agents IA</title>
+<style>
+:root{--bg:#0b1120;--panel:#151e31;--panel2:#101827;--hover:#243049;--border:rgba(255,255,255,.12);--text:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--cyan:#22d3ee;--purple:#a78bfa;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--pink:#f472b6;--orange:#fb923c;--radius:14px;--shadow:0 12px 34px rgba(0,0,0,.28);--font:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+[data-theme=light]{--bg:#f8fafc;--panel:#fff;--panel2:#f1f5f9;--hover:#e2e8f0;--border:rgba(15,23,42,.14);--text:#0f172a;--muted:#475569;--shadow:0 12px 34px rgba(15,23,42,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}[hidden]{display:none!important}
+body{margin:0;font-family:var(--font);background:radial-gradient(circle at top right,rgba(96,165,250,.12),transparent 28%),radial-gradient(circle at bottom left,rgba(167,139,250,.08),transparent 24%),var(--bg);color:var(--text);line-height:1.58;transition:.25s}
+button,input,select,textarea{font:inherit}:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.topbar{position:sticky;top:0;z-index:80;backdrop-filter:blur(14px);background:rgba(11,17,32,.82);border-bottom:1px solid var(--border)}[data-theme=light] .topbar{background:rgba(248,250,252,.86)}
+.topbar-inner{width:min(1320px,calc(100% - 2rem));margin:0 auto;padding:.8rem 0;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.brand{font-weight:850;letter-spacing:-.02em;display:flex;gap:.5rem;align-items:center}.brand span{color:var(--accent)}
+.muted{color:var(--muted)}.small{font-size:.88rem}
+.progress-wrap{min-width:200px;flex:1;max-width:380px}.progress{height:9px;border-radius:999px;background:var(--panel2);border:1px solid var(--border);overflow:hidden;margin-top:.35rem}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--accent),var(--cyan));transition:.35s}
+.controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.2s}.icon-btn:hover{background:var(--hover);transform:translateY(-1px)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:calc(100vh - 70px)}
+aside{border-right:1px solid var(--border);background:rgba(21,30,49,.72);padding:1rem;position:sticky;top:70px;height:calc(100vh - 70px);overflow:auto}[data-theme=light] aside{background:rgba(255,255,255,.78)}
+nav button{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:.62rem .8rem;border-radius:10px;cursor:pointer;margin-bottom:.22rem;display:flex;align-items:center;gap:.5rem;transition:.18s;font-size:.88rem}
+nav button:hover{background:var(--hover);color:var(--text)}nav button.active{background:var(--accent);color:#071224;font-weight:700}
+nav button.completed::after{content:"\2713";margin-left:auto;color:var(--green);font-weight:900}nav button.active.completed::after{color:#071224}
+main{padding:1.5rem;width:100%;max-width:1180px;margin:0 auto}.section{display:none}.section.active{display:block;animation:fadeIn .28s ease}
+h1{font-size:clamp(1.6rem,3vw,2.3rem);margin:0 0 .6rem;letter-spacing:-.03em}h2{font-size:1.3rem;margin:1.6rem 0 .7rem}h3{margin:0 0 .5rem}p{margin:0 0 .8rem}ul,ol{margin:0 0 1rem 1.25rem}li{margin-bottom:.3rem}.lead{color:var(--muted);font-size:1.02rem;max-width:880px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin:1rem 0}.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.card.good{border-left:4px solid var(--green)}.card.bad{border-left:4px solid var(--red)}.card.info{border-left:4px solid var(--accent)}.card.warn{border-left:4px solid var(--yellow)}.card.purple{border-left:4px solid var(--purple)}.card.pink{border-left:4px solid var(--pink)}.card.cyan{border-left:4px solid var(--cyan)}
+.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0 .25rem;align-items:center}.btn{appearance:none;border:0;border-radius:10px;padding:.7rem 1rem;font-weight:700;cursor:pointer;background:var(--accent);color:#071224;transition:.18s;display:inline-flex;align-items:center;justify-content:center;gap:.4rem}.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}.btn.secondary{background:var(--panel);color:var(--text);border:1px solid var(--border)}.btn.secondary:hover{background:var(--hover)}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.schema-wrap{background:linear-gradient(180deg,rgba(16,24,39,.96),rgba(21,30,49,.96));border:1px solid var(--border);border-radius:18px;padding:1rem;margin:1rem 0;overflow:auto}[data-theme=light] .schema-wrap{background:linear-gradient(180deg,#fff,#f8fafc)}
+.schema{width:100%;min-width:820px;height:auto;display:block}.schema text{fill:var(--text);font:700 13px var(--font)}.schema .sub{fill:var(--muted);font-weight:500;font-size:12px}
+.node{fill:var(--panel2);stroke:var(--accent);stroke-width:2}.node.green{stroke:var(--green)}.node.red{stroke:var(--red)}.node.yellow{stroke:var(--yellow)}.node.purple{stroke:var(--purple)}.node.cyan{stroke:var(--cyan)}.node.pink{stroke:var(--pink)}
+.dash{stroke:var(--accent);stroke-width:2.5;fill:none;stroke-dasharray:8 8;animation:dashMove 1s linear infinite}.dash.green{stroke:var(--green)}.dash.purple{stroke:var(--purple)}.dash.yellow{stroke:var(--yellow)}.dash.cyan{stroke:var(--cyan)}
+.pulse{animation:pulse 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes dashMove{to{stroke-dashoffset:-16}}@keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.035);opacity:1}}
+.quiz,.simulator,.resources{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin:1rem 0;box-shadow:var(--shadow)}
+.q{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.9rem;margin:.8rem 0}.q.correct{border-color:rgba(34,197,94,.65)}.q.incorrect{border-color:rgba(239,68,68,.65)}
+.q-text{font-weight:750;margin-bottom:.5rem}.q-option{display:block;padding:.5rem .6rem;border-radius:9px;margin:.25rem 0;cursor:pointer;border:1px solid transparent}.q-option:hover{background:var(--hover)}.q-option input{margin-right:.5rem}
+.q-option.correct{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.45);color:var(--green)}.q-option.incorrect{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.45);color:var(--red)}
+.explain{display:none;margin-top:.5rem;color:var(--muted);font-size:.9rem;border-left:3px solid var(--accent);padding-left:.6rem}.result{margin-top:.6rem;font-weight:800;color:var(--green)}
+details{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;margin:.6rem 0}summary{cursor:pointer;font-weight:800}details[open] summary{margin-bottom:.5rem;color:var(--accent)}
+.code{background:#09101f;border:1px dashed rgba(96,165,250,.35);border-radius:12px;padding:.9rem;white-space:pre-wrap;font-family:var(--mono);font-size:.82rem;color:#dbeafe;margin:.6rem 0;overflow:auto;line-height:1.5}[data-theme=light] .code{background:#0f172a;color:#e2e8f0}
+.console{background:#050a14;border:1px solid #1e293b;border-radius:12px;padding:.9rem;font-family:var(--mono);font-size:.82rem;color:#7dd3fc;min-height:220px;max-height:380px;overflow:auto;white-space:pre-wrap;line-height:1.55}
+.console .ok{color:#4ade80}.console .cmd{color:#e2e8f0}.console .warn{color:#fbbf24}.console .dim{color:#64748b}.console .err{color:#f87171}
+.meter{height:16px;border-radius:999px;background:var(--panel2);border:1px solid var(--border);overflow:hidden;margin:.6rem 0;position:relative}.meter-fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .4s ease}
+.mf-bad{background:linear-gradient(90deg,var(--yellow),var(--red))!important}.mf-info{background:linear-gradient(90deg,var(--accent),var(--purple))!important}
+.slider-row{display:grid;grid-template-columns:230px 1fr 80px;gap:.6rem;align-items:center;margin:.5rem 0}
+.slider-row label{margin:0;font-size:.85rem}.slider-row output{font-family:var(--mono);font-weight:800;color:var(--accent);text-align:right}
+input[type=range]{width:100%;padding:0;background:transparent;border:0;accent-color:var(--accent)}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}.tabs button{border:1px solid var(--border);background:var(--panel2);color:var(--muted);border-radius:999px;padding:.5rem .9rem;cursor:pointer;font-weight:800}.tabs button:hover{background:var(--hover);color:var(--text)}.tabs button.active{background:var(--accent);color:#071224;border-color:var(--accent)}
+.phase-box{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:1rem;margin:.8rem 0}
+.command-pill{display:inline-block;padding:.25rem .65rem;border-radius:999px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.35);color:var(--accent);font-family:var(--mono);font-weight:800;font-size:.82rem;margin:.15rem}
+.skill-pill{display:inline-block;padding:.2rem .55rem;border-radius:999px;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:.76rem;margin:.12rem}
+.mini-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem;transition:.18s}.mini-card:hover{background:var(--hover);transform:translateY(-1px)}
+.anti-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem;margin:.8rem 0}.anti-btn{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:.8rem;cursor:pointer;text-align:left;color:var(--text);font-weight:700;transition:.18s;font-size:.88rem}.anti-btn:hover{background:var(--hover);transform:translateY(-1px)}
+.checklist label{display:flex;gap:.6rem;align-items:flex-start;padding:.4rem 0;border-bottom:1px dashed var(--border)}.checklist label:last-child{border-bottom:0}.checklist input{margin-top:.25rem;width:auto}
+.certificate{display:none;border:2px solid var(--accent);border-radius:18px;padding:1.5rem;text-align:center;background:linear-gradient(135deg,var(--panel),rgba(34,211,238,.08));margin:1rem 0}.certificate.show{display:block;animation:fadeIn .35s ease}.badge{font-size:2.8rem;display:block;margin-bottom:.5rem}
+input[type=text],input[type=number],select,textarea{width:100%;padding:.65rem;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text)}
+label{display:block;font-weight:700;margin-bottom:.3rem}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
+.persona-out{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.8rem 0;white-space:pre-wrap;font-family:var(--mono);font-size:.84rem;min-height:120px}
+.skill-toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.8rem 0;align-items:center}
+.skill-toolbar input,.skill-toolbar select{width:auto;min-width:220px}
+.skill-library{display:grid;gap:.7rem;margin-top:.8rem}
+.skill-card{background:var(--panel2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.skill-card summary{cursor:pointer;padding:.9rem 1rem;display:flex;gap:.7rem;align-items:center;justify-content:space-between;font-weight:850}
+.skill-card summary::-webkit-details-marker{display:none}
+.skill-card[open] summary{border-bottom:1px solid var(--border);color:var(--accent)}
+.skill-name{font-family:var(--mono);font-size:.9rem}
+.skill-phase{font-size:.75rem;padding:.18rem .55rem;border-radius:999px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.28);color:var(--accent)}
+.skill-actions{display:flex;gap:.5rem;flex-wrap:wrap;padding:.8rem 1rem 0}
+.skill-md{margin:1rem;max-height:420px;overflow:auto}
+.skill-empty{padding:1rem;color:var(--muted)}
+@media(max-width:950px){.layout{grid-template-columns:1fr}aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border);display:none}aside.mobile-open{display:block}main{padding:1rem}.progress-wrap{display:none}.slider-row{grid-template-columns:1fr;gap:.2rem}.slider-row output{text-align:left}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{.topbar,aside,.toolbar,.no-print{display:none!important}.layout{display:block}main{max-width:100%;padding:0}body{background:white;color:black}.card,.quiz,.simulator,.schema-wrap,details{box-shadow:none;break-inside:avoid}.section{display:block!important;page-break-after:always}.console{display:none}}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🛠️ <span>Agent Skills</span> Masterclass</div>
+      <div class="muted small">Spec • Plan • Build • Test • Review • Ship | Workflows d'ingénierie pour agents IA</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="why">1. Pourquoi Agent Skills</button>
+      <button data-target="lifecycle">2. Cycle de vie & slash commands</button>
+      <button data-target="anatomy">3. Anatomie d'un skill</button>
+      <button data-target="catalog">4. Catalogue des 25 skills</button>
+      <button data-target="skills25">📚 25 SKILL.md</button>
+      <button data-target="personas">5. Personas & orchestration</button>
+      <button data-target="adoption">6. Adoption & installation</button>
+      <button data-target="build">🛠️ Cas pratique : construire</button>
+      <button data-target="scenarios">🎬 Scénarios</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="antipatterns">🚫 Anti-patterns</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat & ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>Agent Skills : encoder les réflexes d'un ingénieur senior dans vos agents IA</h1>
+      <p class="lead">
+        Le dépôt <strong>addyosmani/agent-skills</strong> fournit des <em>production-grade engineering skills</em> pour agents de codage IA.
+        L'idée : les agents par défaut prennent souvent le chemin le plus court — ils sautent les specs, les tests, la sécurité, la revue,
+        le déploiement progressif. Ce pack encode les workflows, quality gates et bonnes pratiques que les ingénieurs seniors utilisent,
+        via <strong>9 slash commands</strong>, <strong>25 skills</strong>, des personas spécialisés et des références partageables.
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 1040 260" role="img" aria-label="Cycle de vie Agent Skills">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          <rect x="20" y="40" width="140" height="70" class="node cyan"/><text x="90" y="68" text-anchor="middle">DEFINE</text><text x="90" y="88" text-anchor="middle" class="sub">Idea → Spec</text>
+          <path class="dash cyan" d="M160 75 L200 75" marker-end="url(#arr)"/>
+          <rect x="200" y="40" width="140" height="70" class="node purple"/><text x="270" y="68" text-anchor="middle">PLAN</text><text x="270" y="88" text-anchor="middle" class="sub">Spec → Tasks</text>
+          <path class="dash purple" d="M340 75 L380 75" marker-end="url(#arr)"/>
+          <rect x="380" y="40" width="140" height="70" class="node"/><text x="450" y="68" text-anchor="middle">BUILD</text><text x="450" y="88" text-anchor="middle" class="sub">Code incrémental</text>
+          <path class="dash" d="M520 75 L560 75" marker-end="url(#arr)"/>
+          <rect x="560" y="40" width="140" height="70" class="node green"/><text x="630" y="68" text-anchor="middle">VERIFY</text><text x="630" y="88" text-anchor="middle" class="sub">Tests & preuves</text>
+          <path class="dash green" d="M700 75 L740 75" marker-end="url(#arr)"/>
+          <rect x="740" y="40" width="140" height="70" class="node yellow"/><text x="810" y="68" text-anchor="middle">REVIEW</text><text x="810" y="88" text-anchor="middle" class="sub">Qualité & sécurité</text>
+          <path class="dash yellow" d="M880 75 L920 75" marker-end="url(#arr)"/>
+          <rect x="920" y="40" width="100" height="70" class="node pink"/><text x="970" y="68" text-anchor="middle">SHIP</text><text x="970" y="88" text-anchor="middle" class="sub">Go live</text>
+
+          <text x="90" y="150" text-anchor="middle" class="sub">/spec</text>
+          <text x="270" y="150" text-anchor="middle" class="sub">/plan</text>
+          <text x="450" y="150" text-anchor="middle" class="sub">/build</text>
+          <text x="630" y="150" text-anchor="middle" class="sub">/test</text>
+          <text x="810" y="150" text-anchor="middle" class="sub">/review</text>
+          <text x="970" y="150" text-anchor="middle" class="sub">/ship</text>
+
+          <rect x="120" y="185" width="800" height="48" rx="24" fill="none" stroke="var(--border)" stroke-dasharray="6 6"/>
+          <text x="520" y="214" text-anchor="middle" class="sub">+ /constraints • /webperf • /code-simplify • 25 skills • 4 personas • references/checklists</text>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Objectif</h3><p>Comprendre comment transformer un agent de codage IA en exécutant discipliné : spec avant code, petits pas, tests comme preuve, revue avant merge, ship plus sûr.</p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Processus, pas prose ; anti-rationalisation ; vérification non négociable ; progressive disclosure ; skills activés automatiquement selon la tâche.</p></div>
+        <div class="card good"><h3>Cas pratique</h3><p>Construire un workflow complet sur une feature réelle, avec /build guidé ou /build auto, puis générer un SKILL.md personnalisé.</p></div>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('why')">Aller au cours</button>
+        <button class="btn secondary" onclick="showSection('skills25')">Voir les 25 SKILL.md</button>
+        <button class="btn secondary" onclick="showSection('build')">Voir le cas pratique</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour adapter ton parcours.</p>
+      <div class="quiz">
+        <div class="q"><p class="q-text">1. Ton niveau ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre les agents IA et les skills.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="dev"> Développeur : j'utilise Claude Code / Cursor / Copilot.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="lead"> Lead / Staff : je veux standardiser une équipe.</label>
+        </div>
+        <div class="q"><p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre la méthode Agent Skills.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="installer"> Installer et adopter le pack dans un projet.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="creer"> Créer mes propres skills et workflows.</label>
+        </div>
+        <div class="q"><p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15 min.</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 45-60 min (cas pratique complet).</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="why" class="section">
+      <h1>1. Pourquoi Agent Skills ?</h1>
+      <p class="lead">
+        Les agents IA de codage ont un défaut structural : ils cherchent le chemin le plus court. Résultat : ils sautent les specs,
+        les tests, la sécurité, la revue et les garde-fous de déploiement. <strong>Agent Skills</strong> leur donne des workflows structurés
+        qui imposent la même discipline qu'un ingénieur senior en production.
+      </p>
+
+      <div class="grid">
+        <div class="card bad"><h3>Problème</h3><p>« I'll add tests later » / « The code seems right » / « Let's ship quickly » : ces rationalisations produisent du prototype, pas de la production.</p></div>
+        <div class="card good"><h3>Réponse</h3><p>Chaque skill est un processus avec étapes, checkpoints, critères de sortie, tableaux d'anti-rationalisation et exigences de preuve.</p></div>
+        <div class="card info"><h3>Philosophie</h3><p>Process, not prose. Les skills ne sont pas des docs à lire : ce sont des workflows que l'agent suit.</p></div>
+        <div class="card purple"><h3>Vérification</h3><p>« Seems right » n'est jamais suffisant. Chaque skill se termine par des preuves : tests passants, build output, runtime data.</p></div>
+      </div>
+
+      <h2>Simulateur : anti-rationalisation</h2>
+      <p class="muted small">Clique sur une excuse typique d'agent pour voir la contre-argumentation encodée dans les skills.</p>
+      <div class="simulator">
+        <div class="anti-grid">
+          <button class="anti-btn" onclick="chooseExcuse('tests')">« J'ajouterai les tests plus tard. »</button>
+          <button class="anti-btn" onclick="chooseExcuse('spec')">« Pas besoin de spec, je comprends. »</button>
+          <button class="anti-btn" onclick="chooseExcuse('big')">« Je fais tout d'un coup, c'est plus rapide. »</button>
+          <button class="anti-btn" onclick="chooseExcuse('security')">« La sécurité, on verra après. »</button>
+          <button class="anti-btn" onclick="chooseExcuse('perf')">« Les perfs, ce n'est pas mon domaine. »</button>
+          <button class="anti-btn" onclick="chooseExcuse('docs')">« Le code est auto-documenté. »</button>
+        </div>
+        <pre id="excuse-out" class="code" style="display:none"></pre>
+      </div>
+
+      <div class="quiz" data-module="why">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2"><p class="q-text">1. Quelle est l'idée centrale du pack ?</p>
+          <label class="q-option"><input type="radio" name="why-q0" value="0"> Remplacer les développeurs</label>
+          <label class="q-option"><input type="radio" name="why-q0" value="1"> Donner des prompts plus longs</label>
+          <label class="q-option"><input type="radio" name="why-q0" value="2"> Encoder les workflows et quality gates des ingénieurs seniors</label>
+          <div class="explain">Les skills rendent les agents cohérents sur tout le cycle DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP.</div>
+        </div>
+        <div class="q" data-answer="0"><p class="q-text">2. « Verification is non-negotiable » signifie…</p>
+          <label class="q-option"><input type="radio" name="why-q1" value="0"> Chaque skill exige des preuves concrètes avant de conclure</label>
+          <label class="q-option"><input type="radio" name="why-q1" value="1"> Il faut toujours demander à un humain</label>
+          <label class="q-option"><input type="radio" name="why-q1" value="2"> Les tests sont optionnels si le code paraît bon</label>
+          <div class="explain">Tests passants, build output, runtime data : « seems right » ne suffit jamais.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('why')">← Précédent</button><button class="btn" onclick="nextFrom('why')">Cycle de vie →</button></div>
+    </section>
+
+    <section id="lifecycle" class="section">
+      <h1>2. Cycle de vie & slash commands</h1>
+      <p class="lead">
+        Le pack expose <strong>9 slash commands</strong> qui mappent au cycle de vie de développement. Chaque commande active automatiquement
+        les bons skills. L'objectif : rendre explicite ce qui, sinon, serait oublié sous pression de vitesse.
+      </p>
+
+      <div class="grid">
+        <div class="card cyan"><h3>/spec</h3><p><strong>Spec before code.</strong> Écrire un PRD : objectifs, commandes, structure, style, tests, boundaries.</p></div>
+        <div class="card purple"><h3>/plan</h3><p><strong>Small, atomic tasks.</strong> Décomposer la spec en tâches vérifiables avec critères d'acceptation et dépendances.</p></div>
+        <div class="card info"><h3>/build</h3><p><strong>One slice at a time.</strong> Implémentation incrémentale : tranches verticales fines, testées, committées.</p></div>
+        <div class="card good"><h3>/test</h3><p><strong>Tests are proof.</strong> Red-Green-Refactor, test pyramid, DAMP over DRY, Beyoncé Rule.</p></div>
+        <div class="card warn"><h3>/constraints</h3><p><strong>Decide it once, enforce it everywhere.</strong> Écrire CONSTRAINTS.md : seuils qualité, checks, garde-fous.</p></div>
+        <div class="card pink"><h3>/review</h3><p><strong>Improve code health.</strong> Revue five-axis, change sizing ~100 lignes, sévérités Nit/Optional/FYI.</p></div>
+        <div class="card cyan"><h3>/webperf</h3><p><strong>Measure before you optimize.</strong> Audit Core Web Vitals, modes Quick/Deep, metric-honesty rule.</p></div>
+        <div class="card info"><h3>/code-simplify</h3><p><strong>Clarity over cleverness.</strong> Chesterton's Fence, Rule of 500, réduire la complexité sans casser le comportement.</p></div>
+        <div class="card good"><h3>/ship</h3><p><strong>Faster is safer.</strong> Feature flags, staged rollouts, rollback, monitoring, checklists pré-launch.</p></div>
+      </div>
+
+      <h2>Simulateur : explorateur de cycle</h2>
+      <div class="simulator">
+        <div class="tabs no-print">
+          <button class="active" onclick="setPhase('define', this)">DEFINE</button>
+          <button onclick="setPhase('plan', this)">PLAN</button>
+          <button onclick="setPhase('build', this)">BUILD</button>
+          <button onclick="setPhase('verify', this)">VERIFY</button>
+          <button onclick="setPhase('review', this)">REVIEW</button>
+          <button onclick="setPhase('ship', this)">SHIP</button>
+        </div>
+        <div class="phase-box">
+          <h3 id="phase-title">DEFINE</h3>
+          <p id="phase-desc"></p>
+          <p><strong>Commands :</strong> <span id="phase-commands"></span></p>
+          <p><strong>Skills clés :</strong> <span id="phase-skills"></span></p>
+          <p class="muted small" id="phase-principle"></p>
+        </div>
+      </div>
+
+      <h2>Simulateur : taille de changement</h2>
+      <p class="muted small">Le pack recommande un change sizing autour de ~100 lignes. Règle : plus c'est gros, plus la revue et le rollback deviennent risqués.</p>
+      <div class="simulator">
+        <div class="slider-row"><label for="size-lines">Lignes modifiées (diff)</label><input id="size-lines" type="range" min="10" max="1000" value="80" oninput="updateSizing()"><output id="size-out">80</output></div>
+        <div class="meter"><div class="meter-fill" id="size-fill"></div></div>
+        <p class="muted small" id="size-msg"></p>
+      </div>
+
+      <div class="card warn"><h3>/build auto</h3><p>Si la spec existe, <code>/build auto</code> génère le plan et implémente toutes les tâches en une passe approuvée. Il supprime l'intervention humaine <em>entre</em> les tâches, mais pas la vérification : chaque tâche reste test-driven, committée individuellement, et le processus pause sur échec ou étape risquée.</p></div>
+
+      <div class="quiz" data-module="lifecycle">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. Quel principe porte /spec ?</p>
+          <label class="q-option"><input type="radio" name="lc-q0" value="0"> Code before spec</label>
+          <label class="q-option"><input type="radio" name="lc-q0" value="1"> Spec before code</label>
+          <label class="q-option"><input type="radio" name="lc-q0" value="2"> Ship before test</label>
+          <div class="explain">La spec définit objectifs, structure, style, tests et boundaries avant implémentation.</div>
+        </div>
+        <div class="q" data-answer="2"><p class="q-text">2. /build auto fait quoi exactement ?</p>
+          <label class="q-option"><input type="radio" name="lc-q1" value="0"> Supprime les tests</label>
+          <label class="q-option"><input type="radio" name="lc-q1" value="1"> Demande validation humaine à chaque tâche</label>
+          <label class="q-option"><input type="radio" name="lc-q1" value="2"> Approuve le plan une fois, puis exécute de façon autonome mais test-driven, avec pauses sur risque/échec</label>
+          <div class="explain">Il retire le stepping humain entre tâches, pas la vérification.</div>
+        </div>
+        <button class="btn" onclick="

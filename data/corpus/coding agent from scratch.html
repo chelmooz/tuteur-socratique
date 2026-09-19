@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Coding Agent from Scratch | Harness, Tools, Skills, Sandbox, Compaction, Subagents</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+<div class="topbar-inner">
+<div><div class="brand">🛠️ <span>Coding Agent</span> from Scratch</div>
+<div class="muted small">Harness • Tools • Skills • Prefix Cache • Sandbox • Compaction • Subagents</div></div>
+<div class="progress-wrap">
+<div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+<div class="progress"><div class="bar" id="progressBar"></div></div></div>
+<div class="controls no-print">
+<button class="icon-btn" onclick="toggleSources()" title="Ancres transcript">⏱</button>
+<button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+<button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+</div></div></header>
+<div class="layout">
+<aside id="sidebar"><nav id="nav" aria-label="Navigation du cours"></nav></aside>
+<main id="content"></main>
+</div>
+<script>
+var KEY="coding-agent-harness-v3";
+var STATE={theme:"dark",visited:{},quizScores:{},diagnostic:null,finalScore:0,finalTotal:10,finalPassed:false,sourcesHidden:false,checklist:{}};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}}
+function loadState(){try{var r=localStorage.getItem(KEY);if(!r)return;var d=JSON.parse(r);STATE.theme=d.theme||"dark";STATE.visited=d.visited||{};STATE.quizScores=d.quizScores||{};STATE.diagnostic=d.diagnostic||null;STATE.finalScore=d.finalScore||0;STATE.finalTotal=d.finalTotal||10;STATE.finalPassed=!!d.finalPassed;STATE.sourcesHidden=!!d.sourcesHidden;STATE.checklist=d.checklist||{}}catch(e){}}
+
+function quizHTML(items,moduleId,title){
+  var h='<div class="quiz" data-module="'+moduleId+'"><h3>'+(title||"Quiz express")+'</h3>';
+  for(var i=0;i<items.length;i++){var it=items[i];
+    h+='<div class="q" data-answer="'+it.a+'"><p class="q-text">'+(i+1)+'. '+it.q+'</p>';
+    for(var j=0;j<it.o.length;j++){h+='<label class="q-option"><input type="radio" name="'+moduleId+'-q'+i+'" value="'+j+'">'+it.o[j]+'</label>';}
+    h+='<div class="explain">'+(it.e||"")+'</div></div>';}
+  h+='<button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button><div class="result" aria-live="polite"></div></div>';
+  return h;
+}
+function checkQuiz(btn){var box=btn.closest(".quiz");var moduleId=box.getAttribute("data-module");var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+var result=box.querySelector(".result");if(result)result.textContent="Résultat : "+correct+"/"+qs.length;
+STATE.quizScores[moduleId]={correct:correct,total:qs.length};saveState();updateScore();}
+
+var LOOP_STEPS=[
+{who:"USER",cls:"user-step",text:"« Explique ce qui se passe dans llm.py, agent.py et tools.py »"},
+{who:"LLM → tool_call read_file(llm.py)",cls:"",text:"Le modèle génère un JSON structuré : function read_file, argument path=llm.py."},
+{who:"HARNESS → subprocess",cls:"tool-step",text:"Le harness parse le JSON et exécute la fonction Python read_file. Le LLM n'exécute rien."},
+{who:"TOOL RESULT → messages",cls:"tool-step",text:"Le résultat est ajouté à messages avec role=tool (pas assistant)."},
+{who:"LLM → tool_call read_file(agent.py)",cls:"",text:"Ayant lu llm.py, le modèle décide de lire agent.py pour compléter sa réponse."},
+{who:"LLM → tool_call read_file(tools.py)",cls:"",text:"Troisième lecture : tools.py, pour comprendre l'architecture complète."},
+{who:"LLM → réponse finale",cls:"done-step",text:"« tools.py contient les outils, llm.py est un single-turn caller, agent.py est un agent multi-turn. » Aucun tool_call → la boucle s'arrête."}
+];
+var loopIndex=0;
+function resetLoop(){loopIndex=0;var log=$("#loop-log");if(log)log.innerHTML="";
+var st=$("#loop-status");if(st)st.textContent="Cliquez sur Étape suivante pour dérouler la boucle agentique.";
+var btn=$("#loop-next");if(btn){btn.disabled=false;btn.textContent="Étape suivante →";}}
+function nextLoopStep(){var log=$("#loop-log");if(!log||loopIndex>=LOOP_STEPS.length)return;
+var s=LOOP_STEPS[loopIndex];var div=document.createElement("div");div.className="loop-step "+s.cls;
+var who=document.createElement("span");who.className="who";who.textContent=s.who;
+var txt=document.createElement("span");txt.textContent=s.text;
+div.appendChild(who);div.appendChild(txt);log.appendChild(div);
+requestAnimationFrame(function(){div.classList.add("visible")});
+loopIndex++;var st=$("#loop-status");
+if(st)st.textContent="Étape "+loopIndex+"/"+LOOP_STEPS.length+" — messages[] grandit à chaque tour.";
+if(loopIndex>=LOOP_STEPS.length){var btn=$("#loop-next");if(btn)btn.disabled=true;
+if(st)st.textContent="✅ Boucle terminée : réponse sans tool_call → while True s'arrête.";}}
+
+function checkPermission(){var cmd=$("#perm-input").value.trim().toLowerCase();var out=$("#perm-result");if(!out)return;
+var allowList=["ls","pwd","echo","cat","grep","head","tail","wc","git status","git log","git branch"];
+var denyList=["rm","sudo","chmod","chown","curl","wget","dd","mkfs","shutdown","reboot"];
+if(!cmd){out.innerHTML="<div class='perm-result perm-denied'>Entrez une commande.</div>";return}
+var inAllow=false,inDeny=false,i;
+for(i=0;i<allowList.length;i++){if(cmd.indexOf(allowList[i])===0){inAllow=true;break}}
+for(i=0;i<denyList.length;i++){if(cmd.indexOf(denyList[i])===0){inDeny=true;break}}
+if(inDeny){out.innerHTML="<div class='perm-result perm-denied'>🚫 BLOQUÉ : « "+cmd+" » — le sandbox refuse même si l'utilisateur approuve (operation not permitted).</div>"}
+else if(inAllow){out.innerHTML="<div class='perm-result perm-allowed'>✅ AUTORISÉ : « "+cmd+" » — commande read-only de l'allow list, exécution immédiate.</div>"}
+else{out.innerHTML="<div class='perm-result perm-ask'>⚠️ PERMISSION REQUISE : « "+cmd+" » — commande non listée, le harness demande confirmation.</div>"}}
+function resetPerm(){var i=$("#perm-input");if(i)i.value="";var o=$("#perm-result");if(o)o.innerHTML="";}
+
+var COMPACT_STEPS=[
+{pct:20,label:"20% — début de session, prefix cache intact."},
+{pct:45,label:"45% — les tool calls s'accumulent, prefix toujours intact."},
+{pct:70,label:"70% — le contexte se remplit, anciens outputs toujours présents."},
+{pct:85,label:"85% — seuil atteint : déclenchement de la compaction."},
+{pct:35,label:"35% — compacté. Handoff note au début du system prompt → prefix préservé."}
+];
+var compactIndex=0;
+function resetCompact(){compactIndex=0;var f=$("#compact-fill");var l=$("#compact-label");var s=$("#compact-status");
+if(f){f.style.width="0%";f.style.background="var(--green)"}
+if(l)l.textContent="0%";
+if(s)s.textContent="Cliquez sur Simuler pour voir la compaction 85% → 35%.";}
+function nextCompact(){if(compactIndex>=COMPACT_STEPS.length)return;
+var s=COMPACT_STEPS[compactIndex];var f=$("#compact-fill");var l=$("#compact-label");var st=$("#compact-status");
+if(f){f.style.width=s.pct+"%";f.style.background=(s.pct>=85?"var(--red)":(s.pct>=70?"var(--yellow)":"var(--green)"))}
+if(l)l.textContent=s.pct+"%";
+if(st)st.textContent=s.label;
+compactIndex++;
+if(compactIndex>=COMPACT_STEPS.length){var b=$("#compact-next");if(b)b.disabled=true;}}
+
+function chooseScenario(key){var texts={
+basic_chat:"Cas : juste un chat simple.\n→ Étape 1 : llm.py, fichier .env (API key + base URL OpenRouter), DeepSeek V4 Flash, deux messages (system + user), extraction de la réponse + usage tokens.",
+bash_tool:"Cas : l'agent doit inspecter le filesystem.\n→ Bash tool : schema JSON {type:function, name:bash, description}. Le LLM génère {function, arguments} ; le harness exécute via subprocess.run.",
+loop_needed:"Cas : l'agent lit un fichier mais ne raisonne pas dessus.\n→ Problème : le résultat n'est pas renvoyé au LLM.\n→ Solution : while True + append du résultat avec role=tool dans messages[].",
+cache_broken:"Cas : les coûts explosent à chaque appel.\n→ Cause : modification du début du prompt → prefix cache cassé → full price.\n→ Solution : ne jamais toucher au prefix ; late injection en bas ; compaction au début du system prompt.",
+context_overflow:"Cas : l'agent hallucine après 20 tool calls.\n→ Cause : tool outputs qui inondent le contexte.\n→ Solution : compaction 85%→35%, cap 10 000 chars + fichier temp, trim des outputs des messages passés.",
+dangerous_cmd:"Cas : l'agent a supprimé un fichier hors du projet.\n→ Cause : allow list seule, pas de sandbox (shutil.rmtree passe en Python).\n→ Solution : sandbox type Codex : deny by default, pas de réseau, write seulement dans le root du projet.",
+long_task:"Cas : l'agent perd le fil sur une tâche longue.\n→ Solution : todos.py (in_progress / completed / pending), réécrits à chaque appel, réinjectés via late injection ; extension plan.md + planner agent.",
+subagent_needed:"Cas : explorer un repo sans polluer le contexte principal.\n→ Solution : task tool → fresh agent isolé, tools retenus (pas task/write_todos/string_replace/write), profondeur 1, seule la réponse finale remonte.",
+skills_needed:"Cas : l'agent rate le frontend de qualité.\n→ Solution : SKILL.md avec frontmatter YAML (name, description) collé au system prompt ; body lu via read_skill quand nécessaire."};
+var out=$("#scenario-out");if(out){out.style.display="block";out.textContent=texts[key]||"";}}
+
+var FLASHCARDS=[
+{front:"Point de départ",back:"Un chat minimal : llm.py demande un prompt, appelle un modèle via OpenRouter, renvoie la réponse + usage (prompt tokens, completion tokens).",tip:"1:19"},
+{front:"Bash tool",back:"Schema JSON {type:function, name:bash, description:run a shell command and return its output}. Le modèle voit l'outil et décide de l'invoquer.",tip:"3:14"},
+{front:"subprocess.run",back:"Fonction Python qui exécute la commande choisie par le LLM hors du modèle. Le harness parse le JSON du tool call.",tip:"4:13"},
+{front:"Boucle agentique",back:"while True : call_llm(messages) ; si tool_calls → exécuter + append role=tool ; sinon réponse finale → break.",tip:"12:15"},
+{front:"role=tool",back:"Le résultat d'un tool call est ajouté avec role=tool, pas assistant ni user. C'est ce qui distingue la sortie d'un outil.",tip:"14:03"},
+{front:"Prefix cache",back:"Chaque token ne dépend que des tokens précédents (causal). Ce qui est calculé est réutilisé : cached input pricing moins cher.",tip:"15:08"},
+{front:"Règle d'or du cache",back:"Ne jamais modifier le début du prompt : un seul mot changé casse tout le prefix cache → full price.",tip:"16:28"},
+{front:"Exemple cached tokens",back:"3 624 prompt tokens envoyés, 3 328 cached : seulement ~300 nouveaux tokens payés plein tarif.",tip:"17:59"},
+{front:"Skill",back:"Document markdown dans un dossier spécial. Frontmatter YAML (name, description) au system prompt ; body lu via read_skill.",tip:"18:39"},
+{front:"skills.py",back:"Globe les SKILL.md, yaml.safe_load du frontmatter, retourne {name, description, path} ; skills_prompt joint le tout.",tip:"21:10"},
+{front:"write_file",back:"Outil (path, content) qui crée un fichier neuf via f.write.",tip:"25:28"},
+{front:"string_replace",back:"Outil (path, old, new) : remplace un bloc ; replace-all si plusieurs occurrences. Le LLM déduit quoi éditer.",tip:"25:39"},
+{front:"Late injection",back:"Snippets système (date, git branch/head, rappels) injectés juste avant l'appel LLM, toujours en BAS des messages.",tip:"26:43"},
+{front:"Stale file detection",back:"Dictionnaire global seen + mtime : si un fichier a changé depuis la dernière lecture, system reminder « these files changed on disk since you read them ».",tip:"28:40"},
+{front:"TODOs",back:"todos.py : liste de tâches avec statuts in_progress / completed / pending ; l'agent réécrit la liste complète à chaque appel.",tip:"29:32"},
+{front:"Permissions",back:"allow list de commandes read-only (ls, pwd, echo) ; commandes risquées (rm, sudo, curl) → confirmation utilisateur. Design OpenCode.",tip:"32:09"},
+{front:"Limite des permissions",back:"Ce n'est pas une vraie sécurité : shutil.rmtree en Python supprime quand même. Il faut un sandbox.",tip:"33:13"},
+{front:"Sandbox",back:"Profil macOS/Linux repris de Codex (Apache-2) : deny by default, pas de réseau, write seulement dans le root du projet.",tip:"34:55"},
+{front:"Compaction",back:"À 85% du contexte → réduire à 35%. Un compaction agent écrit une handoff note placée au début du system prompt.",tip:"36:50"},
+{front:"Handoff note",back:"Résumé : ce qui s'est passé, le but de l'utilisateur, les prochaines étapes. Permet à un fresh agent de reprendre sans tout relire.",tip:"38:21"},
+{front:"Tool output capping",back:"Output > 10 000 chars → trim + fichier temp ; l'agent page avec head/tail/sed/grep. Fichier supprimé en fin de turn.",tip:"39:44"},
+{front:"Trim des anciens outputs",back:"Les tool outputs des messages PASSÉS sont supprimés ; le message courant garde les siens. Cache cassé seulement sur le dernier message.",tip:"40:59"},
+{front:"Subagent",back:"task tool → fresh agent avec sa propre fenêtre. Aucun historique partagé ; seule la réponse finale (message.content) remonte.",tip:"42:29"},
+{front:"Tools du subagent",back:"Tous les tools SAUF task, write_todos, string_replace, write. Profondeur 1 : pas de récursion.",tip:"42:57"},
+{front:"Démo navigateur",back:"Eagleite browser + Claude Code : Wordle NYT résolu en 6 appels bash, 3 essais, en lisant data-state du DOM.",tip:"8:42"},
+{front:"Démo Boids",back:"Notre harness minimal (DeepSeek V4 Flash) écrit un index.html, patche le mouvement, ajoute sliders et UI.",tip:"46:40"}
+];
+function renderFlashcard(){var card=$("#flashcard");if(!card)return;var i=STATE.flash.index;var c=FLASHCARDS[i];
+card.classList.remove("flipped");
+card.innerHTML="<div class='flash-inner' onclick='flipFlash()'><div class='flash-face flash-front'><h3>"+c.front+"</h3><p class='muted'>Cliquez pour retourner.</p><div><span class='pill'>Carte "+(i+1)+"/"+FLASHCARDS.length+"</span><span class='pill'>⏱ "+c.tip+"</span></div></div><div class='flash-face flash-back'><p><strong>"+c.back+"</strong></p><p class='muted'>"+(STATE.flash.known[i]?"Déjà marquée connue.":"Marquez connue si maîtrisée.")+"</p></div></div>";
+var kb=$("#flash-known");if(kb)kb.textContent=STATE.flash.known[i]?"✅ Connue":"Marquer connue";}
+function flipFlash(){var c=$("#flashcard");if(c)c.classList.toggle("flipped");}
+function nextFlash(){STATE.flash.index=(STATE.flash.index+1)%FLASHCARDS.length;saveState();renderFlashcard();}
+function prevFlash(){STATE.flash.index=(STATE.flash.index-1+FLASHCARDS.length)%FLASHCARDS.length;saveState();renderFlashcard();}
+function markFlash(){var i=STATE.flash.index;if(STATE.flash.known[i])delete STATE.flash.known[i];else STATE.flash.known[i]=true;saveState();renderFlashcard();}
+
+var DIAG_TEXT={novice:"Commencez par le chat minimal et le bash tool. Comprenez la boucle agentique avant skills, sandbox et subagents.",builder:"Focus sur prefix cache, compaction, permissions et subagents : ce sont les patterns qui séparent un prototype d'un vrai harness.",expert:"Allez directement aux patterns avancés : late injection, capping, sandbox Codex, isolation des subagents. Puis validez par l'examen."};
+function validateDiagnostic(){var level=document.querySelector("input[name='diag-level']:checked");var goal=document.querySelector("input[name='diag-goal']:checked");var time=document.querySelector("input[name='diag-time']:checked");
+if(!level||!goal||!time){alert("Répondez aux trois questions.");return}
+STATE.diagnostic={level:level.value,goal:goal.value,time:time.value};saveState();
+var rec=$("#diag-rec");var next=$("#diag-next");
+rec.style.display="block";rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.builder)+"</p>";
+next.style.display="inline-flex";}
+function restoreDiagnostic(){if(!STATE.diagnostic)return;var rec=$("#diag-rec");var next=$("#diag-next");
+rec.style.display="block";rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>";
+next.style.display="inline-flex";}
+
+function checkFinal(){var box=$("#final-quiz");checkQuiz(box.querySelector(".btn"));
+var score=STATE.quizScores["final"];if(score){STATE.finalScore=score.correct;STATE.finalTotal=score.total;STATE.finalPassed=score.correct>=8;saveState();
+var certBtn=$("#go-cert");if(certBtn)certBtn.style.display=STATE.finalPassed?"inline-flex":"none";}}
+function generateCert(){if(!STATE.finalPassed){alert("Atteignez au moins 8/10 à l'examen final.");return}
+var nameInput=$("#cert-name");var name=nameInput?nameInput.value.trim():"";if(!name)name="Apprenant";
+var block=$("#certificate");block.classList.add("show");
+$("#cert-name-out").textContent=name;
+$("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+$("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal;
+$("#cert-level").textContent=STATE.finalPassed?"Maîtrise validée":"En progression";
+block.scrollIntoView({behavior:"smooth",block:"center"});}
+function toggleCheck(id){var el=document.getElementById(id);if(!el)return;STATE.checklist[id]=el.checked;saveState();updateChecklistProgress();}
+function updateChecklistProgress(){var boxes=$$(".checklist input[type=checkbox]");var done=0;
+for(var i=0;i<boxes.length;i++){if(boxes[i].checked)done++;}
+var el=$("#check-progress");if(el)el.textContent=done+"/"+boxes.length;}
+function exportJSON(){var data={cours:"Coding Agent from Scratch Masterclass",date:new Date().toISOString(),profil:STATE.diagnostic,progression:STATE.visited,quiz:STATE.quizScores,examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.finalPassed},checklist:STATE.checklist};
+var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");
+a.href=URL.createObjectURL(blob);a.download="rapport-coding-agent.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);}
+function resetCourse(){if(!confirm("Réinitialiser toute la progression ?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload();}
+
+/* ================= CONTENU DES MODULES ================= */
+var MODULES=[
+{id:"home",title:"🏠 Accueil",content:
+'<h1>Construire un coding agent from scratch</h1>'+
+'<p class="lead">Aucun framework, aucun raccourci : un harness CLI minimal assemblé commit par commit (étapes 1 → 15), en extrayant les meilleures idées des harness existants (Claude Code, Codex, OpenCode, Pi). Tout ici est du context engineering : prompting, tools, subagents, sandboxes, permissions, token management, compaction, session management, plans & todos, browser access, web search. <span class="source">⏱ 0:00</span></p>'+
+'<div class="schema-wrap"><svg class="schema" viewBox="0 0 960 240" role="img" aria-label="Boucle du harness">'+
+'<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>'+
+'<rect x="20" y="90" width="130" height="70" class="node"/><text x="85" y="118" text-anchor="middle">User</text><text x="85" y="138" text-anchor="middle" class="sub">prompt</text>'+
+'<path class="dash" d="M150 125 L200 125" marker-end="url(#arr)"/>'+
+'<rect x="200" y="90" width="150" height="70" class="node purple pulse"/><text x="275" y="118" text-anchor="middle">LLM</text><text x="275" y="138" text-anchor="middle" class="sub">tool_call JSON</text>'+
+'<path class="dash purple" d="M350 125 L400 125" marker-end="url(#arr)"/>'+
+'<rect x="400" y="90" width="160" height="70" class="node green"/><text x="480" y="118" text-anchor="middle">Harness</text><text x="480" y="138" text-anchor="middle" class="sub">subprocess / tools</text>'+
+'<path class="dash green" d="M560 125 L610 125" marker-end="url(#arr)"/>'+
+'<rect x="610" y="90" width="150" height="70" class="node yellow"/><text x="685" y="118" text-anchor="middle">Résultat</text><text x="685" y="138" text-anchor="middle" class="sub">role=tool</text>'+
+'<path class="dash yellow" d="M760 125 L810 125" marker-end="url(#arr)"/>'+
+'<rect x="810" y="90" width="130" height="70" class="node"/><text x="875" y="118" text-anchor="middle">Retour LLM</text><text x="875" y="138" text-anchor="middle" class="sub">boucle</text>'+
+'</svg></div>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Objectif</h3><p>À la fin : un harness minimal mais feature-rich capable de coder, éditer, explorer, se souvenir et se protéger — construit de zéro.</p></div>'+
+'<div class="card warn"><h3>Méthode</h3><p>Chaque module = un commit : chat → bash tool → boucle → prefix cache → skills → édition → late injection → todos → sandbox → compaction → subagents → démos.</p></div>'+
+'<div class="card good"><h3>Livrable</h3><p>Un agent CLI (neural code) qui lit, écrit, remplace, planifie, délègue — et un certificat validé par examen.</p></div>'+
+'</div>'+
+'<div class="card purple"><h3>Phrase clé</h3><p>« Tools are what gives agents capabilities… prompting instructs the model on how to do things, but tools let it do more outside its network weights. » <span class="source">⏱ 10:21</span></p></div>'+
+'<div class="toolbar no-print"><button class="btn" onclick="showSection(\'diagnostic\')">Commencer par le diagnostic</button><button class="btn secondary" onclick="showSection(\'basics\')">Aller au cours</button></div>'},
+
+{id:"diagnostic",title:"🎯 Diagnostic",content:
+'<h1>Diagnostic initial</h1><p class="lead">Trois questions pour orienter votre parcours dans le harness.</p>'+
+'<div class="quiz"><div class="q"><p class="q-text">1. Votre niveau ?</p>'+
+'<label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre agents et harness.</label>'+
+'<label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : j\'ai déjà codé un agent ou un bot.</label>'+
+'<label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je veux les patterns avancés (cache, sandbox, subagents).</label></div>'+
+'<div class="q"><p class="q-text">2. Votre objectif ?</p>'+
+'<label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre le context engineering.</label>'+
+'<label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire mon propre coding agent.</label>'+
+'<label class="q-option"><input type="radio" name="diag-goal" value="securiser"> Sécuriser un agent existant.</label></div>'+
+'<div class="q"><p class="q-text">3. Temps disponible ?</p>'+
+'<label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15-20 min.</label>'+
+'<label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass 45-60 min.</label></div>'+
+'<button class="btn" onclick="validateDiagnostic()">Valider</button>'+
+'<div class="result" id="diag-rec" style="display:none"></div>'+
+'<div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom(\'diagnostic\')">Continuer →</button></div></div>'},
+
+{id:"basics",title:"1. Chat minimal",content:
+'<h1>Étape 1 — Le chat minimal (llm.py)</h1>'+
+'<p class="lead">Le point de départ : un fichier llm.py qui demande un prompt au clavier, appelle un modèle via OpenRouter, et affiche la réponse. Simple, mais c\'est la fondation de tout le harness. <span class="source">⏱ 1:19</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>.env</h3><p>Un fichier d\'environnement contient l\'API key et la base URL OpenRouter : appeler openai.BaseURL + API key donne accès aux credentials OpenRouter. <span class="source">⏱ 1:43</span></p></div>'+
+'<div class="card good"><h3>Modèle</h3><p>DeepSeek V4 Flash : un des modèles les plus rapides et les moins chers, avec de bons benchmarks. <span class="source">⏱ 2:08</span></p></div>'+
+'<div class="card purple"><h3>Deux messages</h3><p>Un message role=system (system prompt) + un message role=user (input clavier). On extrait la réponse + les usage details (prompt tokens, completion tokens). <span class="source">⏱ 2:23</span></p></div>'+
+'</div>'+
+'<pre class="code"># llm.py (schéma)\nload .env (OPENAI_API_KEY, OPENAI_BASE_URL -&gt; OpenRouter)\ninput = input("prompt: ")\nmessages = [ {role: system, content: SYSTEM}, {role: user, content: input} ]\nresp = client.chat.completions.create(model="deepseek-v4-flash", messages=messages)\nprint(resp.choices[0].message.content)\nprint(resp.usage.prompt_tokens, resp.usage.completion_tokens)</pre>'+
+quizHTML([
+{q:"Que contient le fichier .env ?",o:["L'API key et la base URL OpenRouter","Le system prompt uniquement","Les weights du modèle"],a:0,e:"C'est ce qui permet d'appeler OpenRouter via l'SDK openai."},
+{q:"Quels messages sont passés au modèle à l'étape 1 ?",o:["Un role=system + un role=user","Un seul message user","Un role=tool"],a:0,e:"Le system prompt cadre le modèle ; l'user apporte l'input clavier."}
+],"basics")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'basics\')">← Précédent</button><button class="btn" onclick="nextFrom(\'basics\')">Bash tool →</button></div>'},
+
+{id:"tools",title:"2. Bash tool",content:
+'<h1>Étape 2 — Le bash tool</h1>'+
+'<p class="lead">On donne au modèle un outil : un schema JSON décrit {type: function, name: bash, description: "run a shell command and return its output"}. Le modèle voit l\'outil et décide de l\'invoquer. <span class="source">⏱ 3:14</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Schema</h3><p>Le JSON explique la forme de l\'outil ; la description est passée au modèle qui comprend : « j\'ai un outil bash qui exécute une commande et renvoie sa sortie ». <span class="source">⏱ 3:35</span></p></div>'+
+'<div class="card good"><h3>Exécution</h3><p>subprocess.run exécute la commande (ls, gp, cat…) choisie par le LLM, hors du modèle. <span class="source">⏱ 4:13</span></p></div>'+
+'<div class="card purple"><h3>Tool call</h3><p>Le LLM génère un JSON structuré {function name, arguments} ; le harness le parse et appelle la fonction Python correspondante. <span class="source">⏱ 4:56</span></p></div>'+
+'</div>'+
+'<pre class="code">bash_tool = {\n  "type": "function",\n  "function": {\n    "name": "bash",\n    "description": "run a shell command and return its output",\n    "parameters": { "command": "string" }\n  }\n}\n# tools=[bash_tool] passé à chat.completions.create\n# si resp.tool_calls : subprocess.run(command) -&gt; output</pre>'+
+quizHTML([
+{q:"Qui exécute réellement la commande bash ?",o:["Le harness via subprocess.run","Le LLM lui-même","Le terminal de l'utilisateur"],a:0,e:"Le LLM ne fait que générer le JSON du tool call."},
+{q:"Que génère le LLM pour invoquer un outil ?",o:["Un JSON {function, arguments}","Un script Python complet","Un prompt naturel"],a:0,e:"Le harness parse ce JSON puis exécute la fonction."}
+],"tools")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'tools\')">← Précédent</button><button class="btn" onclick="nextFrom(\'tools\')">Boucle agentique →</button></div>'},
+
+{id:"loop",title:"3. Boucle agentique",content:
+'<h1>Étape 3 — La boucle agentique (agent.py)</h1>'+
+'<p class="lead">Un agent = une boucle autour de l\'appel LLM. while True : call_llm(messages) ; si tool_calls → exécuter + append role=tool ; sinon réponse finale → break. C\'est ici qu\'on parle d\'agent pour la première fois. <span class="source">⏱ 12:15</span></p>'+
+'<div class="simulator"><p class="muted small" id="loop-status"></p><div id="loop-log"></div>'+
+'<div class="toolbar no-print"><button class="btn" id="loop-next" onclick="nextLoopStep()">Étape suivante →</button><button class="btn secondary" onclick="resetLoop()">Réinitialiser</button></div></div>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Démo</h3><p>« Explique llm.py, agent.py, tools.py » → l\'agent lit les trois fichiers l\'un après l\'autre, puis synthétise : tools.py = outils, llm.py = single-turn caller, agent.py = agent multi-turn. <span class="source">⏱ 14:15</span></p></div>'+
+'<div class="card warn"><h3>role=tool</h3><p>Le résultat d\'un tool call est ajouté avec role=tool — ni assistant, ni user. C\'est ce qui permet au modèle de relire ses propres résultats. <span class="source">⏱ 14:03</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Quelle structure définit la boucle agentique ?",o:["while True : call_llm → tool_calls ? exécuter+append : break","Un for sur les fichiers","Un thread par outil"],a:0,e:"La boucle tourne tant que le modèle demande des outils."},
+{q:"Quel role pour le message de résultat d'outil ?",o:["tool","assistant","system"],a:0,e:"role=tool distingue la sortie d'un outil du reste de la conversation."}
+],"loop")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'loop\')">← Précédent</button><button class="btn" onclick="nextFrom(\'loop\')">Prefix cache →</button></div>'},
+
+{id:"prefix",title:"4. Prefix cache",content:
+'<h1>Étape 4 — Designer autour du prefix cache</h1>'+
+'<p class="lead">Chaque token ne dépend que des tokens précédents (dépendance causale). Tout ce qui a déjà été calculé est réutilisable : c\'est le prefix caching, facturé moins cher (cached input pricing). <span class="source">⏱ 15:08</span></p>'+
+'<div class="grid">'+
+'<div class="card bad"><h3>Ne jamais casser le prefix</h3><p>Changer un seul mot au début du prompt casse tout le cache : vous payez l\'input entier d\'un coup. <span class="source">⏱ 16:28</span></p></div>'+
+'<div class="card good"><h3>Exemple chiffré</h3><p>3 624 prompt tokens envoyés, 3 328 cached : seulement ~300 nouveaux tokens (la sortie du tool call) payés plein tarif. <span class="source">⏱ 17:59</span></p></div>'+
+'<div class="card purple"><h3>Stratégie</h3><p>On exploite le cache au maximum : tout ce qui est stable reste au début ; le dynamique va en bas. <span class="source">⏱ 16:47</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Pourquoi ne pas modifier le début du prompt ?",o:["Cela casse le prefix cache → full price","Cela ralentit le GPU","Cela vide la mémoire"],a:0,e:"Le cache ne se réutilise que si le prefix est identique."},
+{q:"Que signifie cached input pricing ?",o:["Les tokens déjà calculés coûtent moins cher","Les prompts courts sont gratuits","Le streaming est facturé"],a:0,e:"C'est visible dans tous les documents de pricing LLM."}
+],"prefix")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'prefix\')">← Précédent</button><button class="btn" onclick="nextFrom(\'prefix\')">Skills →</button></div>'},
+
+{id:"skills",title:"5. Skills",content:
+'<h1>Étape 5 — Skills (SKILL.md)</h1>'+
+'<p class="lead">Une skill = un document markdown dans un dossier spécial (~/.agents/skills/ ou racine du projet). Le frontmatter YAML (name, description) est collé dans le system prompt au boot ; le body n\'est lu via read_skill que quand la skill sert. <span class="source">⏱ 18:39</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Frontmatter YAML</h3><p>Séparé par --- : name, description, licensing. C\'est cette partie qui entre dans le system prompt. <span class="source">⏱ 19:11</span></p></div>'+
+'<div class="card good"><h3>skills.py</h3><p>Globe les SKILL.md, yaml.safe_load du frontmatter, retourne {name, description, path} ; skills_prompt joint le tout en une longue liste. <span class="source">⏱ 21:10</span></p></div>'+
+'<div class="card purple"><h3>read_skill</h3><p>Nouvel outil dans tools.py + schema mis à jour (paramètre name). System prompt : « you have skills available… call read_skill and follow it ». <span class="source">⏱ 23:02</span></p></div>'+
+'</div>'+
+'<pre class="code">---\nname: front-end design\ndescription: create distinctive product-grade front-end interfaces\n---\n# Instructions (body)\n… choisies et lues via read_skill seulement si besoin …</pre>'+
+quizHTML([
+{q:"Où va le frontmatter YAML d'une skill ?",o:["Dans le system prompt au boot","Dans le premier tool call","Dans le .env"],a:0,e:"Le body, lui, n'est lu que via read_skill."},
+{q:"Quand le body d'une skill est-il chargé ?",o:["Quand le modèle appelle read_skill","Toujours au démarrage","Jamais"],a:0,e:"C'est ce qui garde le contexte léger."}
+],"skills")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'skills\')">← Précédent</button><button class="btn" onclick="nextFrom(\'skills\')">Édition de fichiers →</button></div>'},
+
+{id:"edit",title:"6. Édition de fichiers",content:
+'<h1>Étape 6 — write_file & string_replace</h1>'+
+'<p class="lead">Deux outils d\'écriture : write_file (path, content) crée un fichier neuf ; string_replace (path, old, new) remplace un bloc. La magie est dans le LLM : c\'est lui qui déduit quel fichier éditer, où, et par quoi remplacer. <span class="source">⏱ 25:08</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>write_file</h3><p>Prend path (string) + content ; invoque f.write. Démo : hello.txt avec cinq « hello world ». <span class="source">⏱ 25:28</span></p></div>'+
+'<div class="card good"><h3>string_replace</h3><p>Prend path, old string, new string ; content.replace puis réécriture. Démo : remplacer la 3e ligne par « goodbye » (replace-all). <span class="source">⏱ 26:18</span></p></div>'+
+'<div class="card purple"><h3>Le vrai cerveau</h3><p>Le LLM lit le fichier, décide du bloc à remplacer et de son remplacement : c\'est lui l\'éditeur, les outils ne font qu\'exécuter. <span class="source">⏱ 25:52</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Que fait string_replace ?",o:["Remplace un bloc old par new puis réécrit le fichier","Crée un fichier neuf","Supprime le fichier"],a:0,e:"Avec replace-all si plusieurs occurrences."},
+{q:"Qui décide quoi éditer ?",o:["Le LLM, à partir du contexte","L'utilisateur à chaque fois","Le harness"],a:0,e:"Les outils exécutent ; le modèle raisonne."}
+],"edit")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'edit\')">← Précédent</button><button class="btn" onclick="nextFrom(\'edit\')">Late injection →</button></div>'},
+
+{id:"late-injection",title:"7. Late injection",content:
+'<h1>Étape 7 — Late prompt injection (context.py)</h1>'+
+'<p class="lead">Juste avant l\'appel LLM, on injecte des snippets système : date courante, git branch + head commit, git status, rappels. Toujours en BAS de la liste de messages, pour ne pas casser le prefix cache. <span class="source">⏱ 26:43</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>context.py</h3><p>Des fonctions qui retournent de petits snippets : git branch (branche + head commit), reminder (date courante). <span class="source">⏱ 27:15</span></p></div>'+
+'<div class="card warn"><h3>Position</h3><p>La date change à chaque message : si on la mettait en haut, le prefix casserait à chaque tour → jamais de cache. Donc injection en bas. <span class="source">⏱ 27:46</span></p></div>'+
+'<div class="card good"><h3>Stale files</h3><p>Dictionnaire global seen + mtime : à chaque read/write on enregistre le mtime ; au tour suivant, si un fichier a changé → system reminder « these files changed on disk since you read them ». <span class="source">⏱ 28:40</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Où colle-t-on les injections ?",o:["En bas de la liste de messages","En haut du system prompt","Au milieu des tool calls"],a:0,e:"En haut, cela casserait le prefix cache à chaque tour."},
+{q:"À quoi sert le dictionnaire seen + mtime ?",o:["À détecter les fichiers modifiés depuis la dernière lecture","À compter les tokens","À sauvegarder les todos"],a:0,e:"Cela déclenche un system reminder de relecture."}
+],"late-injection")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'late-injection\')">← Précédent</button><button class="btn" onclick="nextFrom(\'late-injection\')">TODOs →</button></div>'},
+
+{id:"todos",title:"8. TODOs & plans",content:
+'<h1>Étape 8 — TODOs & plans</h1>'+
+'<p class="lead">Pour les tâches longues : todos.py garde une liste de tâches avec statuts (in_progress, completed, pending). L\'agent réécrit la liste complète à chaque appel ; les todos existants sont réinjectés via late injection. <span class="source">⏱ 29:32</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>write_todos</h3><p>À chaque appel, l\'agent overwrite la liste précédente avec une nouvelle liste d\'action items + statuts. <span class="source">⏱ 29:55</span></p></div>'+
+'<div class="card good"><h3>Réinjection</h3><p>Les todos courants sont ajoutés au reminder de context.py : le LLM les voit après chaque message. <span class="source">⏱ 30:11</span></p></div>'+
+'<div class="card purple"><h3>Extension</h3><p>Un planner agent peut écrire un plan.md étape par étape ; un nouvel agent lit le plan et travaille dessus. <span class="source">⏱ 31:27</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Comment l'agent voit-il ses todos ?",o:["Via late injection après chaque message","Via un fichier ouvert manuellement","Via le .env"],a:0,e:"La liste est réinjectée dans le reminder."},
+{q:"Que fait write_todos à chaque appel ?",o:["Il overwrite la liste complète avec statuts","Il ajoute une tâche sans toucher aux autres","Il supprime tout"],a:0,e:"L'agent réécrit la liste entière à chaque fois."}
+],"todos")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'todos\')">← Précédent</button><button class="btn" onclick="nextFrom(\'todos\')">Permissions & sandbox →</button></div>'},
+
+{id:"sandbox",title:"9. Permissions & sandbox",content:
+'<h1>Étape 9 — Permissions & sandbox</h1>'+
+'<p class="lead">permissions.py = allow list de commandes read-only (ls, pwd, echo) ; les commandes risquées (rm, sudo, curl) demandent confirmation. Mais ce n\'est pas une vraie sécurité : shutil.rmtree en Python passe quand même. Le sandbox confine l\'agent au workspace. <span class="source">⏱ 32:03</span></p>'+
+'<div class="simulator"><label for="perm-input">Testez une commande</label>'+
+'<input id="perm-input" placeholder="ex : ls -la, rm -rf /tmp/x, curl http://…"/>'+
+'<div class="toolbar no-print"><button class="btn" onclick="checkPermission()">Vérifier</button><button class="btn secondary" onclick="resetPerm()">Effacer</button></div>'+
+'<div id="perm-result"></div></div>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Allow list</h3><p>Commandes read-only exécutées sans permission ; le reste demande approbation utilisateur. Design repris d\'OpenCode. <span class="source">⏱ 32:09</span></p></div>'+
+'<div class="card bad"><h3>Limite</h3><p>Un fichier peut toujours être supprimé via Python (shutil.rmtree) : l\'allow list ne suffit pas. <span class="source">⏱ 33:13</span></p></div>'+
+'<div class="card good"><h3>Sandbox Codex</h3><p>Profil macOS/Linux (Apache-2) : deny by default, pas de réseau, write seulement dans le root du projet. Même un « oui » utilisateur → operation not permitted hors workspace. <span class="source">⏱ 34:55</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Le sandbox bloque-t-il si l'utilisateur approuve ?",o:["Oui : operation not permitted hors workspace","Non, l'approbation suffit toujours","Il demande un mot de passe"],a:0,e:"Le sandbox pose une question différente : l'opération est-elle autorisée ?"},
+{q:"Pourquoi l'allow list n'est-elle pas une vraie sécurité ?",o:["Python peut supprimer des fichiers (shutil.rmtree)","Elle est trop lente","Elle bloque le réseau"],a:0,e:"Il faut un confinement système, pas juste une liste."}
+],"sandbox")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'sandbox\')">← Précédent</button><button class="btn" onclick="nextFrom(\'sandbox\')">Compaction →</button></div>'},
+
+{id:"compaction",title:"10. Compaction & capping",content:
+'<h1>Étape 10 — Compaction & capping</h1>'+
+'<p class="lead">Quand le contexte atteint 85% de la limite, on compacte à 35% : un compaction agent résume la session en handoff note, placée au début du system prompt (prefix cache préservé). <span class="source">⏱ 36:50</span></p>'+
+'<div class="simulator"><div class="meter"><div class="meter-fill" id="compact-fill"></div><span class="meter-label" id="compact-label">0%</span></div>'+
+'<p class="muted small" id="compact-status"></p>'+
+'<div class="toolbar no-print"><button class="btn" id="compact-next" onclick="nextCompact()">Simuler →</button><button class="btn secondary" onclick="resetCompact()">Réinitialiser</button></div></div>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Handoff note</h3><p>« You are compacting the transcript of a coding session… write the handoff note that lets a fresh agent pick the work up without rereading everything. » <span class="source">⏱ 38:21</span></p></div>'+
+'<div class="card warn"><h3>Capping</h3><p>Tool output ≥ 10 000 chars → trim + fichier temp ; l\'agent page avec head/tail/sed/grep. Fichier supprimé en fin de turn. <span class="source">⏱ 39:44</span></p></div>'+
+'<div class="card good"><h3>Trim des anciens outputs</h3><p>Les tool outputs des messages PASSÉS sont supprimés ; le message courant garde les siens. Cache cassé seulement sur le dernier message. <span class="source">⏱ 40:59</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Quels seuils de compaction ?",o:["85% → 35%","50% → 10%","95% → 50%"],a:0,e:"On retire les messages du début, on garde les derniers."},
+{q:"Où place-t-on la handoff note ?",o:["Au début du system prompt","En bas des messages","Dans un fichier .env"],a:0,e:"Ainsi le prefix reste identique entre compactages."}
+],"compaction")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'compaction\')">← Précédent</button><button class="btn" onclick="nextFrom(\'compaction\')">Subagents →</button></div>'},
+
+{id:"subagents",title:"11. Subagents",content:
+'<h1>Étape 11 — Subagents</h1>'+
+'<p class="lead">Un task tool confie une question d\'exploration auto-contenue à un fresh agent avec sa propre fenêtre de contexte. Aucun historique partagé, aucun tool call du subagent remonté : seulement sa réponse finale. <span class="source">⏱ 42:29</span></p>'+
+'<div class="grid">'+
+'<div class="card info"><h3>Tools retenus</h3><p>Le subagent reçoit tous les tools SAUF task, write_todos, string_replace, write : il explore, n\'écrit pas. <span class="source">⏱ 42:57</span></p></div>'+
+'<div class="card warn"><h3>Profondeur 1</h3><p>Pas de subagent de subagent : pas de récursion, un seul niveau. <span class="source">⏱ 43:15</span></p></div>'+
+'<div class="card good"><h3>Isolation</h3><p>Aucun contexte utilisateur partagé ; transactionnel : tâche → réponse finale (message.content). <span class="source">⏱ 43:54</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Que remonte le subagent au main agent ?",o:["Seulement sa réponse finale","Tous ses tool calls","Tout son historique"],a:0,e:"L'isolation garde le contexte principal propre."},
+{q:"Quels tools sont retenus au subagent ?",o:["task, write_todos, string_replace, write","bash et read_file uniquement","Aucun"],a:0,e:"Il explore mais ne modifie rien, et ne récurse pas."}
+],"subagents")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'subagents\')">← Précédent</button><button class="btn" onclick="nextFrom(\'subagents\')">Démos →</button></div>'},
+
+{id:"demo",title:"12. Démos",content:
+'<h1>Étape 12 — Démos : navigateur, Wordle, Boids</h1>'+
+'<p class="lead">Le bash tool ouvre la porte au contrôle du navigateur (sponsor Eagleite) : Claude Code résout le Wordle du NYT en 6 appels bash. Puis notre harness minimal résout le Wordle avec DeepSeek V4 Flash, et construit une simulation Boids en un seul index.html. <span class="source">⏱ 6:27</span></p>'+
+'<div class="grid">'+
+'<div class="card purple"><h3>Wordle via navigateur</h3><p>L\'agent gère le cookie disclaimer, essaie crane, pinch, puis uncut (tout vert) : 3 essais, 6 bash calls, en lisant data-state du DOM. <span class="source">⏱ 8:42</span></p></div>'+
+'<div class="card info"><h3>Ce qui manque pour égaler Claude</h3><p>Des skills : c\'est ce qui dit au modèle quel code écrire et comment. <span class="source">⏱ 9:06</span></p></div>'+
+'<div class="card good"><h3>Boids</h3><p>Un index.html écrit par le harness, patché pour le mouvement souris, puis sliders + UI. Le tout avec un petit modèle pas cher. <span class="source">⏱ 46:40</span></p></div>'+
+'</div>'+
+quizHTML([
+{q:"Combien d'appels bash pour le Wordle de Claude Code ?",o:["6","1","20"],a:0,e:"Trois essais : crane, pinch, uncut."},
+{q:"Qu'est-ce qui permet au harness d'égaler Claude sur le navigateur ?",o:["Les skills","Un modèle plus gros","Plus de mémoire"],a:0,e:"Les skills disent quel code écrire et comment."}
+],"demo")+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'demo\')">← Précédent</button><button class="btn" onclick="nextFrom(\'demo\')">Scénarios →</button></div>'},
+
+{id:"scenarios",title:"🎬 Scénarios",content:
+'<h1>Scénarios : quel pattern pour quel problème ?</h1>'+
+'<div class="simulator"><div class="matcher-grid">'+
+'<button class="matcher-btn" onclick="chooseScenario(\'basic_chat\')">Chat simple</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'bash_tool\')">Inspecter le FS</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'loop_needed\')">Lire sans raisonner</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'cache_broken\')">Coûts explosés</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'context_overflow\')">Hallucinations tardives</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'dangerous_cmd\')">Fichier supprimé</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'long_task\')">Tâche longue</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'subagent_needed\')">Explorer un repo</button>'+
+'<button class="matcher-btn" onclick="chooseScenario(\'skills_needed\')">Frontend raté</button>'+
+'</div><pre id="scenario-out" class="code" style="display:none"></pre></div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'scenarios\')">← Précédent</button><button class="btn" onclick="nextFrom(\'scenarios\')">Flashcards →</button></div>'},
+
+{id:"flashcards",title:"🃏 Flashcards",content:
+'<h1>Flashcards</h1><p class="lead">26 cartes couvrant chaque commit du harness.</p>'+
+'<div class="flashcards"><div id="flashcard" class="flashcard"></div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFlash()">← Précédente</button><button class="btn" onclick="flipFlash()">Retourner</button><button class="btn secondary" onclick="nextFlash()">Suivante →</button><button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button></div></div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'flashcards\')">← Précédent</button><button class="btn" onclick="nextFrom(\'flashcards\')">Anti-patterns →</button></div>'},
+
+{id:"antipatterns",title:"🚫 Anti-patterns",content:
+'<h1>Anti-patterns du harness</h1>'+
+'<div class="grid">'+
+'<div class="card bad"><h3>Casser le prefix</h3><p>Modifier le début du prompt à chaque tour : cache inutilisable, coûts pleins tarifs.</p></div>'+
+'<div class="card bad"><h3>Allow list sans sandbox</h3><p>shutil.rmtree passe en Python : le confinement système est indispensable.</p></div>'+
+'<div class="card bad"><h3>Tool outputs non bornés</h3><p>Sans cap 10 000 chars + fichier temp, le contexte est inondé et l\'agent hallucine.</p></div>'+
+'<div class="card bad"><h3>Subagent récursif</h3><p>Laisser task au subagent crée une récursion incontrôlable : profondeur 1 seulement.</p></div>'+
+'<div class="card bad"><h3>Todos non réinjectés</h3><p>Sans late injection des todos, l\'agent perd le fil de la tâche longue.</p></div>'+
+'<div class="card bad"><h3>Skills chargées en entier</h3><p>Coller tout le body au boot alourdit le contexte : seul le frontmatter entre, le body via read_skill.</p></div>'+
+'</div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'antipatterns\')">← Précédent</button><button class="btn" onclick="nextFrom(\'antipatterns\')">Examen final →</button></div>'},
+
+{id:"final",title:"✅ Examen final",content:
+'<h1>Examen final</h1><p class="lead">10 questions. Seuil 8/10 pour le certificat.</p>'+
+'<div class="quiz" data-module="final" id="final-quiz">'+
+'<div class="q" data-answer="0"><p class="q-text">1. Point de départ du tutoriel ?</p><label class="q-option"><input type="radio" name="final-q0" value="0"> Un chat minimal llm.py via OpenRouter</label><label class="q-option"><input type="radio" name="final-q0" value="1"> Un framework agentique</label><label class="q-option"><input type="radio" name="final-q0" value="2"> Un modèle fine-tuné</label><div class="explain">Deux messages (system+user), réponse + usage tokens.</div></div>'+
+'<div class="q" data-answer="1"><p class="q-text">2. Rôle du schema du bash tool ?</p><label class="q-option"><input type="radio" name="final-q1" value="0"> Exécuter la commande</label><label class="q-option"><input type="radio" name="final-q1" value="1"> Décrire name/description/arguments au modèle</label><label class="q-option"><input type="radio" name="final-q1" value="2"> Logger les appels</label><div class="explain">Le modèle voit l\'outil et décide de l\'invoquer.</div></div>'+
+'<div class="q" data-answer="0"><p class="q-text">3. Qui exécute la commande ?</p><label class="q-option"><input type="radio" name="final-q2" value="0"> Le harness via subprocess.run</label><label class="q-option"><input type="radio" name="final-q2" value="1"> Le LLM</label><label class="q-option"><input type="radio" name="final-q2" value="2"> Le terminal</label><div class="explain">Le LLM ne génère que le JSON du tool call.</div></div>'+
+'<div class="q" data-answer="2"><p class="q-text">4. role du message de résultat d\'outil ?</p><label class="q-option"><input type="radio" name="final-q3" value="0"> assistant</label><label class="q-option"><input type="radio" name="final-q3" value="1"> user</label><label class="q-option"><input type="radio" name="final-q3" value="2"> tool</label><div class="explain">C\'est ce qui distingue la sortie d\'un outil.</div></div>'+
+'<div class="q" data-answer="1"><p class="q-text">5. Pourquoi ne pas modifier le début du prompt ?</p><label class="q-option"><input type="radio" name="final-q4" value="0"> Cela vide la RAM</label><label class="q-option"><input type="radio" name="final-q4" value="1"> Cela casse le prefix cache → full price</label><label class="q-option"><input type="radio" name="final-q4" value="2"> Cela ralentit le réseau</label><div class="explain">Le cache ne se réutilise que si le prefix est identique.</div></div>'+
+'<div class="q" data-answer="0"><p class="q-text">6. Où va le frontmatter YAML d\'une skill ?</p><label class="q-option"><input type="radio" name="final-q5" value="0"> Dans le system prompt au boot</label><label class="q-option"><input type="radio" name="final-q5" value="1"> Dans le .env</label><label class="q-option"><input type="radio" name="final-q5" value="2"> Dans un tool call</label><div class="explain">Le body n\'est lu que via read_skill.</div></div>'+
+'<div class="q" data-answer="1"><p class="q-text">7. Late injection se colle où ?</p><label class="q-option"><input type="radio" name="final-q6" value="0"> En haut des messages</label><label class="q-option"><input type="radio" name="final-q6" value="1"> En bas des messages</label><label class="q-option"><input type="radio" name="final-q6" value="2"> Dans le system prompt</label><div class="explain">En haut, cela casserait le cache à chaque tour.</div></div>'+
+'<div class="q" data-answer="0"><p class="q-text">8. Seuils de compaction ?</p><label class="q-option"><input type="radio" name="final-q7" value="0"> 85% → 35%</label><label class="q-option"><input type="radio" name="final-q7" value="1"> 50% → 10%</label><label class="q-option"><input type="radio" name="final-q7" value="2"> 95% → 50%</label><div class="explain">Handoff note au début du system prompt.</div></div>'+
+'<div class="q" data-answer="1"><p class="q-text">9. Le sandbox bloque-t-il si l\'utilisateur approuve ?</p><label class="q-option"><input type="radio" name="final-q8" value="0"> Non</label><label class="q-option"><input type="radio" name="final-q8" value="1"> Oui, operation not permitted hors workspace</label><label class="q-option"><input type="radio" name="final-q8" value="2"> Il redemande</label><div class="explain">Le sandbox pose une question d\'autorisation d\'opération.</div></div>'+
+'<div class="q" data-answer="2"><p class="q-text">10. Le subagent reçoit-il l\'historique du main ?</p><label class="q-option"><input type="radio" name="final-q9" value="0"> Oui, tout</label><label class="q-option"><input type="radio" name="final-q9" value="1"> Seulement les tool calls</label><label class="q-option"><input type="radio" name="final-q9" value="2"> Non, isolé : seulement la tâche</label><div class="explain">Seule la réponse finale remonte.</div></div>'+
+'<button class="btn" onclick="checkFinal()">Soumettre l\'examen</button>'+
+'<div class="result" id="exam-result" aria-live="polite"></div></div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'final\')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection(\'resources\')">Voir certificat →</button></div>'},
+
+{id:"resources",title:"🏆 Ressources & certificat",content:
+'<h1>Certificat, checklist & ressources</h1>'+
+'<div class="card info no-print"><h3>Nom pour le certificat</h3><input id="cert-name" placeholder="Prénom / pseudo"/>'+
+'<div class="toolbar"><button class="btn" onclick="generateCert()">Générer le certificat</button><button class="btn secondary" onclick="exportJSON()">Exporter JSON</button><button class="btn secondary" onclick="window.print()">Imprimer / PDF</button><button class="btn secondary" onclick="resetCourse()">Réinitialiser</button></div></div>'+
+'<div id="certificate" class="certificate"><span class="badge">🛠️</span><h2>Certificat de maîtrise</h2><p>Décerné à</p><h3 id="cert-name-out">Apprenant</h3><p>pour avoir complété la masterclass</p><p class="highlight">Coding Agent from Scratch — Harness, Tools, Skills, Sandbox, Compaction, Subagents</p><p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p></div>'+
+'<h2>Checklist du harness</h2>'+
+'<div class="card checklist">'+
+'<label><input type="checkbox" id="c1" onchange="toggleCheck(\'c1\')"> .env avec API key + base URL ; chat minimal fonctionnel.</label>'+
+'<label><input type="checkbox" id="c2" onchange="toggleCheck(\'c2\')"> Bash tool : schema JSON + subprocess.run + parse du tool call.</label>'+
+'<label><input type="checkbox" id="c3" onchange="toggleCheck(\'c3\')"> Boucle while True avec append role=tool.</label>'+
+'<label><input type="checkbox" id="c4" onchange="toggleCheck(\'c4\')"> Prefix préservé ; injections en bas seulement.</label>'+
+'<label><input type="checkbox" id="c5" onchange="toggleCheck(\'c5\')"> Skills : frontmatter au system prompt, body via read_skill.</label>'+
+'<label><input type="checkbox" id="c6" onchange="toggleCheck(\'c6\')"> write_file + string_replace testés.</label>'+
+'<label><input type="checkbox" id="c7" onchange="toggleCheck(\'c7\')"> Stale file detection (seen + mtime).</label>'+
+'<label><input type="checkbox" id="c8" onchange="toggleCheck(\'c8\')"> TODOs réinjectés via late injection.</label>'+
+'<label><input type="checkbox" id="c9" onchange="toggleCheck(\'c9\')"> Allow list + sandbox (deny by default, pas de réseau).</label>'+
+'<label><input type="checkbox" id="c10" onchange="toggleCheck(\'c10\')"> Compaction 85→35 + handoff note + cap 10 000 chars.</label>'+
+'<label><input type="checkbox" id="c11" onchange="toggleCheck(\'c11\')"> Subagent isolé, profondeur 1, tools retenus.</label>'+
+'<label><input type="checkbox" id="c12" onchange="toggleCheck(\'c12\')"> Démo finale : un vrai artefact construit par l\'agent.</label>'+
+'</div><p class="muted small">Checklist : <span id="check-progress">0/12</span></p>'+
+'<h2>Ressources</h2>'+
+'<div class="resources"><ul>'+
+'<li><strong>Transcript source</strong> : tutoriel « coding agent from scratch », commits 1→15, harness CLI minimal.</li>'+
+'<li><strong>Harness cités</strong> : Claude Code, Codex (sandbox Apache-2), OpenCode (permissions), Pi.</li>'+
+'<li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur AutoManus (Character VC), ex-MIT / Google / Walmart ; Q&A live bimensuel (20 $/mois) et sessions 1h (200 $).</li>'+
+'<li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend (Kimi K2 + LangChain), yt-supabase-tips-kanban, yt-kimi-k2-claude.</li>'+
+'<li><strong>Complément local</strong> : le mini-cours Ollama (modèles locaux, RAG, Python) de la base de connaissances est le compagnon naturel pour tester ce harness sans coût d\'inférence.</li>'+
+'</ul></div>'+
+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'resources\')">← Revenir à l\'examen</button><button class="btn" onclick="showSection(\'home\')">Retour accueil</button></div>'}
+];
+
+var SECTIONS=MODULES.map(function(m){return m.id;});
+
+function renderNav(){var nav=$("#nav");var h="";
+for(var i=0;i<MODULES.length;i++){h+='<button data-target="'+MODULES[i].id+'">'+MODULES[i].title+'</button>';}
+nav.innerHTML=h;
+var buttons=$$("#nav button");
+for(var j=0;j<buttons.length;j++){buttons[j].addEventListener("click",function(){showSection(this.getAttribute("data-target"))});}}
+function renderSections(){var main=$("#content");var h="";
+for(var i=0;i<MODULES.length;i++){h+='<section id="'+MODULES[i].id+'" class="section">'+MODULES[i].content+'</section>';}
+main.innerHTML=h;}
+function showSection(id){var found=false;for(var k=0;k<MODULES.length;k++){if(MODULES[k].id===id){found=true;break}}if(!found)return;
+var sections=$$(".section");for(var i=0;i<sections.length;i++){sections[i].classList.toggle("active",sections[i].id===id);}
+var buttons=$$("#nav button");for(var j=0;j<buttons.length;j++){var t=buttons[j].getAttribute("data-target");buttons[j].classList.toggle("active",t===id);buttons[j].classList.toggle("completed",!!STATE.visited[t]);}
+STATE.visited[id]=true;saveState();updateProgress();initModule(id);
+var sb=$("#sidebar");if(sb)sb.classList.remove("mobile-open");
+window.scrollTo({top:0,behavior:"smooth"});}
+function nextFrom(id){for(var i=0;i<SECTIONS.length;i++){if(SECTIONS[i]===id&&i<SECTIONS.length-1){showSection(SECTIONS[i+1]);return;}}}
+function prevFrom(id){for(var i=0;i<SECTIONS.length;i++){if(SECTIONS[i]===id&&i>0){showSection(SECTIONS[i-1]);return;}}}
+function updateProgress(){var done=0;for(var i=0;i<SECTIONS.length;i++){if(STATE.visited[SECTIONS[i]])done++;}
+var pct=Math.round(done/SECTIONS.length*100);
+var b=$("#progressBar");if(b)b.style.width=pct+"%";
+var t=$("#progressText");if(t)t.textContent=pct+"%";}
+function updateScore(){var c=0,t=0;var keys=Object.keys(STATE.quizScores);for(var i=0;i<keys.length;i++){c+=STATE.quizScores[keys[i]].correct||0;t+=STATE.quizScores[keys[i]].total||0;}
+var el=$("#scoreDisplay");if(el)el.textContent="Score "+c+"/"+t;}
+function toggleTheme(){STATE.theme=STATE.theme==="dark"?"light":"dark";document.body.setAttribute("data-theme",STATE.theme);saveState();}
+function toggleSources(){STATE.sourcesHidden=!STATE.sourcesHidden;document.body.classList.toggle("hide-sources",STATE.sourcesHidden);saveState();}
+function toggleMobileNav(){var sb=$("#sidebar");if(sb)sb.classList.toggle("mobile-open");}
+function initModule(id){
+if(id==="diagnostic")restoreDiagnostic();
+if(id==="loop")resetLoop();
+if(id==="sandbox")resetPerm();
+if(id==="compaction")resetCompact();
+if(id==="flashcards")renderFlashcard();
+if(id==="resources"){var ni=$("#cert-name");if(ni&&STATE.certName)ni.value=STATE.certName;
+var keys=Object.keys(STATE.checklist);for(var i=0;i<keys.length;i++){var el=document.getElementById(keys[i]);if(el)el.checked=STATE.checklist[keys[i]];}
+updateChecklistProgress();
+if(STATE.finalPassed){var bl=$("#certificate");if(bl)bl.classList.add("show");}}}
+function init(){loadState();document.body.setAttribute("data-theme",STATE.theme);
+document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+renderNav();renderSections();showSection("home");updateScore();updateChecklistProgress();}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workflow d'Agent IA — Plan technique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="mark">AGT-01</span>
+      <span class="name">Workflow d'Agent IA</span>
+    </div>
+    <label class="toggle" id="darkToggle">
+      <span id="toggleLabel">Clair</span>
+      <span class="track"><span class="knob"></span></span>
+    </label>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="fig-label">Plan technique — v1</span>
+    <h1>Comment un LLM<br>devient un agent</h1>
+    <p class="lede">Un agent ajoute une boucle de planification, des outils et une mémoire autour d'un LLM. Cliquez sur chaque étape du schéma pour l'ouvrir.</p>
+  </div>
+
+  <hr class="rule">
+
+  <!-- ===================== PIPELINE ===================== -->
+  <section id="pipeline">
+    <div class="section-head">
+      <span class="fig-label">Fig. 01</span>
+      <h2>Pipeline de l'agent</h2>
+    </div>
+    <p class="section-sub">De la requête à la réponse : six étapes traversées à chaque interaction.</p>
+
+    <div class="diagram-block">
+      <div class="svg-frame">
+        <svg id="pipelineSvg" viewBox="0 0 380 700" role="img" aria-label="Schéma du pipeline d'un agent IA">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" class="arrowhead"></path>
+            </marker>
+          </defs>
+
+          <!-- connecting lines -->
+          <g id="pipeLines"></g>
+
+          <!-- nodes injected by data below -->
+          <g id="pipeNodes"></g>
+        </svg>
+      </div>
+
+      <div class="detail-panel" id="pipeDetail">
+        <div class="idx">ÉTAPE — 00</div>
+        <h3>Sélectionnez une étape</h3>
+        <p class="hint">Cliquez sur un bloc du schéma pour afficher son rôle dans le pipeline.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== LOOP ===================== -->
+  <section id="loop">
+    <div class="section-head">
+      <span class="fig-label">Fig. 02</span>
+      <h2>La boucle de l'agent</h2>
+    </div>
+    <p class="section-sub">L'agent ne s'exécute pas une seule fois : il planifie, agit, observe, met à jour sa mémoire, puis recommence jusqu'à l'objectif.</p>
+
+    <div class="diagram-block">
+      <div class="svg-frame loop-wrap">
+        <svg id="loopSvg" viewBox="0 0 400 400" role="img" aria-label="Schéma circulaire de la boucle agentique">
+          <defs>
+            <marker id="arrowLoop" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" class="arrowhead"></path>
+            </marker>
+          </defs>
+          <g id="loopLines"></g>
+          <circle cx="200" cy="190" r="52" fill="none" stroke="var(--line)" stroke-dasharray="3 5" stroke-width="1"></circle>
+          <text x="200" y="184" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-faint)">IDÉE CLÉ</text>
+          <text x="200" y="198" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">planifier → agir →</text>
+          <text x="200" y="210" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">observer → répéter</text>
+          <g id="loopNodes"></g>
+        </svg>
+      </div>
+
+      <div class="detail-panel" id="loopDetail">
+        <div class="idx">PHASE — 00</div>
+        <h3>Sélectionnez une phase</h3>
+        <p class="hint">Chaque tour de boucle rapproche l'agent de l'objectif ou déclenche une nouvelle itération.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== SEQUENCE ===================== -->
+  <section id="sequence">
+    <div class="section-head">
+      <span class="fig-label">Fig. 03</span>
+      <h2>Exemple d'appel d'outil</h2>
+    </div>
+    <p class="section-sub">Requête : « Quel temps fait-il à Bangalore aujourd'hui ? »</p>
+
+    <div class="svg-frame" style="max-width:420px;margin:0 auto;">
+      <svg id="seqSvg" viewBox="0 0 380 560" role="img" aria-label="Séquence d'appel d'un outil météo par l'agent">
+        <g id="seqLines"></g>
+        <g id="seqNodes"></g>
+      </svg>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== CODE ===================== -->
+  <section id="code">
+    <div class="section-head">
+      <span class="fig-label">Fig. 04</span>
+      <h2>Un agent minimal, en Python</h2>
+    </div>
+    <p class="section-sub">Le même principe que le schéma ci-dessus, en une classe d'une dizaine de lignes.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="agent">agent.py</button>
+      <button class="tab-btn" data-tab="run">executer.py</button>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-panel-inner" id="codeArea">
+
+        <div class="code-tab-panel active" data-panel="agent">
+          <div class="code-head"><span>définition de la classe</span>
+            <button class="copy-btn" data-target="code-agent">copier</button>
+          </div>
+          <pre><code id="code-agent"><span class="tok-kw">class</span> <span class="tok-fn">SimpleAgent</span>:
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(self, outils):
+        self.outils = outils
+        self.memoire = []
+
+    <span class="tok-kw">def</span> <span class="tok-fn">run</span>(self, requete):
+        requete_minuscule = requete.lower()
+        <span class="tok-kw">if</span> <span class="tok-str">'météo'</span> <span class="tok-kw">in</span> requete_minuscule:
+            <span class="tok-com"># Appeler l'outil météo</span>
+            resultat = self.outils[<span class="tok-str">'météo'</span>]()
+            <span class="tok-com"># Sauvegarder dans la mémoire</span>
+            self.memoire.append({
+                <span class="tok-str">'requete'</span>: requete,
+                <span class="tok-str">'outil'</span>: <span class="tok-str">'météo'</span>,
+                <span class="tok-str">'resultat'</span>: resultat
+            })
+            <span class="tok-com"># Formater la réponse finale</span>
+            <span class="tok-kw">return</span> <span class="tok-str">f'Météo : {resultat}'</span>
+        <span class="tok-kw">else</span>:
+            <span class="tok-kw">return</span> <span class="tok-str">"Aucun outil nécessaire."</span></code></pre>
+        </div>
+
+        <div class="code-tab-panel" data-panel="run">
+          <div class="code-head"><span>exécution</span>
+            <button class="copy-btn" data-target="code-run">copier</button>
+          </div>
+          <pre><code id="code-run"><span class="tok-kw">def</span> <span class="tok-fn">obtenir_meteo</span>():
+    <span class="tok-kw">return</span> <span class="tok-str">"28°C, Partiellement Nuageux"</span>
+
+agent = SimpleAgent(outils={<span class="tok-str">'météo'</span>: obtenir_meteo})
+requete = <span class="tok-str">"Quel temps fait-il à Bangalore aujourd'hui ?"</span>
+reponse = agent.run(requete)
+<span class="tok-fn">print</span>(reponse)</code></pre>
+          <div class="output-line">Sortie → <b>Météo : 28°C, Partiellement Nuageux</b></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== CARDS ===================== -->
+  <section id="powers">
+    <div class="section-head">
+      <span class="fig-label">Fig. 05</span>
+      <h2>Ce qui rend un agent puissant</h2>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+        <div><h4>Autonomie</h4><p>Planifie des tâches et passe à l'action avec un minimum de guidage humain.</p></div>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="1.6"><path d="M14 7l3 3-8 8-4 1 1-4z"></path><path d="M17 4l3 3"></path></svg>
+        <div><h4>Appel d'outil</h4><p>Interagit avec des systèmes externes : API, recherche, calculatrice, bases de données.</p></div>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6"><rect x="4" y="4" width="16" height="5" rx="1"></rect><rect x="4" y="10.5" width="16" height="5" rx="1"></rect><rect x="4" y="17" width="16" height="3" rx="1"></rect></svg>
+        <div><h4>Mémoire</h4><p>Se souvient des interactions passées et réutilise le contexte précédent.</p></div>
+      </div>
+      <div class="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="1.6"><circle cx="12" cy="9" r="4"></circle><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"></path></svg>
+        <div><h4>Raisonnement</h4><p>Divise les tâches, planifie les actions, et s'adapte en fonction des résultats.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== COMPARE ===================== -->
+  <section id="compare">
+    <div class="section-head">
+      <span class="fig-label">Fig. 06</span>
+      <h2>Du LLM traditionnel à l'agent</h2>
+    </div>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h4>LLM traditionnel</h4>
+        <div class="flow-chip-row">
+          <span class="flow-chip">Prompt</span><span class="flow-arrow">→</span>
+          <span class="flow-chip">LLM</span><span class="flow-arrow">→</span>
+          <span class="flow-chip">Réponse</span>
+        </div>
+      </div>
+      <div class="compare-col">
+        <h4>Agent IA</h4>
+        <div class="flow-chip-row">
+          <span class="flow-chip">Prompt</span><span class="flow-arrow">→</span>
+          <span class="flow-chip agent">Plan</span><span class="flow-arrow">→</span>
+          <span class="flow-chip agent">Outils</span><span class="flow-arrow">→</span>
+          <span class="flow-chip agent">Mémoire</span><span class="flow-arrow">→</span>
+          <span class="flow-chip">LLM</span><span class="flow-arrow">→</span>
+          <span class="flow-chip">Réponse</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ===================== TOOLS + FRAMEWORKS ===================== -->
+  <section id="tools">
+    <div class="section-head">
+      <span class="fig-label">Fig. 07</span>
+      <h2>Outils courants &amp; frameworks</h2>
+    </div>
+
+    <p class="section-sub" style="margin-bottom:10px;">Outils typiquement mis à disposition d'un agent :</p>
+    <div class="chip-row" style="margin-bottom:26px;">
+      <span class="chip">🔎 Recherche web</span>
+      <span class="chip">🧮 Calculatrice</span>
+      <span class="chip">🗄️ Base de données</span>
+      <span class="chip">💻 Interpréteur de code</span>
+      <span class="chip">✉️ E-mail</span>
+      <span class="chip">📅 Calendrier</span>
+      <span class="chip">🧭 Base vectorielle</span>
+      <span class="chip">🔌 API</span>
+    </div>
+
+    <p class="section-sub" style="margin-bottom:10px;">Frameworks d'agents les plus utilisés :</p>
+    <div class="chip-row">
+      <span class="chip framework">LangGraph</span>
+      <span class="chip framework">CrewAI</span>
+      <span class="chip framework">AutoGen</span>
+      <span class="chip framework">OpenAI Agents SDK</span>
+      <span class="chip framework">LlamaIndex</span>
+      <span class="chip framework">ReAct</span>
+    </div>
+  </section>
+
+  <footer>Plan technique généré pour usage interne — schémas interactifs, aucune dépendance externe requise à l'exécution.</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- dark mode ---------- */
+  var root = document.documentElement;
+  var toggle = document.getElementById('darkToggle');
+  var toggleLabel = document.getElementById('toggleLabel');
+  var stored = null;
+  try { stored = localStorage.getItem('agentio-theme'); } catch(e){}
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) { root.classList.add('dark'); }
+  function syncLabel(){ toggleLabel.textContent = root.classList.contains('dark') ? 'Sombre' : 'Clair'; }
+  syncLabel();
+  toggle.addEventListener('click', function(){
+    root.classList.toggle('dark');
+    try { localStorage.setItem('agentio-theme', root.classList.contains('dark') ? 'dark' : 'light'); } catch(e){}
+    syncLabel();
+  });
+  toggle.setAttribute('tabindex','0');
+  toggle.setAttribute('role','button');
+  toggle.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
+  });
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent){
+    var n = document.createElementNS(svgNS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  /* ---------- PIPELINE (vertical chain) ---------- */
+  var pipeData = [
+    { title:"Utilisateur — Requête", sub:"point d'entrée", detail:"L'utilisateur formule une demande en langage naturel. C'est la seule information dont l'agent dispose au départ." },
+    { title:"Planificateur", sub:"décomposition", detail:"Divise la tâche en étapes plus petites et décide de l'action suivante la plus utile." },
+    { title:"Outils", sub:"action", detail:"Systèmes externes que l'agent peut appeler : API, recherche, calculatrice, base de données…" },
+    { title:"Mémoire", sub:"contexte", detail:"Stocke les interactions précédentes et réinjecte le contexte passé dans le raisonnement." },
+    { title:"LLM", sub:"raisonnement", detail:"Génère le raisonnement et rédige les réponses à partir du contexte assemblé." },
+    { title:"Réponse", sub:"sortie", detail:"Réponse finale, formatée et délivrée à l'utilisateur." }
+  ];
+
+  (function buildPipeline(){
+    var nodesG = document.getElementById('pipeNodes');
+    var linesG = document.getElementById('pipeLines');
+    var w = 380, nodeW = 300, nodeH = 64, x = (w-nodeW)/2, gap = 50;
+    var y = 20;
+    var centers = [];
+
+    pipeData.forEach(function(d, i){
+      var g = el('g', { class:'node', tabindex:'0', role:'button', 'aria-label':d.title, 'data-index':i }, nodesG);
+      el('rect', { class:'node-shape', x:x, y:y, width:nodeW, height:nodeH, rx:4 }, g);
+      el('text', { x:x+18, y:y+27, 'font-size':14, 'font-weight':600 }, g).textContent = d.title;
+      el('text', { class:'label-en', x:x+18, y:y+45, 'font-size':10.5 }, g).textContent = d.sub;
+      el('text', { x:x+nodeW-24, y:y+38, 'font-size':11, fill:'var(--ink-faint)' }, g).textContent = '0'+(i+1);
+      centers.push(y + nodeH);
+      var handler = function(){ selectPipe(i); };
+      g.addEventListener('click', handler);
+      g.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); handler(); } });
+      y += nodeH + gap;
+    });
+
+    for (var i=0;i<pipeData.length-1;i++){
+      var y1 = 20 + i*(nodeH+gap) + nodeH;
+      var y2 = y1 + gap;
+      el('line', { class:'flow-line', x1:w/2, y1:y1, x2:w/2, y2:y2-6, 'marker-end':'url(#arrow)' }, linesG);
+      el('line', { class:'flow-dash', x1:w/2, y1:y1, x2:w/2, y2:y2-6 }, linesG);
+    }
+
+    document.getElementById('pipelineSvg').setAttribute('viewBox', '0 0 380 ' + (y-gap+20));
+  })();
+
+  function selectPipe(i){
+    document.querySelectorAll('#pipeNodes .node').forEach(function(n,idx){
+      n.classList.toggle('active', idx===i);
+    });
+    var d = pipeData[i];
+    var panel = document.getElementById('pipeDetail');
+    panel.innerHTML =
+      '<div class="idx">ÉTAPE — 0'+(i+1)+' / 0'+pipeData.length+'</div>' +
+      '<h3>'+d.title+'</h3>' +
+      '<p>'+d.detail+'</p>';
+  }
+
+  /* ---------- LOOP (circular) ---------- */
+  var loopData = [
+    { title:"Plan", detail:"Décide de la prochaine étape la plus utile à partir de l'objectif et du contexte disponible." },
+    { title:"Agir", detail:"Utilise un outil pour passer effectivement à l'action." },
+    { title:"Observer", detail:"Obtient un résultat ou un retour d'information suite à l'action." },
+    { title:"Maj Mémoire", detail:"Sauvegarde le résultat et le contexte pour les tours suivants." },
+    { title:"Répéter", detail:"Re-planifie à partir du nouveau contexte, jusqu'à ce que l'objectif soit atteint." }
+  ];
+
+  (function buildLoop(){
+    var nodesG = document.getElementById('loopNodes');
+    var linesG = document.getElementById('loopLines');
+    var cx=200, cy=190, r=140;
+    var pts = [];
+    for (var i=0;i<5;i++){
+      var angle = (-90 + i*72) * Math.PI/180;
+      pts.push({ x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) });
+    }
+
+    for (var i=0;i<5;i++){
+      var a = pts[i], b = pts[(i+1)%5];
+      el('path', { class:'flow-line', d: quad(a,b,cx,cy), 'marker-end':'url(#arrowLoop)' }, linesG);
+    }
+
+    pts.forEach(function(p,i){
+      var g = el('g', { class:'node', tabindex:'0', role:'button', 'aria-label':loopData[i].title, 'data-index':i }, nodesG);
+      el('rect', { class:'node-shape', x:p.x-46, y:p.y-22, width:92, height:44, rx:22 }, g);
+      el('text', { x:p.x, y:p.y+5, 'font-size':12, 'font-weight':600, 'text-anchor':'middle' }, g).textContent = loopData[i].title;
+      var handler = function(idx){ return function(){ selectLoop(idx); }; }(i);
+      g.addEventListener('click', handler);
+      g.addEventListener('keydown', function(idx){ return function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectLoop(idx); } }; }(i));
+    });
+
+    function quad(a,b,cx,cy){
+      var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      var dx=mx-cx, dy=my-cy, len=Math.sqrt(dx*dx+dy*dy)||1;
+      var ux=dx/len, uy=dy/len;
+      var startx = a.x - (a.x-cx)*0.15, starty = a.y - (a.y-cy)*0.15;
+      var endx = b.x - (b.x-cx)*0.15, endy = b.y - (b.y-cy)*0.15;
+      var ctrlx = cx + ux*(len+24), ctrly = cy + uy*(len+24);
+      return 'M '+startx.toFixed(1)+' '+starty.toFixed(1)+' Q '+ctrlx.toFixed(1)+' '+ctrly.toFixed(1)+' '+endx.toFixed(1)+' '+endy.toFixed(1);
+    }
+  })();
+
+  function selectLoop(i){
+    document.querySelectorAll('#loopNodes .node').forEach(function(n,idx){
+      n.classList.toggle('active', idx===i);
+    });
+    var d = loopData[i];
+    var panel = document.getElementById('loopDetail');
+    panel.innerHTML =
+      '<div class="idx">PHASE — 0'+(i+1)+' / 05</div>' +
+      '<h3>'+d.title+'</h3>' +
+      '<p>'+d.detail+'</p>';
+  }
+
+  /* ---------- SEQUENCE (tool call example) ---------- */
+  var seqData = [
+    { title:"Utilisateur — Requête", sub:'"Quel temps fait-il à Bangalore aujourd\'hui ?"' },
+    { title:"Planificateur", sub:"détecte le mot-clé « météo »" },
+    { title:"Appel de l'API météo", sub:"outils['météo']()" },
+    { title:"Réception des données", sub:"28°C, partiellement nuageux" },
+    { title:"LLM", sub:"formate la réponse finale" },
+    { title:"Réponse", sub:"« Météo : 28°C, partiellement nuageux »" }
+  ];
+
+  (function buildSeq(){
+    var nodesG = document.getElementById('seqNodes');
+    var linesG = document.getElementById('seqLines');
+    var w=380, nodeW=300, x=(w-nodeW)/2, nodeH=70, gap=22, y=15;
+
+    seqData.forEach(function(d,i){
+      var g = el('g', {}, nodesG);
+      el('rect', { class:'node-shape', x:x, y:y, width:nodeW, height:nodeH, rx:4, style:'stroke:var(--accent2)' }, g);
+      el('text', { x:x+16, y:y+27, 'font-size':13.5, 'font-weight':600 }, g).textContent = d.title;
+      var subText = el('text', { x:x+16, y:y+46, 'font-size':10.5, fill:'var(--ink-soft)' }, g);
+      wrapText(subText, d.sub, 34);
+      if (i < seqData.length-1){
+        el('line', { class:'flow-line', x1:w/2, y1:y+nodeH, x2:w/2, y2:y+nodeH+gap-4, 'marker-end':'url(#arrow)' }, linesG);
+      }
+      y += nodeH + gap;
+    });
+
+    document.getElementById('seqSvg').setAttribute('viewBox', '0 0 380 '+(y-gap+15));
+  })();
+
+  function wrapText(node, str, maxChars){
+    if (str.length <= maxChars){ node.textContent = str; return; }
+    var cut = str.lastIndexOf(' ', maxChars);
+    if (cut === -1) cut = maxChars;
+    node.textContent = str.slice(0,cut);
+    var t2 = el('tspan', { x: node.getAttribute('x'), dy: 13 }, node);
+    t2.textContent = str.slice(cut).trim();
+  }
+
+  /* ---------- code tabs ---------- */
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      document.querySelectorAll('.code-tab-panel').forEach(function(p){
+        p.classList.toggle('active', p.getAttribute('data-panel')===target);
+      });
+    });
+  });
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var codeEl = document.getElementById(btn.getAttribute('data-target'));
+      var text = codeEl.innerText;
+      var done = function(){
+        var old = btn.textContent;
+        btn.textContent = 'copié !';
+        setTimeout(function(){ btn.textContent = old; }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else {
+        done();
+      }
+    });
+  });
+
+  /* select first pipeline node by default on larger screens for context */
+  if (window.matchMedia('(min-width: 681px)').matches){
+    selectPipe(0);
+  }
+
+})();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stack de l’agent IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="current">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Agent Engineering • 12 concepts</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Carte"><span class="pill">Du contexte à l’évaluation</span><h1>Stack de l’agent IA</h1><p class="muted">Une carte pour passer d’un modèle qui répond à un système qui observe, planifie, agit et s’améliore.</p><div class="grid"><div class="concept"><b>Connaissance</b><p>RAG, contexte et mémoire donnent à l’agent l’information nécessaire.</p></div><div class="concept"><b>Action</b><p>Outils, function calling, MCP et compétences rendent l’action possible.</p></div><div class="concept"><b>Contrôle</b><p>Hooks, garde-fous et orchestration structurent l’exécution.</p></div><div class="concept"><b>Échelle</b><p>Sous-agents et workflow multi-étapes répartissent la complexité.</p></div><div class="concept"><b>Qualité</b><p>L’évaluation mesure si le système fonctionne réellement.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel concept ferme la boucle de conception ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">L’évaluation</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le contexte seul</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Connaissance"><span class="pill">1–3 • Donner le bon contexte</span><h2>RAG, contexte et mémoire</h2><div class="grid"><div class="concept"><b>RAG</b><p>Récupère des connaissances externes avant de répondre, afin d’enrichir la génération.</p></div><div class="concept"><b>Contexte</b><p>Tout ce que le modèle peut voir dans l’interaction présente : instructions, résultats, état et documents.</p></div><div class="concept"><b>Mémoire</b><p>Ce que le système conserve entre interactions et sessions, avec une politique de sélection et d’oubli.</p></div></div><p><strong>Distinction :</strong> le contexte est visible maintenant ; la mémoire est persistante ou récupérable pour plus tard.</p><div class="quiz"><h3>Quiz</h3><p>Quelle différence est correcte ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Le contexte est présent, la mémoire persiste ou se récupère entre sessions</button><button class="choice" data-correct="false" onclick="answer(this,false)">RAG et mémoire sont toujours exactement la même chose</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Action"><span class="pill">4–7 • Agir sur le monde</span><h2>Agent, outils, MCP et compétences</h2><div class="grid"><div class="concept"><b>Agent</b><p>Une IA qui agit, pas seulement une IA qui répond.</p></div><div class="concept"><b>Outils</b><p>Fonctions externes appelables : recherche, calcul, APIs et systèmes métier.</p></div><div class="concept"><b>MCP</b><p>Standard ouvert pour connecter outils, ressources et données de façon partagée.</p></div><div class="concept"><b>Compétences</b><p>Savoir-faire réutilisables chargés à la demande pour éviter un prompt monolithique.</p></div></div><pre>Décider → sélectionner une compétence → appeler un outil
+→ contrôler le résultat → mettre à jour le contexte</pre><div class="quiz"><h3>Quiz</h3><p>Quel concept aide à standardiser la connexion aux outils ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">MCP</button><button class="choice" data-correct="false" onclick="answer(this,false)">La mémoire court terme seule</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Contrôle"><span class="pill">8–9 • Encadrer l’exécution</span><h2>Hooks et orchestration</h2><div class="grid"><div class="concept"><b>Hooks</b><p>Déclencheurs qui exécutent une logique à des points précis du cycle : avant ou après un appel, un outil ou une réponse.</p></div><div class="concept"><b>Orchestration</b><p>Coordination d’un workflow multi-étapes : agents, outils, évaluations et transitions.</p></div></div><p>Un hook peut journaliser une action, appliquer une politique, enrichir le contexte, valider un résultat ou arrêter le workflow.</p><div class="quiz"><h3>Quiz</h3><p>À quoi sert un hook ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Déclencher une logique à un point précis de l’exécution</button><button class="choice" data-correct="false" onclick="answer(this,false)">Remplacer automatiquement tous les agents</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Échelle"><span class="pill">10–11 • Répartir la complexité</span><h2>Sous-agents et orchestration multi-étapes</h2><div class="grid"><div class="concept"><b>Sous-agents</b><p>Assistants auxquels l’agent principal confie des tâches spécialisées, comme recherche, extraction ou vérification.</p></div><div class="concept"><b>Orchestration</b><p>Le coordinateur organise les dépendances, le passage d’état, les résultats et les décisions d’étape.</p></div></div><pre>Agent principal → planifier → déléguer → agréger → évaluer → répondre</pre><div class="quiz"><h3>Quiz</h3><p>Pourquoi utiliser des sous-agents ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Répartir des tâches spécialisées et maîtriser la complexité</button><button class="choice" data-correct="false" onclick="answer(this,false)">Éviter toute évaluation des résultats</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Évaluer"><span class="pill">12 • Fiabilité</span><h2>Évaluer un agent IA</h2><p>Une évaluation vérifie si le système fonctionne réellement, et pas seulement si le modèle produit une réponse plausible. Elle doit couvrir résultat, trajectoire, appels d’outils, sécurité, coût et latence.</p><div class="grid"><div class="concept"><b>Tests</b><p>Cas reproductibles pour détecter régressions et erreurs connues.</p></div><div class="concept"><b>Trajectoires</b><p>Inspection des décisions, outils, étapes et transitions de l’agent.</p></div><div class="concept"><b>Mesures</b><p>Exactitude, complétude, fiabilité, coût, latence et taux de réussite.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que faut-il évaluer au-delà de la réponse finale ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">La trajectoire, les outils, la sécurité, le coût et la latence</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement la longueur de la réponse</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Checklist"><span class="pill">Passage à l’action</span><h2>Checklist du stack agentique</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Le contexte et la mémoire ont des responsabilités distinctes.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les outils, fonctions et connexions MCP ont des contrats explicites.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les compétences sont modulaires et chargées à la demande.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Hooks, garde-fous et orchestration contrôlent les étapes.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les sous-agents ont des rôles et des critères de sortie.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> L’évaluation couvre réponse, trajectoire, outils, coût et sécurité.</label><button class="btn primary" onclick="finish()">Valider mon stack</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

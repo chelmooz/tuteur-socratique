@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Agents IA | Boucle ReAct, Skills, Context Engineering, Evals</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🤖 <span>AI Agents</span> Masterclass</div>
+        <div class="muted small">Boucle ReAct • Skills • Constrained Decoding • Context Engineering • Evals</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "ai-agents-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express") {
+      return `
+        <div class="quiz" data-module="${moduleId}">
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "react-loop") initReactSim();
+      if (id === "consistent-output") runConstrainedDemo();
+      if (id === "errors-evals") updateErrorCalc();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    // ============ DIAGNOSTIC ============
+    const DIAG_TEXT = {
+      debutant: "Commencez par la boucle ReAct et le simulateur interactif. L'analogie « texte en entrée, texte en sortie » est votre ancre avant d'aborder les skills et le context engineering.",
+      praticien: "Passez vite sur les bases, concentrez-vous sur le constrained decoding, les 4 stratégies de context engineering et la multiplication des erreurs — c'est là que se joue la fiabilité en production.",
+      expert: "Allez directement aux subtilités : evals avec LLM judge, budgets de tokens, isolation multi-agents — puis validez avec l'examen et la checklist de mise en production."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ SIMULATEUR BOUCLE REACT ============
+    const REACT_STEPS = [
+      { who: "USER", cls: "react-user", text: "Trouve le vol le moins cher pour Seattle vendredi prochain et ajoute-le à mon calendrier." },
+      { who: "MODÈLE (génère du texte)", cls: "react-model", text: "Lecture de la question + menu d'outils → décide qu'une recherche aiderait.<br><code>call search_flights(destination=\"Seattle\", date=\"vendredi\", sort=\"prix\")</code>" },
+      { who: "VOTRE CODE", cls: "react-code", text: "Parse la réponse du LLM, identifie l'outil demandé, exécute search_flights HORS du LLM." },
+      { who: "RÉSULTAT OUTIL", cls: "react-result", text: "[Vol AS 1042 — 189 $, 08:15] [Vol DL 88 — 214 $, 10:30] ...<br>→ ajouté à la conversation, puis toute la conversation est renvoyée au modèle." },
+      { who: "MODÈLE (génère du texte)", cls: "react-model", text: "Lit l'historique complet, voit les options de vol, génère la prochaine requête :<br><code>call add_calendar_event(title=\"Vol AS 1042 → Seattle\", heure=\"08:15\")</code>" },
+      { who: "VOTRE CODE", cls: "react-code", text: "Exécute add_calendar_event avec les détails trouvés → ajoute le résultat à la conversation → renvoie tout au modèle." },
+      { who: "MODÈLE (décide : terminé)", cls: "react-done", text: "Voit que la tâche est complète → répond en texte simple au lieu de demander un outil :<br>« C'est fait ! Vol AS 1042 à 189 $ ajouté à votre calendrier vendredi 08:15. »<br><strong>→ Pas de requête d'outil = la boucle s'arrête.</strong>" }
+    ];
+
+    let reactStep = 0;
+
+    function initReactSim() {
+      reactStep = 0;
+      const container = $("#react-history");
+      if (!container) return;
+      container.innerHTML = REACT_STEPS.map((s, i) => `
+        <div class="react-msg ${s.cls}" id="react-step-${i}">
+          <span class="who">${s.who}</span>
+          <span>${s.text}</span>
+        </div>
+      `).join("");
+      const status = $("#react-status");
+      if (status) status.textContent = "Cliquez sur « Étape suivante » pour démarrer la boucle.";
+      const nextBtn = $("#react-next");
+      if (nextBtn) { nextBtn.disabled = false; nextBtn.textContent = "Étape suivante →"; }
+      const resetBtn = $("#react-reset");
+      if (resetBtn) resetBtn.style.display = "inline-flex";
+    }
+
+    function nextReactStep() {
+      if (reactStep >= REACT_STEPS.length) return;
+      const el = $("#react-step-" + reactStep);
+      if (el) el.classList.add("visible");
+
+      const status = $("#react-status");
+      const memNote = $("#react-memory");
+      if (status) {
+        if (reactStep < REACT_STEPS.length - 1) {
+          status.textContent = `Étape ${reactStep + 1}/${REACT_STEPS.length} — la conversation s'allonge, c'est la mémoire de l'agent.`;
+        } else {
+          status.textContent = "✅ Boucle terminée : le modèle a répondu en texte simple, pas de requête d'outil.";
+        }
+      }
+      if (memNote) {
+        memNote.textContent = "Messages dans l'historique : " + (reactStep + 1) + " — tout est renvoyé au modèle à chaque cycle.";
+      }
+
+      reactStep++;
+      if (reactStep >= REACT_STEPS.length) {
+        const nextBtn = $("#react-next");
+        if (nextBtn) nextBtn.disabled = true;
+      }
+    }
+
+    // ============ CONSTRAINED DECODING DEMO ============
+    function runConstrainedDemo() {
+      const wrap = $("#constrained-demo");
+      if (!wrap) return;
+
+      const tokens = [
+        { tok: "{", prob: 0.42, valid: true },
+        { tok: "\"query\"", prob: 0.31, valid: true },
+        { tok: "Sure,", prob: 0.18, valid: false },
+        { tok: ":", prob: 0.06, valid: true },
+        { tok: "]", prob: 0.03, valid: false }
+      ];
+
+      wrap.innerHTML = `
+        <p class="muted small">À chaque token, le système vérifie lesquels gardent le JSON valide et bloque les autres (probabilité → 0).</p>
+        ${tokens.map((t, i) => `
+          <div class="tok-row ${t.valid ? "" : "tok-blocked"}">
+            <span class="tok-label">${t.tok}</span>
+            <div class="tok-bar-wrap"><div class="tok-bar" style="width:${t.valid ? t.prob * 100 : 0}%; background:${t.valid ? "var(--green)" : "var(--red)"}"></div></div>
+            <span class="tok-prob">${t.valid ? (t.prob * 100).toFixed(0) + "%" : "0%"}</span>
+          </div>
+        `).join("")}
+        <p class="muted small" style="margin-top:0.6rem">Le modèle choisit toujours par probabilité, mais uniquement parmi les options qui ne cassent pas le format.</p>
+      `;
+    }
+
+    // ============ CALCULATEUR MULTIPLICATION ERREURS ============
+    function updateErrorCalc() {
+      const acc = Number($("#ec-acc")?.value ?? 95);
+      const steps = Number($("#ec-steps")?.value ?? 10);
+
+      $("#ecv-acc").textContent = acc + "%";
+      $("#ecv-steps").textContent = steps;
+
+      const overall = Math.pow(acc / 100, steps) * 100;
+      const fill = $("#ec-fill");
+      if (fill) {
+        fill.style.width = overall + "%";
+        fill.style.background = overall > 70 ? "var(--green)" : (overall > 40 ? "var(--yellow)" : "var(--red)");
+      }
+      const out = $("#ec-out");
+      if (out) {
+        out.innerHTML = `<span class="big-number" style="color:${overall > 70 ? "var(--green)" : (overall > 40 ? "var(--yellow)" : "var(--red)")}">${overall.toFixed(1)}%</span> de chance de réussir la tâche complète`;
+      }
+    }
+
+    // ============ SCENARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        json_parse: "Cas : votre agent oublie une virgule dans une requête d'outil tous les ~300 cycles.\nConcept : SORTIE STRUCTURÉE FIABLE.\nDemander gentiment ne marche que « la plupart du temps ». La retry logic coûte des appels supplémentaires.\nDéfense : CONSTRAINED DECODING — pendant la génération, bloquer les tokens qui cassent le JSON en mettant leur probabilité à zéro.",
+        context_bloat: "Cas : 20 étapes dans une tâche, les instructions originales sont enfouies sous 50 000 tokens de sorties d'outils.\nConcept : CONTEXT ENGINEERING.\nLes modèles retiennent bien le début et la fin, mais ratent le milieu (lost in the middle).\nDéfense : COMPRESS — résumer ou supprimer les vieilles sorties d'outils déjà exploitées.",
+        too_many_tools: "Cas : un petit modèle échoue avec 46 outils disponibles mais réussit avec 19.\nConcept : SÉLECTION DES OUTILS.\nLe contexte avait techniquement la place, mais le modèle ne raisonne pas clairement avec trop d'options.\nDéfense : SELECT — cherchez sur les descriptions d'outils elles-mêmes et ne présentez que la poignée qui compte maintenant.",
+        long_task: "Cas : une tâche de recherche + planification + code dans une seule longue conversation.\nConcept : ISOLATION MULTI-AGENTS.\nDéfense : ISOLATE — un agent parent confie le sous-tâche sale à un sous-agent avec sa propre fenêtre propre. Le sous-agent rapporte un court résumé, tout le bruit reste dans son contexte.",
+        forget_rules: "Cas : l agent oublie les règles fondamentales après plusieurs sessions.\nConcept : MÉMOIRE EXTERNE.\nDéfense : WRITE — donnez à l agent un moyen de sauvegarder hors de la fenêtre : fichiers de notes mis à jour en travaillant, fichiers de règles chargés au début de chaque session.",
+        unreliable: "Cas : votre agent réussit chaque étape 95% du temps, mais la tâche fait 20 étapes.\nConcept : MULTIPLICATION DES ERREURS.\n95%^20 ≈ 36%. Chaque étape a l'air correcte seule, mais multipliées, la tâche échoue.\nDéfense : EVALS — testez sur des tâches réelles, lancez plusieurs fois, suivez les taux de succès."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "Comment un LLM « cherche sur le web » ?", back: "Il ne le fait pas. Il génère du texte demandant d'appeler un outil. Votre code parse la requête, exécute la fonction hors du LLM, et renvoie le résultat. Texte en entrée, texte en sortie, à chaque étape.", tip: "1:14" },
+      { front: "Tool / outil", back: "Une action qu'on dit au modèle qu'il peut prendre. Le modèle signale qu'il veut l'utiliser en écrivant une requête structurée. Le code exécute réellement la fonction.", tip: "1:18" },
+      { front: "Boucle ReAct", back: "Le cycle : requête → outil → lire le résultat → renvoyer toute la conversation au modèle → répéter. Le modèle continue d'appeler des outils jusqu'à ce qu'il décide que la tâche est finie.", tip: "3:18" },
+      { front: "Mémoire de l'agent", back: "L'historique de messages qui grandit. La question originale, tous les appels d'outils, chaque résultat — tout est renvoyé à l'agent à chaque cycle. C'est toute sa mémoire.", tip: "3:22" },
+      { front: "Fin de la boucle", back: "Quand le modèle regarde la conversation et décide que la tâche est complète, il répond en texte simple au lieu de demander un outil. Le code voit qu'il n'y a pas de requête d'outil → la boucle s'arrête.", tip: "3:38" },
+      { front: "Skill", back: "Un dossier d'instructions écrites en markdown simple qui apprend à l'agent à bien faire un travail spécifique. Chargé dans le contexte quand une tâche pertinente est détectée.", tip: "3:59" },
+      { front: "Valeur des skills", back: "Tout ce que vous savez sur bien faire une tâche — conventions d'équipe, bizarreries actuelles d'un outil, vérifications systématiques — peut être documenté UNE fois, et chaque run d'agent charge votre expertise au bon moment.", tip: "5:18" },
+      { front: "Exemple Supabase skills", back: "Un fichier markdown qui encode les exigences de sécurité, les commandes CLI actuelles, et une règle clé : vérifier la doc en direct avant d'écrire du code Supabase, plutôt que de faire confiance au snapshot des données d'entraînement.", tip: "4:38" },
+      { front: "Problème des virgules manquantes", back: "Les requêtes d'outils sont du texte structuré que votre code doit parser. Si le modèle oublie une virgule ou une accolade, le parse échoue, l'outil ne tourne jamais, la boucle casse.", tip: "5:49" },
+      { front: "Pourquoi « demander gentiment » ne suffit pas", back: "« Ça marche la plupart du temps » = tous les quelques centaines de requêtes, le modèle ajoute un petit « Bien sûr, voici votre JSON » avant le JSON, et votre parser échoue quand même.", tip: "6:24" },
+      { front: "Constrained decoding", back: "Pendant la génération, le système vérifie quels tokens garderaient le JSON valide et bloque tous les autres en mettant leur probabilité à zéro. Le modèle choisit toujours par probabilité, mais parmi une liste où les options cassantes sont déjà indisponibles.", tip: "7:08" },
+      { front: "Lost in the middle", back: "Les modèles retiennent bien le début et la fin de leur contexte, mais ce qui est au milieu tend à être raté. Des instructions enfouies sous 50 000 tokens de sorties d'outils disparaissent.", tip: "7:50" },
+      { front: "MCP (Model Context Protocol)", back: "Une prise standard pour connecter les agents à des systèmes externes. Un serveur MCP pour GitHub, un pour la base de données, un pour Jira. Pratique, mais aussi un piège : trop facile de connecter une tonne d'outils.", tip: "8:18" },
+      { front: "Trop d'outils", back: "Un benchmark : un petit modèle llama a échoué avec les 46 outils disponibles, mais a réussi avec seulement 19. Le contexte avait la place, mais le modèle ne raisonnait pas clairement avec autant d'options.", tip: "8:42" },
+      { front: "Context engineering", back: "S'assurer que le modèle voit la bonne information, au bon format, au bon moment, à chaque passage dans la boucle. C'est une grande partie de la différence entre un agent démo et un agent fiable longtemps.", tip: "8:58" },
+      { front: "Stratégie WRITE", back: "Donner à l'agent un moyen de sauvegarder hors de la fenêtre : fichiers de notes mis à jour en travaillant, fichiers de règles chargés au début de chaque session.", tip: "9:22" },
+      { front: "Stratégie SELECT", back: "Donner au modèle ce dont il a besoin pour cette étape, pas tout ce que vous avez. Récupérer seulement les documents pertinents ; pour les outils, chercher sur les descriptions et ne présenter que la poignée utile.", tip: "9:34" },
+      { front: "Stratégie COMPRESS", back: "Les vieilles sorties d'outils déjà exploitées peuvent être supprimées ou remplacées par un résumé d'une ligne. Claude Code le fait automatiquement à 95% de capacité.", tip: "9:51" },
+      { front: "Stratégie ISOLATE", back: "Ce qui fait marcher les systèmes multi-agents. Un agent parent confie un sous-tâche sale à un sous-agent avec sa propre fenêtre propre. Le sous-agent creuse et rapporte un court résumé ; tout le bruit reste dans son contexte.", tip: "10:03" },
+      { front: "Multiplication des erreurs", back: "95% par étape × 10 étapes ≈ 60% pour la tâche complète. × 20 étapes ≈ un tiers. Chaque étape a l'air correcte seule, mais multipliées, la tâche échoue.", tip: "10:50" },
+      { front: "Eval", back: "Un test pour votre agent. Vous lui donnez une tâche, puis lancez une logique de notation contre le résultat pour vérifier s'il a réussi. C'est la compétence la plus sous-estimée de ce domaine.", tip: "11:19" },
+      { front: "Eval by vibes", back: "Lancer l'agent quelques fois, ça a l'air bon, on déploie. Puis on change un prompt ou un modèle et on reçoit du feedback que c'est pire — sans aucun moyen de dire si c'est vrai ni pourquoi.", tip: "11:31" },
+      { front: "Bonnes evals : les tâches", back: "Commencer avec 20 à 50 tâches réelles tirées de ce où votre agent a réellement échoué. Chacune avec des critères de succès clairs.", tip: "11:57" },
+      { front: "Grader avec du code", back: "Quand le résultat est vérifiable, utilisez du code simple : le test est-il passé ? La réservation existe-t-elle vraiment dans la base de données ? Ces checks sont bon marché, objectifs, et vous pouvez en lancer des milliers.", tip: "12:08" },
+      { front: "LLM judge", back: "Pour les sorties floues (un résumé précis ? une réponse support qui résout la plainte ?), l'outil standard est un second modèle qui note la sortie contre une rubric que vous avez écrite.", tip: "12:20" },
+      { front: "Vérifier le judge", back: "Les judges ont besoin d'être vérifiés aussi. Règles claires, comparez leurs notes aux vôtres sur un échantillon, clarifiez la rubric jusqu'à ce qu'ils soient d'accord avec vous. Ne sous-estimez pas l'importance d'une rubric claire.", tip: "12:30" },
+      { front: "Lancer plusieurs fois", back: "L'agent est non-déterministe, donc un seul run ne dit presque rien. La même tâche peut passer aujourd'hui et échouer demain sans aucun changement de votre côté. Ce que vous voulez : des taux de succès.", tip: "12:44" },
+      { front: "Tracker plus que pass/fail", back: "Loggez aussi les étapes prises, les appels d'outils, les tokens, et le coût par tâche. Un tweak de prompt qui passe toujours mais double votre facture de tokens est une régression.", tip: "13:01" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ EXAM ============
+    const FINAL_QUESTIONS = [
+      { q: "Comment un LLM « cherche sur le web » ?", o: ["Il exécute la recherche lui-même", "Il génère du texte demandant d'appeler un outil ; votre code exécute la fonction hors du LLM", "Il utilise une base de données interne"], a: 1, e: "Les LLMs ne peuvent que générer du texte. Texte en entrée, texte en sortie, à chaque étape." },
+      { q: "Qu'est-ce qui définit un agent par rapport à un chatbot ?", o: ["Il répond plus vite", "Il continue d'appeler des outils jusqu'à ce qu'il décide que la tâche est complète", "Il utilise plus de paramètres"], a: 1, e: "Si chaque étape nécessitait votre intervention, ce serait juste un chatbot avec des étapes en plus." },
+      { q: "Quelle est la mémoire entière de l'agent ?", o: ["Une base de données externe", "L'historique de messages qui grandit, renvoyé au modèle à chaque cycle", "Les poids du modèle"], a: 1, e: "La question originale, tous les appels d'outils, chaque résultat — tout est renvoyé." },
+      { q: "Qu'est-ce qu'un skill ?", o: ["Un outil de plus", "Un dossier d'instructions en markdown qui apprend à l'agent à bien faire un travail spécifique", "Un modèle plus gros"], a: 1, e: "Chargé dans le contexte quand une tâche pertinente est détectée, comme un résultat d'outil." },
+      { q: "Pourquoi « demander gentiment » un JSON valide ne suffit pas ?", o: ["Parce que le modèle refuse", "« La plupart du temps » = tous les quelques centaines de requêtes, le modèle ajoute du texte avant le JSON et le parser échoue", "Parce que le JSON est obsolète"], a: 1, e: "Mostly working means it still fails regularly." },
+      { q: "Comment fonctionne le constrained decoding ?", o: ["Il demande au modèle de réessayer", "Pendant la génération, il bloque les tokens qui casseraient le JSON en mettant leur probabilité à zéro", "Il post-process le texte"], a: 1, e: "Le modèle choisit toujours par probabilité, mais parmi une liste filtrée." },
+      { q: "Qu'est-ce que le « lost in the middle » ?", o: ["Le modèle oublie le début", "Les modèles retiennent bien le début et la fin, mais ratent ce qui est au milieu du contexte", "Le modèle perd les outils"], a: 1, e: "Des instructions enfouies sous 50 000 tokens de sorties d'outils disparaissent." },
+      { q: "Quelles sont les 4 stratégies de context engineering selon LangChain ?", o: ["Write, Select, Compress, Isolate", "Read, Write, Execute, Delete", "Plan, Act, Observe, Reflect"], a: 0, e: "Write = sauvegarder dehors, Select = donner le nécessaire, Compress = résumer, Isolate = sous-agents." },
+      { q: "Si un agent réussit chaque étape 95% du temps, quel est le taux de succès sur 10 étapes ?", o: ["95%", "Environ 60%", "50%"], a: 1, e: "0.95^10 ≈ 0.60. Les erreurs se multiplient dans la boucle." },
+      { q: "Pourquoi faut-il lancer chaque tâche d'eval plusieurs fois ?", o: ["Pour aller plus vite", "L'agent est non-déterministe : la même tâche peut passer aujourd'hui et échouer demain sans changement", "Pour économiser les tokens"], a: 1, e: "Un seul run ne dit presque rien. Ce que vous voulez : des taux de succès." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous maîtrisez la boucle ReAct, les skills, le constrained decoding, le context engineering et les evals. Vous pouvez construire des agents fiables en production."
+          : (correct >= 5 ? "Bases correctes. Revoyez le constrained decoding, les 4 stratégies de context engineering et la multiplication des erreurs." : "Reprenez depuis la boucle ReAct et le simulateur, puis les skills, avant de réessayer.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d abord l examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "AI Agents Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-ai-agents.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Construisez d'abord un agent simple avec la boucle ReAct, puis ajoutez un skill markdown pour votre workflow, avant de toucher au multi-agents.";
+      if (d.level === "expert") return "Mettez en place une suite d'evals avec 20-50 tâches réelles, LLM judge vérifié contre votre rubric, et suivi des tokens/coûts sur chaque changement.";
+      return "Consolidez la boucle ReAct, appliquez les 4 stratégies de context engineering, puis construitez des evals avant de passer au multi-agents.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Comprendre vraiment les agents IA, des concepts à la production</h1>
+          <p class="lead">
+            Vous avez presque certainement déjà interagi avec un agent IA — Claude Code pour un projet, un chatbot de service
+            client pour un remboursement. Les agents IA sont en réalité assez simples. Mais il y a une grande différence entre
+            comprendre les concepts de base et comprendre comment les agents marchent vraiment en production, au service de
+            millions de personnes, de manière fiable et à grande échelle. <span class="source">⏱ 0:00</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 240" role="img" aria-label="La boucle ReAct : requête, outil, résultat, répéter">
+              <defs>
+                <marker id="arrow-loop" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="85" width="150" height="70" class="node" />
+              <text x="105" y="112" text-anchor="middle">Question</text>
+              <text x="105" y="132" text-anchor="middle" class="sub">utilisateur</text>
+              <path class="dash" d="M180 120 L230 120" marker-end="url(#arrow-loop)" />
+
+              <rect x="230" y="85" width="160" height="70" class="node purple pulse" />
+              <text x="310" y="112" text-anchor="middle">Modèle</text>
+              <text x="310" y="132" text-anchor="middle" class="sub">génère du texte</text>
+              <path class="dash purple" d="M390 120 L440 120" marker-end="url(#arrow-loop)" />
+
+              <rect x="440" y="85" width="160" height="70" class="node green" />
+              <text x="520" y="112" text-anchor="middle">Code exécute</text>
+              <text x="520" y="132" text-anchor="middle" class="sub">l'outil demandé</text>
+              <path class="dash green" d="M600 120 L650 120" marker-end="url(#arrow-loop)" />
+
+              <rect x="650" y="85" width="160" height="70" class="node yellow" />
+              <text x="730" y="112" text-anchor="middle">Résultat</text>
+              <text x="730" y="132" text-anchor="middle" class="sub">ajouté à la conversation</text>
+
+              <path class="dash yellow" d="M730 155 L730 200 L310 200 L310 155" marker-end="url(#arrow-loop)" />
+              <text x="520" y="222" text-anchor="middle" class="sub">Renvoyer toute la conversation au modèle — la boucle continue</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez expliquer comment les agents agissent, construire la boucle ReAct, améliorer la performance avec les skills, garantir des sorties fiables, gérer le contexte et évaluer vos agents.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, simulateur de boucle ReAct, skills, démo de constrained decoding, les 4 stratégies de context engineering, calculateur de multiplication d'erreurs, flashcards, examen.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Un modèle mental complet des agents en production, une checklist de fiabilité, un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('take-action')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau avec les agents IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre comment les agents fonctionnent.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : je construis des agents, je veux les rendre fiables.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je veux les subtilités de production (evals, coûts, multi-agents).</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre les concepts pour mieux utiliser les agents.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire un agent fiable pour mon workflow.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="production"> Déployer des agents à grande échelle avec evals.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours avec simulateurs.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "take-action", title: "1. Agir avec des outils", express: true,
+        content: `
+          <h1>Comment les agents agissent : texte en entrée, texte en sortie</h1>
+          <p class="lead">
+            Vous avez probablement vu ChatGPT ou Claude chercher sur le web pour obtenir une information à jour.
+            Il est naturel de supposer que le modèle lui-même exécute cette recherche. Mais les LLMs ne peuvent que générer du texte.
+            Alors, comment cherchent-ils sur le web ? <span class="source">⏱ 1:14</span>
+          </p>
+
+          <div class="card info">
+            <h3>Le mécanisme</h3>
+            <ol>
+              <li>On dit au modèle quelles actions il peut prendre — ce sont les <strong>outils</strong>.</li>
+              <li>On lui dit comment signaler qu'il veut utiliser un outil particulier.</li>
+              <li>Quand on demande « Quel temps fait-il à Seattle ? », le modèle lit la question, regarde son menu d'outils, décide qu'une recherche aiderait.</li>
+              <li>Il fait la seule chose qu'il peut faire : <strong>générer du texte</strong>. Il écrit une petite requête structurée : <code>call web_search with the query "Seattle weather today"</code>.</li>
+              <li>Votre code parse la réponse du LLM, trouve l'outil demandé, exécute la fonction <strong>directement hors du LLM</strong>.</li>
+              <li>Le modèle ne voit jamais ce code. Il voit juste les outils décrits, puis plus tard les résultats qu'on lui renvoie.</li>
+            </ol>
+            <p><strong>Texte en entrée, texte en sortie, à chaque étape.</strong> Le modèle a décidé quoi chercher et a écrit la réponse, mais le code a réellement exécuté la recherche. <span class="source">⏱ 2:11</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Comment un LLM « cherche sur le web » ?", o: ["Il exécute la recherche lui-même", "Il génère du texte demandant d'appeler un outil ; votre code exécute la fonction hors du LLM", "Il utilise une API interne"], a: 1, e: "Les LLMs ne peuvent que générer du texte. Le code fait le vrai travail." },
+            { q: "Que voit le modèle dans tout ce processus ?", o: ["Le code source de l'application", "Les outils décrits, puis les résultats qu'on lui renvoie", "La base de données"], a: 1, e: "Le modèle ne voit jamais le code qui exécute réellement les fonctions." }
+          ], "take-action")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('take-action')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('take-action')">Boucle ReAct →</button>
+          </div>
+        `
+      },
+      {
+        id: "react-loop", title: "2. Boucle ReAct", express: true,
+        content: `
+          <h1>La boucle ReAct : le cœur d'un agent</h1>
+          <p class="lead">
+            Une recherche et une réponse, c'est bien. Mais la clé d'un agent est qu'il <strong>continue d'appeler des outils
+            jusqu'à ce qu'il décide que la tâche est terminée</strong>. Les vraies tâches nécessitent plus d'une étape.
+            <span class="source">⏱ 2:23</span>
+          </p>
+
+          <div class="card info">
+            <h3>L'exemple du vol + calendrier</h3>
+            <p>« Trouve le vol le moins cher pour Seattle vendredi prochain et ajoute-le à mon calendrier. » Il n'existe aucun outil unique qui fait tout ça. Le modèle doit chercher des vols, lire les résultats, puis faire une requête complètement séparée à un outil calendrier avec les détails qu'il vient de trouver. Si l'une de ces étapes nécessitait votre intervention pour relancer, ce serait juste un chatbot avec des étapes en plus. <span class="source">⏱ 2:32</span></p>
+          </div>
+
+          <h2>Simulateur interactif : déroulez la boucle</h2>
+          <div class="simulator">
+            <p class="muted small" id="react-status"></p>
+            <div id="react-history"></div>
+            <p class="muted small" id="react-memory" style="margin-top:0.6rem"></p>
+            <div class="toolbar no-print">
+              <button class="btn" id="react-next" onclick="nextReactStep()">Étape suivante →</button>
+              <button class="btn secondary" id="react-reset" onclick="initReactSim()" style="display:none">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div class="card good">
+            <h3>La mémoire de l'agent</h3>
+            <p>Chaque cycle, la conversation s'allonge un peu, et cet historique de messages qui grandit est <strong>toute la mémoire de l'agent</strong>. La question originale, tous les appels d'outils, chaque résultat — tout est renvoyé à l'agent. À chaque fois, le modèle voit l'historique complet et décide : « Ai-je besoin d'un autre outil, ou ai-je fini ? » <span class="source">⏱ 3:20</span></p>
+            <p>Quand le modèle regarde la conversation et décide que la tâche est complète, il répond simplement en texte au lieu de demander un outil. Votre code voit qu'il n'y a pas de requête d'outil, et la boucle s'arrête. <span class="source">⏱ 3:38</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Qu'est-ce qui distingue un agent d'un chatbot ?", o: ["Il continue d'appeler des outils jusqu'à décider que la tâche est finie", "Il répond plus vite", "Il a plus de paramètres"], a: 0, e: "Sinon ce serait juste un chatbot avec des étapes en plus." },
+            { q: "Quelle est la mémoire entière de l'agent ?", o: ["Une base de données", "L'historique de messages qui grandit, renvoyé au modèle à chaque cycle", "Les poids du modèle"], a: 1, e: "Tout est renvoyé à chaque passage dans la boucle." }
+          ], "react-loop")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('react-loop')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('react-loop')">Skills →</button>
+          </div>
+        `
+      },
+      {
+        id: "skills", title: "3. Skills", express: true,
+        content: `
+          <h1>Les skills : charger votre expertise au bon moment</h1>
+          <p class="lead">
+            Si le modèle agit sur tout ce qui est dans son contexte, peut-on simplement y mettre de meilleures choses ?
+            C'est exactement ce que sont les skills. Un skill est un dossier d'instructions écrites en markdown simple qui
+            apprend à l'agent à bien faire un travail spécifique. <span class="source">⏱ 3:58</span>
+          </p>
+
+          <div class="card info">
+            <h3>Comment ça marche</h3>
+            <p>Quand l'agent détecte une tâche pertinente, il charge ces instructions dans son contexte, de la même manière qu'un résultat d'outil est collé. C'est la différence entre obtenir des résultats médiocres et construire quelque chose de constamment utile pour votre propre workflow. <span class="source">⏱ 4:05</span></p>
+          </div>
+
+          <div class="card purple">
+            <h3>L'exemple Supabase</h3>
+            <p>Supabase a créé des agent skills : un fichier markdown qui encode les exigences de sécurité, les commandes CLI actuelles, et une règle clé — <strong>vérifier la doc en direct avant d'écrire du code Supabase</strong>, plutôt que de faire confiance au snapshot des données d'entraînement. Installé en une commande, il marche sur pratiquement tous les agents de code, de Claude Code à Cursor. <span class="source">⏱ 4:38</span></p>
+            <p>Résultat concret : sans le skill, Claude Code a dit qu'il n'y avait aucun problème de performance dans un schéma. Avec le skill, il a trouvé un problème vraiment important. <span class="source">⏱ 5:07</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>La valeur des skills</h3>
+            <p>Tout ce que vous savez sur bien faire une tâche — les conventions de votre équipe, les bizarreries actuelles d'un outil, les vérifications que vous feriez toujours — peut être documenté <strong>une seule fois</strong>, et chaque run d'agent après cela charge votre expertise dans son contexte au moment exact où il faut. <span class="source">⏱ 5:18</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Qu'est-ce qu'un skill ?", o: ["Un dossier d'instructions en markdown qui apprend à l'agent à bien faire un travail spécifique", "Un outil de plus", "Un modèle plus gros"], a: 0, e: "Chargé dans le contexte quand une tâche pertinente est détectée." },
+            { q: "Quelle est la valeur principale des skills ?", o: ["Documenter une fois votre expertise, chaque run d'agent la charge au bon moment", "Rendre le modèle plus rapide", "Réduire les coûts"], a: 0, e: "Conventions d'équipe, bizarreries d'outil, vérifications systématiques — écrits une fois." }
+          ], "skills")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('skills')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('skills')">Sorties fiables →</button>
+          </div>
+        `
+      },
+      {
+        id: "consistent-output", title: "4. Sorties fiables", express: true,
+        content: `
+          <h1>Garantir des sorties fiables : le constrained decoding</h1>
+          <p class="lead">
+            Même avec les meilleures connaissances, on travaille avec un modèle non-déterministe qui peut faire des erreurs.
+            Comment faire confiance à l'agent sur des centaines de cycles ? En commençant par un problème si basique qu'il
+            semble ridicule : les virgules et accolades manquantes. <span class="source">⏱ 5:34</span>
+          </p>
+
+          <div class="card bad">
+            <h3>Le problème</h3>
+            <p>Chaque requête d'outil est du texte structuré que votre code doit parser. Imaginez le modèle des centaines de cycles dans une tâche, écrivant une requête de plus — et il oublie une virgule ou une accolade. Votre code bute, le parse échoue, l'outil ne tourne jamais, et la boucle casse juste là. <span class="source">⏱ 5:49</span></p>
+            <p>Le modèle génère du texte un token à la fois en suivant une distribution de probabilité. Rien dans ce processus ne sait ce qu'est un JSON valide, à part les patterns appris à l'entraînement.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card warn">
+              <h3>Tentative 1 : demander gentiment</h3>
+              <p>De plus en plus fermement, parfois en MAJUSCULES. Ça marche « la plupart du temps » — ce qui est exactement le problème. Tous les quelques centaines de requêtes, le modèle ajoute un petit « Bien sûr, voici votre JSON » avant le JSON, et votre parser échoue quand même. <span class="source">⏱ 6:19</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Tentative 2 : retry logic</h3>
+              <p>Attraper l'échec de parse, renvoyer la sortie cassée au modèle, lui demander de corriger. Ça marche aussi. Mais vous payez des appels de modèle supplémentaires juste pour réparer le formatage, et vous n'avez toujours aucune garantie que la retry revienne correcte. <span class="source">⏱ 6:39</span></p>
+            </div>
+          </div>
+
+          <div class="card good">
+            <h3>La vraie solution : constrained decoding</h3>
+            <p>Ça se passe <strong>pendant</strong> que le texte est généré. À chaque étape, le modèle a une liste de tous les tokens qu'il pourrait écrire ensuite, chacun avec une probabilité. Le constrained decoding réduit cette liste : avant que le modèle choisisse, le système vérifie quels tokens garderaient le JSON valide, et bloque tous les autres en mettant leur probabilité à zéro. Le modèle choisit toujours par probabilité, mais parmi une liste où les options cassantes sont déjà indisponibles. <span class="source">⏱ 7:08</span></p>
+          </div>
+
+          <h2>Démo : le constrained decoding en action</h2>
+          <div class="simulator">
+            <div id="constrained-demo"></div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi « demander gentiment » un JSON valide ne suffit pas ?", o: ["« La plupart du temps » = échec encore tous les quelques centaines de requêtes", "Le modèle refuse toujours", "Le JSON est obsolète"], a: 0, e: "Mostly working means it still fails regularly." },
+            { q: "Comment fonctionne le constrained decoding ?", o: ["Pendant la génération, il bloque les tokens qui casseraient le JSON (probabilité → 0)", "Il demande au modèle de réessayer", "Il post-process le texte"], a: 0, e: "Le modèle choisit toujours par probabilité, mais parmi une liste filtrée." }
+          ], "consistent-output")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('consistent-output')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('consistent-output')">Context engineering →</button>
+          </div>
+        `
+      },
+      {
+        id: "context-engineering", title: "5. Context engineering", express: true,
+        content: `
+          <h1>Context engineering : la bonne info, au bon format, au bon moment</h1>
+          <p class="lead">
+            La sortie est plus ou moins réglée. Mais qu'en est-il de ce qui <strong>entre</strong> ? À chaque cycle de la boucle,
+            on met beaucoup de choses dans cette fenêtre de contexte finie. À mesure que l'usage du contexte augmente,
+            les résultats empirent : le modèle oublie ce que vous avez demandé, appelle des outils qui n'ont pas de sens,
+            ou la qualité devient bâclée. <span class="source">⏱ 7:27</span>
+          </p>
+
+          <div class="card warn">
+            <h3>Lost in the middle</h3>
+            <p>Une équipe de recherche a trouvé que les modèles retiennent bien le début et la fin de leur contexte, mais ce qui est au milieu tend à être raté. Imaginez un agent 20 étapes dans une tâche : les instructions originales sont en haut, enfouies sous 50 000 tokens de sorties d'outils. Ces instructions disparaissent essentiellement. <span class="source">⏱ 7:50</span></p>
+          </div>
+
+          <div class="card warn">
+            <h3>Le piège des trop nombreux outils (MCP)</h3>
+            <p>Chaque outil que l'agent peut appeler a besoin d'une définition dans le contexte avant même que le travail commence. MCP (Model Context Protocol) est une prise standard pour connecter les agents à des systèmes externes — un serveur pour GitHub, un pour la base de données, un pour Jira. Pratique, mais aussi un piège : ça rend trop facile de connecter une tonne d'outils. Un benchmark : un petit modèle llama a échoué avec les 46 outils disponibles, mais a réussi avec seulement 19. Le contexte avait techniquement la place — le modèle ne raisonnait juste pas clairement avec autant d'options. <span class="source">⏱ 8:42</span></p>
+          </div>
+
+          <h2>Les 4 stratégies de LangChain</h2>
+          <div class="grid">
+            <div class="card info">
+              <h3>1. Write (écrire)</h3>
+              <p>Donner à l'agent un moyen de sauvegarder des choses hors de la fenêtre : fichiers de notes qu'il met à jour en travaillant, fichiers de règles chargés au début de chaque session pour ne jamais oublier les fondamentaux. <span class="source">⏱ 9:22</span></p>
+            </div>
+            <div class="card info">
+              <h3>2. Select (sélectionner)</h3>
+              <p>Donner au modèle ce dont il a besoin pour cette étape, pas tout ce que vous avez. Récupérer seulement les documents pertinents ; pour les outils, chercher sur les descriptions elles-mêmes et ne présenter que la poignée qui compte maintenant. <span class="source">⏱ 9:34</span></p>
+            </div>
+            <div class="card info">
+              <h3>3. Compress (compresser)</h3>
+              <p>Les vieilles sorties d'outils déjà exploitées peuvent être supprimées ou remplacées par un résumé d'une ligne. Claude Code le fait automatiquement : à 95% de capacité, il résume tout l'historique et continue à partir du résumé. <span class="source">⏱ 9:51</span></p>
+            </div>
+            <div class="card info">
+              <h3>4. Isolate (isoler)</h3>
+              <p>Ce qui fait marcher les systèmes multi-agents. Au lieu d'un agent faisant recherche + planification + code dans une longue conversation, un agent parent confie le sous-tâche sale à un sous-agent avec sa propre fenêtre propre. Le sous-agent creuse et rapporte un court résumé ; tout le bruit reste dans son contexte, sans jamais atteindre le parent. <span class="source">⏱ 10:03</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Le point clé</h3>
+            <p>À travers tout ça, la boucle centrale reste exactement la même : un modèle qui demande des outils jusqu'à décider qu'il a fini. Le context engineering, c'est juste contrôler ce que le modèle voit à chaque passage. C'est une grande partie de la différence entre un agent démo et un agent qui tourne fiablement très longtemps. <span class="source">⏱ 10:24</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Qu'est-ce que le « lost in the middle » ?", o: ["Les modèles retiennent bien le début et la fin, mais ratent le milieu", "Le modèle oublie le début", "Le modèle perd les outils"], a: 0, e: "Des instructions enfouies sous 50 000 tokens de sorties d'outils disparaissent." },
+            { q: "Quelles sont les 4 stratégies de context engineering ?", o: ["Write, Select, Compress, Isolate", "Read, Write, Execute, Delete", "Plan, Act, Observe, Reflect"], a: 0, e: "Écrire dehors, sélectionner le nécessaire, compresser l'ancien, isoler en sous-agents." }
+          ], "context-engineering")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('context-engineering')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('context-engineering')">Erreurs & evals →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors-evals", title: "6. Erreurs & evals", express: true,
+        content: `
+          <h1>Erreurs et evals : construire du fiable avec des pièces non fiables</h1>
+          <p class="lead">
+            Chaque étape qu'un agent franchit est probabiliste. Même avec un excellent modèle, un contexte propre et des outils
+            bien construits, un petit pourcentage d'étapes ira probablement mal. Et dans une boucle, ces erreurs se multiplient.
+            <span class="source">⏱ 10:38</span>
+          </p>
+
+          <h2>Calculateur : la multiplication des erreurs</h2>
+          <div class="simulator">
+            <div class="slider-row">
+              <label for="ec-acc">Précision par étape</label>
+              <input type="range" id="ec-acc" min="50" max="99" step="1" value="95" oninput="updateErrorCalc()">
+              <span class="slider-val" id="ecv-acc">95%</span>
+            </div>
+            <div class="slider-row">
+              <label for="ec-steps">Nombre d'étapes</label>
+              <input type="range" id="ec-steps" min="1" max="30" step="1" value="10" oninput="updateErrorCalc()">
+              <span class="slider-val" id="ecv-steps">10</span>
+            </div>
+            <div class="risk-meter" style="height:14px;border-radius:999px;background:var(--panel-2);border:1px solid var(--border);overflow:hidden;margin:0.8rem 0">
+              <div id="ec-fill" style="height:100%;width:60%;background:var(--green);transition:width 0.4s"></div>
+            </div>
+            <div id="ec-out"></div>
+            <p class="muted small" style="margin-top:0.6rem">95% par étape sur 10 étapes ≈ 60%. Sur 20 étapes ≈ un tiers. Chaque étape a l'air correcte seule, mais multipliées, la tâche échoue.</p>
+          </div>
+
+          <h2>Les evals : la compétence la plus sous-estimée</h2>
+          <div class="card info">
+            <h3>Qu'est-ce qu'une eval ?</h3>
+            <p>Un test pour votre agent. Vous lui donnez une tâche, puis lancez une logique de notation contre le résultat pour vérifier s'il a réussi. Ça a l'air ennuyeux, et ça l'est un peu — c'est probablement pourquoi presque personne ne le fait bien. <span class="source">⏱ 11:19</span></p>
+          </div>
+
+          <div class="card bad">
+            <h3>Eval by vibes</h3>
+            <p>Au début, la plupart des gens font des evals « au feeling » : lancer l'agent quelques fois, ça a l'air bon, on déploie. Puis on change un prompt ou un modèle, et on reçoit du feedback que l'agent est pire — mais sans aucun moyen de dire si c'est vrai, ni pourquoi. <span class="source">⏱ 11:31</span></p>
+          </div>
+
+          <h2>Les bonnes pratiques d'eval</h2>
+          <div class="grid">
+            <div class="card good">
+              <h3>1. Tâches réelles</h3>
+              <p>Commencez avec 20 à 50 tâches réelles tirées de ce où votre agent a réellement échoué. Chacune avec des critères de succès clairs. <span class="source">⏱ 11:57</span></p>
+            </div>
+            <div class="card good">
+              <h3>2. Grader avec du code</h3>
+              <p>Quand le résultat est vérifiable, utilisez du code simple : le test est-il passé ? La réservation existe-t-elle dans la base de données ? Ces checks sont bon marché, objectifs, et vous pouvez en lancer des milliers. <span class="source">⏱ 12:08</span></p>
+            </div>
+            <div class="card good">
+              <h3>3. LLM judge</h3>
+              <p>Pour les sorties floues (résumé précis ? réponse support qui résout la plainte ?), un second modèle note la sortie contre une rubric que vous avez écrite. <span class="source">⏱ 12:20</span></p>
+            </div>
+            <div class="card good">
+              <h3>4. Vérifier le judge</h3>
+              <p>Les judges ont besoin d'être vérifiés aussi. Règles claires, comparez leurs notes aux vôtres sur un échantillon, clarifiez la rubric jusqu'à l'accord. Ne sous-estimez pas l'importance d'une rubric claire. <span class="source">⏱ 12:30</span></p>
+            </div>
+            <div class="card good">
+              <h3>5. Lancer plusieurs fois</h3>
+              <p>L'agent est non-déterministe : un seul run ne dit presque rien. La même tâche peut passer aujourd'hui et échouer demain sans aucun changement. Ce que vous voulez : des taux de succès. <span class="source">⏱ 12:44</span></p>
+            </div>
+            <div class="card good">
+              <h3>6. Tracker plus que pass/fail</h3>
+              <p>Loggez les étapes prises, les appels d'outils, les tokens, le coût par tâche. Un tweak de prompt qui passe toujours mais double votre facture de tokens est une régression. <span class="source">⏱ 13:01</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Conclusion</h3>
+            <p>La suite de tests devrait tourner sur chaque changement que vous faites. C'est à peu près comme ça que les agents fonctionnent. Ce qui est dur, c'est la discipline de faire tout ça constamment, et de résister à l'envie de sauter directement dans le multi-agents sophistiqué avant d'avoir les fondations. <span class="source">⏱ 13:16</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Si un agent réussit chaque étape 95% du temps, quel est le taux de succès sur 10 étapes ?", o: ["Environ 60%", "95%", "50%"], a: 0, e: "0.95^10 ≈ 0.60. Les erreurs se multiplient dans la boucle." },
+            { q: "Pourquoi faut-il lancer chaque tâche d'eval plusieurs fois ?", o: ["L'agent est non-déterministe : la même tâche peut passer aujourd'hui et échouer demain", "Pour aller plus vite", "Pour économiser les tokens"], a: 0, e: "Un seul run ne dit presque rien." }
+          ], "errors-evals")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors-evals')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors-evals')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios", title: "7. Scénarios", express: false,
+        content: `
+          <h1>Scénarios : quelle solution pour quel problème ?</h1>
+          <p class="lead">Sélectionnez un scénario pour voir le problème, le concept mobilisé et la défense recommandée.</p>
+
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('json_parse')">JSON qui casse</button>
+              <button class="tab-btn" onclick="chooseScenario('context_bloat')">Contexte qui déborde</button>
+              <button class="tab-btn" onclick="chooseScenario('too_many_tools')">Trop d'outils</button>
+              <button class="tab-btn" onclick="chooseScenario('long_task')">Tâche longue</button>
+              <button class="tab-btn" onclick="chooseScenario('forget_rules')">Règles oubliées</button>
+              <button class="tab-btn" onclick="chooseScenario('unreliable')">Étapes peu fiables</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "8. Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. 28 cartes couvrant tout le vocabulaire du cours, avec ancres temporelles du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors-antipatterns", title: "9. Anti-patterns", express: true,
+        content: `
+          <h1>Anti-patterns à éviter absolument</h1>
+          <p class="lead">Les erreurs les plus courantes que le cours met en évidence, regroupées pour ne plus jamais les commettre.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Croire que le modèle exécute les outils</h3>
+              <p>Le modèle ne fait que générer du texte. Votre code exécute réellement les fonctions. Confondre les deux mène à de mauvaises architectures.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Eval by vibes</h3>
+              <p>Lancer quelques fois, ça a l'air bon, déployer. Sans evals, vous ne pouvez pas dire si un changement a amélioré ou dégradé l'agent.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Demander gentiment un format</h3>
+              <p>« S'il te plaît, réponds en JSON » ne marche que la plupart du temps. Utilisez le constrained decoding.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. Connecter une tonne d'outils</h3>
+              <p>MCP rend ça trop facile. Un petit modèle échoue avec 46 outils, réussit avec 19. Sélectionnez les outils pertinents par étape.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. Ignorer le lost in the middle</h3>
+              <p>Les instructions enfouies sous 50 000 tokens de sorties d'outils disparaissent. Compressez, résumez, réécrivez les règles.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Sauter au multi-agents trop tôt</h3>
+              <p>Résistez à l'envie de sauter dans le multi-agents sophistiqué avant d'avoir les fondations : boucle propre, skills, evals.</p>
+            </div>
+            <div class="card bad">
+              <h3>7. Ne lancer qu'une seule fois</h3>
+              <p>L'agent est non-déterministe. Un seul run ne dit presque rien. Lancez plusieurs fois, suivez des taux de succès.</p>
+            </div>
+            <div class="card bad">
+              <h3>8. Tracker seulement pass/fail</h3>
+              <p>Un tweak qui passe toujours mais double la facture de tokens est une régression. Loggez tokens, coûts, étapes.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi éviter de connecter une tonne d'outils via MCP ?", o: ["Un petit modèle échoue avec 46 outils mais réussit avec 19 — trop d'options nuisent au raisonnement", "C'est trop cher", "C'est interdit"], a: 0, e: "Le contexte avait la place, mais le modèle ne raisonnait pas clairement." },
+            { q: "Pourquoi ne pas sauter directement au multi-agents ?", o: ["Il faut d'abord les fondations : boucle propre, skills, evals", "C'est trop difficile", "C'est obsolète"], a: 0, e: "La discipline des fondations avant la sophistication." }
+          ], "errors-antipatterns")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors-antipatterns')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors-antipatterns')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider que vous pouvez construire et fiabiliser des agents en production.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et checklist de production</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et appliquez la checklist de fiabilité à votre prochain agent.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🤖</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Agents IA : Boucle ReAct, Skills, Constrained Decoding, Context Engineering, Evals</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Checklist de fiabilité en production</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> La boucle ReAct est implémentée : le modèle continue jusqu'à décider qu'il a fini.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Les outils sont exécutés hors du LLM ; le modèle ne voit que les descriptions et les résultats.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Un skill markdown encode votre expertise pour la tâche principale.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Le constrained decoding garantit les sorties structurées (JSON valide).</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Le contexte est géré : Write, Select, Compress, Isolate selon le besoin.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Le nombre d'outils présentés par étape est limité (pas 46).</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Les instructions critiques ne sont pas enfouies sous les sorties d'outils.</label>
+            <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> 20-50 tâches d'eval réelles tirées des échecs passés, avec critères clairs.</label>
+            <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Graders en code pour les résultats vérifiables ; LLM judge pour les sorties floues.</label>
+            <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Le LLM judge est vérifié contre votre propre notation sur un échantillon.</label>
+            <label><input type="checkbox" id="c11" onchange="toggleCheck('c11')"> Chaque tâche est lancée plusieurs fois ; vous suivez des taux de succès.</label>
+            <label><input type="checkbox" id="c12" onchange="toggleCheck('c12')"> Tokens, coûts, étapes et appels d'outils sont loggés par tâche.</label>
+            <label><input type="checkbox" id="c13" onchange="toggleCheck('c13')"> La suite d'evals tourne sur chaque changement.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/13</span></p>
+
+          <h2>Ressources ancrées au transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Formateur</strong> : senior applied scientist chez Twitch, a coaché des centaines de personnes dans le domaine.</li>
+              <li><strong>Concepts clés</strong> : boucle ReAct, tools, skills, constrained decoding, context engineering, evals.</li>
+              <li><strong>Exemples du cours</strong> : météo à Seattle (62 et nuageux), vol + calendrier, Supabase agent skills, Claude Code qui compresse à 95%.</li>
+              <li><strong>Chiffres à retenir</strong> : 95% par étape × 10 = ~60%, × 20 = ~un tiers ; llama échoue avec 46 outils, réussit avec 19 ; 20-50 tâches d'eval.</li>
+              <li><strong>Les 4 stratégies LangChain</strong> : Write, Select, Compress, Isolate.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.nextReactStep = nextReactStep;
+    window.initReactSim = initReactSim;
+    window.updateErrorCalc = updateErrorCalc;
+    window.chooseScenario = chooseScenario;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

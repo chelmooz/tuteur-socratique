@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conception et Évaluation d'un Harnais d'Agent</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="font-sans antialiased min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- Header & Dark Mode Toggle -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400">Quand créer son propre harnais d'agent ?</h1>
+            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition focus:outline-none" aria-label="Basculer le thème">
+                <svg id="moon-icon" class="w-6 h-6 hidden dark:block text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="sun-icon" class="w-6 h-6 block dark:hidden text-gray-800" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.415l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.415l.707.707a1 1 0 010 1.415zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.415l-.707.707a1 1 0 01-1.415 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+
+        <p class="mb-8 text-lg opacity-90">Pour comprendre l'intelligence d'un agent, il faut la décomposer en trois piliers : le <strong>modèle</strong>, le <strong>contexte</strong>, et le <strong>harnais</strong>.</p>
+
+        <!-- Section 1 : SVG Interactif Environnement -->
+        <div class="card rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">1. L'architecture du Harnais</h2>
+            <div class="grid grid-cols-1 gap-8 items-center">
+                <div>
+                    <p class="mb-6">Le harnais est l'infrastructure qui enveloppe le modèle. Son travail principal est d'apporter le bon contexte au moment opportun.</p>
+                    
+                    <div class="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-inner">
+                        <svg viewBox="0 0 800 240" class="w-full min-w-[600px] h-auto" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <style>
+                                    .svg-box { rx: 6; stroke-width: 1.5; transition: all 0.2s; cursor: default; }
+                                    .svg-line { fill: none; stroke-width: 2; }
+                                </style>
+                            </defs>
+                            <path d="M 265 80 L 265 120" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 70 120 L 500 120" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 70 120 L 70 160" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 190 120 L 190 160" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 330 120 L 330 160" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 500 120 L 500 160" class="svg-line stroke-gray-400 dark:stroke-gray-500" />
+
+                            <text x="20" y="25" class="fill-gray-500 dark:fill-gray-400 font-sans text-xs font-bold tracking-wider">EXECUTION ENVIRONMENT</text>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="20" y="40" width="150" height="40" class="svg-box fill-white dark:fill-gray-900 stroke-blue-400 dark:stroke-blue-600 hover:fill-blue-50 dark:hover:fill-gray-700" />
+                                <text x="95" y="65" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Code Interpreter</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="190" y="40" width="150" height="40" class="svg-box fill-blue-100 dark:fill-blue-900 stroke-blue-500 dark:stroke-blue-400 hover:fill-blue-200 dark:hover:fill-blue-800" />
+                                <text x="265" y="65" text-anchor="middle" dominant-baseline="middle" class="fill-blue-900 dark:fill-blue-100 font-sans text-sm font-semibold">Sandbox</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="360" y="40" width="150" height="40" class="svg-box fill-white dark:fill-gray-900 stroke-blue-400 dark:stroke-blue-600 hover:fill-blue-50 dark:hover:fill-gray-700" />
+                                <text x="435" y="65" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Filesystem</text>
+                            </g>
+
+                            <text x="550" y="25" class="fill-gray-500 dark:fill-gray-400 font-sans text-xs font-bold tracking-wider">DELEGATION</text>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="550" y="40" width="100" height="40" class="svg-box fill-red-50 dark:fill-red-900/30 stroke-red-400 dark:stroke-red-600 hover:fill-red-100 dark:hover:fill-red-900/50" />
+                                <text x="600" y="65" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Planning</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="670" y="40" width="100" height="40" class="svg-box fill-red-50 dark:fill-red-900/30 stroke-red-400 dark:stroke-red-600 hover:fill-red-100 dark:hover:fill-red-900/50" />
+                                <text x="720" y="65" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Subagents</text>
+                            </g>
+
+                            <text x="20" y="145" class="fill-gray-500 dark:fill-gray-400 font-sans text-xs font-bold tracking-wider">CONTEXT MANAGEMENT</text>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="20" y="160" width="100" height="40" class="svg-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-900/50" />
+                                <text x="70" y="185" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Skills</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="140" y="160" width="100" height="40" class="svg-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-900/50" />
+                                <text x="190" y="185" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Memory</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="260" y="160" width="140" height="40" class="svg-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-900/50" />
+                                <text x="330" y="185" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Summarization</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="420" y="160" width="160" height="40" class="svg-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-900/50" />
+                                <text x="500" y="185" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Context offloading</text>
+                            </g>
+                            <g class="hover:-translate-y-1 transition-transform">
+                                <rect x="600" y="160" width="140" height="40" class="svg-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-900/50" />
+                                <text x="670" y="185" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">Prompt caching</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2 : SVG Interactif Middlewares -->
+        <div class="card rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">2. Boucle vs Middlewares</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="order-2 md:order-1 flex justify-center">
+                    <div class="w-full max-w-sm bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-inner">
+                        <svg viewBox="0 0 400 530" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <path d="M 0 0 L 6 3 L 0 6 z" class="fill-gray-400 dark:fill-gray-500" />
+                                </marker>
+                                <marker id="arrowhead-dashed" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                    <path d="M 0 0 L 6 3 L 0 6 z" class="fill-gray-400 dark:fill-gray-500" />
+                                </marker>
+                                <style>
+                                    .flow-box { rx: 16; stroke-width: 1.5; cursor: default; }
+                                    .flow-line { fill: none; stroke-width: 2; marker-end: url(#arrowhead); }
+                                    .flow-line-dashed { fill: none; stroke-width: 2; stroke-dasharray: 4 4; marker-end: url(#arrowhead-dashed); }
+                                </style>
+                            </defs>
+                            <path d="M 200 45 L 200 75" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 200 115 L 200 145" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 200 185 L 100 235" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 200 185 L 300 235" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 80 235 L 80 165 L 110 165" class="flow-line-dashed stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 300 275 L 200 325" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 100 275 L 200 325" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 200 365 L 200 395" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+                            <path d="M 200 435 L 200 465" class="flow-line stroke-gray-400 dark:stroke-gray-500" />
+
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 30px;">
+                                <rect x="140" y="15" width="120" height="30" class="flow-box fill-white dark:fill-gray-900 stroke-purple-400 dark:stroke-purple-500" />
+                                <text x="200" y="31" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">request</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 100px;">
+                                <rect x="120" y="85" width="160" height="30" class="flow-box fill-indigo-50 dark:fill-indigo-900/30 stroke-indigo-400 dark:stroke-indigo-500" />
+                                <text x="200" y="101" text-anchor="middle" dominant-baseline="middle" class="fill-indigo-900 dark:fill-indigo-100 font-sans text-sm font-semibold">before_agent</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 170px;">
+                                <rect x="120" y="155" width="160" height="30" class="flow-box fill-indigo-50 dark:fill-indigo-900/30 stroke-indigo-400 dark:stroke-indigo-500" />
+                                <text x="200" y="171" text-anchor="middle" dominant-baseline="middle" class="fill-indigo-900 dark:fill-indigo-100 font-sans text-sm font-semibold">before_model</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 100px 255px;">
+                                <rect x="20" y="240" width="160" height="40" class="flow-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-500" />
+                                <text x="100" y="253" text-anchor="middle" dominant-baseline="middle" class="fill-purple-900 dark:fill-purple-100 font-sans text-sm font-semibold">wrap_tool_call</text>
+                                <text x="100" y="270" text-anchor="middle" dominant-baseline="middle" class="fill-gray-500 dark:fill-gray-400 font-sans text-xs">tools</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 300px 255px;">
+                                <rect x="220" y="240" width="160" height="40" class="flow-box fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-500" />
+                                <text x="300" y="253" text-anchor="middle" dominant-baseline="middle" class="fill-purple-900 dark:fill-purple-100 font-sans text-sm font-semibold">wrap_model_call</text>
+                                <text x="300" y="270" text-anchor="middle" dominant-baseline="middle" class="fill-gray-500 dark:fill-gray-400 font-sans text-xs">model</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 350px;">
+                                <rect x="120" y="335" width="160" height="30" class="flow-box fill-indigo-50 dark:fill-indigo-900/30 stroke-indigo-400 dark:stroke-indigo-500" />
+                                <text x="200" y="351" text-anchor="middle" dominant-baseline="middle" class="fill-indigo-900 dark:fill-indigo-100 font-sans text-sm font-semibold">after_model</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 420px;">
+                                <rect x="120" y="405" width="160" height="30" class="flow-box fill-indigo-50 dark:fill-indigo-900/30 stroke-indigo-400 dark:stroke-indigo-500" />
+                                <text x="200" y="421" text-anchor="middle" dominant-baseline="middle" class="fill-indigo-900 dark:fill-indigo-100 font-sans text-sm font-semibold">after_agent</text>
+                            </g>
+                            <g class="hover:scale-[1.03] transition-transform origin-center" style="transform-origin: 200px 490px;">
+                                <rect x="140" y="475" width="120" height="30" class="flow-box fill-white dark:fill-gray-900 stroke-purple-400 dark:stroke-purple-500" />
+                                <text x="200" y="491" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-100 font-sans text-sm">result</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2">
+                    <p class="mb-4">Plutôt que de modifier le modèle, on personnalise la boucle de base via des hooks (middlewares).</p>
+                    <ul class="list-disc pl-5 space-y-3 opacity-90">
+                        <li><code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm text-blue-600 dark:text-blue-400">before_model</code> : Préparer et nettoyer le contexte.</li>
+                        <li><code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm text-blue-600 dark:text-blue-400">wrap_tool_call</code> : Gérer les appels d'outils de façon sécurisée et relancer la boucle (ligne pointillée).</li>
+                        <li><code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm text-blue-600 dark:text-blue-400">after_model</code> : Filtrer ou structurer la sortie finale.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Harbor Eval (Images Conservées) -->
+        <div class="card rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">3. Évaluation Continue avec Harbor</h2>
+            <p class="mb-6 opacity-90">Pour savoir si votre harnais (ou vos middlewares) améliore réellement l'agent, il est nécessaire de mettre en place un framework d'évaluation (evals) robuste. Le projet Harbor standardise cette approche de tests.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-lg mb-4">La Recette de l'Amélioration</h3>
+                    <img src="image_9e86e7.png" alt="Recipe for improving agents" class="img-clickable mb-4">
+                    <ol class="list-decimal pl-5 space-y-2 text-sm opacity-90 mt-4">
+                        <li>Construire un agent V1 et le lancer.</li>
+                        <li>Collecter un volume important de traces.</li>
+                        <li>Explorer et trier ces traces (Data mining).</li>
+                        <li>Lancer des expérimentations ciblées.</li>
+                    </ol>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-800 p-5 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <h3 class="font-bold text-lg mb-4">Structure d'une Tâche Harbor</h3>
+                    <img src="image_9e2d4d.png" alt="Harbor Tasks Structure" class="img-clickable mb-4">
+                    <ul class="list-disc pl-5 space-y-2 text-sm opacity-90 mt-4">
+                        <li><strong>Environment :</strong> Dockerfile ou docker-compose définissant le bac à sable.</li>
+                        <li><strong>Instruction :</strong> Fichier Markdown décrivant l'objectif pour l'agent.</li>
+                        <li><strong>Évaluation :</strong> Script (ex: <code>test.sh</code>) vérifiant l'accomplissement.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4 : SVG Interactif Custom Architectures -->
+        <div class="card rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">4. Architectures Cognitives Sur Mesure</h2>
+            <p class="mb-6 opacity-90">Quand l'agent s'éloigne des tâches classiques pour lesquelles le modèle a été entraîné (Out-of-Distribution), une boucle itérative simple montre ses limites (hallucinations, boucles infinies). Il devient nécessaire de concevoir une <strong>architecture spécialisée et déterministe</strong> pour encadrer le raisonnement de façon stricte.</p>
+            
+            <!-- Nouveau SVG SVG de Flux (SWE / Recherche) -->
+            <div class="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 overflow-x-auto shadow-inner flex justify-center">
+                <svg viewBox="0 0 800 350" class="w-full max-w-[700px] h-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                            <path d="M 0 0 L 8 3 L 0 6 z" class="fill-blue-500 dark:fill-blue-400" />
+                        </marker>
+                        <marker id="arrow-dashed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                            <path d="M 0 0 L 8 3 L 0 6 z" class="fill-red-500 dark:fill-red-400" />
+                        </marker>
+                    </defs>
+
+                    <!-- Lignes de connexion -->
+                    <path d="M 400 40 L 400 70" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+                    
+                    <!-- Séparation Plan -> Exécution -->
+                    <path d="M 400 110 L 400 130 L 200 130 L 200 150" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+                    <path d="M 400 110 L 400 150" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+                    <path d="M 400 110 L 400 130 L 600 130 L 600 150" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+                    <!-- Regroupement Exécution -> Validation -->
+                    <path d="M 200 190 L 200 220 L 400 220 L 400 240" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+                    <path d="M 400 190 L 400 240" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+                    <path d="M 600 190 L 600 220 L 400 220 L 400 240" fill="none" stroke="currentColor" class="text-blue-500 dark:text-blue-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+                    <!-- Validation -> Sortie -->
+                    <path d="M 400 280 L 400 310" fill="none" stroke="currentColor" class="text-green-500 dark:text-green-400" stroke-width="2" marker-end="url(#arrow-blue)" />
+
+                    <!-- Boucle de rétroaction (Échec de validation) -->
+                    <path d="M 480 260 L 700 260 L 700 90 L 480 90" fill="none" stroke="currentColor" class="text-red-500 dark:text-red-400" stroke-width="2" stroke-dasharray="6,6" marker-end="url(#arrow-dashed)" />
+                    <text x="710" y="185" class="fill-red-500 dark:fill-red-400 font-sans text-xs font-semibold tracking-wide" style="writing-mode: vertical-rl;">Échec (Boucle de correction)</text>
+
+                    <!-- Nœuds Interactifs -->
+                    <g class="hover:scale-105 transition-transform" transform="translate(320, 10)">
+                        <rect width="160" height="30" rx="8" class="fill-white dark:fill-gray-900 stroke-gray-300 dark:stroke-gray-600" stroke-width="2"/>
+                        <text x="80" y="15" text-anchor="middle" dominant-baseline="middle" class="fill-gray-800 dark:fill-gray-200 font-sans text-sm font-bold">1. Tâche Initiale</text>
+                    </g>
+
+                    <g class="hover:scale-105 transition-transform" transform="translate(320, 70)">
+                        <rect width="160" height="40" rx="8" class="fill-blue-50 dark:fill-blue-900/30 stroke-blue-400 dark:stroke-blue-600 hover:fill-blue-100 dark:hover:fill-blue-800" stroke-width="2"/>
+                        <text x="80" y="20" text-anchor="middle" dominant-baseline="middle" class="fill-blue-900 dark:fill-blue-100 font-sans text-sm font-bold">2. Planifier &amp; Diviser</text>
+                    </g>
+
+                    <g class="hover:scale-105 transition-transform" transform="translate(120, 150)">
+                        <rect width="160" height="40" rx="8" class="fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-800" stroke-width="2"/>
+                        <text x="80" y="20" text-anchor="middle" dominant-baseline="middle" class="fill-purple-900 dark:fill-purple-100 font-sans text-sm font-bold">3a. Recherche RAG</text>
+                    </g>
+                    
+                    <g class="hover:scale-105 transition-transform" transform="translate(320, 150)">
+                        <rect width="160" height="40" rx="8" class="fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-800" stroke-width="2"/>
+                        <text x="80" y="20" text-anchor="middle" dominant-baseline="middle" class="fill-purple-900 dark:fill-purple-100 font-sans text-sm font-bold">3b. Édition de Fichiers</text>
+                    </g>
+
+                    <g class="hover:scale-105 transition-transform" transform="translate(520, 150)">
+                        <rect width="160" height="40" rx="8" class="fill-purple-50 dark:fill-purple-900/30 stroke-purple-400 dark:stroke-purple-600 hover:fill-purple-100 dark:hover:fill-purple-800" stroke-width="2"/>
+                        <text x="80" y="20" text-anchor="middle" dominant-baseline="middle" class="fill-purple-900 dark:fill-purple-100 font-sans text-sm font-bold">3c. Outils Spécifiques</text>
+                    </g>
+
+                    <g class="hover:scale-105 transition-transform" transform="translate(320, 240)">
+                        <rect width="160" height="40" rx="8" class="fill-yellow-50 dark:fill-yellow-900/30 stroke-yellow-400 dark:stroke-yellow-600 hover:fill-yellow-100 dark:hover:fill-yellow-800" stroke-width="2"/>
+                        <text x="80" y="20" text-anchor="middle" dominant-baseline="middle" class="fill-yellow-900 dark:fill-yellow-100 font-sans text-sm font-bold">4. Valider (Tests / CI)</text>
+                    </g>
+
+                    <g class="hover:scale-105 transition-transform" transform="translate(320, 310)">
+                        <rect width="160" height="30" rx="8" class="fill-green-50 dark:fill-green-900/30 stroke-green-400 dark:stroke-green-600 hover:fill-green-100 dark:hover:fill-green-800" stroke-width="2"/>
+                        <text x="80" y="15" text-anchor="middle" dominant-baseline="middle" class="fill-green-900 dark:fill-green-100 font-sans text-sm font-bold">5. Résultat Final</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Section 5: Amélioration Continue (Images Conservées) -->
+        <div class="card rounded-xl p-6 mb-8 shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-gray-700">5. Le Cycle d'Amélioration (Flywheel)</h2>
+            <p class="mb-6 opacity-90">Pour faire évoluer l'agent, le recueil de feedback est crucial. Ce retour d'expérience permet ensuite d'ajuster spécifiquement l'un des trois piliers de l'agent.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h3 class="font-bold text-lg mb-3">1. Collecter le Feedback</h3>
+                    <img src="image_9e8ac4.png" alt="Feedback sources: UX Design and Synthetic Evals" class="img-clickable mb-4">
+                    <ul class="list-disc pl-5 space-y-2 text-sm opacity-90 mt-4">
+                        <li><strong>UX Design :</strong> Concevoir une interface qui capte naturellement les corrections de l'utilisateur.</li>
+                        <li><strong>Évaluations Synthétiques :</strong> Utiliser des petits modèles spécialisés (SLMs), des prompts de vérification ou du code classique pour juger les traces de l'agent.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-3">2. Mettre à jour l'Agent</h3>
+                    <img src="image_9e8e84.png" alt="Updating the Agent: Finetuning, Harness Engineering, Memory" class="img-clickable mb-4">
+                    <ul class="list-disc pl-5 space-y-2 text-sm opacity-90 mt-4">
+                        <li><strong>Modèle :</strong> Affinement (Finetuning) basé sur les réussites passées.</li>
+                        <li><strong>Harnais :</strong> Ingénierie du harnais (Harness Engineering) pour corriger les erreurs logiques.</li>
+                        <li><strong>Contexte :</strong> Enrichissement de la base de connaissances ou de la mémoire.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lightbox Modal Sécurisée -->
+    <div id="lightbox" class="lightbox">
+        <span class="close-lightbox" id="close-lightbox-btn">&times;</span>
+        <img id="lightbox-img" src="" alt="Aperçu agrandi">
+    </div>
+
+    <script>
+        // --- 1. Gestion du Dark Mode ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        themeToggle.addEventListener('click', () => {
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+        });
+
+        // --- 2. Gestion Sécurisée et Native de la Lightbox ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeBtn = document.getElementById('close-lightbox-btn');
+
+        // Ajout des écouteurs d'événements sans utiliser l'attribut HTML "onclick" (contourne les restrictions des bacs à sable web)
+        document.querySelectorAll('.img-clickable').forEach(img => {
+            img.addEventListener('click', function() {
+                const rawSrc = this.getAttribute('src');
+                if (rawSrc) {
+                    lightboxImg.setAttribute('src', rawSrc);
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden'; 
+                }
+            });
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = ''; 
+            setTimeout(() => { 
+                lightboxImg.removeAttribute('src'); 
+            }, 300);
+        }
+
+        closeBtn.addEventListener('click', closeLightbox);
+        
+        // Fermer la lightbox si on clique à l'extérieur de l'image
+        lightbox.addEventListener('click', function(event) {
+            if (event.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        // Fermer avec la touche Échap
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" && lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

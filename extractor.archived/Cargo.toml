@@ -1,0 +1,17 @@
+[package]
+name = "extractor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+poppler = "0.12"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+tesseract = "0.1"
+image = "0.25"
+docx = "1.0"
+walkdir = "2.0"
+zip = "0.6"
+uuid = { version = "1.0", features = ["v4"] }

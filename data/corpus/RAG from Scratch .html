@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : RAG from Scratch | Indexing, Retrieval, Generation, CRAG, LangGraph</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🔎 <span>RAG</span> from Scratch</div>
+      <div class="muted small">Indexing • Retrieval • Generation • Query Translation • Routing • CRAG • LangGraph</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Ancres transcript">⏱</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar"><nav id="nav" aria-label="Navigation du cours"></nav></aside>
+  <main id="content"></main>
+</div>
+
+<script>
+var KEY="rag-from-scratch-premium-v1";
+var STATE={theme:"dark",visited:{},quizScores:{},diagnostic:null,finalScore:0,finalTotal:10,passed:false,sourcesHidden:false,checklist:{},certName:""};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}}
+function loadState(){try{var r=localStorage.getItem(KEY);if(!r)return;var d=JSON.parse(r);
+STATE.theme=d.theme||"dark";STATE.visited=d.visited||{};STATE.quizScores=d.quizScores||{};STATE.diagnostic=d.diagnostic||null;
+STATE.finalScore=d.finalScore||0;STATE.finalTotal=d.finalTotal||10;STATE.passed=!!d.passed;STATE.sourcesHidden=!!d.sourcesHidden;STATE.checklist=d.checklist||{};STATE.certName=d.certName||"";}catch(e){}}
+
+function quizHTML(items,moduleId,title){
+var h='<div class="quiz" data-module="'+moduleId+'"><h3>'+(title||"Quiz express")+'</h3>';
+for(var i=0;i<items.length;i++){var it=items[i];
+h+='<div class="q" data-answer="'+it.a+'"><p class="q-text">'+(i+1)+'. '+it.q+'</p>';
+for(var j=0;j<it.o.length;j++){h+='<label class="q-option"><input type="radio" name="'+moduleId+'-q'+i+'" value="'+j+'">'+it.o[j]+'</label>';}
+h+='<div class="explain">'+(it.e||"")+'</div></div>';}
+h+='<button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button><div class="result" aria-live="polite"></div></div>';
+return h;}
+
+function checkQuiz(btn){
+var box=btn.closest(".quiz");var moduleId=box.getAttribute("data-module");var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+var result=box.querySelector(".result");if(result)result.textContent="Résultat : "+correct+"/"+qs.length;
+STATE.quizScores[moduleId]={correct:correct,total:qs.length};saveState();updateScore();}
+
+function getSectionIds(){return $$(".section").map(function(s){return s.id})}
+function showSection(id){
+var ids=getSectionIds();if(ids.indexOf(id)===-1)return;
+$$(".section").forEach(function(s){s.classList.toggle("active",s.id===id)});
+$$("#nav button").forEach(function(b){var t=b.getAttribute("data-target");b.classList.toggle("active",t===id);b.classList.toggle("completed",!!STATE.visited[t])});
+STATE.visited[id]=true;saveState();updateProgress();initModule(id);
+var sb=$("#sidebar");if(sb)sb.classList.remove("mobile-open");
+window.scrollTo({top:0,behavior:"smooth"});}
+function nextFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>-1&&i<ids.length-1)showSection(ids[i+1]);}
+function prevFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>0)showSection(ids[i-1]);}
+function updateProgress(){var ids=getSectionIds();var done=0;for(var i=0;i<ids.length;i++)if(STATE.visited[ids[i]])done++;
+var pct=Math.round(done/ids.length*100);var b=$("#progressBar");if(b)b.style.width=pct+"%";var t=$("#progressText");if(t)t.textContent=pct+"%";}
+function updateScore(){var c=0,t=0;var k=Object.keys(STATE.quizScores);for(var i=0;i<k.length;i++){c+=STATE.quizScores[k[i]].correct||0;t+=STATE.quizScores[k[i]].total||0}
+if(STATE.passed){c+=STATE.finalScore;t+=STATE.finalTotal}var el=$("#scoreDisplay");if(el)el.textContent="Score "+c+"/"+t;}
+function toggleTheme(){STATE.theme=STATE.theme==="dark"?"light":"dark";document.body.setAttribute("data-theme",STATE.theme);saveState()}
+function toggleSources(){STATE.sourcesHidden=!STATE.sourcesHidden;document.body.classList.toggle("hide-sources",STATE.sourcesHidden);saveState()}
+function toggleMobileNav(){var s=$("#sidebar");if(s)s.classList.toggle("mobile-open")}
+
+var DIAG_TEXT={
+novice:"Commencez par la motivation (pourquoi RAG) puis le cas pratique de construction pas à pas. Construisez d'abord le pipeline de base avant les techniques avancées.",
+builder:"Allez directement au cas pratique, puis enchaînez query translation, routing et CRAG : ce sont les briques qui rendent un RAG robuste en production.",
+expert:"Concentrez-vous sur indexing avancé (Multi-rep, RAPTOR, ColBERT), Adaptive RAG avec LangGraph, et le débat long-context vs RAG (multi-needle, recency bias)."};
+function validateDiagnostic(){
+var level=document.querySelector("input[name='diag-level']:checked");var goal=document.querySelector("input[name='diag-goal']:checked");var time=document.querySelector("input[name='diag-time']:checked");
+if(!level||!goal||!time){alert("Répondez aux trois questions.");return}
+STATE.diagnostic={level:level.value,goal:goal.value,time:time.value};saveState();
+var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.builder)+"</p>"}
+if(next)next.style.display="inline-flex";}
+function restoreDiagnostic(){if(!STATE.diagnostic)return;var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"}
+if(next)next.style.display="inline-flex";}
+
+/* ---------- CAS PRATIQUE : BUILD SIMULATOR ---------- */
+var BUILD_STEPS=[
+{who:"ÉTAPE 1 — Installation",code:"$ pip install langchain langchain-community langchain-openai chromadb\n$ export OPENAI_API_KEY=sk-...\n$ export LANGSMITH_API_KEY=...   # optionnel : tracing",out:"✅ environnement prêt"},
+{who:"ÉTAPE 2 — Chargement des documents",code:"from langchain_community.document_loaders import WebBaseLoader\ndocs = WebBaseLoader(\"https://lilianweng.github.io/posts/2023-06-23-agent/\").load()",out:"→ 1 document · 42 423 caractères"},
+{who:"ÉTAPE 3 — Splitting",code:"from langchain_text_splitters import RecursiveCharacterTextSplitter\nsplitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)\nsplits = splitter.split_documents(docs)",out:"→ 66 chunks (les modèles d'embedding ont une fenêtre limitée : 512 → 8k tokens)"},
+{who:"ÉTAPE 4 — Embedding + index",code:"from langchain_openai import OpenAIEmbeddings\nfrom langchain_chroma import Chroma\nvectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())",out:"→ 66 vecteurs de 1536 dimensions indexés (représentation sémantique fixe)"},
+{who:"ÉTAPE 5 — Retriever (kNN)",code:"retriever = vectorstore.as_retriever(search_kwargs={\"k\": K})\ndocs = retriever.invoke(\"What is task decomposition?\")",out:"DYNAMIC_K"},
+{who:"ÉTAPE 6 — Prompt + chaîne LCEL",code:"from langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.runnables import RunnablePassthrough\nfrom langchain_core.output_parsers import StrOutputParser\nprompt = ChatPromptTemplate.from_template(\n    \"Answer the question based on this context: {context}\\nQuestion: {question}\")\ndef format_docs(ds): return \"\\n\\n\".join(d.page_content for d in ds)\nrag_chain = ({\"context\": retriever | format_docs, \"question\": RunnablePassthrough()}\n             | prompt | llm | StrOutputParser())",out:"→ chaîne composée : invoke / batch / stream disponibles"},
+{who:"ÉTAPE 7 — Génération",code:"answer = rag_chain.invoke(\"What is task decomposition?\")",out:"→ réponse ancrée dans les documents récupérés (grounded)"}];
+var buildIdx=0;
+function resetBuild(){buildIdx=0;var c=$("#build-console");if(c)c.innerHTML="";var s=$("#build-status");if(s)s.textContent="Cliquez sur « Étape suivante » pour construire le pipeline RAG.";var b=$("#build-next");if(b){b.disabled=false;b.textContent="Étape suivante →"}}
+function nextBuildStep(){
+var c=$("#build-console");if(!c||buildIdx>=BUILD_STEPS.length)return;
+var st=BUILD_STEPS[buildIdx];
+var k=parseInt(($("#build-k")||{}).value||"1",10);
+var out=st.out;
+if(out==="DYNAMIC_K"){out="→ "+k+" document(s) récupéré(s) par recherche de similarité (k="+k+")";}
+c.innerHTML+="<span class='cmd'>"+st.who+"</span>\n"+st.code+"\n<span class='ok'>"+out+"</span>\n\n";
+c.scrollTop=c.scrollHeight;
+var s=$("#build-status");if(s)s.textContent="Étape "+(buildIdx+1)+"/"+BUILD_STEPS.length+" exécutée.";
+buildIdx++;
+if(buildIdx>=BUILD_STEPS.length){var b=$("#build-next");if(b)b.disabled=true;if(s)s.textContent="✅ Pipeline RAG complet construit : indexing → retrieval → generation."}}
+
+/* ---------- RECENCY BIAS / MULTI-NEEDLE ---------- */
+function updateNeedle(){
+var pos=parseInt(($("#nd-pos")||{}).value||"90",10);
+var count=parseInt(($("#nd-count")||{}).value||"1",10);
+var po=$("#nd-opos");if(po)po.textContent=pos+"%";
+var co=$("#nd-ocount");if(co)co.textContent=count;
+var base=count===1?0.95:(count===3?0.78:0.60);
+var prob=base*(0.55+0.45*(pos/100));
+var fill=$("#nd-fill");if(fill)fill.style.width=(prob*100)+"%";
+var lab=$("#nd-label");if(lab)lab.textContent="Probabilité de récupération ≈ "+Math.round(prob*100)+"%";
+var note=$("#nd-note");if(note){
+if(pos<30)note.textContent="Aiguille placée au DÉBUT du contexte : le modèle l'oublie (recency bias) — c'est le pire emplacement.";
+else if(pos<70)note.textContent="Position médiane : récupération correcte mais pas optimale.";
+else note.textContent="Aiguille vers la FIN du contexte : meilleure récupération (biais de récence).";}}
+
+/* ---------- SCENARIOS ---------- */
+function chooseScenario(key){var texts={
+multiquery:"Problème : la formulation de la question est mal alignée avec les documents.\nTechnique : MULTI-QUERY.\nReformulez la question en plusieurs perspectives, récupérez pour chacune, union unique des documents.\nCode : generate_queries = prompt | llm | StrOutputParser() | split('\\n').",
+ragfusion:"Problème : plusieurs récupérations indépendantes à fusionner proprement.\nTechnique : RAG-FUSION = Multi-Query + Reciprocal Rank Fusion.\nRRF agrège les listes classées en un ranking consolidé (score = Σ 1/(rank+k)).",
+decomposition:"Problème : question complexe nécessitant plusieurs sous-réponses.\nTechnique : DECOMPOSITION (Least-to-Most, IRCoT).\nRésolvez chaque sous-question séquentiellement en ajoutant les paires Q-A précédentes, ou en parallèle puis concaténez.",
+stepback:"Problème : question trop spécifique, le contexte conceptuel manque.\nTechnique : STEP-BACK PROMPTING (few-shot).\nGénérez une question plus abstraite, récupérez pour les deux (step-back + originale), combinez les contextes.",
+hyde:"Problème : la question courte est loin de l'espace des documents.\nTechnique : HyDE.\nGénérez un document hypothétique qui répondrait à la question, embeddez-le, récupérez avec lui (document space > question space).",
+routing:"Problème : plusieurs sources (vector store, SQL, graph, web).\nTechnique : ROUTING logique (structured output / function calling) ou sémantique (similarité question ↔ prompts).",
+queryconstruction:"Problème : filters structurés depuis le langage naturel.\nTechnique : QUERY CONSTRUCTION (text-to-SQL, text-to-Cypher, text-to-metadata-filters) via function calling + schéma Pydantic.",
+multirep:"Problème : récupérer le bon DOCUMENT (pas le bon chunk).\nTechnique : MULTI-REPRESENTATION INDEXING (Dense X / proposition indexing).\nIndexez un résumé optimisé pour la retrieval, stockez le document complet dans un doc store, retournez le doc entier à la génération.",
+raptor:"Problème : question nécessitant de consolider l'info de plusieurs documents.\nTechnique : RAPTOR (index hiérarchique).\nClusterez → résumez → récursion → indexez tous les niveaux ensemble.",
+colbert:"Problème : compresser tout un document en un seul vecteur perd la nuance.\nTechnique : ColBERT (late interaction).\nEmbedding par token, MaxSim par token de question, somme des max.",
+crag:"Problème : documents récupérés non pertinents → réponse hallucinée.\nTechnique : CRAG (Corrective RAG).\nGradez la relevance ; si aucun doc pertinent → transformation de requête + web search puis génération.",
+adaptive:"Problème : pipeline rigide qui ne se corrige pas.\nTechnique : ADAPTIVE RAG (LangGraph).\nRouter (vector store / web / LLM fallback) + tests en ligne (relevance, hallucination, answer relevance) avec boucles de feedback."};
+var out=$("#scenario-out");if(out){out.style.display="block";out.textContent=texts[key]||""}}
+
+/* ---------- FLASHCARDS ---------- */
+var FLASHCARDS=[
+{front:"Motivation RAG",back:"La plupart des données du monde sont privées ; les LLMs sont entraînés sur du public. RAG unit la connaissance privée et la capacité de raisonnement du LLM.",tip:"0:37"},
+{front:"Fenêtres de contexte",back:"Il y a un an : 4-8k tokens (une dizaine de pages). Aujourd'hui : jusqu'à 1M tokens (Claude 3, Gemini). Mais stuffing ≠ retrieval garanti.",tip:"1:08"},
+{front:"Les 3 étapes de RAG",back:"Indexing (indexer les documents), Retrieval (récupérer les docs pertinents), Generation (réponse ancrée dans les docs récupérés).",tip:"2:13"},
+{front:"Sparse vectors",back:"Méthodes statistiques (fréquence de mots) sur un large vocabulaire, beaucoup de zéros. Bonnes méthodes de recherche historiques (Google).",tip:"7:06"},
+{front:"Dense embeddings",back:"Représentation compressée de longueur fixe apprise par ML, capturant le sens sémantique. Similarité numérique facile.",tip:"7:40"},
+{front:"Pourquoi splitter",back:"Les modèles d'embedding ont des fenêtres limitées (512 → 8k tokens). On découpe le document, chaque split est embeddé.",tip:"8:04"},
+{front:"Paramètre k",back:"Nombre de voisins proches récupérés lors de la recherche (kNN). k=1 → 1 doc ; k=3 → 3 docs.",tip:"14:38"},
+{front:"Prompt template",back:"Placeholder avec clés (context, question) : les docs récupérés et la question y sont slotés, puis passés au LLM.",tip:"17:25"},
+{front:"LCEL",back:"LangChain Expression Language : compose prompt | llm | parser en chaînes avec invoke / batch / stream.",tip:"19:20"},
+{front:"RAG chain",back:"Chaîne qui déclenche automatiquement le retriever : {context: retriever|format_docs, question: RunnablePassthrough()} | prompt | llm | parser.",tip:"20:53"},
+{front:"Multi-Query",back:"Reformuler la question en plusieurs perspectives pour augmenter la fiabilité de la retrieval ; union unique des docs.",tip:"22:17"},
+{front:"RAG-Fusion",back:"Multi-Query + Reciprocal Rank Fusion : agrège les listes classées de chaque retrieval en un ranking consolidé.",tip:"28:23"},
+{front:"Décomposition",back:"Diviser la question en sous-problèmes (Least-to-Most, IRCoT) ; résoudre séquentiellement en chaînant les Q-A, ou en parallèle + concat.",tip:"33:58"},
+{front:"Step-back",back:"Poser une question plus abstraite (few-shot) ; récupérer pour la step-back ET l'originale ; combiner les contextes.",tip:"40:34"},
+{front:"HyDE",back:"Hypothetical Document Embeddings : générer un document hypothétique réponse, l'embedder, récupérer avec lui (plus proche de l'espace des docs).",tip:"47:25"},
+{front:"Routing logique",back:"Le LLM raisonne et produit un objet structuré (function calling / Pydantic) contraint aux sources disponibles.",tip:"52:08"},
+{front:"Routing sémantique",back:"Embedder la question, comparer aux prompts embeddés, choisir le prompt le plus similaire.",tip:"57:29"},
+{front:"Query construction",back:"Langage naturel → DSL : text-to-SQL, text-to-Cypher, text-to-metadata-filters pour vector stores.",tip:"59:07"},
+{front:"Multi-representation indexing",back:"Indexer un résumé/proposition optimisé pour la retrieval ; stocker le doc complet ; retourner le doc entier à la génération (MultiVectorRetriever + doc store).",tip:"1:05:09"},
+{front:"RAPTOR",back:"Index hiérarchique : cluster → summarize → récursion → index de tous les niveaux. Répond aux questions haut niveau spanning plusieurs docs.",tip:"1:11:40"},
+{front:"ColBERT",back:"Late interaction : embedding par token, MaxSim par token de question, somme des max. Forte performance, latence à surveiller.",tip:"1:19:20"},
+{front:"CRAG (Corrective RAG)",back:"Grader la relevance des docs ; si pertinent → génération ; sinon → transform query + web search puis génération. State machine LangGraph.",tip:"26:35"},
+{front:"Adaptive RAG",back:"Query analysis (routing) + tests en ligne (relevance, hallucination, answer) avec feedback loops. Command R (35B, open weights) bon pour routing + grading.",tip:"44:09"},
+{front:"LangGraph vs agents",back:"LangGraph = flows définis, fiables, guardrails, petits modèles rapides. Agents = raisonnement ouvert, moins fiables, grands LLMs.",tip:"2:08:27"},
+{front:"Multi-needle findings",back:"Plus d'aiguilles = pire ; raisonner sur la retrieval = pire ; aiguilles au début du contexte = plus dures (recency bias).",tip:"2:16:03"},
+{front:"Context stuffing limites",back:"Latence haute, coût tokens ($1/generation 100k GPT-4), retrieval non auditable, sécurité/authentification difficile.",tip:"2:32:04"},
+{front:"RAG is not dead",back:"« Jazz isn't dead, it just smells funny. » RAG évolue : document-centric, reasoning post-retrieval, flows cycliques.",tip:"2:21:19"}];
+function renderFlashcard(){var card=$("#flashcard");if(!card)return;var i=STATE.flash.index;var c=FLASHCARDS[i];
+card.classList.remove("flipped");
+card.innerHTML="<div class='flash-inner' onclick='flipFlash()'><div class='flash-face flash-front'><h3>"+c.front+"</h3><p class='muted'>Cliquez pour retourner.</p><div><span class='pill'>Carte "+(i+1)+"/"+FLASHCARDS.length+"</span><span class='pill'>⏱ "+c.tip+"</span></div></div><div class='flash-face flash-back'><p><strong>"+c.back+"</strong></p><p class='muted'>"+(STATE.flash.known[i]?"Déjà marquée connue.":"Marquez-la connue si maîtrisée.")+"</p></div></div>";
+var kb=$("#flash-known");if(kb)kb.textContent=STATE.flash.known[i]?"✅ Connue":"Marquer connue";}
+function flipFlash(){var c=$("#flashcard");if(c)c.classList.toggle("flipped")}
+function nextFlash(){STATE.flash.index=(STATE.flash.index+1)%FLASHCARDS.length;saveState();renderFlashcard()}
+function prevFlash(){STATE.flash.index=(STATE.flash.index-1+FLASHCARDS.length)%FLASHCARDS.length;saveState();renderFlashcard()}
+function markFlash(){var i=STATE.flash.index;if(STATE.flash.known[i])delete STATE.flash.known[i];else STATE.flash.known[i]=true;saveState();renderFlashcard()}
+
+/* ---------- EXAM ---------- */
+var FINAL_Q=[
+{q:"Les 3 étapes générales de RAG sont...",o:["Indexing, Retrieval, Generation","Training, Fine-tuning, Inference","Chunking, Prompting, Streaming"],a:0,e:"Indexer les docs, récupérer les pertinents, générer une réponse ancrée."},
+{q:"Pourquoi splitte-t-on les documents avant embedding ?",o:["Parce que les modèles d'embedding ont des fenêtres de contexte limitées","Pour réduire le coût du stockage","Pour accélérer le LLM"],a:0,e:"Fenêtres d'embedding : 512 → 8k tokens."},
+{q:"Le paramètre k d'un retriever contrôle...",o:["Le nombre de voisins proches récupérés","La taille des chunks","La température du LLM"],a:0,e:"kNN : k = nombre de docs retournés."},
+{q:"RAG-Fusion se distingue de Multi-Query par...",o:["L'ajout du Reciprocal Rank Fusion pour consolider les rankings","L'usage d'un modèle plus grand","L'absence de retrieval"],a:0,e:"RRF agrège les listes classées de chaque retrieval."},
+{q:"HyDE améliore la retrieval en...",o:["Générant un document hypothétique réponse, embeddé et utilisé pour récupérer","Décomposant la question","Routant vers le web"],a:0,e:"Le document hypothétique est plus proche de l'espace des documents que la question courte."},
+{q:"Le routing logique utilise...",o:["Un objet structuré contraint (function calling / Pydantic)","Uniquement la similarité cosinus","Un index inversé"],a:0,e:"Le LLM produit un objet contraint aux sources disponibles."},
+{q:"Multi-representation indexing indexe... et retourne...",o:["Un résumé pour la retrieval ; le document complet à la génération","Le chunk exact pour tout","Uniquement des propositions"],a:0,e:"Résumé optimisé pour pêche ; doc entier pour génération (long context)."},
+{q:"RAPTOR résout le problème...",o:["Des questions nécessitant de consolider l'info de plusieurs documents (index hiérarchique)","De la latence du LLM","Du coût des embeddings"],a:0,e:"Cluster → summarize → récursion → index de tous les niveaux."},
+{q:"Dans CRAG, si aucun document n'est pertinent...",o:["On transforme la requête et on fait un web search puis génération","On répond vide","On régénère sans contexte"],a:0,e:"Fallback web search pour les questions hors domaine de l'index."},
+{q:"Face aux LLMs long-context, la position du transcript est...",o:["RAG n'est pas mort mais évolue (document-centric, reasoning post-retrieval)","RAG est mort","Il faut toujours chunker finement"],a:0,e:"« Jazz isn't dead, it just smells funny. » Stuffing ≠ retrieval garanti."}];
+function finalQuizHTML(){var h='<div class="quiz" data-module="final" id="final-quiz"><h3>Examen final</h3>';
+for(var i=0;i<FINAL_Q.length;i++){var it=FINAL_Q[i];
+h+='<div class="q" data-answer="'+it.a+'"><p class="q-text">'+(i+1)+'. '+it.q+'</p>';
+for(var j=0;j<it.o.length;j++){h+='<label class="q-option"><input type="radio" name="final-q'+i+'" value="'+j+'">'+it.o[j]+'</label>';}
+h+='<div class="explain">'+it.e+'</div></div>';}
+h+='</div>';return h;}
+function startExam(){if(STATE.passed)return;STATE.remaining=480;tick();clearInterval(STATE.iv);STATE.iv=setInterval(function(){STATE.remaining--;tick();if(STATE.remaining<=0)submitExam()},1000);var b=$("#exam-start");if(b)b.style.display="none"}
+function tick(){var el=$("#exam-timer");if(!el)return;var m=Math.floor(Math.max(0,STATE.remaining)/60);var s=String(Math.max(0,STATE.remaining)%60).padStart(2,"0");el.textContent="⏱ "+m+":"+s}
+function submitExam(){clearInterval(STATE.iv);var box=$("#final-quiz");if(!box)return;var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+STATE.passed=correct>=7;STATE.finalScore=correct;STATE.finalTotal=qs.length;saveState();updateScore();
+var res=$("#exam-result");if(res)res.innerHTML="<strong>Résultat : "+correct+"/"+qs.length+"</strong><br>"+(STATE.passed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+(STATE.passed?"Vous maîtrisez le pipeline RAG de bout en bout, du basique au correctif.":"Revoyez indexing/retrieval/generation puis les techniques avancées.")+"</span>";
+var go=$("#go-cert");if(go)go.style.display="inline-flex";}
+function generateCert(){if(!STATE.passed){alert("Atteignez 7/10 à l'examen final.");return}
+var ni=$("#cert-name");var name=ni&&ni.value.trim()?ni.value.trim():"Apprenant";STATE.certName=name;saveState();
+var b=$("#certificate");if(!b)return;b.classList.add("show");
+$("#cert-name-out").textContent=name;$("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+$("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal;$("#cert-level").textContent=STATE.passed?"Maîtrise validée":"Fin de parcours";
+b.scrollIntoView({behavior:"smooth",block:"center"});}
+function toggleCheck(id){var el=document.getElementById(id);if(!el)return;STATE.checklist[id]=el.checked;saveState();updateChecklistProgress()}
+function updateChecklistProgress(){var b=$$(".checklist input[type=checkbox]");var d=0;for(var i=0;i<b.length;i++)if(b[i].checked)d++;var el=$("#check-progress");if(el)el.textContent=d+"/"+b.length}
+function exportJSON(){var data={cours:"RAG from Scratch Masterclass",date:new Date().toISOString(),profil:STATE.diagnostic,progression:STATE.visited,quiz:STATE.quizScores,examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.passed},checklist:STATE.checklist};
+var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="rapport-rag-from-scratch.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}
+function resetCourse(){if(!confirm("Réinitialiser toute la progression ?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+function initModule(id){
+if(id==="diagnostic")restoreDiagnostic();
+if(id==="build")resetBuild();
+if(id==="future")updateNeedle();
+if(id==="flashcards")renderFlashcard();
+if(id==="final"){tick();if(STATE.passed){var b=$("#exam-start");if(b)b.style.display="none";var go=$("#go-cert");if(go)go.style.display="inline-flex"}}
+if(id==="action"){var ni=$("#cert-name");if(ni&&STATE.certName)ni.value=STATE.certName;
+var k=Object.keys(STATE.checklist);for(var i=0;i<k.length;i++){var el=document.getElementById(k[i]);if(el)el.checked=STATE.checklist[k[i]]}
+updateChecklistProgress();if(STATE.passed){var b=$("#certificate");if(b)b.classList.add("show")}}}
+
+var MODULES=[
+{id:"home",title:"🏠 Accueil",content:'<h1>RAG from Scratch : combiner données privées et LLMs</h1><p class="lead">La plupart des données du monde sont privées, alors que les LLMs sont entraînés sur du public. RAG (Retrieval Augmented Generation) unit les deux : indexer vos documents, récupérer les pertinents selon la question, et ancrer la réponse du LLM dans ces documents. Ce cours construit tout, pas à pas, du pipeline de base aux flows correctifs (CRAG, Adaptive RAG) avec LangGraph. <span class="source">⏱ 0:19</span></p><div class="schema-wrap"><svg class="schema" viewBox="0 0 1000 250" role="img" aria-label="Pipeline RAG"><defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs><rect x="20" y="40" width="140" height="60" class="node"/><text x="90" y="65" text-anchor="middle">Documents</text><text x="90" y="85" text-anchor="middle" class="sub">privés</text><path class="dash" d="M160 70 L210 70" marker-end="url(#arr)"/><rect x="210" y="40" width="120" height="60" class="node"/><text x="270" y="65" text-anchor="middle">Split</text><text x="270" y="85" text-anchor="middle" class="sub">chunks</text><path class="dash" d="M330 70 L380 70" marker-end="url(#arr)"/><rect x="380" y="40" width="130" height="60" class="node purple"/><text x="445" y="65" text-anchor="middle">Embed</text><text x="445" y="85" text-anchor="middle" class="sub">vecteurs</text><path class="dash purple" d="M510 70 L560 70" marker-end="url(#arr)"/><rect x="560" y="40" width="130" height="60" class="node green"/><text x="625" y="65" text-anchor="middle">Vector store</text><text x="625" y="85" text-anchor="middle" class="sub">index</text><rect x="20" y="160" width="140" height="60" class="node yellow"/><text x="90" y="185" text-anchor="middle">Question</text><path class="dash yellow" d="M160 190 L380 190 L445 100" marker-end="url(#arr)"/><path class="dash green" d="M690 70 L760 70 L760 160" marker-end="url(#arr)"/><rect x="760" y="160" width="130" height="60" class="node cyan pulse"/><text x="825" y="185" text-anchor="middle">LLM</text><text x="825" y="205" text-anchor="middle" class="sub">réponse ancrée</text></svg></div><div class="grid"><div class="card info"><h3>Objectif</h3><p>Construire un RAG de bout en bout (indexing → retrieval → generation) puis maîtriser les techniques avancées : query translation, routing, indexing avancé, RAG correctif.</p></div><div class="card warn"><h3>Méthode</h3><p>Théorie + cas pratique de construction pas à pas avec code LangChain réel et console simulée, puis techniques avancées et débat long-context.</p></div><div class="card good"><h3>Livrable</h3><p>Un pipeline RAG fonctionnel, un catalogue de techniques (quand utiliser laquelle), et une checklist de mise en production.</p></div></div><div class="toolbar no-print"><button class="btn" onclick="showSection(\'diagnostic\')">Commencer par le diagnostic</button><button class="btn secondary" onclick="showSection(\'build\')">Aller au cas pratique</button></div>'},
+{id:"diagnostic",title:"🎯 Diagnostic",content:'<h1>Diagnostic initial</h1><p class="lead">Trois questions pour adapter votre parcours.</p><div class="quiz"><div class="q"><p class="q-text">1. Votre niveau ?</p><label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre RAG.</label><label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : j\'ai déjà fait un RAG basique.</label><label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je veux les techniques avancées et LangGraph.</label></div><div class="q"><p class="q-text">2. Votre objectif ?</p><label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre le pipeline RAG.</label><label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire un RAG de production.</label><label class="q-option"><input type="radio" name="diag-goal" value="avancer"> Maîtriser CRAG / Adaptive RAG / long-context.</label></div><div class="q"><p class="q-text">3. Votre temps ?</p><label class="q-option"><input type="radio" name="diag-time" value="express"> Express 20 min.</label><label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 60 min (cas pratique complet).</label></div><button class="btn" onclick="validateDiagnostic()">Valider</button><div class="result" id="diag-rec" style="display:none"></div><div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom(\'diagnostic\')">Continuer →</button></div></div>'},
+{id:"why",title:"1. Pourquoi RAG",content:'<h1>Motivation : données privées vs LLMs publics</h1><p class="lead">Les LLMs sont entraînés sur des données publiques (1.5T tokens pour les petits, >2T pour les propriétaires). Mais l\'essentiel des données importantes est privé : personnel, corporate. Les fenêtres de contexte grandissent (4-8k → 1M tokens), rendant possible d\'y injecter ces masses de données privées. <span class="source">⏱ 0:37</span></p><div class="grid"><div class="card info"><h3>LLM = nouvel OS</h3><p>Le LLM est au centre d\'un nouveau type de système d\'exploitation ; il devient critique de lui injecter de l\'information externe (données privées) pour traitement. <span class="source">⏱ 1:54</span></p></div><div class="card good"><h3>RAG = raisonner sur du récupéré</h3><p>Indexer des documents, les récupérer selon des heuristiques relatives à la question, et laisser le LLM raisonner dessus pour ancrer sa réponse. <span class="source">⏱ 2:37</span></p></div><div class="card purple"><h3>Pourquoi c\'est puissant</h3><p>Unit la connaissance et la capacité de traitement du LLM avec les sources privées où vit encore la plupart des données importantes. <span class="source">⏱ 3:03</span></p></div></div><div class="card warn"><h3>Plan du cours</h3><p>Query translation (multi-query, décomposition, step-back, HyDE) → routing → query construction → indexing → reranking/filtering → generation avec feedback (grade docs, grade answers, re-retrieve / rewrite). <span class="source">⏱ 3:35</span></p></div>'+quizHTML([{q:"RAG sert principalement à...",o:["Ancrer les réponses du LLM dans des documents privés récupérés","Accélérer l\'entraînement","Réduire la taille du modèle"],a:0,e:"Unit connaissance privée + capacité de raisonnement du LLM."},{q:"Les fenêtres de contexte ont évolué de...",o:["4-8k tokens à jusqu\'à 1M tokens","8k à 32k seulement","1k à 4k"],a:0,e:"Des dizaines de pages à des milliers de pages."}],"why")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'why\')">← Précédent</button><button class="btn" onclick="nextFrom(\'why\')">Indexing →</button></div>'},
+{id:"indexing",title:"2. Indexing",content:'<h1>Indexing : rendre les documents récupérables</h1><p class="lead">Charger les documents externes, les splitter (fenêtres d\'embedding limitées), les embedder en vecteurs de longueur fixe capturant le sens, et les stocker dans un index. La similarité numérique entre vecteurs est bien plus simple que comparer du texte libre. <span class="source">⏱ 6:16</span></p><div class="grid"><div class="card info"><h3>Sparse vectors</h3><p>Méthodes statistiques (fréquence de mots) sur un large vocabulaire, beaucoup de zéros. Bonnes méthodes de recherche historiques. <span class="source">⏱ 7:06</span></p></div><div class="card good"><h3>Dense embeddings</h3><p>Représentation compressée apprise par ML, de longueur fixe, capturant le sens sémantique du document. Recherche forte par similarité. <span class="source">⏱ 7:40</span></p></div><div class="card purple"><h3>Split → embed → store</h3><p>Chaque split est embeddé (ex : 1536 dims OpenAI) et stocké avec un lien vers le document brut. La question est embeddée de la même façon pour la recherche. <span class="source">⏱ 9:40</span></p></div></div>'+quizHTML([{q:"Pourquoi splitter les documents ?",o:["Les modèles d\'embedding ont des fenêtres limitées (512 → 8k tokens)","Pour réduire le coût","Pour accélérer le LLM"],a:0,e:"Chaque split est embeddé séparément."},{q:"Un embedding capture...",o:["Le sens sémantique du texte en vecteur de longueur fixe","La mise en forme du texte","Le nombre de mots"],a:0,e:"Représentation numérique compressée du sens."}],"indexing")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'indexing\')">← Précédent</button><button class="btn" onclick="nextFrom(\'indexing\')">Retrieval →</button></div>'},
+{id:"retrieval",title:"3. Retrieval",content:'<h1>Retrieval : recherche de similarité (kNN)</h1><p class="lead">Documents et question sont projetés dans le même espace vectoriel. La position reflète le sens : documents proches = sémantique proche. On fait une recherche de voisinage autour de la question et on récupère k voisins. <span class="source">⏱ 11:52</span></p><div class="grid"><div class="card info"><h3>Paramètre k</h3><p>Nombre de voisins proches à récupérer. k=1 → 1 doc ; k=3 → 3 docs. À tuner selon le besoin. <span class="source">⏱ 14:38</span></p></div><div class="card good"><h3>Voisinage local</h3><p>Dans l\'espace (toy 3D), on cherche les documents « à proximité » de la question embeddée : ce sont les pertinents. <span class="source">⏱ 12:32</span></p></div><div class="card purple"><h3>Écosystème</h3><p>Beaucoup de modèles d\'embedding, d\'index, de loaders et de splitters recombinables pour tester différentes façons d\'indexer/récupérer. <span class="source">⏱ 13:28</span></p></div></div>'+quizHTML([{q:"Le paramètre k contrôle...",o:["Le nombre de voisins récupérés","La taille des chunks","Le nombre d\'epochs"],a:0,e:"kNN : k voisins les plus proches de la question."}],"retrieval")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'retrieval\')">← Précédent</button><button class="btn" onclick="nextFrom(\'retrieval\')">Generation →</button></div>'},
+{id:"generation",title:"4. Generation",content:'<h1>Generation : stuffing, prompt template, chaînes LCEL</h1><p class="lead">Les documents récupérés sont « stuffés » dans la fenêtre de contexte du LLM. Un prompt template avec clés (context, question) reçoit les docs et la question, passe au LLM, puis un parser produit la réponse. <span class="source">⏱ 16:25</span></p><div class="grid"><div class="card info"><h3>Prompt template</h3><p>Placeholders {context} et {question} : on peuple le template depuis un dict (docs récupérés + question) → prompt value → LLM → message → string. <span class="source">⏱ 17:25</span></p></div><div class="card good"><h3>LCEL</h3><p>LangChain Expression Language : composer prompt | llm | parser en chaînes avec invoke / batch / stream. <span class="source">⏱ 19:20</span></p></div><div class="card purple"><h3>RAG chain</h3><p>Chaîne qui déclenche automatiquement le retriever : le dict {context, question} est auto-peuplé, retrieval inclus. <span class="source">⏱ 20:53</span></p></div></div>'+quizHTML([{q:"Le prompt template sert à...",o:["Sloter context et question avant de passer au LLM","Embedder la question","Splitter les docs"],a:0,e:"Clés {context} et {question} peuplées depuis un dict."},{q:"LCEL permet de...",o:["Composer prompt | llm | parser en chaînes (invoke/batch/stream)","Compiler le modèle","Indexer les docs"],a:0,e:"LangChain Expression Language."}],"generation")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'generation\')">← Précédent</button><button class="btn" onclick="nextFrom(\'generation\')">Cas pratique →</button></div>'},
+{id:"build",title:"🛠️ Cas pratique : construire",content:'<h1>Cas pratique : construire le pipeline RAG pas à pas</h1><p class="lead">Construisez le pipeline complet avec le code LangChain réel. Cliquez « Étape suivante » : chaque étape affiche le code exécuté et sa sortie simulée. Réglez k pour voir son effet sur la retrieval. <span class="source">⏱ 8:43</span></p><div class="simulator"><div class="slider-row"><label for="build-k">Paramètre k (voisins)</label><input id="build-k" type="range" min="1" max="6" value="1" oninput="updateKLabel()"><output id="build-ok">1</output></div><div class="toolbar no-print"><button class="btn" id="build-next" onclick="nextBuildStep()">Étape suivante →</button><button class="btn secondary" onclick="resetBuild()">Réinitialiser</button></div><p class="muted small" id="build-status">Cliquez sur « Étape suivante » pour construire le pipeline RAG.</p><div class="console" id="build-console"></div></div><h2>Code complet de référence</h2><details open><summary>Pipeline de base (indexing → retrieval → generation)</summary><div class="code">import os\nfrom langchain_community.document_loaders import WebBaseLoader\nfrom langchain_text_splitters import RecursiveCharacterTextSplitter\nfrom langchain_openai import OpenAIEmbeddings, ChatOpenAI\nfrom langchain_chroma import Chroma\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.runnables import RunnablePassthrough\nfrom langchain_core.output_parsers import StrOutputParser\n\n# 1. Load\nloader = WebBaseLoader("https://lilianweng.github.io/posts/2023-06-23-agent/")\ndocs = loader.load()\n\n# 2. Split\nsplitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)\nsplits = splitter.split_documents(docs)\n\n# 3. Embed + index\nvectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())\nretriever = vectorstore.as_retriever(search_kwargs={"k": 1})\n\n# 4. Prompt + chain\nllm = ChatOpenAI(model="gpt-3.5-turbo")\ntemplate = """Answer the following question based on this context: {context}\nQuestion: {question}"""\nprompt = ChatPromptTemplate.from_template(template)\n\ndef format_docs(ds):\n    return "\\n\\n".join(d.page_content for d in ds)\n\nrag_chain = (\n    {"context": retriever | format_docs, "question": RunnablePassthrough()}\n    | prompt | llm | StrOutputParser()\n)\n\nrag_chain.invoke("What is task decomposition?")</div></details><details><summary>Multi-Query (query translation)</summary><div class="code">generate_queries = (\n    multi_query_prompt          # "reframe en plusieurs sous-questions"\n    | llm\n    | StrOutputParser()\n    | (lambda x: x.split("\\n"))\n)\nquestions = generate_queries.invoke({"question": question})\nresults = [retriever.invoke(q) for q in questions]\nunique_docs = unique_union(results)   # union unique des docs</div></details><details><summary>RAG-Fusion (Reciprocal Rank Fusion)</summary><div class="code">def reciprocal_rank_fusion(results, k=60):\n    fused = defaultdict(float)\n    for doc_list in results:\n        for rank, d in enumerate(doc_list):\n            fused[d.page_content] += 1.0 / (rank + k)\n    return sorted(fused, key=fused.get, reverse=True)\n\n# retrieval par question reformulée → list of lists → RRF → ranking consolidé</div></details><details><summary>CRAG (LangGraph state machine)</summary><div class="code">graph = StateGraph(GraphState)   # state = dict(question, documents, generation)\ngraph.add_node("retrieve", retrieve)\ngraph.add_node("grade", grade_documents)      # relevance binaire (Pydantic yes/no)\ngraph.add_node("transform", transform_query)\ngraph.add_node("web", web_search)             # fallback Tavily\ngraph.add_node("generate", generate)\ngraph.set_entry_point("retrieve")\ngraph.add_edge("retrieve", "grade")\ngraph.add_conditional_edges("grade", decide, {"web": "transform", "generate": "generate"})\ngraph.add_edge("transform", "web"); graph.add_edge("web", "generate")\ngraph.add_edge("generate", END)</div></details><div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'build\')">← Précédent</button><button class="btn" onclick="nextFrom(\'build\')">Query translation →</button></div>'},
+{id:"query-translation",title:"5. Query translation",content:'<h1>Query translation : Multi-Query, RAG-Fusion, Décomposition, Step-back, HyDE</h1><p class="lead">Première étape d\'un RAG avancé : transformer la question utilisateur pour améliorer la retrieval. Une question mal posée ou ambiguë récupère mal. <span class="source">⏱ 22:29</span></p><div class="grid"><div class="card info"><h3>Multi-Query</h3><p>Reformuler en plusieurs perspectives ; retrieval par question ; union unique. Augmente la fiabilité quand la formulation initiale est mal alignée. <span class="source">⏱ 24:05</span></p></div><div class="card good"><h3>RAG-Fusion</h3><p>Multi-Query + Reciprocal Rank Fusion : consolide les listes classées en un ranking final (top-N unique). <span class="source">⏱ 29:22</span></p></div><div class="card purple"><h3>Décomposition</h3><p>Least-to-Most / IRCoT : sous-problèmes résolus séquentiellement (Q-A chaînés) ou en parallèle puis concaténés. <span class="source">⏱ 34:04</span></p></div><div class="card warn"><h3>Step-back</h3><p>Question plus abstraite (few-shot) ; retrieval sur step-back + originale ; contextes combinés. Utile pour docs techniques / manuels. <span class="source">⏱ 41:48</span></p></div><div class="card cyan" style="border-left:4px solid var(--cyan)"><h3>HyDE</h3><p>Document hypothétique généré comme réponse, embeddé, utilisé pour récupérer : plus proche de l\'espace des documents que la question courte. <span class="source">⏱ 47:49</span></p></div></div>'+quizHTML([{q:"HyDE améliore la retrieval en...",o:["Générant un document hypothétique réponse, embeddé pour récupérer","Routant vers le web","Décomposant la question"],a:0,e:"Document space > question space pour la similarité."},{q:"RAG-Fusion ajoute à Multi-Query...",o:["Reciprocal Rank Fusion pour consolider les rankings","Un modèle plus grand","Un index hiérarchique"],a:0,e:"RRF agrège les listes classées de chaque retrieval."}],"query-translation")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'query-translation\')">← Précédent</button><button class="btn" onclick="nextFrom(\'query-translation\')">Routing & construction →</button></div>'},
+{id:"routing",title:"6. Routing & construction",content:'<h1>Routing et query construction</h1><p class="lead">Router la question (éventuellement transformée) vers la bonne source : vector store, SQL DB, graph DB, web, ou fallback LLM. Puis convertir le langage naturel en DSL de la source. <span class="source">⏱ 52:08</span></p><div class="grid"><div class="card info"><h3>Routing logique</h3><p>Le LLM raisonne sur les sources disponibles et produit un objet structuré contraint (function calling + schéma Pydantic) : classification + function calling. <span class="source">⏱ 53:54</span></p></div><div class="card good"><h3>Routing sémantique</h3><p>Embedder la question, comparer aux prompts embeddés, choisir le plus similaire. Simple et efficace. <span class="source">⏱ 57:29</span></p></div><div class="card purple"><h3>Query construction</h3><p>NL → DSL : text-to-SQL, text-to-Cypher, text-to-metadata-filters (vector stores). Le schéma des filters disponibles est bindé au LLM via function calling. <span class="source">⏱ 59:07</span></p></div></div>'+quizHTML([{q:"Le routing logique produit...",o:["Un objet structuré contraint aux sources disponibles","Uniquement un score cosinus","Un chunk aléatoire"],a:0,e:"Classification + function calling → objet Pydantic parsé."}],"routing")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'routing\')">← Précédent</button><button class="btn" onclick="nextFrom(\'routing\')">Indexing avancé →</button></div>'},
+{id:"advanced-indexing",title:"7. Indexing avancé",content:'<h1>Indexing avancé : Multi-representation, RAPTOR, ColBERT</h1><div class="grid"><div class="card info"><h3>Multi-representation (Dense X)</h3><p>Découpler doc brut et unité de retrieval : indexer un résumé/proposition optimisé pour la pêche ; stocker le doc complet dans un doc store ; retourner le doc entier à la génération (MultiVectorRetriever + doc IDs). Idéal long-context. <span class="source">⏱ 1:05:57</span></p></div><div class="card good"><h3>RAPTOR</h3><p>Index hiérarchique : cluster → summarize → récursion jusqu\'à un résumé global ; index de tous les niveaux ensemble. Répond aux questions haut niveau spanning plusieurs docs. <span class="source">⏱ 1:12:12</span></p></div><div class="card purple"><h3>ColBERT (late interaction)</h3><p>Embedding par token (avec pondération positionnelle) ; pour chaque token de question, MaxSim sur les tokens du doc ; score = somme des max. Forte performance, latence à surveiller. <span class="source">⏱ 1:21:30</span></p></div></div>'+quizHTML([{q:"Multi-representation indexing indexe... et retourne...",o:["Un résumé pour la retrieval ; le document complet à la génération","Le chunk exact partout","Uniquement des propositions"],a:0,e:"Résumé optimisé pour pêche ; doc entier pour génération."},{q:"RAPTOR résout...",o:["Les questions nécessitant de consolider l\'info de plusieurs documents","La latence du LLM","Le coût des embeddings"],a:0,e:"Hiérarchie de résumés clusterisés récursivement."}],"advanced-indexing")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'advanced-indexing\')">← Précédent</button><button class="btn" onclick="nextFrom(\'advanced-indexing\')">RAG actif →</button></div>'},
+{id:"active-rag",title:"8. RAG actif (CRAG, Adaptive)",content:'<h1>RAG actif : CRAG et Adaptive RAG avec LangGraph</h1><p class="lead">Passer du RAG « single-shot » à des flows cycliques qui se corrigent : grader la relevance des docs, vérifier hallucinations et pertinence de la réponse, et boucler (re-retrieve / rewrite / web search). <span class="source">⏱ 26:35</span></p><div class="grid"><div class="card info"><h3>CRAG</h3><p>Grade chaque doc ; si au moins un pertinent → génération ; sinon → transform query + web search puis génération. State machine LangGraph (state = dict question/documents/generation). <span class="source">⏱ 29:46</span></p></div><div class="card good"><h3>Adaptive RAG</h3><p>Query analysis (routing : vector store / web / LLM fallback) + tests en ligne (relevance, hallucination, answer relevance) avec feedback loops. Command R (35B open weights) : bon tool use/routing, rapide, 128k context. <span class="source">⏱ 44:09</span></p></div><div class="card purple"><h3>LangGraph vs agents</h3><p>LangGraph = flows définis, fiables, « agent on guardrails », petits modèles rapides. Agents = raisonnement ouvert, moins fiables, grands LLMs. Trade-off flexibilité / fiabilité. <span class="source">⏱ 2:08:27</span></p></div></div>'+quizHTML([{q:"Dans CRAG, si aucun doc pertinent...",o:["Transform query + web search puis génération","Réponse vide","Régénération sans contexte"],a:0,e:"Fallback web search pour questions hors domaine."},{q:"LangGraph est préféré quand...",o:["Le flow est bien défini et on veut fiabilité + petits modèles rapides","On veut un raisonnement totalement ouvert","On n\'a pas de documents"],a:0,e:"Flows contraints = guardrails ; agents = ouvert mais moins fiable."}],"active-rag")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'active-rag\')">← Précédent</button><button class="btn" onclick="nextFrom(\'active-rag\')">Futur du RAG →</button></div>'},
+{id:"future",title:"9. Futur du RAG",content:'<h1>Le RAG est-il mort ? Long-context vs retrieval</h1><p class="lead">Avec des fenêtres de 1M tokens, pourquoi récupérer ? Tests multi-needle-in-haystack : plus d\'aiguilles = pire ; raisonner sur la retrieval = pire ; aiguilles au DÉBUT du contexte = plus dures (recency bias). Le stuffing n\'offre aucune garantie de retrieval. <span class="source">⏱ 2:12:06</span></p><div class="simulator"><h3>Visualiseur recency bias (multi-needle)</h3><div class="slider-row"><label for="nd-pos">Position de l\'aiguille (0=début → 100=fin)</label><input id="nd-pos" type="range" min="0" max="100" value="90" oninput="updateNeedle()"><output id="nd-opos">90%</output></div><div class="slider-row"><label for="nd-count">Nombre d\'aiguilles</label><input id="nd-count" type="range" min="1" max="10" step="1" value="1" oninput="updateNeedle()"><output id="nd-ocount">1</output></div><div class="meter"><div class="meter-fill" id="nd-fill"></div></div><p class="muted small" id="nd-label"></p><p class="muted small" id="nd-note"></p></div><div class="grid"><div class="card bad"><h3>Limites du stuffing</h3><p>Latence haute, coût tokens (~$1/generation 100k GPT-4), retrieval non auditable, sécurité/authentification difficile par utilisateur. <span class="source">⏱ 2:32:04</span></p></div><div class="card good"><h3>Futur : document-centric</h3><p>Moins de chunking idiosyncratique ; récupérer des documents entiers via résumés (multi-rep) ; routing/query analysis toujours pertinents ; reasoning post-retrieval (Self-RAG, CRAG). <span class="source">⏱ 2:23:51</span></p></div><div class="card purple"><h3>Verdict</h3><p>« Jazz isn\'t dead, it just smells funny. » RAG n\'est pas mort : il change. Régime pré-optimal entre chunking fin et stuffing intégral. <span class="source">⏱ 2:21:19</span></p></div></div>'+quizHTML([{q:"Les tests multi-needle montrent que...",o:["Plus d\'aiguilles et le raisonnement sur la retrieval dégradent la récupération ; le début du contexte est oublié","Le long context résout tout","Le stuffing est optimal"],a:0,e:"Recency bias : les aiguilles du début sont moins bien récupérées."}],"future")+'<div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'future\')">← Précédent</button><button class="btn" onclick="nextFrom(\'future\')">Scénarios →</button></div>'},
+{id:"scenarios",title:"🎬 Scénarios",content:'<h1>Scénarios : quelle technique pour quel problème ?</h1><div class="simulator"><div class="matcher-grid"><button class="matcher-btn" onclick="chooseScenario(\'multiquery\')">Question mal alignée</button><button class="matcher-btn" onclick="chooseScenario(\'ragfusion\')">Fusionner plusieurs retrievals</button><button class="matcher-btn" onclick="chooseScenario(\'decomposition\')">Question complexe multi-étapes</button><button class="matcher-btn" onclick="chooseScenario(\'stepback\')">Concept sous-jacent manquant</button><button class="matcher-btn" onclick="chooseScenario(\'hyde\')">Question courte vs docs denses</button><button class="matcher-btn" onclick="chooseScenario(\'routing\')">Plusieurs sources hétérogènes</button><button class="matcher-btn" onclick="chooseScenario(\'queryconstruction\')">Filters structurés depuis NL</button><button class="matcher-btn" onclick="chooseScenario(\'multirep\')">Récupérer le bon document</button><button class="matcher-btn" onclick="chooseScenario(\'raptor\')">Info spanning plusieurs docs</button><button class="matcher-btn" onclick="chooseScenario(\'colbert\')">Nuance perdue en 1 vecteur</button><button class="matcher-btn" onclick="chooseScenario(\'crag\')">Docs non pertinents</button><button class="matcher-btn" onclick="chooseScenario(\'adaptive\')">Pipeline qui se corrige</button></div><pre id="scenario-out" class="code" style="display:none"></pre></div><div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'scenarios\')">← Précédent</button><button class="btn" onclick="nextFrom(\'scenarios\')">Flashcards →</button></div>'},
+{id:"flashcards",title:"🃏 Flashcards",content:'<h1>Flashcards</h1><div class="flashcards"><div id="flashcard" class="flashcard"></div><div class="toolbar no-print"><button class="btn secondary" onclick="prevFlash()">← Précédente</button><button class="btn" onclick="flipFlash()">Retourner</button><button class="btn secondary" onclick="nextFlash()">Suivante →</button><button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button></div></div><div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'flashcards\')">← Précédent</button><button class="btn" onclick="nextFrom(\'flashcards\')">Examen →</button></div>'},
+{id:"final",title:"✅ Examen final",content:'<h1>Examen final</h1><p class="lead">10 questions. Seuil 7/10. 8 minutes.</p><div class="toolbar no-print"><button class="btn" id="exam-start" onclick="startExam()">Démarrer</button><div id="exam-timer" class="pill">⏱ 8:00</div></div>'+finalQuizHTML()+'<div class="toolbar no-print"><button class="btn" onclick="submitExam()">Soumettre</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection(\'action\')">Certificat →</button></div><div class="result" id="exam-result" aria-live="polite"></div>'},
+{id:"action",title:"🏆 Certificat & ressources",content:'<h1>Certificat, checklist & ressources</h1><div class="card info no-print"><h3>Nom pour le certificat</h3><input id="cert-name" placeholder="Prénom / pseudo" /><div class="toolbar"><button class="btn" onclick="generateCert()">Générer le certificat</button><button class="btn secondary" onclick="exportJSON()">Exporter JSON</button><button class="btn secondary" onclick="window.print()">Imprimer / PDF</button><button class="btn secondary" onclick="resetCourse()">Réinitialiser</button></div></div><div id="certificate" class="certificate"><span class="badge">🔎</span><h2>Certificat de maîtrise</h2><p>Décerné à</p><h3 id="cert-name-out">Apprenant</h3><p>pour avoir complété la masterclass</p><p class="highlight">RAG from Scratch — Indexing, Retrieval, Generation, CRAG, LangGraph</p><p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p></div><h2>Checklist de construction</h2><div class="card checklist"><label><input type="checkbox" id="c1" onchange="toggleCheck(\'c1\')"> Loader : charger les documents (WebBaseLoader / PDF loader).</label><label><input type="checkbox" id="c2" onchange="toggleCheck(\'c2\')"> Splitter : chunk_size / overlap adaptés à la fenêtre d\'embedding.</label><label><input type="checkbox" id="c3" onchange="toggleCheck(\'c3\')"> Embedder + indexer (Chroma / FAISS / Pinecone).</label><label><input type="checkbox" id="c4" onchange="toggleCheck(\'c4\')"> Retriever avec k tuné ; tracer les docs récupérés (LangSmith).</label><label><input type="checkbox" id="c5" onchange="toggleCheck(\'c5\')"> Prompt template {context}{question} + chaîne LCEL / RAG chain.</label><label><input type="checkbox" id="c6" onchange="toggleCheck(\'c6\')"> Query translation si retrieval faible (multi-query / HyDE / step-back).</label><label><input type="checkbox" id="c7" onchange="toggleCheck(\'c7\')"> Routing si sources multiples ; query construction si filters.</label><label><input type="checkbox" id="c8" onchange="toggleCheck(\'c8\')"> Indexing avancé si questions haut niveau (multi-rep, RAPTOR).</label><label><input type="checkbox" id="c9" onchange="toggleCheck(\'c9\')"> Grading en ligne (relevance, hallucination, answer) avec fallback (CRAG/Adaptive).</label><label><input type="checkbox" id="c10" onchange="toggleCheck(\'c10\')"> Évaluer : multi-needle, positions, reasoning ; se méfier des needle-in-haystack fournisseurs.</label></div><p class="muted small">Checklist : <span id="check-progress">0/10</span></p><h2>Ressources</h2><div class="resources"><ul><li><strong>Transcript source</strong> : série « RAG from Scratch » (Lance Martin, LangChain) + talk « Is RAG dead? ».</li><li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur AutoManus (Character VC), ex-MIT / Google / Walmart ; Q&A live bimensuel (20 $/mois), session 1h (200 $).</li><li><strong>GitHub ShenSeanChen</strong> : yt-DeepResearch-Backend (Kimi K2 + LangChain), launch-mvp-stripe-nextjs-supabase, yt-kimi-k2-claude, yt-supabase-tips-kanban.</li><li><strong>Ollama</strong> : pour exécuter localement Command R / Mistral / Llama et tester CRAG/Adaptive RAG sans coût API.</li></ul></div><div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom(\'action\')">← Examen</button><button class="btn" onclick="showSection(\'home\')">Accueil</button></div>'}
+];
+
+function renderNav(){var nav=$("#nav");var h="";for(var i=0;i<MODULES.length;i++){h+='<button data-target="'+MODULES[i].id+'">'+MODULES[i].title+'</button>'}nav.innerHTML=h;
+$$("#nav button").forEach(function(b){b.addEventListener("click",function(){showSection(this.getAttribute("data-target"))})});}
+function renderSections(){var m=$("#content");var h="";for(var i=0;i<MODULES.length;i++){h+='<section id="'+MODULES[i].id+'" class="section">'+MODULES[i].content+'</section>'}m.innerHTML=h;}
+function updateKLabel(){var k=$("#build-k");var o=$("#build-ok");if(k&&o)o.textContent=k.value;}
+function init(){loadState();document.body.setAttribute("data-theme",STATE.theme);document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+renderNav();renderSections();showSection("home");updateScore();updateChecklistProgress();}
+window.showSection=showSection;window.nextFrom=nextFrom;window.prevFrom=prevFrom;window.toggleTheme=toggleTheme;window.toggleSources=toggleSources;window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic;window.checkQuiz=checkQuiz;window.nextBuildStep=nextBuildStep;window.resetBuild=resetBuild;window.updateKLabel=updateKLabel;
+window.updateNeedle=updateNeedle;window.chooseScenario=chooseScenario;window.flipFlash=flipFlash;window.nextFlash=nextFlash;window.prevFlash=prevFlash;window.markFlash=markFlash;
+window.startExam=startExam;window.submitExam=submitExam;window.generateCert=generateCert;window.toggleCheck=toggleCheck;window.exportJSON=exportJSON;window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

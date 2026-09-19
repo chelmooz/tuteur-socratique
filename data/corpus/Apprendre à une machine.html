@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Multimodalité & Contrastive Representation Learning | Embeddings, CLIP, MNIST, PCA/UMAP</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🦁 <span>Multimodalité</span> & Contrastive Learning</div>
+      <div class="muted small">Embeddings conjoints • Ancre/positif/négatif • CLIP • MNIST • PCA/UMAP</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les citations ⏱"></button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="why">1. Pourquoi le multimodal</button>
+      <button data-target="data">2. Données &amp; embeddings</button>
+      <button data-target="contrastive">3. Ancre, positif, négatif</button>
+      <button data-target="loss">4. Contrastive loss &amp; CLIP</button>
+      <button data-target="lab">5. Lab MNIST : le code</button>
+      <button data-target="viz">6. Visualiser l espace appris</button>
+      <button data-target="scenarios">🎬 Scénarios</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="antipatterns">🚫 Anti-patterns</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat &amp; ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>Apprendre à une machine à comprendre plusieurs modalités</h1>
+      <p class="lead">
+        Cette leçon couvre la <strong>multimodalité</strong> : ce que sont les modèles multimodaux, et surtout comment enseigner à un
+        ordinateur la compréhension de données multimodales via le <strong>contrastive representation learning</strong>. On part du live
+        demo de recherche multimodale (texte → images, audio, vidéo) et on finit par un lab complet : entraîner un réseau sur MNIST
+        avec une contrastive loss, puis visualiser l espace vectoriel appris avec PCA et UMAP. <span class="source">⏱ 0:01</span>
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 1000 260" role="img" aria-label="Du multimodal vers l espace conjoint">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          <rect x="15" y="30" width="120" height="52" class="node green"/><text x="75" y="52" text-anchor="middle">Texte</text><text x="75" y="70" text-anchor="middle" class="sub">modèle f</text>
+          <rect x="15" y="100" width="120" height="52" class="node"/><text x="75" y="122" text-anchor="middle">Image</text><text x="75" y="140" text-anchor="middle" class="sub">modèle g</text>
+          <rect x="15" y="170" width="120" height="52" class="node yellow"/><text x="75" y="192" text-anchor="middle">Audio / Vidéo</text><text x="75" y="210" text-anchor="middle" class="sub">modèles h…</text>
+          <path class="dash green" d="M135 56 L205 118" marker-end="url(#arr)"/>
+          <path class="dash" d="M135 126 L205 126" marker-end="url(#arr)"/>
+          <path class="dash yellow" d="M135 196 L205 134" marker-end="url(#arr)"/>
+          <rect x="205" y="92" width="170" height="70" class="node purple pulse"/><text x="290" y="118" text-anchor="middle">Espace conjoint</text><text x="290" y="138" text-anchor="middle" class="sub">mêmes vecteurs</text>
+          <path class="dash purple" d="M375 127 L445 127" marker-end="url(#arr)"/>
+          <rect x="445" y="80" width="180" height="95" class="node pink"/><text x="535" y="104" text-anchor="middle">Contraste</text><text x="535" y="124" text-anchor="middle" class="sub">ancre + positif</text><text x="535" y="142" text-anchor="middle" class="sub">+ négatifs</text><text x="535" y="162" text-anchor="middle" class="sub">tirer / pousser</text>
+          <path class="dash pink" d="M625 127 L695 127" marker-end="url(#arr)"/>
+          <rect x="695" y="92" width="150" height="70" class="node cyan"/><text x="770" y="118" text-anchor="middle">Embeddings</text><text x="770" y="138" text-anchor="middle" class="sub">64-d (lab)</text>
+          <path class="dash cyan" d="M845 127 L895 127" marker-end="url(#arr)"/>
+          <rect x="895" y="80" width="95" height="95" class="node red"/><text x="942" y="112" text-anchor="middle">Recherche</text><text x="942" y="132" text-anchor="middle" class="sub">texte ↔ img</text><text x="942" y="150" text-anchor="middle" class="sub">↔ audio/vidéo</text>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Objectif</h3><p>Comprendre comment unifier texte, image, audio et vidéo dans un même espace vectoriel, et savoir le mettre en œuvre (loss contrastive, MNIST, PCA/UMAP).</p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Intuition (le lion qu on voit et qu on entend) → mécanisme (ancre/positif/négatif) → mathématique (loss) → code (lab) → preuve visuelle (clusters).</p></div>
+        <div class="card good"><h3>5 cas pratiques</h3><p>Recherche multimodale simulée, playground de contraste, calculateur de loss + matrice CLIP, déroulé du lab, visualiseur d espace avec rotation.</p></div>
+      </div>
+
+      <div class="card purple">
+        <h3>Phrase clé</h3>
+        <p>« It is only when you see the lion and hear him that you understand why he s the king of the jungle. » — combiner les modalités donne une meilleure compréhension des concepts. <span class="source">⏱ 1:45</span></p>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('data')">Sauter à la recherche multimodale</button>
+        <button class="btn secondary" onclick="showSection('lab')">Aller directement au lab</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour adapter ton parcours.</p>
+      <div class="quiz">
+        <div class="q">
+          <p class="q-text">1. Ton niveau ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre les embeddings.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : je code en Python / PyTorch.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="researcher"> Researcher : je veux maîtriser loss, CLIP, évaluation.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre le contraste et l espace conjoint.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire une recherche multimodale.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="entrainer"> Entraîner / évaluer un modèle d embeddings.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15 min.</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 45-60 min (lab complet).</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="why" class="section">
+      <h1>Pourquoi apprendre la multimodalité</h1>
+      <p class="lead">
+        Le contenu multimédia est partout : chercher une chanson, un film, un produit, un article Wikipédia — tout commence par une
+        recherche. Mais on ne veut pas chercher que du texte : on veut chercher dans des chansons, des bandes-annonces, des images
+        produits. <span class="source">⏱ 0:52</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Le live demo</h3><p>Une saisie texte « a bunch of lions » renvoie des images, de l audio et des vidéos. Ce cours explique la technologie derrière cette app. <span class="source">⏱ 0:19</span></p></div>
+        <div class="card good"><h3>Combiner = mieux comprendre</h3><p>Chaque modalité apporte une information différente ; les combiner donne une meilleure compréhension des concepts représentés. <span class="source">⏱ 1:37</span></p></div>
+        <div class="card purple"><h3>Como los humanos</h3><p>Un enfant, avant de parler, apprend en touchant, sentant, goûtant (même le savon), en regardant et en écoutant : sa base de connaissances se construit par interactions multimodales, pas par le langage. <span class="source">⏱ 2:02</span></p></div>
+      </div>
+      <div class="card warn">
+        <h3>Conclusion</h3>
+        <p>Si tu veux une IA plus intelligente et plus capable, elle doit apprendre et raisonner sur plusieurs modalités d information,
+        comme les humains. <span class="source">⏱ 2:26</span></p>
+      </div>
+      <div class="quiz" data-module="why">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. L exemple du lion sert à montrer que…</p>
+          <label class="q-option"><input type="radio" name="wh-q0" value="0"> les images sont plus fiables que le texte</label>
+          <label class="q-option"><input type="radio" name="wh-q0" value="1"> voir + entendre donne une meilleure compréhension que chaque modalité seule</label>
+          <label class="q-option"><input type="radio" name="wh-q0" value="2"> le son coûte plus cher à traiter</label>
+          <div class="explain">C est la combinaison qui fait « roi de la jungle ».</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. L analogie de l enfant illustre…</p>
+          <label class="q-option"><input type="radio" name="wh-q1" value="0"> que la connaissance de base se construit par interaction multimodale, avant le langage</label>
+          <label class="q-option"><input type="radio" name="wh-q1" value="1"> qu il faut parler avant de voir</label>
+          <label class="q-option"><input type="radio" name="wh-q1" value="2"> que le goût est la modalité principale</label>
+          <div class="explain">Toucher, sentir, regarder, écouter : multimodal d abord.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('why')">← Précédent</button><button class="btn" onclick="nextFrom('why')">Données &amp; embeddings →</button></div>
+    </section>
+
+    <section id="data" class="section">
+      <h1>Données multimodales et embeddings conjoints</h1>
+      <p class="lead">
+        Une donnée multimodale vient de sources différentes : texte, images, audio, vidéo, et plus. Chaque modalité décrit souvent des
+        concepts similaires — une photo de lion, un paragraphe sur le roi de la jungle, une vidéo de lions qui courent, le son d un
+        rugissement. Les <strong>multimodal embeddings</strong> permettent de représenter tout cela dans le <strong>même espace vectoriel</strong>.
+        <span class="source">⏱ 1:16</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Espace conjoint</h3><p>Un modèle d embedding multimodal produit un espace qui comprend toutes tes modalités : emails, images, fichiers audio, etc. <span class="source">⏱ 3:00</span></p></div>
+        <div class="card good"><h3>Similarité sémantique</h3><p>Le concept clé : préserver la similarité sémantique <em>dans</em> et <em>entre</em> les modalités. Objets similaires → vecteurs proches, quelle que soit la modalité. <span class="source">⏱ 3:10</span></p></div>
+        <div class="card warn"><h3>Concepts différents</h3><p>Lions et trompette restent éloignés dans l espace multimodal, même si l un est une image et l autre un audio. <span class="source">⏱ 3:23</span></p></div>
+        <div class="card purple"><h3>Point de départ</h3><p>On commence avec des modèles qui comprennent une modalité à la fois (texte, image, audio/vidéo), puis on les unifie. <span class="source">⏱ 3:30</span></p></div>
+      </div>
+
+      <h2>Cas pratique 1 — Recherche multimodale simulée</h2>
+      <p class="muted small">Tape une requête texte. Le moteur la projette dans l espace conjoint et classe des items image / texte / audio / vidéo par similarité — exactement le principe du live demo du début.</p>
+      <div class="simulator">
+        <label for="search-q">Requête</label>
+        <input id="search-q" type="text" value="lions running in the savanna" placeholder="ex : lion roar, trumpet jazz, smell the roses…" />
+        <div class="toolbar no-print">
+          <button class="btn" onclick="runSearch()">Rechercher</button>
+          <button class="btn secondary" onclick="setQuery('trumpet jazz solo')">Essayer « trumpet »</button>
+          <button class="btn secondary" onclick="setQuery('smell the roses')">Essayer « roses »</button>
+          <button class="btn secondary" onclick="resetSearch()">Reset</button>
+        </div>
+        <div id="search-results"></div>
+        <h3 style="margin-top:1rem">Projection dans l espace conjoint</h3>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--accent)"></i> image</span>
+          <span><i class="dot" style="background:var(--green)"></i> texte</span>
+          <span><i class="dot" style="background:var(--yellow)"></i> audio</span>
+          <span><i class="dot" style="background:var(--purple)"></i> vidéo</span>
+          <span><i class="dot" style="background:var(--red)"></i> requête</span>
+        </div>
+        <canvas id="search-canvas" width="640" height="340"></canvas>
+        <p class="muted small" id="search-note">La requête (étoile rouge) atterrit près des items sémantiquement proches, quelle que soit leur modalité : c est ça, un espace conjoint.</p>
+      </div>
+
+      <div class="quiz" data-module="data">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. Un espace d embeddings conjoint sert à…</p>
+          <label class="q-option"><input type="radio" name="da-q0" value="0"> compresser les fichiers</label>
+          <label class="q-option"><input type="radio" name="da-q0" value="1"> chiffrer les données</label>
+          <label class="q-option"><input type="radio" name="da-q0" value="2"> placer des concepts similaires proches, quelle que soit la modalité</label>
+          <div class="explain">Similarité sémantique dans et entre modalités.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Avant d unifier, on part de…</p>
+          <label class="q-option"><input type="radio" name="da-q1" value="0"> modèles spécialisés par modalité (texte, image, audio/vidéo)</label>
+          <label class="q-option"><input type="radio" name="da-q1" value="1"> un unique modèle géant</label>
+          <label class="q-option"><input type="radio" name="da-q1" value="2"> bases de données vectorielles</label>
+          <div class="explain">Puis la tâche est de les unifier dans un même espace. <span class="source">⏱ 3:49</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('data')">← Précédent</button><button class="btn" onclick="nextFrom('data')">Ancre, positif, négatif →</button></div>
+    </section>
+
+    <section id="contrastive" class="section">
+      <h1>Contrastive representation learning : ancre, positif, négatif</h1>
+      <p class="lead">
+        Unifier plusieurs modèles dans un même espace se fait par le <strong>contrastive representation learning</strong> : un procédé
+        général qui entraîne n importe quel modèle d embedding — et qui, ici, unifie plusieurs modèles en un seul modèle multimodal.
+        L idée : fournir des exemples <strong>positifs</strong> (similaires) et <strong>négatifs</strong> (différents), puis <em>tirer</em> les
+        vecteurs similaires et <em>pousser</em> les différents. <span class="source">⏱ 4:09</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Exemple texte</h3><p>Ancre : « he could smell the roses ». Positif : « a field of fragrant flowers ». Négatif : « the lion roared majestically ». <span class="source">⏱ 4:52</span></p></div>
+        <div class="card good"><h3>Exemple image</h3><p>Ancre : photo d un German Shepherd. Positif : version grayscale de l ancre. Négatif : photo d une fourmi. <span class="source">⏱ 5:24</span></p></div>
+        <div class="card purple"><h3>Passer au multimodal</h3><p>Ancre = vidéo de lions qui courent ; positifs/négatifs fournis en image ET en texte. Le push/pull s applique entre modalités → alignement dans un même espace. <span class="source">⏱ 6:04</span></p></div>
+      </div>
+
+      <h2>Cas pratique 2 — Playground de contraste</h2>
+      <p class="muted small">Choisis une ancre, puis applique des étapes de contraste : les positifs se rapprochent, les négatifs s éloignent. La similarité cosinus affichée évolue en conséquence.</p>
+      <div class="simulator">
+        <div class="toolbar no-print" id="anchor-btns"></div>
+        <div class="toolbar no-print">
+          <button class="btn" id="contrast-step" onclick="stepContrast()">Étape de contraste →</button>
+          <button class="btn secondary" onclick="resetContrast()">Réinitialiser</button>
+        </div>
+        <canvas id="contrast-canvas" width="640" height="360"></canvas>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--red)"></i> ancre</span>
+          <span><i class="dot" style="background:var(--green)"></i> positif (tiré)</span>
+          <span><i class="dot" style="background:var(--muted)"></i> négatif (poussé)</span>
+        </div>
+        <p class="muted small" id="contrast-note">Sélectionne une ancre pour commencer.</p>
+      </div>
+
+      <div class="quiz" data-module="contrastive">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Le contrastive representation learning sert à…</p>
+          <label class="q-option"><input type="radio" name="co-q0" value="0"> générer des images</label>
+          <label class="q-option"><input type="radio" name="co-q0" value="1"> entraîner un modèle d embedding en tirant les similaires et poussant les différents</label>
+          <label class="q-option"><input type="radio" name="co-q0" value="2"> classer par étiquettes fixes</label>
+          <div class="explain">Procédé général, pas seulement multimodal. <span class="source">⏱ 4:16</span></div>
+        </div>
+        <div class="q" data-answer="2">
+          <p class="q-text">2. Dans l exemple image du transcript, le positif du German Shepherd est…</p>
+          <label class="q-option"><input type="radio" name="co-q1" value="0"> une photo de lion</label>
+          <label class="q-option"><input type="radio" name="co-q1" value="1"> une fourmi</label>
+          <label class="q-option"><input type="radio" name="co-q1" value="2"> la version grayscale de l ancre</label>
+          <div class="explain">Même concept, transformation différente.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('contrastive')">← Précédent</button><button class="btn" onclick="nextFrom('contrastive')">Contrastive loss &amp; CLIP →</button></div>
+    </section>
+
+    <section id="loss" class="section">
+      <h1>La contrastive loss, CLIP et ImageBind</h1>
+      <p class="lead">
+        Le push/pull s accomplit avec la <strong>contrastive loss function</strong> : encoder ancre et exemples en vecteurs de même
+        dimension, calculer les distances, puis <em>minimiser</em> la distance à l ancre pour les positifs et la <em>maximiser</em> pour
+        les négatifs. <span class="source">⏱ 5:41</span>
+      </p>
+      <div class="formula">L = − log&nbsp; exp( sim(q, k⁺)/τ ) / [ exp( sim(q, k⁺)/τ ) + Σ<sub>j</sub> exp( sim(q, k⁻ⱼ)/τ ) ]</div>
+      <div class="grid">
+        <div class="card info"><h3>Fonctions d encodage</h3><p>f prend une image → vecteur q ; g prend une vidéo → vecteur k. Même dimension. <span class="source">⏱ 7:03</span></p></div>
+        <div class="card good"><h3>Numérateur</h3><p>Similarité entre exemples positifs (image de lion + vidéo de lions qui courent) : on veut qu elle soit la plus haute possible. <span class="source">⏱ 7:20</span></p></div>
+        <div class="card warn"><h3>Dénominateur</h3><p>Un négatif (image de lion + chatons sur un vélo) — en fait un parmi beaucoup qu il faut sommer. On normalise en remettant le positif, et le signe moins devant la loss signifie : minimiser. <span class="source">⏱ 7:35</span></p></div>
+        <div class="card purple"><h3>Effet</h3><p>Minimiser tire les embeddings vidéo positifs vers l ancre image et pousse la vidéo négative loin. À faire modalité par modalité (audio, texte, vidéo) — c est ce que fait ImageBind. <span class="source">⏱ 8:02</span></p></div>
+      </div>
+
+      <h2>CLIP (2021) : la diagonale comme positif</h2>
+      <p class="muted small">Trouver assez d ancres et d exemples contrastés est délicat. CLIP prend des images et leurs légendes correspondantes : l image + sa légende = ancre + positif (diagonale de la matrice) ; tout autre pairing aléatoire image/légende est probablement un négatif.</p>
+      <div class="simulator">
+        <div id="clip-matrix"></div>
+        <p class="muted small" id="clip-note">Survole une cellule : verte = paire (image, sa légende) → positif ; rouge = pairing aléatoire → négatif.</p>
+      </div>
+
+      <h2>Cas pratique 3 — Calculateur de loss</h2>
+      <div class="simulator">
+        <div class="slider-row"><label for="ls-pos">sim(ancre, positif)</label><input id="ls-pos" type="range" min="0" max="1" step="0.01" value="0.35" oninput="updateLoss()"><output id="lo-pos">0.35</output></div>
+        <div class="slider-row"><label for="ls-neg">sim(ancre, négatif)</label><input id="ls-neg" type="range" min="0" max="1" step="0.01" value="0.30" oninput="updateLoss()"><output id="lo-neg">0.30</output></div>
+        <div class="slider-row"><label for="ls-n">nombre de négatifs</label><input id="ls-n" type="range" min="1" max="64" step="1" value="7" oninput="updateLoss()"><output id="lo-n">7</output></div>
+        <div class="slider-row"><label for="ls-t">température τ</label><input id="ls-t" type="range" min="0.05" max="1" step="0.05" value="0.2" oninput="updateLoss()"><output id="lo-t">0.20</output></div>
+        <div class="loss-out" id="loss-value">—</div>
+        <p class="muted small" id="loss-note">Glisse les curseurs : augmente sim(positif), baisse sim(négatif), augmente le nombre de négatifs → la loss chute. C est littéralement le « tirer / pousser » du transcript.</p>
+      </div>
+
+      <div class="quiz" data-module="loss">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="0">
+          <p class="q-text">1. Dans CLIP, la paire positive est…</p>
+          <label class="q-option"><input type="radio" name="lo-q0" value="0"> l image et sa légende (diagonale)</label>
+          <label class="q-option"><input type="radio" name="lo-q0" value="1"> deux images quelconques</label>
+          <label class="q-option"><input type="radio" name="lo-q0" value="2"> deux légendes quelconques</label>
+          <div class="explain">Tout autre pairing aléatoire sert de négatif. <span class="source">⏱ 6:32</span></div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">2. Le signe moins devant la loss signifie…</p>
+          <label class="q-option"><input type="radio" name="lo-q1" value="0"> qu on maximise la similarité négative</label>
+          <label class="q-option"><input type="radio" name="lo-q1" value="1"> qu on minimise la loss → positifs tirés, négatifs poussés</label>
+          <label class="q-option"><input type="radio" name="lo-q1" value="2"> qu on ignore les négatifs</label>
+          <div class="explain">Minimiser pousse le positif vers la distance idéale et éloigne les négatifs.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('loss')">← Précédent</button><button class="btn" onclick="nextFrom('loss')">Lab MNIST →</button></div>
+    </section>
+
+    <section id="lab" class="section">
+      <h1>Lab : entraînez un modèle d embeddings sur MNIST</h1>
+      <p class="lead">
+        On entraîne un réseau à apprendre des embeddings sur le dataset d images de chiffres MNIST (0-9), avec la contrastive loss,
+        puis on visualise l espace appris. Imports : PyTorch, plotly, umap, et la classe <code>MNISTDataset</code> qui fournit ancre +
+        positifs + négatifs. <span class="source">⏱ 8:30</span>
+      </p>
+
+      <div class="grid">
+        <div class="card info"><h3>MNISTDataset</h3><p>Chaque image de chiffre est étiquetée. La classe fournit une ancre (un chiffre), un positif (autre image du même chiffre) et un négatif (autre chiffre, ex. ancre 5 → positif 5, négatif 6 ou 7). <span class="source">⏱ 9:09</span></p></div>
+        <div class="card good"><h3>Clé 1 : labeling</h3><p>Si le label de l exemple correspond à celui de l ancre → positif ; sinon → négatif. <span class="source">⏱ 9:54</span></p></div>
+        <div class="card warn"><h3>Clé 2 : distances idéales</h3><p>Avec la similarité cosinus : positif idéal = 1, négatif idéal = 0. <span class="source">⏱ 10:20</span></p></div>
+        <div class="card purple"><h3>Architecture</h3><p>2 couches convolutives (extraire les features visuelles du chiffre) + 2 couches linéaires (transformer ces features en représentation 64-d). Image → conv → conv → flatten → lin → lin → vecteur 64-d. <span class="source">⏱ 12:22</span></p></div>
+      </div>
+
+      <pre class="code"># mnist_dataset.py — les deux parties clés
+# 1) labeling positif / négatif
+if example_label == anchor_label:
+    positives.append(example)      # 7 avec 7  -&gt; positif
+else:
+    negatives.append(example)      # 7 avec 5  -&gt; négatif
+
+# 2) distance idéale (cosine similarity)
+ideal_distance = 1.0 if is_positive else 0.0</pre>
+
+      <pre class="code"># contrastive loss : cosinus vs distance idéale
+class ContrastiveLoss(nn.Module):
+    def forward(self, anchor, contrasted, ideal_distance):
+        s = F.cosine_similarity(anchor, contrasted)   # étape 1 : score
+        return ((s - ideal_distance) ** 2).mean()     # étape 2 : écarter de l'idéal</pre>
+
+      <h2>Cas pratique 4 — Déroulé du lab</h2>
+      <p class="muted small">Chaque étape correspond à un bloc du notebook. Le simulateur d epochs montre la courbe de loss qui se stabilise vers 20 epochs (l essentiel de l apprentissage dans les 5-10 premières).</p>
+      <div class="simulator">
+        <p class="muted small" id="train-status">Clique sur « Étape suivante » pour dérouler le pipeline du lab.</p>
+        <div id="train-log"></div>
+        <div class="toolbar no-print">
+          <button class="btn" id="train-next" onclick="nextTrainStep()">Étape suivante →</button>
+          <button class="btn secondary" onclick="resetTrain()">Réinitialiser</button>
+        </div>
+        <h3 style="margin-top:1rem">Courbe de loss (synthétique, 100 epochs pré-entraînés fournis)</h3>
+        <canvas id="loss-canvas" width="640" height="240"></canvas>
+        <div class="toolbar no-print">
+          <button class="btn" id="epoch-btn" onclick="simEpoch()">Simuler un epoch</button>
+          <button class="btn secondary" onclick="resetEpoch()">Reset courbe</button>
+        </div>
+        <p class="muted small" id="epoch-note">Entraînement réel : 2-3 min/epoch → on charge le checkpoint pré-entraîné (100 epochs). Passe <code>train=True</code> pour tout relancer.</p>
+      </div>
+
+      <div class="quiz" data-module="lab">
+        <h3>Quiz lab</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. La sortie du réseau dans le lab est…</p>
+          <label class="q-option"><input type="radio" name="lb-q0" value="0"> une probabilité par chiffre</label>
+          <label class="q-option"><input type="radio" name="lb-q0" value="1"> une image reconstruite</label>
+          <label class="q-option"><input type="radio" name="lb-q0" value="2"> un vecteur de 64 dimensions</label>
+          <div class="explain">2 conv + 2 lin → 64-d. <span class="source">⏱ 12:26</span></div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Distance idéale cosinus : positif et négatif valent…</p>
+          <label class="q-option"><input type="radio" name="lb-q1" value="0"> 1 et 0</label>
+          <label class="q-option"><input type="radio" name="lb-q1" value="1"> 0 et 1</label>
+          <label class="q-option"><input type="radio" name="lb-q1" value="2"> 1 et 1</label>
+          <div class="explain">Positif → 1 (même direction), négatif → 0.</div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">3. Pourquoi charger le checkpoint plutôt qu entraîner ?</p>
+          <label class="q-option"><input type="radio" name="lb-q2" value="0"> le checkpoint est plus petit</label>
+          <label class="q-option"><input type="radio" name="lb-q2" value="1"> l entraînement est lent (2-3 min/epoch)</label>
+          <label class="q-option"><input type="radio" name="lb-q2" value="2"> le GPU est obligatoire</label>
+          <div class="explain">CPU par défaut, GPU/CUDA si disponibles. <span class="source">⏱ 16:29</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('lab')">← Précédent</button><button class="btn" onclick="nextFrom('lab')">Visualiser l espace →</button></div>
+    </section>
+
+    <section id="viz" class="section">
+      <h1>Visualiser l espace appris : PCA, UMAP, cosine vs euclidien</h1>
+      <p class="lead">
+        Encoder tout le training set avec le modèle → vecteurs 64-d + labels. Comme on ne voit pas le monde en 64 dimensions :
+        <strong>PCA</strong> 64 → 3 (scatter plotly interactif), puis <strong>UMAP</strong> → 2. Attention : la métrique compte — UMAP
+        default à la distance euclidienne, ce qui ne donne pas une vue fidèle ; il faut <code>metric="cosine"</code>.
+        <span class="source">⏱ 17:49</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Cosine → spokes</h3><p>Avec la distance cosinus, les embeddings de chiffres similaires s alignent en forme de rayon / ligne plutôt qu en cluster : la cosinus dépend des angles, contrairement à l euclidien qui minimise la proximité. <span class="source">⏱ 19:25</span></p></div>
+        <div class="card good"><h3>UMAP cosine → jellyfish</h3><p>Chaque chiffre forme un cluster distinct, motif « méduse » : preuve que l entraînement contrastif a réussi. <span class="source">⏱ 21:13</span></p></div>
+        <div class="card bad"><h3>UMAP euclidien → strings</h3><p>Sans préciser la métrique, UMAP utilise l euclidien et donne des « ficelles » : moins fidèle à l espace appris en cosinus. <span class="source">⏱ 21:46</span></p></div>
+        <div class="card warn"><h3>Vidéo 100 epochs</h3><p>Au début tout est agglutiné ; avec le temps les similarités s alignent et les chiffres différents s écartent — l effet pull/push en direct. <span class="source">⏱ 22:09</span></p></div>
+      </div>
+
+      <h2>Cas pratique 5 — Visualiseur d espace d embeddings</h2>
+      <p class="muted small">Glisse pour pivoter (3D), molette pour zoomer. Change la forme et la vue pour reproduire les trois observations du transcript.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" id="shape-spokes" onclick="setShape('spokes')">Espace appris (cosine) → spokes</button>
+          <button class="btn secondary" id="shape-jelly" onclick="setShape('jelly')">UMAP metric=cosine → jellyfish</button>
+          <button class="btn secondary" id="shape-string" onclick="setShape('string')">UMAP metric=euclidean → strings</button>
+        </div>
+        <div class="toolbar no-print">
+          <button class="btn secondary" id="view-3d" onclick="setView(3)">Vue 3D (PCA 64→3)</button>
+          <button class="btn secondary" id="view-2d" onclick="setView(2)">Vue 2D (UMAP →2)</button>
+          <button class="btn secondary" onclick="resetSpace()">Reset caméra</button>
+        </div>
+        <canvas id="space-canvas" width="640" height="400"></canvas>
+        <div class="legend" id="space-legend"></div>
+        <p class="muted small" id="space-note">Astuce : en 3D, certains chiffres peuvent paraître proches (ex. 2 et 4) à cause de la compression 64→3 — tout dépend de l angle. <span class="source">⏱ 20:04</span></p>
+      </div>
+
+      <div class="quiz" data-module="viz">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Pourquoi régler metric="cosine" dans UMAP ici ?</p>
+          <label class="q-option"><input type="radio" name="vi-q0" value="0"> c est plus rapide</label>
+          <label class="q-option"><input type="radio" name="vi-q0" value="1"> le modèle a été entraîné en cosinus ; l euclidien par défaut fausse la vue</label>
+          <label class="q-option"><input type="radio" name="vi-q0" value="2"> UMAP n accepte que la cosinus</label>
+          <div class="explain">UMAP default = euclidien → « strings » au lieu de clusters fidèles.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. PCA sert ici à…</p>
+          <label class="q-option"><input type="radio" name="vi-q1" value="0"> réduire 64-d → 3-d pour visualiser</label>
+          <label class="q-option"><input type="radio" name="vi-q1" value="1"> entraîner le réseau</label>
+          <label class="q-option"><input type="radio" name="vi-q1" value="2"> calculer la loss</label>
+          <div class="explain">Puis UMAP descend à 2-d pour le plan.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('viz')">← Précédent</button><button class="btn" onclick="nextFrom('viz')">Scénarios →</button></div>
+    </section>
+
+    <section id="scenarios" class="section">
+      <h1>Scénarios : quelle brique pour quel besoin ?</h1>
+      <div class="simulator">
+        <div class="grid">
+          <button class="btn secondary" onclick="chooseScenario('search')">Chercher du média par du texte</button>
+          <button class="btn secondary" onclick="chooseScenario('unify')">Unifier texte + image + audio</button>
+          <button class="btn secondary" onclick="chooseScenario('pairs')">Pas de paires annotées</button>
+          <button class="btn secondary" onclick="chooseScenario('space')">Choisir la métrique</button>
+          <button class="btn secondary" onclick="chooseScenario('viz')">Prouver que ça a appris</button>
+          <button class="btn secondary" onclick="chooseScenario('slow')">Entraînement trop lent</button>
+          <button class="btn secondary" onclick="chooseScenario('dim')">Vecteurs trop grands</button>
+          <button class="btn secondary" onclick="chooseScenario('next')">Passer à la base vectorielle</button>
+        </div>
+        <pre id="scenario-out" class="code" style="display:none"></pre>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button><button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button></div>
+    </section>
+
+    <section id="flashcards" class="section">
+      <h1>Flashcards</h1>
+      <details open><summary>Multimodal data</summary><p>Données venant de sources différentes : texte, images, audio, vidéo, et plus. Chaque modalité décrit souvent des concepts similaires. <span class="source">⏱ 1:16</span></p></details>
+      <details><summary>Pourquoi combiner</summary><p>Chaque modalité apporte une info différente ; les combiner donne une meilleure compréhension (voir + entendre le lion). <span class="source">⏱ 1:37</span></p></details>
+      <details><summary>Multimodal embeddings</summary><p>Représenter toutes les modalités dans le même espace vectoriel : photo de lion proche du texte « lions », du rugissement, de la vidéo. <span class="source">⏱ 2:42</span></p></details>
+      <details><summary>Espace conjoint</summary><p>Préserve la similarité sémantique dans et entre modalités ; lions vs trompette = loin. <span class="source">⏱ 3:10</span></p></details>
+      <details><summary>Point de départ</summary><p>Modèles mono-modalité spécialisés (texte, image, audio/vidéo), à unifier ensuite. <span class="source">⏱ 3:30</span></p></details>
+      <details><summary>Contrastive repr. learning</summary><p>Procédé général pour entraîner tout modèle d embedding ; ici, unifier plusieurs modèles en un modèle multimodal. <span class="source">⏱ 4:13</span></p></details>
+      <details><summary>Ancre / positif / négatif</summary><p>Ancre = tout point de données ; positif = similaire (« smell the roses » ↔ « field of fragrant flowers ») ; négatif = dissemblable (« lion roared »). <span class="source">⏱ 4:52</span></p></details>
+      <details><summary>Push / pull</summary><p>Tirer les vecteurs similaires vers l ancre, pousser les différents loin. <span class="source">⏱ 5:14</span></p></details>
+      <details><summary>Contrastive loss</summary><p>Encoder en vecteurs de même dimension, calculer les distances, minimiser la distance à l ancre pour les positifs, la maximiser pour les négatifs. <span class="source">⏱ 5:41</span></p></details>
+      <details><summary>Formule</summary><p>Numérateur = similarité positive (haute) ; dénominateur = somme des négatifs + normalisation par le positif ; signe moins → minimiser. <span class="source">⏱ 7:20</span></p></details>
+      <details><summary>CLIP (2021)</summary><p>Images + légendes correspondantes = ancre + positif (diagonale) ; tout autre pairing = négatif. Loss contrastive pour un modèle texte-image. <span class="source">⏱ 6:32</span></p></details>
+      <details><summary>ImageBind</summary><p>Appliquer la même loss modalité par modalité (audio, texte, vidéo…) pour aligner tout dans un espace. <span class="source">⏱ 8:11</span></p></details>
+      <details><summary>MNISTDataset</summary><p>Chiffres 0-9 étiquetés ; fournit ancre + positif (même chiffre) + négatif (autre chiffre). <span class="source">⏱ 9:09</span></p></details>
+      <details><summary>Distances idéales</summary><p>Cosinus : positif = 1, négatif = 0. <span class="source">⏱ 10:31</span></p></details>
+      <details><summary>Architecture lab</summary><p>2 conv (features visuelles) + 2 lin (→ 64-d) ; image → conv → conv → flatten → lin → lin → vecteur 64-d. <span class="source">⏱ 12:32</span></p></details>
+      <details><summary>Loss implémentée</summary><p>Étape 1 : score = cosinus(ancre, exemple) ; étape 2 : comparer au distance idéale ; moindre écart = moindre loss. <span class="source">⏱ 14:04</span></p></details>
+      <details><summary>Entraînement</summary><p>Optimizer (gradient descent), loss contrastive, scheduler, checkpoints ; forward + backward jusqu à convergence ; loss moyenne par epoch. <span class="source">⏱ 14:57</span></p></details>
+      <details><summary>Pré-entraîné</summary><p>2-3 min/epoch → charger le checkpoint 100 epochs ; loss stabilisée vers 20 epochs, essentiel dans les 5-10 premières. <span class="source">⏱ 16:29</span></p></details>
+      <details><summary>PCA 64→3</summary><p>Réduction de dimension pour visualiser en scatter plotly interactif (rotation, zoom). <span class="source">⏱ 18:33</span></p></details>
+      <details><summary>Cosine → spokes</summary><p>Chiffres similaires alignés en rayons/lignes, pas en clusters : la cosinus dépend des angles. <span class="source">⏱ 19:25</span></p></details>
+      <details><summary>UMAP metric=cosine</summary><p>Impératif de spécifier la métrique ; donne des clusters « méduse » → entraînement réussi. <span class="source">⏱ 20:43</span></p></details>
+      <details><summary>UMAP euclidien</summary><p>Par défaut : donne des « strings » — vue moins fidèle à l espace appris. <span class="source">⏱ 21:46</span></p></details>
+      <details><summary>Vidéo 100 epochs</summary><p>D abord tout agglutiné, puis alignement des similarités et étalement des différences : pull/push visible. <span class="source">⏱ 22:09</span></p></details>
+      <details><summary>Suite</summary><p>Leçon suivante : base vectorielle + modèle multimodal pour vectorizer images/vidéos et chercher par texte, image, vidéo. <span class="source">⏱ 23:01</span></p></details>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button></div>
+    </section>
+
+    <section id="antipatterns" class="section">
+      <h1>Anti-patterns du contrastive learning</h1>
+      <div class="grid">
+        <div class="card bad"><h3>Oublier la métrique dans UMAP</h3><p>Laissé en euclidien par défaut alors que le modèle est entraîné en cosinus → clusters trompeurs (« strings »).</p></div>
+        <div class="card bad"><h3>Trop peu de négatifs</h3><p>Un seul négatif par ancre ≈ pas de signal ; CLIP exploite justement tous les autres pairings de la matrice.</p></div>
+        <div class="card bad"><h3>Positifs triviaux</h3><p>Un « positif » qui n est pas le même concept (lion vs chaton) apprend à confondre plutôt qu à aligner.</p></div>
+        <div class="card bad"><h3>Comparer des vecteurs de dimensions différentes</h3><p>La loss exige des encodages f/g de même dimension ; sinon la similarité n a pas de sens.</p></div>
+        <div class="card bad"><h3>Relancer tout l entraînement à chaque question</h3><p>Comme dans le lab RAG : ré-encoder à chaque requête est inefficace — encoder une fois, réutiliser.</p></div>
+        <div class="card bad"><h3>Interpréter 3D comme la vérité</h3><p>La compression 64→3 peut rapprocher visuellement des chiffres distincts (2 et 4) selon l angle.</p></div>
+        <div class="card bad"><h3>τ fixe sans test</h3><p>La température contrôle la netteté du contraste ; trop haute = tout flou, trop basse = gradient mort.</p></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button><button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button></div>
+    </section>
+
+    <section id="final" class="section">
+      <h1>Examen final</h1>
+      <p class="lead">12 questions. Seuil 9/12 pour débloquer le certificat.</p>
+      <div class="quiz" data-module="final" id="final-quiz">
+        <div class="q" data-answer="1"><p class="q-text">1. Une donnée multimodale…</p><label class="q-option"><input type="radio" name="fi-q0" value="0"> est toujours une vidéo</label><label class="q-option"><input type="radio" name="fi-q0" value="1"> vient de sources différentes : texte, image, audio, vidéo</label><label class="q-option"><input type="radio" name="fi-q0" value="2"> est chiffrée</label><div class="explain">Et chaque modalité décrit souvent des concepts similaires.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">2. Un espace d embeddings conjoint…</p><label class="q-option"><input type="radio" name="fi-q1" value="0"> place les concepts similaires proches, dans et entre modalités</label><label class="q-option"><input type="radio" name="fi-q1" value="1"> sépare strictement chaque modalité</label><label class="q-option"><input type="radio" name="fi-q1" value="2"> réduit la taille des fichiers</label><div class="explain">Lion image ≈ texte « lions » ≈ rugissement ≈ vidéo.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">3. Avant unification, on part de…</p><label class="q-option"><input type="radio" name="fi-q2" value="0"> CLIP</label><label class="q-option"><input type="radio" name="fi-q2" value="1"> MNIST</label><label class="q-option"><input type="radio" name="fi-q2" value="2"> modèles mono-modalité spécialisés</label><div class="explain">Puis le contraste les unifie dans un même espace.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">4. Le contrastive representation learning…</p><label class="q-option"><input type="radio" name="fi-q3" value="0"> ne s applique qu aux images</label><label class="q-option"><input type="radio" name="fi-q3" value="1"> est un procédé général pour entraîner tout modèle d embedding</label><label class="q-option"><input type="radio" name="fi-q3" value="2"> remplace la loss</label><div class="explain">Ici il unifie plusieurs modèles en un modèle multimodal.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">5. Ancre « he could smell the roses » → positif…</p><label class="q-option"><input type="radio" name="fi-q4" value="0"> « a field of fragrant flowers »</label><label class="q-option"><input type="radio" name="fi-q4" value="1"> « the lion roared majestically »</label><label class="q-option"><input type="radio" name="fi-q4" value="2"> une photo de fourmi</label><div class="explain">Le négatif serait le rugissement de lion.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">6. Le push/pull s accomplit via…</p><label class="q-option"><input type="radio" name="fi-q5" value="0"> PCA</label><label class="q-option"><input type="radio" name="fi-q5" value="1"> UMAP</label><label class="q-option"><input type="radio" name="fi-q5" value="2"> la contrastive loss function</label><div class="explain">Encoder, mesurer les distances, minimiser.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">7. Dans la formule, le dénominateur…</p><label class="q-option"><input type="radio" name="fi-q6" value="0"> ne contient que le positif</label><label class="q-option"><input type="radio" name="fi-q6" value="1"> somme les négatifs (un parmi beaucoup) et normalise avec le positif</label><label class="q-option"><input type="radio" name="fi-q6" value="2"> annule la loss</label><div class="explain">Signe moins devant → on minimise.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">8. CLIP (2021) définit ses positifs comme…</p><label class="q-option"><input type="radio" name="fi-q7" value="0"> image + sa légende (diagonale de la matrice)</label><label class="q-option"><input type="radio" name="fi-q7" value="1"> deux légendes au hasard</label><label class="q-option"><input type="radio" name="fi-q7" value="2"> deux images du même fichier</label><div class="explain">Tout autre pairing image/légende = négatif probable.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">9. MNISTDataset fournit…</p><label class="q-option"><input type="radio" name="fi-q8" value="0"> uniquement des légendes</label><label class="q-option"><input type="radio" name="fi-q8" value="1"> des vidéos de chiffres</label><label class="q-option"><input type="radio" name="fi-q8" value="2"> ancre + positif (même chiffre) + négatif (autre chiffre)</label><div class="explain">Ancre 5 → positif 5, négatif 6 ou 7.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">10. Distances idéales cosinus dans le lab…</p><label class="q-option"><input type="radio" name="fi-q9" value="0"> positif 0, négatif 1</label><label class="q-option"><input type="radio" name="fi-q9" value="1"> positif 1, négatif 0</label><label class="q-option"><input type="radio" name="fi-q9" value="2"> les deux à 1</label><div class="explain">C est ce que la loss doit approcher.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">11. Avec la métrique cosinus, les clusters ressemblent à…</p><label class="q-option"><input type="radio" name="fi-q10" value="0"> des rayons / lignes (spokes)</label><label class="q-option"><input type="radio" name="fi-q10" value="1"> des sphères compactes</label><label class="q-option"><input type="radio" name="fi-q10" value="2"> du bruit uniforme</label><div class="explain">La cosinus dépend des angles, pas de la proximité euclidienne.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">12. UMAP sans metric="cosine"…</p><label class="q-option"><input type="radio" name="fi-q11" value="0"> crash</label><label class="q-option"><input type="radio" name="fi-q11" value="1"> donne les mêmes clusters</label><label class="q-option"><input type="radio" name="fi-q11" value="2"> tombe en euclidien → « strings », vue moins fidèle</label><div class="explain">Toujours spécifier la métrique correspondant à l entraînement.</div></div>
+        <button class="btn" onclick="submitFinal(this)">Soumettre l examen</button>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('final')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('resources')">Voir certificat →</button></div>
+    </section>
+
+    <section id="resources" class="section">
+      <h1>Certificat, checklist &amp; ressources</h1>
+      <div class="card info no-print">
+        <h3>Nom pour le certificat</h3>
+        <input id="cert-name" placeholder="Prénom / pseudo" />
+        <div class="toolbar">
+          <button class="btn" onclick="generateCert()">Générer le certificat</button>
+          <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+          <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+          <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="certificate" class="certificate">
+        <span class="badge">🦁</span>
+        <h2>Certificat de maîtrise</h2>
+        <p>Décerné à</p>
+        <h3 id="cert-name-out">Apprenant</h3>
+        <p>pour avoir complété la masterclass</p>
+        <p class="highlight">Multimodalité &amp; Contrastive Representation Learning — Embeddings conjoints, CLIP, MNIST, PCA/UMAP</p>
+        <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+      </div>
+
+      <h2>Checklist de l ingénieur multimodal</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Je sais expliquer pourquoi combiner les modalités (lion vu + entendu).</label>
+        <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Je sais ce qu est un espace d embeddings conjoint et la similarité dans/entre modalités.</label>
+        <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Je construis un triplet ancre / positif / négatif pour texte et image.</label>
+        <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Je sais ce que fait la contrastive loss (tirer / pousser, minimiser).</label>
+        <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Je connais l astuce CLIP : diagonale = positif, autres = négatifs.</label>
+        <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Je peux lire le lab MNIST : chargers, 2 conv + 2 lin → 64-d, cosinus vs idéal 1/0.</label>
+        <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Je sais pourquoi charger un checkpoint pré-entraîné et interpréter la courbe de loss.</label>
+        <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Je sais réduire 64→3 (PCA) puis →2 (UMAP) et pourquoi metric="cosine".</label>
+        <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Je reconnais spokes / jellyfish / strings et ce qu ils disent de la métrique.</label>
+        <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Je sais brancher la suite : base vectorielle + modèle multimodal (texte/image/vidéo en entrée).</label>
+      </div>
+      <p class="muted small">Checklist : <span id="check-progress">0/10</span></p>
+
+      <h2>Extension : passer au local avec Ollama (ressource de ta base)</h2>
+      <div class="card purple">
+        <p>
+          La leçon se termine sur « vector database + modèle multimodal pour vectorizer images et vidéos et chercher par texte, image,
+          vidéo ». Ta base de connaissances couvre exactement ça en local et gratuit :
+          <strong>Llava</strong> (multimodal texte + image, captioning de <code>flower1.png</code>),
+          <strong>nomic-embed-text</strong> (modèle d embeddings), <strong>Chroma</strong> (base vectorielle) via LangChain, et le
+          framework <strong>Swarm</strong> pour les agents. Même logique que CLIP/ImageBind, mais exécutée sur ta machine via
+          <code>localhost:11434</code>. <span class="source">Base Ollama ⏱ 47:11 / 1:14:43 / 2:06:02</span>
+        </p>
+      </div>
+
+      <h2>Ressources</h2>
+      <div class="resources">
+        <ul>
+          <li><strong>Transcript source</strong> : leçon multimodalité — live demo de recherche, contrastive representation learning, lab MNIST (PyTorch, plotly, UMAP), PCA/UMAP, CLIP 2021, ImageBind.</li>
+          <li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur d AutoManus (backed by Character VC), ex-MIT business analytics puis Google et Walmart ; il enseigne à construire avec l IA, un vrai projet à la fois. Formules : Q&amp;A live bimensuel (20 $/mois) et session 1 h sur mesure (200 $).</li>
+          <li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend (Kimi K2 + LangChain), yt-supabase-tips-kanban, yt-kimi-k2-claude.</li>
+          <li><strong>Ollama</strong> : mini-cours couvrant CLI, REST API, Python library, Modelfile, RAG (LangChain + Chroma + nomic-embed-text), Llava multimodal et agents Swarm — le compagnon naturel pour appliquer cette leçon sans coût d API.</li>
+        </ul>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn secondary" onclick="prevFrom('resources')">← Revenir à l examen</button>
+        <button class="btn" onclick="showSection('home')">Retour accueil</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+var KEY="multimodal-contrastive-course-v1";
+var STATE={theme:"dark",visited:{},quizScores:{},diagnostic:null,finalScore:0,finalTotal:12,finalPassed:false,sourcesHidden:false,checklist:{}};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}}
+function loadState(){try{var raw=localStorage.getItem(KEY);if(!raw)return;var d=JSON.parse(raw);
+STATE.theme=d.theme||"dark";STATE.visited=d.visited||{};STATE.quizScores=d.quizScores||{};STATE.diagnostic=d.diagnostic||null;
+STATE.finalScore=d.finalScore||0;STATE.finalTotal=d.finalTotal||12;STATE.finalPassed=!!d.finalPassed;STATE.sourcesHidden=!!d.sourcesHidden;STATE.checklist=d.checklist||{};}catch(e){}}
+function getSectionIds(){return $$(".section").map(function(s){return s.id})}
+function showSection(id){
+var sections=$$(".section");for(var i=0;i<sections.length;i++)sections[i].classList.toggle("active",sections[i].id===id);
+var buttons=$$("#nav button");for(var j=0;j<buttons.length;j++){var t=buttons[j].getAttribute("data-target");buttons[j].classList.toggle("active",t===id);buttons[j].classList.toggle("completed",!!STATE.visited[t]);}
+STATE.visited[id]=true;saveState();updateProgress();initModule(id);
+var sb=$("#sidebar");if(sb)sb.classList.remove("mobile-open");
+window.scrollTo({top:0,behavior:"smooth"});}
+function nextFrom(id){var ids=getSectionIds();for(var i=0;i<ids.length;i++)if(ids[i]===id&&i<ids.length-1){showSection(ids[i+1]);return}}
+function prevFrom(id){var ids=getSectionIds();for(var i=0;i<ids.length;i++)if(ids[i]===id&&i>0){showSection(ids[i-1]);return}}
+function updateProgress(){var ids=getSectionIds();var done=0;for(var i=0;i<ids.length;i++)if(STATE.visited[ids[i]])done++;
+var pct=Math.round(done/ids.length*100);var b=$("#progressBar");if(b)b.style.width=pct+"%";var t=$("#progressText");if(t)t.textContent=pct+"%";}
+function updateScore(){var c=0,t=0,keys=Object.keys(STATE.quizScores);for(var i=0;i<keys.length;i++){c+=STATE.quizScores[keys[i]].correct||0;t+=STATE.quizScores[keys[i]].total||0;}
+var el=$("#scoreDisplay");if(el)el.textContent="Score "+c+"/"+t+(STATE.finalPassed?" • validé":"");}
+function toggleTheme(){STATE.theme=STATE.theme==="dark"?"light":"dark";document.body.setAttribute("data-theme",STATE.theme);saveState()}
+function toggleSources(){STATE.sourcesHidden=!STATE.sourcesHidden;document.body.classList.toggle("hide-sources",STATE.sourcesHidden);saveState()}
+function toggleMobileNav(){var s=$("#sidebar");if(s)s.classList.toggle("mobile-open")}
+function checkQuiz(btn){
+var box=btn.closest(".quiz");var moduleId=box.getAttribute("data-module");var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+var result=box.querySelector(".result");if(result)result.textContent="Résultat : "+correct+"/"+qs.length;
+STATE.quizScores[moduleId]={correct:correct,total:qs.length};saveState();updateScore();return{correct:correct,total:qs.length}}
+var DIAG_TEXT={
+novice:"Commence par « Pourquoi le multimodal » puis « Données & embeddings ». Fais le simulateur de recherche : c est l intuition avant les maths.",
+praticien:"Va au contraste puis au loss, puis enchaîne sur le lab MNIST et la visualisation. Les 5 simulateurs sont faits pour toi.",
+researcher:"Concentre-toi sur la loss (température, négatifs), CLIP/ImageBind, et la partie évaluation PCA/UMAP + métrique. L examen valide ta compréhension du signal contrastif."};
+function validateDiagnostic(){
+var level=document.querySelector("input[name='diag-level']:checked");var goal=document.querySelector("input[name='diag-goal']:checked");var time=document.querySelector("input[name='diag-time']:checked");
+if(!level||!goal||!time){alert("Répondez aux trois questions.");return}
+STATE.diagnostic={level:level.value,goal:goal.value,time:time.value};saveState();
+var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.novice)+"</p>"}
+if(next)next.style.display="inline-flex"}
+function restoreDiagnostic(){if(!STATE.diagnostic)return;var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"}
+if(next)next.style.display="inline-flex"}
+
+/* ---------- RNG déterministe ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Sim 1 : recherche multimodale ---------- */
+var CATALOG=[
+{id:1,mod:"image",title:"Lions running on the savanna",tags:["lion","lions","run","running","savanna","jungle","king"],x:.16,y:.30},
+{id:2,mod:"text",title:"The king of the jungle, Panthera leo",tags:["lion","king","jungle","panthera","leo","animal"],x:.24,y:.38},
+{id:3,mod:"audio",title:"Lion roar (field recording)",tags:["lion","roar","sound","king","jungle"],x:.12,y:.44},
+{id:4,mod:"video",title:"Pride hunting at dusk",tags:["lion","pride","hunt","savanna","running"],x:.27,y:.24},
+{id:5,mod:"image",title:"Trumpet on stage",tags:["trumpet","instrument","music","brass"],x:.80,y:.70},
+{id:6,mod:"text",title:"How to tune a trumpet",tags:["trumpet","tune","music","instrument"],x:.85,y:.62},
+{id:7,mod:"audio",title:"Jazz trumpet solo",tags:["trumpet","jazz","solo","music"],x:.74,y:.78},
+{id:8,mod:"image",title:"Field of fragrant roses",tags:["rose","roses","flowers","fragrant","field","smell"],x:.50,y:.14},
+{id:9,mod:"text",title:"He could smell the roses",tags:["rose","roses","smell","fragrant"],x:.56,y:.20},
+{id:10,mod:"video",title:"German Shepherd, grayscale clip",tags:["dog","german","shepherd","grayscale","animal"],x:.34,y:.74},
+{id:11,mod:"image",title:"Ant close-up",tags:["ant","insect","small"],x:.86,y:.30},
+{id:12,mod:"image",title:"Kittens on a bicycle",tags:["kitten","kittens","bicycle","cat"],x:.66,y:.50}
+];
+var MODCOLOR={image:"#60a5fa",text:"#22c55e",audio:"#f59e0b",video:"#a78bfa"};
+function tokenize(s){return s.toLowerCase().replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean)}
+function simOf(item,tokens){var hit=0;for(var i=0;i<tokens.length;i++){if(item.tags.indexOf(tokens[i])!==-1)hit++}
+if(!hit)return 0.02+0.01*Math.abs(Math.sin(item.id));
+return hit/Math.sqrt(item.tags.length*tokens.length+1)}
+function runSearch(){
+var q=$("#search-q");var out=$("#search-results");var note=$("#search-note");if(!q||!out)return;
+var tokens=tokenize(q.value);
+var scored=CATALOG.map(function(it){return{it:it,s:simOf(it,tokens)}});
+scored.sort(function(a,b){return b.s-a.s});
+var top=scored.slice(0,6);
+var h="";
+for(var i=0;i<top.length;i++){var r=top[i];var pct=Math.round(r.s*100);
+h+="<div class='search-row'><span class='mod-badge mod-"+r.it.mod+"'>"+r.it.mod+"</span><span style='flex:1'>"+r.it.title+"</span><span class='sim-bar'><div style='width:"+Math.min(100,pct*2)+"%'></div></span><span style='font-family:var(--mono);font-size:.8rem;min-width:44px;text-align:right'>"+r.s.toFixed(2)+"</span></div>"}
+out.innerHTML=h;
+if(note)note.textContent=tokens.length?"Requête projetée près des items partageant des tags — l ordre des modalités (image, texte, audio, vidéo) n importe pas : c est la sémantique qui compte.":"Tape une requête (ex : lions, trumpet, roses, german shepherd).";
+drawSearchSpace(top);
+}
+function setQuery(v){var q=$("#search-q");if(q){q.value=v;runSearch()}}
+function resetSearch(){var q=$("#search-q");if(q)q.value="";var o=$("#search-results");if(o)o.innerHTML="";var n=$("#search-note");if(n)n.textContent="Réinitialisé.";drawSearchSpace([])}
+function drawSearchSpace(top){
+var cv=$("#search-canvas");if(!cv)return;var ctx=cv.getContext("2d");var W=cv.width,H=cv.height;
+ctx.clearRect(0,0,W,H);
+ctx.strokeStyle="rgba(148,163,184,.15)";ctx.lineWidth=1;
+for(var gx=0;gx<=W;gx+=64){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke()}
+for(var gy=0;gy<=H;gy+=64){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke()}
+var topIds={};for(var i=0;i<top.length;i++)topIds[top[i].it.id]=top[i].s;
+var qx=null,qy=null,qw=0;
+for(var j=0;j<CATALOG.length;j++){var it=CATALOG[j];var px=30+it.x*(W-60),py=24+it.y*(H-48);
+var s=topIds[it.id]||0;
+ctx.beginPath();ctx.arc(px,py,6+s*14,0,Math.PI*2);ctx.fillStyle=MODCOLOR[it.mod];ctx.globalAlpha=.35+s*.65;ctx.fill();ctx.globalAlpha=1;
+ctx.strokeStyle="rgba(255,255,255,.25)";ctx.stroke();
+ctx.fillStyle="rgba(229,231,235,.85)";ctx.font="10px ui-monospace,monospace";ctx.fillText(it.mod,px+9,py+3);
+if(s>0){qx=(qx||0)+px*s;qy=(qy||0)+py*s;qw+=s}}
+if(qw>0){qx/=qw;qy/=qw;
+ctx.strokeStyle="rgba(239,68,68,.6)";ctx.setLineDash([4,4]);
+for(var k=0;k<top.length;k++){var t2=top[k].it;ctx.beginPath();ctx.moveTo(qx,qy);ctx.lineTo(30+t2.x*(W-60),24+t2.y*(H-48));ctx.stroke()}
+ctx.setLineDash([]);
+ctx.fillStyle="#ef4444";ctx.beginPath();
+for(var a=0;a<10;a++){var ang=Math.PI/5*a-Math.PI/2;var rr=a%2===0?11:5;ctx.lineTo(qx+Math.cos(ang)*rr,qy+Math.sin(ang)*rr)}
+ctx.closePath();ctx.fill();
+ctx.fillStyle="#fecaca";ctx.font="bold 11px system-ui";ctx.fillText("requête",qx+14,qy-8)}}
+
+/* ---------- Sim 2 : playground de contraste ---------- */
+var ANCHORS=[
+{key:"roses",label:"Texte : « smell the roses »",
+pos:["field of fragrant flowers","parfum des roses"],neg:["lion roared majestically","trumpet jazz solo"]},
+{key:"shepherd",label:"Image : German Shepherd",
+pos:["version grayscale","berger allemand (autre photo)"],neg:["fourmi (ant)","chatons sur un vélo"]},
+{key:"lions",label:"Vidéo : lions qui courent",
+pos:["image de lions","texte : king of the jungle","audio : lion roar"],neg:["image de trompette","texte : tune a trumpet"]}
+];
+var contrastState=null;
+function buildAnchorButtons(){var wrap=$("#anchor-btns");if(!wrap)return;var h="";
+for(var i=0;i<ANCHORS.length;i++)h+="<button class='btn secondary' onclick=\"pickAnchor("+i+")\">"+ANCHORS[i].label+"</button>";
+wrap.innerHTML=h}
+function pickAnchor(idx){
+var a=ANCHORS[idx];var rng=mulberry32(97+idx*13);
+var pts=[];var all=a.pos.map(function(t){return{t:t,k:1}}).concat(a.neg.map(function(t){return{t:t,k:0}}));
+for(var i=0;i<all.length;i++){var ang=rng()*Math.PI*2;var rad=110+rng()*60;
+pts.push({text:all[i].t,kind:all[i].k,a:ang,r:rad,r0:rad})}
+contrastState={pts:pts,steps:0};
+var note=$("#contrast-note");if(note)note.textContent="Ancre : "+a.label+" — "+a.pos.length+" positifs, "+a.neg.length+" négatifs. Clique « Étape de contraste ».";
+drawContrast()}
+function stepContrast(){
+if(!contrastState){alert("Choisis d abord une ancre.");return}
+contrastState.steps++;
+for(var i=0;i<contrastState.pts.length;i++){var p=contrastState.pts[i];
+if(p.kind===1)p.r=Math.max(26,p.r*0.78);else p.r=Math.min(168,p.r*1.14)}
+var note=$("#contrast-note");
+if(note)note.textContent="Étape "+contrastState.steps+" : les positifs se rapprochent de l ancre (cosinus → 1), les négatifs s éloignent (→ 0). C est la contrastive loss en action.";
+drawContrast()}
+function resetContrast(){contrastState=null;var note=$("#contrast-note");if(note)note.textContent="Sélectionne une ancre pour commencer.";drawContrast()}
+function drawContrast(){
+var cv=$("#contrast-canvas");if(!cv)return;var ctx=cv.getContext("2d");var W=cv.width,H=cv.height,cx=W/2,cy=H/2;
+ctx.clearRect(0,0,W,H);
+ctx.strokeStyle="rgba(148,163,184,.18)";
+for(var ring=40;ring<=160;ring+=40){ctx.beginPath();ctx.arc(cx,cy,ring,0,Math.PI*2);ctx.stroke()}
+if(!contrastState){ctx.fillStyle="rgba(148,163,184,.6)";ctx.font="14px system-ui";ctx.textAlign="center";ctx.fillText("Choisis une ancre ci-dessus",cx,cy);ctx.textAlign="left";return}
+ctx.fillStyle="#ef4444";ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fill();
+ctx.fillStyle="#fecaca";ctx.font="bold 11px system-ui";ctx.textAlign="center";ctx.fillText("ANCRE",cx,cy+24);ctx.textAlign="left";
+for(var i=0;i<contrastState.pts.length;i++){var p=contrastState.pts[i];
+var px=cx+Math.cos(p.a)*p.r,py=cy+Math.sin(p.a)*p.r;
+ctx.strokeStyle=p.kind===1?"rgba(34,197,94,.5)":"rgba(148,163,184,.35)";ctx.setLineDash(p.kind===1?[]:[3,4]);
+ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle=p.kind===1?"#22c55e":"#94a3b8";ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);ctx.fill();
+var sim=Math.max(0,Math.min(1,1-p.r/180));
+ctx.fillStyle="rgba(229,231,235,.9)";ctx.font="10px ui-monospace,monospace";ctx.textAlign="center";
+ctx.fillText(p.text,px,py-12);ctx.fillText("cos≈"+sim.toFixed(2),px,py+20);ctx.textAlign="left"}}
+
+/* ---------- Sim 3 : loss + matrice CLIP ---------- */
+function updateLoss(){
+var pos=parseFloat($("#ls-pos").value),neg=parseFloat($("#ls-neg").value),n=parseInt($("#ls-n").value,10),tau=parseFloat($("#ls-t").value);
+$("#lo-pos").textContent=pos.toFixed(2);$("#lo-neg").textContent=neg.toFixed(2);$("#lo-n").textContent=n;$("#lo-t").textContent=tau.toFixed(2);
+var pp=Math.exp(pos/tau),pn=Math.exp(neg/tau);
+var loss=-Math.log(pp/(pp+n*pn+1e-12));
+var el=$("#loss-value");if(el){el.textContent="L = "+loss.toFixed(4);
+el.style.color=loss<0.5?"var(--green)":(loss<2?"var(--yellow)":"var(--red)")}
+var note=$("#loss-note");
+if(note)note.textContent=loss<0.5?"Contraste fort : le positif domine largement les "+n+" négatifs.":(loss<2?"Contraste moyen : augmente sim(positif) ou baisse sim(négatif).":"Contraste faible : positifs et négatifs sont presque aussi proches — la loss est élevée.");
+}
+var CLIP_IMGS=["🦁 lion","🌹 roses","🎺 trumpet"," shepherd","🐜 ant","🚲 kittens"];
+var CLIP_CAPS=["the king of the jungle","a field of fragrant flowers","a brass instrument solo","a grayscale dog photo","tiny insect close-up","cats on a bicycle"];
+function buildClipMatrix(){
+var wrap=$("#clip-matrix");if(!wrap||wrap.dataset.built)return;
+var h="<div class='clip-grid' style='grid-template-columns:70px repeat("+CLIP_IMGS.length+",1fr)'>";
+h+="<div class='clip-head'>img \\ cap</div>";
+for(var c=0;c<CLIP_CAPS.length;c++)h+="<div class='clip-head'>"+CLIP_CAPS[c].split(" ")[0]+"</div>";
+for(var r=0;r<CLIP_IMGS.length;r++){
+h+="<div class='clip-head' style='justify-content:flex-left'>"+CLIP_IMGS[r].split(" ")[0]+"</div>";
+for(var cc=0;cc<CLIP_CAPS.length;cc++){
+var diag=r===cc;
+h+="<div class='clip-cell "+(diag?"clip-pos":"clip-neg")+"' data-r='"+r+"' data-c='"+cc+"' data-d='"+(diag?1:0)+"'>"+(diag?"+":"−")+"</div>"}}
+h+="</div>";
+wrap.innerHTML=h;wrap.dataset.built="1";
+wrap.addEventListener("mouseover",function(e){
+var cell=e.target.closest?e.target.closest(".clip-cell"):null;if(!cell)return;
+var r=+cell.getAttribute("data-r"),c=+cell.getAttribute("data-c"),d=cell.getAttribute("data-d")==="1";
+var note=$("#clip-note");
+if(note)note.textContent=d?("Diagonale : « "+CLIP_IMGS[r]+" » + « "+CLIP_CAPS[c]+" » = ancre + positif → tirés."):("Pairing aléatoire : « "+CLIP_IMGS[r]+" » + « "+CLIP_CAPS[c]+" » = négatif → poussés.");
+});
+}
+
+/* ---------- Sim 4 : déroulé du lab ---------- */
+var TRAIN_STEPS=[
+{cls:"",who:"Imports",text:"torch / torch.nn.functional, plotly, umap, et la classe MNISTDataset (ancre + positifs + négatifs)."},
+{cls:"",who:"Chargement des données",text:"Training set + validation set chargés ; PyTorch DataLoaders avec batch size ajustable (influence la convergence)."},
+{cls:"",who:"Visualisation des triplets",text:"Helper d affichage : ancre (ex. 9), positif (autre 9), négatifs (8, 6, 4, 7) — ce qui servira au push/pull."},
+{cls:"conv",who:"Architecture",text:"2 couches convolutives (features visuelles du chiffre) → flatten → 2 couches linéaires → vecteur 64-d."},
+{cls:"loss",who:"ContrastiveLoss",text:"Étape 1 : score = cosine_similarity(anchor, contrasted). Étape 2 : comparer à la distance idéale (positif 1, négatif 0). Moindre écart = moindre loss."},
+{cls:"loss",who:"Config entraînement",text:"Optimizer (gradient descent), loss contrastive, training scheduler. CPU par défaut, GPU/CUDA si disponibles."},
+{cls:"",who:"Checkpoints",text:"Dossier checkpoints : sauvegarde à chaque epoch, rechargeable plus tard."},
+{cls:"",who:"Training loop",text:"Pour chaque epoch : forward + backward sur chaque batch ; loss par point additionnée → loss moyenne de l epoch ; sauvegarde du checkpoint. Retourne le modèle + tableau des losses."},
+{cls:"viz",who:"Charger le pré-entraîné",text:"2-3 min/epoch → on charge le checkpoint 100 epochs (train=False). Passer train=True pour tout relancer."},
+{cls:"viz",who:"Courbe de loss",text:"Stabilisation vers 20 epochs ; l essentiel de l apprentissage dans les 5-10 premières ; améliorations minimes ensuite."}
+];
+var trainIdx=0;
+function resetTrain(){trainIdx=0;var l=$("#train-log");if(l)l.innerHTML="";var s=$("#train-status");if(s)s.textContent="Clique sur « Étape suivante » pour dérouler le pipeline du lab.";var b=$("#train-next");if(b){b.disabled=false;b.textContent="Étape suivante →"}}
+function nextTrainStep(){var l=$("#train-log");if(!l||trainIdx>=TRAIN_STEPS.length)return;
+var st=TRAIN_STEPS[trainIdx];var div=document.createElement("div");div.className="step "+st.cls;
+var who=document.createElement("span");who.className="who";who.textContent=st.who;
+var tx=document.createElement("span");tx.textContent=st.text;
+div.appendChild(who);div.appendChild(tx);l.appendChild(div);
+requestAnimationFrame(function(){div.classList.add("visible")});
+trainIdx++;var s=$("#train-status");
+if(s)s.textContent="Étape "+trainIdx+"/"+TRAIN_STEPS.length;
+if(trainIdx>=TRAIN_STEPS.length){var b=$("#train-next");if(b)b.disabled=true;
+if(s)s.textContent="✅ Pipeline complet déroulé. Passe maintenant au visualiseur d espace (module suivant) pour voir ce que le modèle a appris.";}}
+var lossHist=[];
+function seededLoss(e){var rng=mulberry32(42+e);return 0.06+0.85*Math.exp(-e/7)+ (rng()-0.5)*0.03}
+function simEpoch(){
+if(lossHist.length>=100){var n=$("#epoch-note");if(n)n.textContent="100 epochs simulées (checkpoint pré-entraîné).";return}
+var e=lossHist.length+1;lossHist.push(seededLoss(e));drawLossCurve();
+var n=$("#epoch-note");if(n)n.textContent="Epoch "+e+" — loss = "+lossHist[e-1].toFixed(3)+(e<=10?" (phase d apprentissage rapide)":(e<=20?" (stabilisation)":" (améliorations minimes)"));}
+function resetEpoch(){lossHist=[];drawLossCurve();var n=$("#epoch-note");if(n)n.textContent="Courbe réinitialisée."}
+function drawLossCurve(){
+var cv=$("#loss-canvas");if(!cv)return;var ctx=cv.getContext("2d");var W=cv.width,H=cv.height;
+ctx.clearRect(0,0,W,H);
+ctx.strokeStyle="rgba(148,163,184,.2)";
+for(var gy=0;gy<=4;gy++){var y=20+gy*(H-40)/4;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(W-10,y);ctx.stroke()}
+ctx.fillStyle="rgba(148,163,184,.7)";ctx.font="10px ui-monospace,monospace";
+ctx.fillText("loss",8,16);ctx.fillText("epochs",W-46,H-6);
+if(!lossHist.length){ctx.fillStyle="rgba(148,163,184,.5)";ctx.fillText("clique « Simuler un epoch »",W/2-70,H/2);return}
+ctx.strokeStyle="#60a5fa";ctx.lineWidth=2;ctx.beginPath();
+for(var i=0;i<lossHist.length;i++){var x=40+i*(W-50)/99;var y=20+(1-lossHist[i]/1.0)*(H-40);
+if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+ctx.stroke();
+var lx=40+(lossHist.length-1)*(W-50)/99,ly=20+(1-lossHist[lossHist.length-1])*(H-40);
+ctx.fillStyle="#22d3ee";ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle="rgba(239,68,68,.4)";ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(40+19*(W-50)/99,20);ctx.lineTo(40+19*(W-50)/99,H-20);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle="rgba(239,68,68,.7)";ctx.fillText("~20 epochs : stabilisé",40+20*(W-50)/99,32)}
+
+/* ---------- Sim 5 : visualiseur d espace ---------- */
+var DIGIT_COLORS=["#60a5fa","#22c55e","#f59e0b","#a78bfa","#ef4444","#22d3ee","#f472b6","#fb923c","#84cc16","#818cf8"];
+var space={shape:"spokes",view:3,ax:-0.5,ay:0.6,zoom:1,pts:[],drag:false,lx:0,ly:0};
+function genPoints(){
+var rng=mulberry32(space.shape==="spokes"?7:(space.shape==="jelly"?21:55));
+var pts=[];
+for(var d=0;d<10;d++){
+var theta=(d/10)*Math.PI*2;
+for(var k=0;k<60;k++){
+var x,y,z;
+if(space.shape==="spokes"){
+var r=0.55+rng()*0.45;var jx=(rng()-0.5)*0.10,jy=(rng()-0.5)*0.10;
+x=Math.cos(theta)*r+jx;y=Math.sin(theta)*r+jy;z=(rng()-0.5)*0.12;
+}else if(space.shape==="jelly"){
+var t=rng();var petal=Math.sin(t*Math.PI)*0.5;var spread=(t-0.5)*0.9;
+var rr=0.35+petal;
+x=Math.cos(theta)*rr+Math.cos(theta+Math.PI/2)*spread*0.5;
+y=Math.sin(theta)*rr+Math.sin(theta+Math.PI/2)*spread*0.5;
+z=(rng()-0.5)*0.25*(1-t);
+}else{
+var s2=rng();var curve=Math.sin(s2*Math.PI*2+theta)*0.25;
+x=Math.cos(theta)*0.5+s2*0.12+ (rng()-0.5)*0.05;
+y=curve+s2*0.9-0.45+(rng()-0.5)*0.05;
+z=(rng()-0.5)*0.06;
+}
+pts.push({x:x,y:y,z:z,d:d})}}
+space.pts=pts}
+function drawSpace(){
+var cv=$("#space-canvas");if(!cv)return;var ctx=cv.getContext("2d");var W=cv.width,H=cv.height;
+ctx.clearRect(0,0,W,H);
+var cx=W/2,cy=H/2,scale=Math.min(W,H)*0.36*space.zoom;
+var ca=Math.cos(space.ax),sa=Math.sin(space.ax),cb=Math.cos(space.ay),sb=Math.sin(space.ay);
+for(var i=0;i<space.pts.length;i++){var p=space.pts[i];
+var x1=p.x*cb+p.z*sb;var z1=-p.x*sb+p.z*cb;var y1=p.y;
+var y2=y1*ca-z1*sa;var z2=y1*sa+z1*ca;
+var px,py;
+if(space.view===3){px=cx+x1*scale;py=cy+y2*scale}
+else{px=cx+p.x*scale*1.4;py=cy+p.y*scale*1.4}
+var depth=space.view===3?(z2+1.5)/3:1;
+ctx.globalAlpha=0.35+0.65*Math.max(0,Math.min(1,depth));
+ctx.fillStyle=DIGIT_COLORS[p.d];
+ctx.beginPath();ctx.arc(px,py,space.view===3?2.6+depth*1.6:3,0,Math.PI*2);ctx.fill()}
+ctx.globalAlpha=1;
+var lab=$("#space-legend");
+if(lab&&!lab.dataset.built){var h="";for(var d2=0;d2<10;d2++)h+="<span><i class='dot' style='background:"+DIGIT_COLORS[d2]+"'></i>"+d2+"</span>";lab.innerHTML=h;lab.dataset.built="1"}}
+function setShape(s){space.shape=s;genPoints();drawSpace();
+var notes={spokes:"Espace appris en cosinus : chaque chiffre s aligne en rayon (spoke), car la cosinus dépend des angles — pas de clusters compacts.",
+jelly:"UMAP avec metric=cosine : clusters distincts en motif « méduse » → la training contrastive a réussi, chaque chiffre occupant une région.",
+string:"UMAP sans metric (euclidien par défaut) : des « strings » qui se suivent — vue moins fidèle à l espace appris en cosinus."};
+var n=$("#space-note");if(n)n.textContent=notes[s];
+["spokes","jelly","string"].forEach(function(k){var b=$("#shape-"+k);if(b){b.className="btn"+(k===s?"":" secondary")}})}
+function setView(v){space.view=v;drawSpace();
+var b3=$("#view-3d"),b2=$("#view-2d");
+if(b3)b3.className="btn"+(v===3?"":" secondary");if(b2)b2.className="btn"+(v===2?"":" secondary");
+var n=$("#space-note");if(n)n.textContent=v===3?"Vue 3D (PCA 64→3) : glisse pour pivoter, molette pour zoomer. Certains chiffres peuvent paraître proches selon l angle (compression 64→3).":"Vue 2D (UMAP →2) : projection à plat — les clusters « méduse » sont plus lisibles."}
+function resetSpace(){space.ax=-0.5;space.ay=0.6;space.zoom=1;drawSpace()}
+function bindSpaceCanvas(){
+var cv=$("#space-canvas");if(!cv||cv.dataset.bound)return;cv.dataset.bound="1";
+cv.addEventListener("pointerdown",function(e){space.drag=true;space.lx=e.clientX;space.ly=e.clientY;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",function(e){if(!space.drag)return;space.ay+=(e.clientX-space.lx)*0.008;space.ax+=(e.clientY-space.ly)*0.008;space.lx=e.clientX;space.ly=e.clientY;drawSpace()});
+cv.addEventListener("pointerup",function(){space.drag=false});
+cv.addEventListener("wheel",function(e){e.preventDefault();space.zoom=Math.max(0.4,Math.min(3,space.zoom*(e.deltaY>0?0.92:1.08)));drawSpace()},{passive:false})}
+
+/* ---------- Scénarios ---------- */
+function chooseScenario(key){var texts={
+search:"Besoin : chercher du média (image/audio/vidéo) avec une requête texte.\n→ Espace d embeddings conjoint + similarité cosinus entre vecteurs de modalités différentes. C est le live demo du début : « a bunch of lions » → images, audio, vidéo.",
+unify:"Besoin : unifier texte + image + audio dans le même espace.\n→ Partir de modèles mono-modalité, puis contrastive representation learning avec triplets ancre/positif/négatif à travers les modalités (ImageBind : modalité par modalité).",
+pairs:"Besoin : pas de paires annotées positives.\n→ Astuce CLIP : prendre N images + N légendes ; la diagonale (image, sa légende) donne les positifs « gratuits », tous les autres pairings donnent les négatifs.",
+space:"Besoin : choisir la métrique de similarité.\n→ Cosinus si l entraînement vise les angles (spokes) ; euclidien si la proximité absolue compte. Important : la métrique de visualisation (UMAP) doit matcher celle de l entraînement.",
+viz:"Besoin : prouver que le modèle a appris.\n→ Encoder le training set (64-d), PCA 64→3 pour le scatter 3D, UMAP→2 avec metric=cosine pour les clusters « méduse ». Comparer au défaut euclidien (« strings »).",
+slow:"Besoin : entraînement trop lent (2-3 min/epoch).\n→ Charger le checkpoint pré-entraîné (100 epochs) ; la loss se stabilise vers 20 epochs, donc 100 = marge confortable. Garder train=True pour les experiments.",
+dim:"Besoin : vecteurs 64-d invisibles directement.\n→ Réduction de dimension : PCA (linéaire, rapide, 64→3) puis UMAP (non linéaire, 64→2) pour la lecture des clusters.",
+next:"Besoin : passer à la recherche en production.\n→ Leçon suivante du transcript : base vectorielle + modèle multimodal pour vectorizer images/vidéos et chercher par texte, image, vidéo. Extension locale : Llava + nomic-embed-text + Chroma via Ollama."};
+var out=$("#scenario-out");if(out){out.style.display="block";out.textContent=texts[key]||""}}
+
+/* ---------- Examen / certificat / checklist / export ---------- */
+function submitFinal(btn){var res=checkQuiz(btn);STATE.finalScore=res.correct;STATE.finalTotal=res.total;STATE.finalPassed=res.correct>=9;saveState();updateScore();
+var result=$("#exam-result");
+if(result){var advice=STATE.finalPassed?"Tu maîtrises le pipeline multimodal : espace conjoint, triplets contrastifs, loss, CLIP, lab MNIST, et l évaluation PCA/UMAP avec la bonne métrique.":"Revois la loss (tirer/pousser, diagonale CLIP) et la partie UMAP metric=cosine vs euclidien.";
+result.innerHTML="<strong>Résultat : "+res.correct+"/"+res.total+"</strong><br>"+(STATE.finalPassed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+advice+"</span>"}
+var go=$("#go-cert");if(go)go.style.display=STATE.finalPassed?"inline-flex":"none"}
+function generateCert(){if(!STATE.finalPassed){alert("Atteins au moins 9/12 à l examen final.");return}
+var ni=$("#cert-name");var name=ni?ni.value.trim():"";if(!name)name="Apprenant";
+var block=$("#certificate");if(!block)return;block.classList.add("show");
+$("#cert-name-out").textContent=name;$("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+$("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal;$("#cert-level").textContent=STATE.finalPassed?"Maîtrise validée":"En progression";
+block.scrollIntoView({behavior:"smooth",block:"center"})}
+function toggleCheck(id){var el=document.getElementById(id);if(!el)return;STATE.checklist[id]=el.checked;saveState();updateChecklistProgress()}
+function updateChecklistProgress(){var boxes=$$(".checklist input[type=checkbox]");var done=0;for(var i=0;i<boxes.length;i++)if(boxes[i].checked)done++;
+var el=$("#check-progress");if(el)el.textContent=done+"/"+boxes.length}
+function exportJSON(){var data={cours:"Multimodalité & Contrastive Representation Learning",date:new Date().toISOString(),profil:STATE.diagnostic,progression:STATE.visited,quiz:STATE.quizScores,
+examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.finalPassed},checklist:STATE.checklist,
+simulateurs:["recherche multimodale","playground de contraste","calculateur de loss + matrice CLIP","déroulé du lab MNIST","visualiseur d espace PCA/UMAP"],
+ressources:["Transcript multimodalité (leçon)","Sean Chen seanchen.io","GitHub ShenSeanChen","Ollama : Llava + nomic-embed-text + Chroma + Swarm"]};
+var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");
+a.href=URL.createObjectURL(blob);a.download="rapport-multimodal-contrastive.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}
+function resetCourse(){if(!confirm("Réinitialiser toute la progression ?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+function initModule(id){
+if(id==="diagnostic")restoreDiagnostic();
+if(id==="data"){runSearch()}
+if(id==="contrastive"){buildAnchorButtons();drawContrast()}
+if(id==="loss"){buildClipMatrix();updateLoss()}
+if(id==="lab"){resetTrain();resetEpoch();drawLossCurve()}
+if(id==="viz"){genPoints();drawSpace();bindSpaceCanvas();setShape("spokes");setView(3)}
+if(id==="resources"){var ni=$("#cert-name");if(ni&&STATE.certName)ni.value=STATE.certName;
+var keys=Object.keys(STATE.checklist);for(var i=0;i<keys.length;i++){var el=document.getElementById(keys[i]);if(el)el.checked=STATE.checklist[keys[i]]}
+updateChecklistProgress();
+if(STATE.finalPassed){var block=$("#certificate");if(block)block.classList.add("show");var go=$("#go-cert");if(go)go.style.display="inline-flex"}}}
+function init(){loadState();document.body.setAttribute("data-theme",STATE.theme);document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+var buttons=$$("#nav button");for(var i=0;i<buttons.length;i++)buttons[i].addEventListener("click",function(){showSection(this.getAttribute("data-target"))});
+showSection("home");updateScore();updateChecklistProgress()}
+window.showSection=showSection;window.nextFrom=nextFrom;window.prevFrom=prevFrom;
+window.toggleTheme=toggleTheme;window.toggleSources=toggleSources;window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic;window.checkQuiz=checkQuiz;
+window.runSearch=runSearch;window.setQuery=setQuery;window.resetSearch=resetSearch;
+window.pickAnchor=pickAnchor;window.stepContrast=stepContrast;window.resetContrast=resetContrast;
+window.updateLoss=updateLoss;
+window.nextTrainStep=nextTrainStep;window.resetTrain=resetTrain;window.simEpoch=simEpoch;window.resetEpoch=resetEpoch;
+window.setShape=setShape;window.setView=setView;window.resetSpace=resetSpace;
+window.chooseScenario=chooseScenario;
+window.submitFinal=submitFinal;window.generateCert=generateCert;window.toggleCheck=toggleCheck;window.exportJSON=exportJSON;window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

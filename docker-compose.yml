@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tuteur-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: tuteur-chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+      - ANONYMIZED_TELEMETRY=False
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8000'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Pre-pull models container (run once, then remove)
+  # Uncomment and run `docker-compose --profile init up model-puller` to pre-download models
+  model-puller:
+    image: ollama/ollama:latest
+    container_name: tuteur-model-puller
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: >
+      sh -c "
+        ollama pull qwen2.5:7b &&
+        ollama pull bge-m3:latest &&
+        ollama pull prof-ia:latest
+      "
+    profiles:
+      - init
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  ollama-data:
+  chroma-data:

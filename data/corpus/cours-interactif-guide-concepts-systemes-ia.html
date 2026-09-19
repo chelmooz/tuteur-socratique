@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guide des concepts de systèmes d’IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="current">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Guide des concepts • systèmes d’IA</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Carte"><span class="pill">17 concepts • une architecture</span><h1>Guide des concepts de systèmes d’IA</h1><p class="muted">Une carte de l’ingénierie IA, de la représentation des connaissances à l’évaluation continue.</p><div class="grid"><div class="concept"><b>Fondations</b><p>Embeddings, bases vectorielles, RAG, ingénierie du contexte et cache sémantique.</p></div><div class="concept"><b>Orchestration</b><p>Routage, gateways, function calling, outils, MCP et intégrations externes.</p></div><div class="concept"><b>Agents</b><p>Harnais, boucle d’exécution, mémoire et garde-fous.</p></div><div class="concept"><b>Opérations</b><p>Observabilité, métriques, traces, logs, tests, benchmarks et amélioration.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel bloc appartient à la fin du cycle de production ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Observabilité et évaluations</button><button class="choice" data-correct="false" onclick="answer(this,false)">Embeddings uniquement</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Connaissance"><span class="pill">1–5 • Représenter et retrouver</span><h2>Fondations de la connaissance</h2><div class="grid"><div class="concept"><b>Embeddings</b><p>Convertir des contenus en vecteurs denses qui capturent une proximité sémantique.</p></div><div class="concept"><b>Base vectorielle</b><p>Stocker et indexer les vecteurs pour retrouver efficacement les éléments proches.</p></div><div class="concept"><b>RAG</b><p>Augmenter une génération avec des informations récupérées dynamiquement.</p></div><div class="concept"><b>Contexte</b><p>Préparer et structurer les données d’entrée pour maximiser la pertinence.</p></div><div class="concept"><b>Cache sémantique</b><p>Réutiliser une réponse pour une requête suffisamment proche afin de réduire latence et coût.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel composant indexe les représentations vectorielles ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">La base de données vectorielle</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le garde-fou seul</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Orchestration"><span class="pill">6–11 • Connecter les capacités</span><h2>Routage, outils et protocoles</h2><div class="grid"><div class="concept"><b>Routage de modèles</b><p>Diriger une requête vers le modèle approprié selon type, coût, risque ou capacité.</p></div><div class="concept"><b>AI Gateway</b><p>Centraliser accès, authentification, limites de débit, coûts et politiques.</p></div><div class="concept"><b>Function calling</b><p>Permettre au modèle de demander une fonction avec des arguments structurés JSON.</p></div><div class="concept"><b>Outils</b><p>Donner accès à recherche web, calculatrices, APIs ou systèmes d’entreprise.</p></div><div class="concept"><b>MCP</b><p>Partager de façon unifiée contexte, outils et ressources entre plateformes et modèles.</p></div><div class="concept"><b>Intégrations externes</b><p>Connecter les agents aux services SaaS et sources de données externes.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel mécanisme permet une demande d’action structurée au modèle ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Function calling avec arguments définis</button><button class="choice" data-correct="false" onclick="answer(this,false)">Un cache sans contrat</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Agents"><span class="pill">12–15 • Construire un agent fiable</span><h2>Harnais, exécution, mémoire et garde-fous</h2><div class="grid"><div class="concept"><b>Harnais d’agent</b><p>Réunir orchestrateur, outils, mémoire, règles et état autour du modèle.</p></div><div class="concept"><b>Boucle d’exécution</b><p>Percevoir, raisonner, agir, puis observer le résultat et recommencer si nécessaire.</p></div><div class="concept"><b>Mémoire</b><p>Distinguer mémoire courte pour le contexte courant et mémoire longue pour les informations persistantes.</p></div><div class="concept"><b>Garde-fous</b><p>Imposer des contraintes de sécurité et d’éthique sur les entrées et les sorties.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que doit contenir un harnais d’agent ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Orchestrateur, outils, mémoire et garde-fous</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement le nom du modèle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Opérations"><span class="pill">16–17 • Mesurer et améliorer</span><h2>Observabilité et évaluations</h2><p>L’observabilité relie métriques, traces, logs et insights pour comprendre ce que fait le système. Les évaluations organisent tests, benchmarks, mesure et amélioration continue.</p><div class="grid"><div class="concept"><b>Métriques</b><p>Suivre qualité, coût, latence, taux d’erreur et réussite des tâches.</p></div><div class="concept"><b>Traces et logs</b><p>Reconstituer les appels, outils, décisions et erreurs d’une exécution.</p></div><div class="concept"><b>Benchmarks</b><p>Comparer versions et stratégies sur un jeu stable et documenté.</p></div><div class="concept"><b>Amélioration</b><p>Transformer les résultats en corrections, nouveaux tests et décisions de déploiement.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Pourquoi combiner traces et métriques ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour relier le résultat global aux étapes concrètes de l’exécution</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour supprimer les tests</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Checklist"><span class="pill">Passage à l’action</span><h2>Checklist d’architecture</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Les contenus sont représentés par des embeddings et une stratégie d’indexation.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Le pipeline de contexte et la récupération sont testés.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Le routage, le gateway et les limites d’accès sont définis.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les fonctions, outils, MCP et intégrations ont des contrats explicites.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> L’agent possède une boucle d’exécution, une mémoire et des garde-fous.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Métriques, traces, logs et benchmarks sont disponibles avant la production.</label><button class="btn primary" onclick="finish()">Valider mon architecture</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

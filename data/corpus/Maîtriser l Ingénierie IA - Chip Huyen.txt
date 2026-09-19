@@ -1,0 +1,205 @@
+﻿🎓
+COURS
+Maîtriser l'Ingénierie IA
+( AI Engineering )
+Basé sur l'ouvrage de Chip Huyen
+Niveau : Intermédiaire à Avancé
+	
+
+💡  Introduction
+L'Ingénierie IA n'est pas l'Apprentissage Automatique (ML) traditionnel. Au lieu de créer des modèles à partir de zéro, l'ingénieur IA exploite et adapte des modèles de fondation (Foundation Models) massifs pour résoudre des problèmes réels. Ce cours donne la vue d'ensemble architecturale pour concevoir, évaluer et déployer des systèmes IA en production.
+	
+
+📚  9 modules  •  🧠  Fondations aux systèmes de production  •  ⚡  Illustré
+📖 Sommaire
+📚  Module 1 — Les Modèles de Fondation & l'Architecture3
+📊  Module 2 — L'Évaluation (le plus grand défi)4
+✍️  Module 3 — Ingénierie de Prompt5
+🔍  Module 4 — Le RAG (Génération Augmentée par Récupération)6
+🤖  Module 5 — Les Agents IA7
+⚖️  Module 6 — RAG vs Fine-Tuning8
+💎  Module 7 — L'IA Centrée sur les Données (Data-Centric AI)9
+⚡  Module 8 — Optimisation de l'Inférence10
+🏗️  Module 9 — Architecture Système & Production11
+🎓  Conclusion du cours11
+________________
+
+
+📚  MODULE 1 — Les Modèles de Fondation & l'Architecture
+Contrairement au ML classique, les modèles de fondation apprennent par auto-supervision (prédire la partie manquante d'une donnée).
+🧠 Le cœur du réacteur : le Transformer
+L'architecture dominante repose sur le mécanisme d'Attention.
+Entrée (Texte)
+	⬇
+	Requête (Q)
+	Clé (K)
+	Valeur (V)
+	⬇
+	⬇
+	⬇
+	Score d'Attention (Q comparé à K)
+	Sortie Pondérée
+	Figure 1 — Mécanisme d'Attention : Q, K et V produisent une sortie pondérée
+* Prefill : traitement parallèle de tous les jetons d'entrée (rapide).
+* Decode : génération séquentielle des jetons de sortie (un par un).
+
+
+📐  Loi de Chinchilla
+Pour un budget de calcul donné, il faut environ 20× plus de jetons d'entraînement que de paramètres dans le modèle.
+	📊  MODULE 2 — L'Évaluation (le plus grand défi)
+Évaluer un LLM est complexe : les tâches sont ouvertes, les réponses multiples et les modèles sont des « boîtes noires ».
+📈 Les métriques clés
+Type de métrique
+	Description
+	Exemple d'usage
+	Perplexité
+	Mesure l'incertitude du modèle (basée sur l'entropie).
+	Évaluation pendant le pré-entraînement.
+	Justesse fonctionnelle
+	Le système a-t-il accompli sa tâche ?
+	Le code s'exécute-t-il ? La réservation est-elle faite ?
+	Similarité sémantique
+	Le sens est-il conservé (via embeddings) ?
+	Comparaison de résumés.
+	LLM-as-a-Judge
+	Utiliser une IA pour noter une autre IA.
+	Évaluation de la toxicité, de la cohérence.
+	
+
+⚠️  Attention aux biais du juge IA
+Auto-biais (préfère ses propres réponses), biais de position (préfère la 1ère réponse), biais de verbosité (préfère les textes longs).
+	✍️  MODULE 3 — Ingénierie de Prompt
+L'art de guider le modèle sans modifier ses poids. C'est votre première ligne de défense avant d'envisager le fine-tuning.
+🛠️ Les stratégies gagnantes
+1. Clarté & Format : spécifier le JSON, le Markdown, ou interdire les préambules.
+2. Personas : « Agis comme un pédiatre expérimenté ».
+3. Few-Shot : fournir des exemples (shots) dans le prompt.
+4. Chain-of-Thought (CoT) : « Réfléchis étape par étape » pour améliorer le raisonnement logique.
+
+
+🛡️ Sécurité & attaques
+* Prompt Injection : contourner les règles de sécurité via l'entrée utilisateur.
+* Jailbreak : forcer le modèle à adopter un rôle ignorant ses filtres éthiques.
+🛡️  Solution
+Isoler le prompt système et utiliser des garde-fous (guardrails) en entrée comme en sortie.
+	🔍  MODULE 4 — Le RAG (Génération Augmentée par Récupération)
+Donner une mémoire à long terme au modèle pour éviter les hallucinations et accéder à des données privées.
+🔄 Le pipeline RAG
+📂 Base de Connaissance
+	⬇
+	Chunking
+	⬇
+	Embeddings
+	⬇
+	Base Vectorielle (recherche KNN)
+	⬇
+	Requête Utilisateur
+	Top-K Docs
+	⬇
+	🧠 Génération (Modèle de Fondation)
+	Figure 2 — Pipeline RAG : de la base de connaissance à la génération
+* Recherche lexicale (BM25) : rapide, basée sur les mots-clés exacts.
+* Recherche sémantique (Embeddings) : comprend le sens et les synonymes.
+* Hybride : le standard en production pour combiner les forces des deux.
+
+
+💡  Astuce
+La réécriture de requête (ex. « Quelle est sa population ? » → « Population de Paris ») est cruciale pour les conversations multi-tours.
+	🤖  MODULE 5 — Les Agents IA
+Un agent n'est pas juste un générateur de texte. C'est un système qui perçoit, planifie, et agit sur son environnement via des outils.
+🧩 Anatomie d'un agent
+Composant
+	Description
+	Outils (Tools)
+	API Web, calculatrices, exécuteurs SQL, lecteurs d'emails.
+	Planification
+	Décomposer « Projeter le CA » en : Écrire SQL → Exécuter → Analyser → Répondre.
+	Mémoire court terme
+	Fenêtre de contexte.
+	Mémoire long terme
+	Base de données vectorielle (RAG).
+	
+
+🚨  Règle d'or
+Toujours séparer la génération du plan de l'exécution des outils, et exiger une validation (humaine ou heuristique) avant les actions d'écriture (ex. envoyer un email).
+	⚖️  MODULE 6 — RAG vs Fine-Tuning
+Quand faut-il modifier les poids du modèle ?
+Problème du modèle
+	Cause
+	Solution recommandée
+	Manque de connaissances (données récentes, privées)
+	Information
+	🟢 RAG
+	Mauvais comportement (format, ton, style, jargon)
+	Comportement
+	🔵 Fine-Tuning
+	Les deux
+	Mixte
+	🟣 RAG + Fine-Tuning
+	
+
+🧬 Techniques de fine-tuning moderne
+* PEFT & LoRA : au lieu de réentraîner les milliards de paramètres, on « gèle » le modèle et on entraîne de petites matrices (A et B) qui s'ajoutent aux poids — environ 90 % des performances pour 1 % du coût mémoire.
+* Quantification : passer de 32 bits (FP32) à 8 ou 4 bits (INT8/INT4) pour réduire l'empreinte mémoire.
+* Fusion de modèles (Model Merging) : combiner les poids de deux modèles fine-tunés sur des tâches différentes pour créer un modèle « Frankenstein » surdoué.
+💎  MODULE 7 — L'IA Centrée sur les Données (Data-Centric AI)
+« Déchets en entrée, déchets en sortie »
+	La qualité de vos données battra toujours la taille de votre modèle.
+* Qualité > Quantité : 100 exemples parfaits et cohérents valent mieux que 10 000 exemples bruités.
+* Synthèse de données (Distillation) : utiliser un LLM puissant (ex. GPT-4) pour générer des données d'entraînement pour un petit modèle open-source (ex. Llama 3 8B).
+* Nettoyage : supprimer les doublons, le HTML, les données toxiques et vérifier la distribution des domaines.
+⚡  MODULE 8 — Optimisation de l'Inférence
+🎯  Utilité en production
+Utilité = Qualité ÷ (Coût + Latence)
+	
+
+📉 Comprendre la latence
+Sigle
+	Signification
+	TTFT
+	Time To First Token — le temps de « pré-remplissage » (lecture du prompt).
+	TPOT
+	Time Per Output Token — le temps de « décodage » (génération).
+	
+
+🚀 Techniques d'accélération
+* KV-Caching : mettre en cache les clés et valeurs des prompts système pour ne pas les recalculer à chaque tour de conversation.
+* Batching continu : traiter les requêtes de plusieurs utilisateurs simultanément sur le GPU sans attendre la fin des réponses des uns pour commencer celles des autres.
+* Décodage spéculatif : utiliser un « petit » modèle rapide pour deviner les prochains mots, et le « gros » modèle pour valider en parallèle.
+🏗️  MODULE 9 — Architecture Système & Production
+Comment assembler le tout pour une application d'entreprise ?
+👤 Utilisateur
+	⬇
+	🛡️ Garde-fous d'Entrée (filtres toxiques, prompt injection)
+	⬇
+	🚦 Routeur de Modèles (classifieur d'intention)
+	⬇
+	Tâche simple → Modèle rapide / peu cher
+	Tâche complexe → Modèle puissant + RAG + Agents
+	⬇
+	⚙️ Orchestrateur (LangChain, LlamaIndex) + Cache Redis
+	⬇
+	🛡️ Garde-fous de Sortie (PII, hallucinations)
+	⬇
+	👤 Réponse
+	📊 Collecte de Feedback
+	Figure 3 — Architecture d'une application IA en production
+🔭 L'observabilité
+Ne vous contentez pas de surveiller si le serveur est « en ligne ». Surveillez :
+* Le taux d'échec des outils (tool calling failures).
+* La dérive sémantique des réponses.
+* Le feedback implicite (l'utilisateur a-t-il régénéré la réponse 3 fois ?).
+
+
+🎓 Conclusion du cours
+L'ingénierie IA est un domaine où l'architecture système et la gestion des données ont pris le pas sur la création d'algorithmes mathématiques purs.
+✅ Votre plan d'action pour vos prochains projets
+1. Commencez toujours par le Prompt Engineering.
+2. Si le modèle manque de faits, ajoutez du RAG.
+3. Si le modèle manque de style ou de format, faites du Fine-Tuning (LoRA).
+4. Mettez en place des évaluations automatisées (LLM-as-a-judge) dès le jour 1.
+5. Itérez grâce au feedback utilisateur.
+
+
+📚  Devoirs / Pour aller plus loin
+Lire le livre « AI Engineering » de Chip Huyen pour explorer les implémentations mathématiques de l'Attention et les études de cas de déploiement à grande échelle.

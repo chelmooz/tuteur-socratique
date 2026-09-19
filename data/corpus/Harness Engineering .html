@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Harness Engineering | Prompt, Context, Loops, Agents</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🧰 <span>Harness Engineering</span> Masterclass</div>
+        <div class="muted small">Prompt • Context • Loops • Orchestration • Exécution • Agents autonomes</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "harness-engineering-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { started: false, finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        STATE.theme = data.theme || "dark";
+        STATE.visited = new Set(data.visited || []);
+        STATE.quizScores = data.quizScores || {};
+        STATE.diagnostic = data.diagnostic || null;
+        STATE.path = data.path || "masterclass";
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        STATE.certName = data.certName || "";
+        STATE.sourcesHidden = !!data.sourcesHidden;
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express", boxId = "") {
+      const idAttr = boxId ? ' id="' + boxId + '"' : "";
+      return `
+        <div class="quiz" data-module="${moduleId}"${idAttr}>
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function codeHTML(label, id, code) {
+      return `
+        <div class="card">
+          <h3>${label}</h3>
+          <pre class="code" id="${id}">${code}</pre>
+          <button class="btn secondary small" onclick="copyText('${id}', this)">Copier</button>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const total = qs.length;
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + total;
+      STATE.quizScores[moduleId] = { correct, total };
+      saveState();
+      updateScore();
+    }
+
+    function copyText(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.innerText.trim();
+      const done = () => {
+        if (!btn) return;
+        const old = btn.textContent;
+        btn.textContent = "✅ Copié";
+        setTimeout(() => { btn.textContent = old; }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      const mods = visibleModules();
+      $("#nav").innerHTML = mods.map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">
+          ${m.title}
+        </button>
+      `).join("");
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `
+        <section id="${m.id}" class="section">
+          ${m.content}
+        </section>
+      `).join("");
+    }
+
+    function showSection(id) {
+      const mod = MODULES.find(m => m.id === id);
+      if (!mod) return;
+
+      if (STATE.path === "express" && mod.express === false) {
+        STATE.path = "masterclass";
+        saveState();
+        renderNav();
+      }
+
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "loops") showLoopStep(0);
+      if (id === "autonomy") chooseAutonomy("local");
+      if (id === "simulator") simReset();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0;
+      let total = 0;
+      Object.values(STATE.quizScores).forEach(s => {
+        correct += s.correct || 0;
+        total += s.total || 0;
+      });
+      if (STATE.exam.finished) {
+        correct += STATE.exam.score;
+        total += STATE.exam.total;
+      }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() {
+      STATE.theme = STATE.theme === "dark" ? "light" : "dark";
+      document.body.setAttribute("data-theme", STATE.theme);
+      saveState();
+    }
+
+    function toggleSources() {
+      STATE.sourcesHidden = !STATE.sourcesHidden;
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      saveState();
+    }
+
+    function toggleMobileNav() {
+      $("#sidebar").classList.toggle("mobile-open");
+    }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    const DIAG_TEXT = {
+      debutant: "Commencez par distinguer prompt, contexte et harness. Ne cherchez pas à construire un système autonome complexe avant de comprendre la boucle.",
+      praticien: "Focus sur les loops, le requirement file, la sélection de tâche unique, les tests par itération et l escalade d autonomie.",
+      expert: "Analysez les trade-offs : orchestration, coût, latence, vérification, rollback, observabilité, garde-fous d autonomie."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) {
+        alert("Répondez aux trois questions du diagnostic.");
+        return;
+      }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+          <p class="muted">Le mode express masque les modules avancés. Vous pouvez basculer en masterclass à tout moment depuis le diagnostic.</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function showLoopStep(step) {
+      const steps = [
+        {
+          title: "1. Requirement file",
+          text: "Le harness commence par transformer une intention large en document de exigences. Ce document devient la source de vérité des tâches à accomplir."
+        },
+        {
+          title: "2. Task selection",
+          text: "À chaque itération, l agent ne tente pas tout le projet. Il sélectionne une seule tâche claire à compléter."
+        },
+        {
+          title: "3. Fresh context",
+          text: "L agent reçoit un contexte propre et ciblé pour la tâche courante, au lieu de traîner un historique résumé et dégradé."
+        },
+        {
+          title: "4. Strict rules",
+          text: "Le prompt et l environnement définissent comment démarrer, quoi faire, comment finir, et quand s arrêter."
+        },
+        {
+          title: "5. Execute",
+          text: "L agent exécute la tâche avec les outils nécessaires : fichiers, tests, commandes, API, contexte pertinent."
+        },
+        {
+          title: "6. Test and document",
+          text: "Chaque étape est vérifiée et documentée. On ne suppose pas qu une feature est finie sans preuve."
+        },
+        {
+          title: "7. Iterate",
+          text: "Le loop recommence jusqu à ce que toutes les tâches soient terminées. La progression devient incrémentale et auditable."
+        }
+      ];
+
+      const title = $("#loop-title");
+      const text = $("#loop-text");
+      if (!title || !text) return;
+      title.textContent = steps[step].title;
+      text.textContent = steps[step].text;
+      $$("#loop-buttons button").forEach((b, i) => b.classList.toggle("active", i === step));
+    }
+
+    function chooseAutonomy(level) {
+      const texts = {
+        local: "Niveau 1 — Agent local : vous travaillez dans votre IDE ou terminal. Contrôle maximal, mais votre machine doit rester disponible et vous devez superviser chaque étape.",
+        concurrent: "Niveau 2 — Agents concurrents : plusieurs agents travaillent en parallèle avec leurs propres contextes. Gain de vitesse, mais risque de conflits, de duplication et de coordination fragile.",
+        cloud: "Niveau 3 — Cloud agent : le job continue même si vous fermez votre poste. L agent peut créer une pull request. Il faut alors une revue humaine, des permissions strictes et un environnement isolé.",
+        slack: "Niveau 4 — Déclenchement par message : une demande arrive via Slack ou un autre canal, l agent lance un cloud job et notifie à la fin. Utile en équipe, mais exige audit, ownership et garde-fous.",
+        scheduled: "Niveau 5 — Automation planifiée : le système vérifie périodiquement une source et agit seul. Puissant, mais dangereux sans tests, rollback, notifications, budget max et critères d échec."
+      };
+
+      const out = $("#autonomy-out");
+      if (out) out.textContent = texts[level] || texts.local;
+      $$("#autonomy-buttons button").forEach(b => b.classList.toggle("active", b.dataset.level === level));
+    }
+
+    function simReset() {
+      const log = $("#sim-log");
+      const result = $("#sim-result");
+      if (log) log.textContent = "Simulateur prêt. Choisissez un mode d exécution pour comparer les résultats sur une tâche large : cloner un site web.";
+      if (result) result.textContent = "En attente de simulation.";
+    }
+
+    function simRun(mode) {
+      const log = $("#sim-log");
+      const result = $("#sim-result");
+      if (!log || !result) return;
+
+      if (mode === "prompt") {
+        log.textContent = [
+          "MODE PROMPT ONE-SHOT",
+          "1. L utilisateur demande : clone entire website.",
+          "2. Le modèle répond en une seule passe.",
+          "3. Il génère une structure apparente.",
+          "4. Certains boutons ne fonctionnent pas.",
+          "5. Les features ne sont pas testées.",
+          "6. Aucune vérification incrémentale n existe."
+        ].join("\n");
+        result.textContent = "Verdict : rapide à lancer, mais résultat sketchy. Le modèle ne peut pas tenir un scope énorme dans une seule réponse fiable.";
+      }
+
+      if (mode === "context") {
+        log.textContent = [
+          "MODE CONTEXT ENGINEERING",
+          "1. L agent charge des fichiers pertinents via tool calling.",
+          "2. Il connecte des sources avec RAG ou MCP.",
+          "3. Il commence à travailler sur plusieurs parties du site.",
+          "4. Le contexte se remplit.",
+          "5. Le système résume pour continuer.",
+          "6. Le résumé perd des détails critiques.",
+          "7. L agent suppose que certaines pages sont finies.",
+          "8. Des features restent partielles ou non vérifiées."
+        ].join("\n");
+        result.textContent = "Verdict : meilleur que le one-shot, mais toujours limité sur les tâches longues. L agent devient dépendant de sa capacité à résumer son propre travail.";
+      }
+
+      if (mode === "harness") {
+        log.textContent = [
+          "MODE HARNESS ENGINEERING",
+          "1. Le harness génère un requirement file complet.",
+          "2. Les exigences sont découpées en tâches.",
+          "3. Itération 1 : sélectionner Home page.",
+          "4. Contexte frais + règles de démarrage et de fin.",
+          "5. Exécution, test, documentation.",
+          "6. Itération 2 : sélectionner Authentication.",
+          "7. Contexte frais + règles + outils pertinents.",
+          "8. Exécution, test, documentation.",
+          "9. Itérations suivantes : Dashboard, Billing, Tests, Déploiement.",
+          "10. Le loop continue jusqu à complétion vérifiée."
+        ].join("\n");
+        result.textContent = "Verdict : architecture plus robuste. L agent ne porte pas tout le projet dans sa tête ; le harness porte la structure, la mémoire de progression et les critères de sortie.";
+      }
+    }
+
+    function generateHarnessSpec() {
+      const project = $("#hs-project")?.value || "Application web";
+      const goal = $("#hs-goal")?.value || "Livrer une fonctionnalité complète et testée";
+      const stack = $("#hs-stack")?.value || "TypeScript, React, Node, Supabase";
+      const constraints = $("#hs-constraints")?.value || "Tests unitaires, CI, sécurité, accessibilité";
+      const success = $("#hs-success")?.value || "Toutes les tâches sont passantes, documentées et reviewables";
+      const autonomy = $("#hs-autonomy")?.value || "cloud";
+      const loop = $("#hs-loop")?.value || "une tâche par itération";
+
+      const spec = `# Harness Spec — ${project}
+
+## Objectif
+${goal}
+
+## Stack
+${stack}
+
+## Contraintes
+${constraints}
+
+## Critères de succès
+${success}
+
+## Niveau d autonomie
+${autonomy}
+
+## Protocole de boucle
+${loop}
+
+## 1. Couche Prompt Engineering
+Définir le rôle de l agent, le ton, les interdits et le format de sortie attendu.
+Le prompt reste important, mais il ne porte plus seul la complexité du système.
+
+## 2. Couche Context Engineering
+Charger uniquement le contexte pertinent pour la tâche courante :
+- fichiers concernés ;
+- outils ;
+- documentation interne ;
+- résultats de tests ;
+- historique minimal nécessaire.
+
+## 3. Couche Harness Engineering
+Le harness orchestre l exécution :
+- générer un requirement file ;
+- découper en tâches atomiques ;
+- sélectionner une tâche par itération ;
+- fournir un contexte frais ;
+- imposer des règles de start et finish ;
+- exécuter ;
+- tester ;
+- documenter ;
+- passer à la tâche suivante.
+
+## 4. Gardes-fous
+- plafond de tokens et de coûts ;
+- timeout par tâche ;
+- interdiction de déclarer une feature finie sans test ;
+- journalisation des décisions ;
+- rollback possible ;
+- revue humaine pour les actions sensibles.
+
+## 5. Sortie attendue
+Un rapport final contenant :
+- tâches accomplies ;
+- preuves de tests ;
+- fichiers modifiés ;
+- limitations restantes ;
+- prochaines étapes.`;
+
+      const out = $("#hs-out");
+      if (out) {
+        out.textContent = spec;
+        out.style.display = "block";
+      }
+      const copy = $("#hs-copy");
+      if (copy) copy.style.display = "inline-flex";
+    }
+
+    const FLASHCARDS = [
+      { front: "Harness Engineering", back: "Ingénierie de l environnement autour de l agent : orchestration, exécution, gestion de contexte, boucles, règles de start/finish.", tip: "0:00" },
+      { front: "Prompt Engineering", back: "Définit qui est l agent, son persona, ses instructions et son format de réponse. Toujours utile, mais devient une couche inférieure.", tip: "6:54" },
+      { front: "Context Engineering", back: "Gère la fenêtre de contexte avec tool calling, MCP, RAG, fichiers pertinents et actions externes.", tip: "1:00" },
+      { front: "Tool calling", back: "Permet à l agent d explorer un repo, lire des fichiers spécifiques et créer des actions externes.", tip: "1:11" },
+      { front: "MCP", back: "Ajoute des fonctionnalités vendor-specific au-dessus du modèle.", tip: "1:21" },
+      { front: "RAG", back: "Connecte des bases personnalisées pour rendre des données disponibles à la demande.", tip: "1:26" },
+      { front: "Context summarization", back: "Technique de compression du contexte quand il se remplit. Utile, mais dangereuse sur les tâches longues.", tip: "2:52" },
+      { front: "Limite du résumé", back: "L agent devient dépendant de sa capacité à résumer son travail précédent ; il peut croire qu une tâche est finie.", tip: "3:13" },
+      { front: "Loops", back: "Changement critique du harness : itérations avec contexte frais et règles strictes de démarrage et de fin.", tip: "5:57" },
+      { front: "Requirement file", back: "Document large généré au début pour découper le projet en tâches exploitables.", tip: "7:18" },
+      { front: "One task per iteration", back: "À chaque boucle, l agent sélectionne une seule tâche à compléter, teste et documente.", tip: "7:23" },
+      { front: "Ralph", back: "Exemple cité d architecture simple et efficace basée sur requirement document, JSON tasks et loop d implémentation.", tip: "6:23" },
+      { front: "Cloud agent", back: "Agent exécuté hors du poste local, capable de continuer après fermeture du client et de créer une PR.", tip: "5:22" },
+      { front: "Scheduled automation", back: "Niveau d autonomie élevé : l agent agit périodiquement sans déclenchement manuel. Nécessite des garde-fous forts.", tip: "5:51" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    const FINAL_QUESTIONS = [
+      { q: "Qu est-ce que le harness engineering ajoute surtout par rapport au prompt engineering ?", o: ["Un prompt plus long", "Un environnement d exécution et d orchestration autour de l agent", "Un modèle plus puissant"], a: 1, e: "Le harness porte la structure, les boucles, le contexte, les règles de start/finish et la vérification." },
+      { q: "Pourquoi le prompt engineering reste-t-il utile dans un harness ?", o: ["Il disparaît complètement", "Il définit le rôle, le persona et les instructions de base", "Il remplace les tools"], a: 1, e: "Le transcript précise que le harness n deprecated pas le prompt engineering." },
+      { q: "Quel est le rôle principal du context engineering ?", o: ["Gérer efficacement la fenêtre de contexte", "Remplacer le LLM", "Créer l interface utilisateur"], a: 0, e: "Tool calling, MCP et RAG servent à charger le bon contexte au bon moment." },
+      { q: "Quelle limite majeure apparaît quand les tâches deviennent très longues ?", o: ["Le modèle devient trop créatif", "Le résumé du contexte peut faire perdre des détails et simuler une complétion", "Les tools disparaissent"], a: 1, e: "L agent devient dépendant de sa capacité à résumer son travail précédent." },
+      { q: "Quel changement critique est associé à la montée du harness engineering ?", o: ["Les loops avec contexte frais et règles strictes", "Supprimer les tests", "Utiliser uniquement un plus grand contexte"], a: 0, e: "Le loop permet de traiter une tâche à la fois avec un contexte propre." },
+      { q: "À quoi sert un requirement file dans cette architecture ?", o: ["À stocker des vecteurs", "À découper un objectif large en tâches exploitables", "À remplacer LangSmith"], a: 1, e: "Il devient la source de vérité des tâches à itérer." },
+      { q: "Que doit faire l agent à chaque itération d un harness bien conçu ?", o: ["Tenter tout le projet d un coup", "Sélectionner une tâche, exécuter, tester, documenter", "Supprimer l historique"], a: 1, e: "La progression doit être incrémentale et vérifiée." },
+      { q: "Pourquoi les architectures type Ralph ou Anthropic sont-elles citées ?", o: ["Parce qu elles sont complexes et lourdes", "Parce qu elles montrent qu un harness peut être simple, léger et efficace", "Parce qu elles remplacent les modèles"], a: 1, e: "Le transcript insiste sur la simplicité relative de ces architectures." },
+      { q: "Quel risque apparaît avec un agent cloud planifié et autonome ?", o: ["Aucun risque", "Agir sans supervision si les garde-fous, tests et rollbacks sont absents", "Perdre le prompt"], a: 1, e: "Plus d autonomie exige plus de contrôle, d audit et de critères d échec." },
+      { q: "Quelle phrase résume le mieux la relation entre prompt, context et harness ?", o: ["Le harness remplace tout", "Le harness exploite prompt et context, mais déplace la valeur vers l environnement et la boucle", "Le context remplace le harness"], a: 1, e: "Ce n est pas une substitution brutale, c est un changement de paradigme." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.started = true;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = "";
+        if (STATE.exam.passed) {
+          advice = "Vous pouvez concevoir un harness simple : requirement file, boucle, contexte frais, test, documentation, escalade d autonomie contrôlée.";
+        } else if (correct >= 5) {
+          advice = "Bases solides. Revoyez les limites du context summarization, le rôle des loops et les garde-fous d autonomie.";
+        } else {
+          advice = "Reprenez la distinction prompt / context / harness, puis le simulateur de boucle.";
+        }
+        res.innerHTML = `
+          <strong>Résultat : ${correct}/${qs.length}</strong><br>
+          ${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br>
+          <span class="muted">${advice}</span>
+        `;
+      }
+
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) {
+          res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        }
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) {
+        alert("Terminez d abord l examen final.");
+        return;
+      }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Harness Engineering Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-harness-engineering.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencer par un harness minimal : une tâche à la fois, contexte frais, test manuel, documentation courte.";
+      if (d.level === "expert") return "Ajouter observabilité, evals automatiques, budget max, rollback, coordination multi-agents et politiques d autonomie graduée.";
+      return "Stack pragmatique : prompt persona, context ciblé, requirement file, loop strict, tests par itération, escalade cloud seulement après garde-fous.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    const MODULES = [
+      {
+        id: "home",
+        title: "🏠 Accueil",
+        express: true,
+        content: `
+          <h1>Harness Engineering : dépasser le prompt et le contexte</h1>
+          <p class="lead">
+            Le terme harness est à la fois large et précis. Beaucoup disent qu il désigne un environnement pour agent,
+            mais cela ne suffit pas. Ce cours premium clarifie la différence entre prompt engineering, context engineering
+            et harness engineering, puis vous fait construire un modèle mental opérationnel.
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 280" role="img" aria-label="Stack prompt context harness">
+              <defs>
+                <marker id="arrow-stack" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="120" y="190" width="660" height="60" class="node purple" />
+              <text x="450" y="215" text-anchor="middle">Prompt Engineering</text>
+              <text x="450" y="235" text-anchor="middle" class="sub">persona, rôle, instructions, format</text>
+
+              <path class="dash purple" d="M450 190 L450 160" marker-end="url(#arrow-stack)" />
+
+              <rect x="90" y="100" width="720" height="60" class="node" />
+              <text x="450" y="125" text-anchor="middle">Context Engineering</text>
+              <text x="450" y="145" text-anchor="middle" class="sub">tool calling, MCP, RAG, fichiers pertinents, actions</text>
+
+              <path class="dash" d="M450 100 L450 70" marker-end="url(#arrow-stack)" />
+
+              <rect x="60" y="10" width="780" height="60" class="node green pulse" />
+              <text x="450" y="35" text-anchor="middle">Harness Engineering</text>
+              <text x="450" y="55" text-anchor="middle" class="sub">loops, orchestration, exécution, règles start/finish, tests, documentation</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous serez capable d expliquer pourquoi le harness dépasse le prompt et le contexte, et de concevoir une boucle agentique simple pour une tâche longue.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, timeline, limites, architecture, loops, autonomie, simulateur, générateur de spec, flashcards, erreurs fréquentes, examen final.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Une Harness Spec réutilisable, un modèle mental clair, une checklist de garde-fous et un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('timeline')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic",
+        title: "🎯 Diagnostic",
+        express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours : niveau, objectif et temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau sur les agents IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je confonds encore prompt, contexte et harness.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : j ai déjà utilisé des tools, RAG ou un coding agent.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je conçois des orchestrations, boucles et systèmes autonomes.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre la différence conceptuelle.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire un harness pour un projet réel.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="deboguer"> Déboguer des agents qui abandonnent ou hallucinent la fin.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, essentiel seulement.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, atelier complet.</label>
+            </div>
+
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "timeline",
+        title: "1. Timeline",
+        express: true,
+        content: `
+          <h1>De Prompt Engineering à Context Engineering à Harness Engineering</h1>
+          <p class="lead">
+            Le transcript rappelle une généalogie importante : le harness engineering existait avant que le terme soit officiellement
+            popularisé début 2026. <span class="source">⏱ 0:25</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 980 240" role="img" aria-label="Timeline du prompt au harness">
+              <defs>
+                <marker id="arrow-time" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <path class="dash" d="M60 110 L920 110" marker-end="url(#arrow-time)" />
+
+              <circle cx="100" cy="110" r="12" class="node purple pulse" />
+              <text x="100" y="70" text-anchor="middle">2022</text>
+              <text x="100" y="145" text-anchor="middle" class="sub">ChatGPT</text>
+              <text x="100" y="165" text-anchor="middle" class="sub">4k tokens</text>
+
+              <circle cx="290" cy="110" r="12" class="node" />
+              <text x="290" y="70" text-anchor="middle">Prompt</text>
+              <text x="290" y="145" text-anchor="middle" class="sub">instructions</text>
+              <text x="290" y="165" text-anchor="middle" class="sub">one-shot</text>
+
+              <circle cx="480" cy="110" r="12" class="node green" />
+              <text x="480" y="70" text-anchor="middle">Context</text>
+              <text x="480" y="145" text-anchor="middle" class="sub">tools, MCP, RAG</text>
+              <text x="480" y="165" text-anchor="middle" class="sub">fenêtre gérée</text>
+
+              <circle cx="670" cy="110" r="12" class="node yellow" />
+              <text x="670" y="70" text-anchor="middle">Limites</text>
+              <text x="670" y="145" text-anchor="middle" class="sub">tâches longues</text>
+              <text x="670" y="165" text-anchor="middle" class="sub">summarization</text>
+
+              <circle cx="870" cy="110" r="14" class="node purple pulse" />
+              <text x="870" y="70" text-anchor="middle">2026</text>
+              <text x="870" y="145" text-anchor="middle" class="sub">Harness</text>
+              <text x="870" y="165" text-anchor="middle" class="sub">loops, env</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card purple">
+              <h3>Prompt Engineering</h3>
+              <p>Au début, le problème était simple : comment obtenir le bon comportement du modèle dans une petite fenêtre de contexte ?</p>
+            </div>
+            <div class="card info">
+              <h3>Context Engineering</h3>
+              <p>Puis il a fallu gérer la mémoire vive de l agent : quels fichiers lire, quels outils appeler, quelles données récupérer à la demande.</p>
+            </div>
+            <div class="card green">
+              <h3>Harness Engineering</h3>
+              <p>Enfin, pour les tâches longues, il a fallu orchestrer l environnement d exécution : boucles, règles, tests, documentation, reprise.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi le prompt engineering seul ne suffisait-il pas après 2022 ?", o: ["Parce que les modèles étaient trop petits et la fenêtre de contexte limitée", "Parce que les prompts sont interdits", "Parce que RAG était obligatoire"], a: 0, e: "Avec 4k tokens, il fallait faire plus avec moins, donc gérer le contexte." },
+            { q: "Quelles techniques ont fait passer du prompt au contexte ?", o: ["Tool calling, MCP, RAG", "Plus de emojis", "Supprimer les tools"], a: 0, e: "Ces techniques permettent de charger le bon contexte au bon moment." }
+          ], "timeline")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('timeline')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('timeline')">Limites du contexte →</button>
+          </div>
+        `
+      },
+      {
+        id: "limits",
+        title: "2. Limites",
+        express: true,
+        content: `
+          <h1>Pourquoi le context engineering échoue sur les tâches très longues</h1>
+          <p class="lead">
+            Le transcript donne un exemple parlant : demander à un coding agent de cloner un site entier.
+            Même avec de bons outils, le résultat peut être partiel, avec boutons cassés et features non testées.
+            <span class="source">⏱ 2:19</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 260" role="img" aria-label="Contexte qui se remplit puis résumé perte de détails">
+              <defs>
+                <marker id="arrow-limit" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="40" y="70" width="260" height="110" class="node" />
+              <text x="170" y="105" text-anchor="middle">Context window</text>
+              <rect x="60" y="125" width="45" height="35" class="node green" />
+              <rect x="115" y="125" width="45" height="35" class="node green" />
+              <rect x="170" y="125" width="45" height="35" class="node yellow" />
+              <rect x="225" y="125" width="45" height="35" class="node red pulse" />
+
+              <path class="dash red" d="M300 125 L380 125" marker-end="url(#arrow-limit)" />
+              <text x="340" y="105" text-anchor="middle" class="sub">summarize</text>
+
+              <rect x="380" y="70" width="220" height="110" class="node yellow" />
+              <text x="490" y="105" text-anchor="middle">Résumé élastique</text>
+              <text x="490" y="130" text-anchor="middle" class="sub">détails perdus</text>
+              <text x="490" y="150" text-anchor="middle" class="sub">fausse complétion</text>
+
+              <path class="dash yellow" d="M600 125 L680 125" marker-end="url(#arrow-limit)" />
+
+              <rect x="680" y="70" width="180" height="110" class="node red" />
+              <text x="770" y="105" text-anchor="middle">Tâche partielle</text>
+              <text x="770" y="130" text-anchor="middle" class="sub">buttons cassés</text>
+              <text x="770" y="150" text-anchor="middle" class="sub">non testé</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Symptôme 1 : half completed</h3>
+              <p>Le site semble avancé, mais certaines pages, boutons ou flux n existent pas vraiment.</p>
+            </div>
+            <div class="card bad">
+              <h3>Symptôme 2 : oversimplification</h3>
+              <p>Quand le contexte se remplit, l agent résume, puis simplifie à outrance la suite du travail.</p>
+            </div>
+            <div class="card bad">
+              <h3>Symptôme 3 : fake verification</h3>
+              <p>Il peut assumer qu une feature est terminée et vérifiée alors qu elle ne l est pas.</p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>Idée clé</h3>
+            <p>Le problème n est pas que le context engineering est mauvais. Le problème est qu une tâche très longue ne peut pas être portée uniquement par une fenêtre de contexte auto-résumée.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est le risque principal du context summarization sur une tâche de 12 heures ?", o: ["L agent peut oublier ou déformer l état réel du travail", "Le modèle devient plus rapide", "Les tools disparaissent"], a: 0, e: "L agent devient dépendant de sa capacité à résumer son propre travail." },
+            { q: "Pourquoi un site cloné peut-il paraître fini mais ne pas l être ?", o: ["Parce que l agent peut supposer que des features sont testées sans preuve", "Parce que CSS est interdit", "Parce que le contexte est trop petit uniquement"], a: 0, e: "La fausse vérification est un symptôme clé des tâches longues mal orchestrées." }
+          ], "limits")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('limits')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('limits')">Harness Engineering →</button>
+          </div>
+        `
+      },
+      {
+        id: "harness",
+        title: "3. Harness",
+        express: true,
+        content: `
+          <h1>Ce qu est vraiment le harness engineering</h1>
+          <p class="lead">
+            Le harness n est pas juste un mot à la mode. Il capture une transformation : on ne demande plus au modèle de porter
+            seul la complexité. On construit un environnement qui le fait entrer dans une série d étapes contrôlées.
+            <span class="source">⏱ 4:06</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Orchestration layer</h3>
+              <p>Décide quoi faire ensuite : quelle tâche, quel outil, quel contexte, quel arrêt.</p>
+            </div>
+            <div class="card good">
+              <h3>Execution environment</h3>
+              <p>Fournit le terrain d action : fichiers, commandes, tests, API, sandbox, PR, logs.</p>
+            </div>
+            <div class="card purple">
+              <h3>Context management</h3>
+              <p>Charge le bon contexte pour la tâche courante, sans dépendre d un historique infini.</p>
+            </div>
+          </div>
+
+          ${codeHTML("Squelette conceptuel d un harness", "code-harness", `requirement_file = generate_requirements(objective)
+tasks = parse_tasks(requirement_file)
+
+while tasks_remaining(tasks):
+    task = select_one_task(tasks)
+    context = build_fresh_context(task)
+    prompt = rules_for_start_and_finish(task)
+
+    result = agent.run(prompt, context, tools)
+
+    verify(result)
+    document(result)
+    mark_task_done(task)`)}
+
+          <div class="card warn">
+            <h3>Point important du transcript</h3>
+            <p>Le harness engineering ne déprécie ni le prompt engineering ni le context engineering. Il les exploite, mais déplace la valeur vers l environnement et la boucle. <span class="source">⏱ 6:31</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Le harness engineering remplace-t-il le prompt engineering ?", o: ["Oui, totalement", "Non, il l exploite comme une couche inférieure", "Seulement avec RAG"], a: 1, e: "Le prompt définit toujours rôle, persona et instructions de base." },
+            { q: "Quelles sont les trois ingrédients clés mentionnés pour harnesser un agent ?", o: ["Orchestration, environnement d exécution, gestion de contexte", "CSS, HTML, JS", "Prompt, emoji, température"], a: 0, e: "Ce sont les briques qui permettent de maîtriser l agent au-delà du simple prompt." }
+          ], "harness")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('harness')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('harness')">Les loops →</button>
+          </div>
+        `
+      },
+      {
+        id: "loops",
+        title: "4. Loops",
+        express: true,
+        content: `
+          <h1>Le changement critique : les boucles</h1>
+          <p class="lead">
+            L une des idées les plus importantes du transcript est la boucle. À chaque itération, l agent reçoit un contexte frais,
+            propre, sous des règles strictes de démarrage et de fin. <span class="source">⏱ 5:57</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 300" role="img" aria-label="Boucle harness requirement task context test">
+              <defs>
+                <marker id="arrow-loop" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="40" y="115" width="150" height="70" class="node" />
+              <text x="115" y="142" text-anchor="middle">Requirement</text>
+              <text x="115" y="162" text-anchor="middle" class="sub">file / JSON</text>
+
+              <path class="dash" d="M190 150 L245 150" marker-end="url(#arrow-loop)" />
+
+              <rect x="245" y="115" width="130" height="70" class="node purple" />
+              <text x="310" y="142" text-anchor="middle">Select one</text>
+              <text x="310" y="162" text-anchor="middle" class="sub">task</text>
+
+              <path class="dash purple" d="M375 150 L430 150" marker-end="url(#arrow-loop)" />
+
+              <rect x="430" y="115" width="130" height="70" class="node green pulse" />
+              <text x="495" y="142" text-anchor="middle">Fresh</text>
+              <text x="495" y="162" text-anchor="middle" class="sub">context</text>
+
+              <path class="dash green" d="M560 150 L615 150" marker-end="url(#loop-arrow)" />
+
+              <rect x="615" y="115" width="120" height="70" class="node yellow" />
+              <text x="675" y="142" text-anchor="middle">Execute</text>
+              <text x="675" y="162" text-anchor="middle" class="sub">tools</text>
+
+              <path class="dash yellow" d="M735 150 L790 150" marker-end="url(#arrow-loop)" />
+
+              <rect x="790" y="115" width="90" height="70" class="node" />
+              <text x="835" y="142" text-anchor="middle">Test</text>
+              <text x="835" y="162" text-anchor="middle" class="sub">document</text>
+
+              <path class="dash" d="M835 185 L835 235 L115 235 L115 185" marker-end="url(#arrow-loop)" />
+              <text x="475" y="225" text-anchor="middle" class="sub">iterate until completion</text>
+            </svg>
+          </div>
+
+          <div class="simulator">
+            <h3>Stepper interactif de la boucle</h3>
+            <div id="loop-buttons" class="tab-list no-print">
+              <button class="tab-btn active" onclick="showLoopStep(0)">Requirement</button>
+              <button class="tab-btn" onclick="showLoopStep(1)">Select task</button>
+              <button class="tab-btn" onclick="showLoopStep(2)">Fresh context</button>
+              <button class="tab-btn" onclick="showLoopStep(3)">Strict rules</button>
+              <button class="tab-btn" onclick="showLoopStep(4)">Execute</button>
+              <button class="tab-btn" onclick="showLoopStep(5)">Test / Doc</button>
+              <button class="tab-btn" onclick="showLoopStep(6)">Iterate</button>
+            </div>
+            <h4 id="loop-title">1. Requirement file</h4>
+            <p id="loop-text" class="muted">Le harness commence par transformer une intention large en document de exigences.</p>
+          </div>
+
+          <div class="card good">
+            <h3>Pourquoi ça marche mieux</h3>
+            <p>L agent ne doit pas retenir tout le projet dans un contexte déformé par des résumés. Le harness externalise la mémoire de progression et impose une discipline d exécution.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "À chaque itération d un harness, que reçoit idéalement l agent ?", o: ["Tout l historique brut", "Un contexte frais et ciblé avec règles strictes", "Un prompt aléatoire"], a: 1, e: "Le fresh context évite la dégradation par summarization successive." },
+            { q: "Pourquoi sélectionner une seule tâche par itération ?", o: ["Pour réduire la surface d erreur et rendre le test possible", "Pour utiliser moins de tokens toujours", "Pour éviter les outils"], a: 0, e: "Une tâche atomique est plus facile à exécuter, vérifier et documenter." }
+          ], "loops")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('loops')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('loops')">Autonomie graduée →</button>
+          </div>
+        `
+      },
+      {
+        id: "autonomy",
+        title: "5. Autonomie",
+        express: false,
+        content: `
+          <h1>L escalier d autonomie : local, cloud, Slack, scheduled</h1>
+          <p class="lead">
+            Le segment Cursor du transcript illustre une progression : agent local, agents concurrents, cloud agent,
+            intégration Slack, puis automation planifiée. Chaque niveau augmente la valeur, mais aussi le risque.
+            <span class="source">⏱ 4:44</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 260" role="img" aria-label="Escalier d autonomie">
+              <defs>
+                <marker id="arrow-auto" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="40" y="170" width="130" height="55" class="node" />
+              <text x="105" y="195" text-anchor="middle">Local</text>
+              <text x="105" y="213" text-anchor="middle" class="sub">IDE</text>
+
+              <rect x="190" y="135" width="130" height="55" class="node green" />
+              <text x="255" y="160" text-anchor="middle">Concurrent</text>
+              <text x="255" y="178" text-anchor="middle" class="sub">multi-agents</text>
+
+              <rect x="340" y="100" width="130" height="55" class="node purple" />
+              <text x="405" y="125" text-anchor="middle">Cloud</text>
+              <text x="405" y="143" text-anchor="middle" class="sub">PR auto</text>
+
+              <rect x="490" y="65" width="130" height="55" class="node yellow" />
+              <text x="555" y="90" text-anchor="middle">Slack</text>
+              <text x="555" y="108" text-anchor="middle" class="sub">trigger équipe</text>
+
+              <rect x="640" y="30" width="150" height="55" class="node red pulse" />
+              <text x="715" y="55" text-anchor="middle">Scheduled</text>
+              <text x="715" y="73" text-anchor="middle" class="sub">daily automation</text>
+
+              <path class="dash" d="M170 190 L190 165" marker-end="url(#arrow-auto)" />
+              <path class="dash green" d="M320 155 L340 130" marker-end="url(#arrow-auto)" />
+              <path class="dash purple" d="M470 120 L490 95" marker-end="url(#arrow-auto)" />
+              <path class="dash yellow" d="M620 85 L640 60" marker-end="url(#arrow-auto)" />
+            </svg>
+          </div>
+
+          <div class="simulator">
+            <h3>Sélectionnez un niveau d autonomie</h3>
+            <div id="autonomy-buttons" class="tab-list no-print">
+              <button class="tab-btn active" data-level="local" onclick="chooseAutonomy('local')">Local</button>
+              <button class="tab-btn" data-level="concurrent" onclick="chooseAutonomy('concurrent')">Concurrent</button>
+              <button class="tab-btn" data-level="cloud" onclick="chooseAutonomy('cloud')">Cloud</button>
+              <button class="tab-btn" data-level="slack" onclick="chooseAutonomy('slack')">Slack</button>
+              <button class="tab-btn" data-level="scheduled" onclick="chooseAutonomy('scheduled')">Scheduled</button>
+            </div>
+            <pre id="autonomy-out" class="prompt"></pre>
+          </div>
+
+          <div class="card bad">
+            <h3>Règle de sécurité</h3>
+            <p>Ne passez jamais directement à scheduled sans avoir validé local, tests, rollback, notifications, budget max et critères d échec.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel avantage apporte un cloud agent par rapport à un agent local ?", o: ["Le job continue même si votre machine est fermée", "Il supprime les prompts", "Il évite les tests"], a: 0, e: "C est l exemple donné dans le transcript avec création de PR." },
+            { q: "Pourquoi le niveau scheduled est-il le plus risqué ?", o: ["Parce qu il agit sans déclenchement manuel continu", "Parce qu il utilise toujours moins de tokens", "Parce qu il remplace LLM"], a: 0, e: "Plus d autonomie implique plus de garde-fous, d audit et de rollback." }
+          ], "autonomy")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('autonomy')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('autonomy')">Atelier spec →</button>
+          </div>
+        `
+      },
+      {
+        id: "workshop",
+        title: "6. Atelier",
+        express: false,
+        content: `
+          <h1>Atelier : générez votre Harness Spec</h1>
+          <p class="lead">Transformez un projet flou en spécification d environnement agentique : prompt, contexte, boucle, tests, autonomie.</p>
+
+          <div class="generator">
+            <div class="grid">
+              <div>
+                <label for="hs-project">Projet</label>
+                <input id="hs-project" value="Site de documentation IA" />
+              </div>
+              <div>
+                <label for="hs-goal">Objectif</label>
+                <input id="hs-goal" value="Mettre à jour automatiquement les nouveaux modèles" />
+              </div>
+              <div>
+                <label for="hs-stack">Stack</label>
+                <input id="hs-stack" value="Next.js, Markdown, API models, CI" />
+              </div>
+              <div>
+                <label for="hs-constraints">Contraintes</label>
+                <input id="hs-constraints" value="Tests lint, revue PR, budget max, pas de secret" />
+              </div>
+              <div>
+                <label for="hs-success">Critères de succès</label>
+                <input id="hs-success" value="Page modèles à jour, sources citées, PR mergable" />
+              </div>
+              <div>
+                <label for="hs-autonomy">Autonomie</label>
+                <select id="hs-autonomy">
+                  <option value="local">local</option>
+                  <option value="concurrent">concurrent</option>
+                  <option value="cloud" selected>cloud</option>
+                  <option value="slack">slack</option>
+                  <option value="scheduled">scheduled</option>
+                </select>
+              </div>
+              <div>
+                <label for="hs-loop">Protocole de boucle</label>
+                <select id="hs-loop">
+                  <option selected>une tâche par itération</option>
+                  <option>un module par itération</option>
+                  <option>un fichier par itération</option>
+                  <option>un test d abord par itération</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn" onclick="generateHarnessSpec()">Générer la Harness Spec</button>
+            <pre id="hs-out" class="prompt" style="display:none"></pre>
+            <button class="btn secondary small" id="hs-copy" style="display:none" onclick="copyText('hs-out', this)">Copier la spec</button>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('workshop')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('workshop')">Simulateur →</button>
+          </div>
+        `
+      },
+      {
+        id: "simulator",
+        title: "7. Simulateur",
+        express: true,
+        content: `
+          <h1>Simulateur : prompt vs context vs harness</h1>
+          <p class="lead">Comparez mentalement trois approches sur la même tâche large : cloner un site web.</p>
+
+          <div class="simulator">
+            <div class="step-row no-print">
+              <button class="btn secondary" onclick="simRun('prompt')">1. Prompt one-shot</button>
+              <button class="btn secondary" onclick="simRun('context')">2. Context engineering</button>
+              <button class="btn" onclick="simRun('harness')">3. Harness loop</button>
+              <button class="btn secondary" onclick="simReset()">Réinitialiser</button>
+            </div>
+            <div id="sim-log" class="sim-log"></div>
+            <h3>Résultat</h3>
+            <div id="sim-result" class="sim-result"></div>
+          </div>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Leçon 1</h3>
+              <p>Une tâche large en one-shot produit une illusion de complétion.</p>
+            </div>
+            <div class="card warn">
+              <h3>Leçon 2</h3>
+              <p>Le contexte intelligent aide, mais ne suffit pas si la progression n est pas externalisée et vérifiée.</p>
+            </div>
+            <div class="card good">
+              <h3>Leçon 3</h3>
+              <p>Le harness rend la tâche longue découpable, testable, reprenable et auditable.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('simulator')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('simulator')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards",
+        title: "8. Flashcards",
+        express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. Ces cartes résument le vocabulaire essentiel du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Erreurs fréquentes →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors",
+        title: "9. Erreurs",
+        express: true,
+        content: `
+          <h1>Anti-patterns du harness engineering</h1>
+          <p class="lead">Le transcript montre que la confusion vient souvent du fait que harness est à la fois très large et très spécifique. Voici les erreurs à éviter.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Traiter harness comme un simple buzzword</h3>
+              <p>Si vous ne pouvez pas dire quelles couches il orchestre, vous n avez pas compris le concept.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Croire qu il remplace prompt et contexte</h3>
+              <p>Il les exploite. Le prompt donne le rôle, le contexte donne les bons faits, le harness donne la discipline.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Se fier au summarization pour tenir une tâche longue</h3>
+              <p>Le résumé élastique peut faire perdre des détails critiques et créer de fausses complétions.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. Donner un scope énorme sans requirement file</h3>
+              <p>Sans découpage, l agent tente tout, puis abandonne ou simplifie.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. Ne pas tester à chaque itération</h3>
+              <p>Une feature n est pas finie parce que le modèle l a écrite. Elle est finie quand elle est vérifiée.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Automatiser trop vite</h3>
+              <p>Passer de local à scheduled sans garde-fous est un accident en préparation.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle erreur consiste à dire que le harness remplace tout ?", o: ["Confondre orchestration et suppression des couches inférieures", "Utiliser des tests", "Découper les tâches"], a: 0, e: "Le harness exploite prompt et context engineering." },
+            { q: "Pourquoi tester à chaque itération est-il central ?", o: ["Pour éviter les fausses complétions", "Pour rendre le code plus long", "Pour supprimer le contexte"], a: 0, e: "La vérification transforme une génération en progression fiable." },
+            { q: "Quel garde-fou est crucial avant scheduled automation ?", o: ["Rollback, tests, budget max, notifications, critères d échec", "Plus de prompts décoratifs", "Supprimer les logs"], a: 0, e: "L autonomie élevée exige des contrôles élevés." }
+          ], "errors")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final",
+        title: "✅ Examen final",
+        express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : vérifier que vous pouvez distinguer, concevoir et sécuriser un harness.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action",
+        title: "🏆 Certificat",
+        express: true,
+        content: `
+          <h1>Certificat et plan d action 7 jours</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et passez à l implémentation réelle.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🧰</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Harness Engineering : Prompt, Context, Loops, Autonomie</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Plan d action 7 jours</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Jour 1 : écrire un requirement file pour une tâche réellement trop large pour un one-shot.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Jour 2 : découper ce requirement en tâches atomiques testables.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Jour 3 : définir les règles de start et finish de chaque itération.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Jour 4 : construire un contexte frais par tâche, pas un historique infini.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Jour 5 : ajouter tests et documentation à chaque boucle.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Jour 6 : simuler un échec et vérifier que le harness peut reprendre.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Jour 7 : décider du niveau d autonomie sécurisé : local, cloud ou scheduled.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+          <h2>Ressources ancrées au transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Concept central</strong> : harness engineering comme environnement d orchestration autour de l agent.</li>
+              <li><strong>Généalogie</strong> : prompt engineering, context engineering, limites, loops, harness.</li>
+              <li><strong>Outils cités</strong> : tool calling, MCP, RAG, coding agents, Cursor, cloud agents, Slack, automation.</li>
+              <li><strong>Exemples</strong> : Ralph, Anthropic, repositories légers, requirement document, JSON tasks.</li>
+              <li><strong>Leçon finale</strong> : la valeur ne vient pas seulement du modèle, mais de l environnement qui le fait progresser de façon vérifiable.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      const first = visibleModules()[0]?.id || "home";
+      showSection(first);
+      updateScore();
+      updateChecklistProgress();
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.copyText = copyText;
+    window.showLoopStep = showLoopStep;
+    window.chooseAutonomy = chooseAutonomy;
+    window.simRun = simRun;
+    window.simReset = simReset;
+    window.generateHarnessSpec = generateHarnessSpec;
+    window.renderFlashcard = renderFlashcard;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

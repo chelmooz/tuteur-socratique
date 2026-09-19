@@ -1,0 +1,59 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>L’ingénierie de l’IA en 10 compétences</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #b79cff;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #6ee7f5;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">AI Engineering Blueprint • 10 compétences</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Carte"><span class="pill">Idée → production</span><h1>L’ingénierie de l’IA en 10 compétences</h1><p class="muted">Une carte de progression inspirée de la présentation <em>AI Engineering Blueprint</em> : fondations, expérimentation, production et opérations.</p><div class="diagram"><svg viewBox="0 0 900 180"><g fill="#3b4868" stroke="#8be5ee" stroke-width="2"><rect x="30" y="65" width="180" height="50" rx="10"/><rect x="250" y="65" width="180" height="50" rx="10"/><rect x="470" y="65" width="180" height="50" rx="10"/><rect x="690" y="65" width="180" height="50" rx="10"/></g><g fill="#f3f6ff" text-anchor="middle" font-size="14"><text x="120" y="95">Données</text><text x="340" y="95">Modèle</text><text x="560" y="95">Système</text><text x="780" y="95">Production</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M210 90h40M430 90h40M650 90h40"/></g></svg></div><div class="grid"><div><h3>Phase 1</h3><p>Fondation et données : gouvernance, architecture cloud, modèles de fondation.</p></div><div><h3>Phase 2</h3><p>Développement : adaptation, évaluation, orchestration et workflows.</p></div><div><h3>Phase 3</h3><p>Opérations : serving, observabilité, sécurité et cycle de vie.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel est le point de départ avant la production ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Données, fondations et architecture du système</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement l’interface graphique</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Produit"><span class="pill">Compétence 1</span><h2>Pensée produit et rôle humain</h2><p>Le niveau d’autonomie doit être choisi selon le risque : copilote (l’humain valide), routeur (l’IA trie, l’humain gère la complexité), puis agent autonome pour des actions bornées et contrôlées.</p><p><strong>Règle de conception :</strong> déployer d’abord en interne, observer les erreurs, puis exposer progressivement les agents externes.</p><div class="quiz"><h3>Quiz</h3><p>Quel niveau convient à une action d’écriture sensible ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Copilote ou routeur avec validation humaine</button><button class="choice" data-correct="false" onclick="answer(this,false)">Agent autonome sans contrôle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Fondations"><span class="pill">Compétences 2–3</span><h2>Data Engineering, gouvernance et modèles de fondation</h2><p>La qualité, la sécurité et la traçabilité des données soutiennent tout le système. Les modèles de fondation sont adaptés plutôt qu’entraînés systématiquement from scratch.</p><div class="grid"><div><h3>Données</h3><p>Qualité, confidentialité, validation, provenance et préparation.</p></div><div><h3>Architecture</h3><p>Réseau, stockage, compute, APIs et composants cloud cohérents.</p></div><div><h3>Modèle</h3><p>Comprendre capacités, limites, contexte, coût et modalités d’adaptation.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que signifie Model-as-a-Service ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Consommer un modèle via une API et construire le système autour</button><button class="choice" data-correct="false" onclick="answer(this,false)">Réentraîner toujours un modèle depuis zéro</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Contexte"><span class="pill">Compétence 4</span><h2>Ingénierie du contexte</h2><p>La réponse générée dépend du prompt système, du prompt utilisateur et du contexte externe sélectionné. L’ingénieur fournit l’information exacte nécessaire sans saturer la fenêtre de contexte.</p><pre>Prompt système + Prompt utilisateur + Contexte externe
+                         ↓
+                  Réponse générée</pre><p>Le RAG, le few-shot et la réécriture de requête sont des outils de contexte. Ils permettent l’in-context learning sans réentraîner les poids du modèle.</p><div class="quiz"><h3>Quiz</h3><p>Quel est le rôle du contexte externe ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Fournir les informations exactes utiles à la réponse</button><button class="choice" data-correct="false" onclick="answer(this,false)">Remplacer le prompt système et les garde-fous</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Adaptation"><span class="pill">Compétences 5–6</span><h2>Fine-tuning, évaluation et orchestration</h2><div class="grid"><div><h3>Adaptation</h3><p>Fine-tuning et LoRA pour modifier comportement, style ou format lorsque prompting et RAG ne suffisent pas.</p></div><div><h3>Évaluation</h3><p>Métriques de qualité, robustesse, coût et latence ; tests reproductibles.</p></div><div><h3>Workflows</h3><p>Orchestrer appels de modèles, outils, étapes et validations.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que faut-il faire avant d’ajouter un fine-tuning ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Mesurer le problème et épuiser les options prompt/contexte/RAG adaptées</button><button class="choice" data-correct="false" onclick="answer(this,false)">Modifier les poids sans jeu d’évaluation</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Production"><span class="pill">Compétences 7–10</span><h2>Serving, observabilité, sécurité et cycle de vie</h2><div class="grid"><div><h3>Déploiement</h3><p>Serving efficace, APIs cohérentes, scalabilité et gestion des versions.</p></div><div><h3>Observabilité</h3><p>Tracer latence, coûts, erreurs d’outils, qualité et dérive.</p></div><div><h3>Sécurité</h3><p>Guardrails, PII, prompt injection, accès, biais et gouvernance.</p></div><div><h3>Retraining</h3><p>Feedback, nouvelles données, évaluation avant mise à jour et rollback.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que doit couvrir l’observabilité ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Qualité, latence, coûts, erreurs et dérive</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement la disponibilité du serveur</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Checklist"><span class="pill">Passage à l’action</span><h2>Checklist des 10 compétences</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Pensée produit et niveau de supervision humaine.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Data engineering et gouvernance.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Architecture système et cloud.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Modèles de fondation et LLM.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ingénierie du contexte.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Évaluation et métriques.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Orchestration et workflows.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Déploiement et serving.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Surveillance, observabilité, sécurité et éthique.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Cycle de vie, feedback et retraining.</label><button class="btn primary" onclick="finish()">Valider ma carte de compétences</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

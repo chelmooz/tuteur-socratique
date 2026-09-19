@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Vibe Coding avec AI | Birthday Card, Prompting, Ping Pong, Projet Pratique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🎂 <span>Vibe Coding</span> avec AI</div>
+      <div class="muted small">Birthday Card App • Prompting • Itération • Debug • Ping Pong • Projet final</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les citations ⏱"></button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="definition">1. Vibe Coding</button>
+      <button data-target="blocks">2. Les 5 blocs</button>
+      <button data-target="birthday">3. Cas pratique : Birthday Card</button>
+      <button data-target="lab">4. Atelier prompt</button>
+      <button data-target="iteration">5. Itérer & déboguer</button>
+      <button data-target="pingpong">6. Cas pratique : Ping Pong</button>
+      <button data-target="project">7. Projet final</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="antipatterns">🚫 Anti-patterns</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat & ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>Construire des logiciels avec l’IA, même sans savoir coder</h1>
+      <p class="lead">
+        Ce cours est basé sur le transcript fourni : Andrew Ng montre comment créer des applications web utiles et amusantes
+        en décrivant à l’IA ce que l’on veut. Le cœur de la méthode : prompting, itération, spécificité, feedback, et
+        construction pas à pas d’une <strong>birthday card app</strong>, puis d’un jeu de ping pong, puis d’un projet final.
+        <span class="source">⏱ 0:02</span>
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 980 240" role="img" aria-label="Pipeline vibe coding">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          <rect x="20" y="85" width="130" height="70" class="node"/><text x="85" y="113" text-anchor="middle">Idée</text><text x="85" y="133" text-anchor="middle" class="sub">ce que tu veux</text>
+          <path class="dash" d="M150 120 L200 120" marker-end="url(#arr)"/>
+          <rect x="200" y="85" width="140" height="70" class="node green"/><text x="270" y="113" text-anchor="middle">Prompt</text><text x="270" y="133" text-anchor="middle" class="sub">instructions</text>
+          <path class="dash green" d="M340 120 L390 120" marker-end="url(#arr)"/>
+          <rect x="390" y="85" width="150" height="70" class="node purple pulse"/><text x="465" y="113" text-anchor="middle">IA</text><text x="465" y="133" text-anchor="middle" class="sub">génère HTML</text>
+          <path class="dash purple" d="M540 120 L590 120" marker-end="url(#arr)"/>
+          <rect x="590" y="85" width="140" height="70" class="node yellow"/><text x="660" y="113" text-anchor="middle">Fichier</text><text x="660" y="133" text-anchor="middle" class="sub">.html</text>
+          <path class="dash yellow" d="M730 120 L780 120" marker-end="url(#arr)"/>
+          <rect x="780" y="85" width="80" height="70" class="node"/><text x="820" y="113" text-anchor="middle">Browser</text><text x="820" y="133" text-anchor="middle" class="sub">teste</text>
+          <path class="dash" d="M860 120 L900 120" marker-end="url(#arr)"/>
+          <rect x="900" y="85" width="60" height="70" class="node red"/><text x="930" y="113" text-anchor="middle">Feedback</text><text x="930" y="133" text-anchor="middle" class="sub">itérer</text>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Objectif</h3><p>Savoir parler à une IA pour qu’elle écrive du code à ta place, et obtenir une application web qui fonctionne dans ton navigateur.</p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Commencer simple, observer le résultat, préciser, améliorer, corriger les bugs, montrer à quelqu’un, recommencer.</p></div>
+        <div class="card good"><h3>Livrable pratique</h3><p>Une birthday card app, un jeu de ping pong, et ton propre générateur d’histoire à trous.</p></div>
+      </div>
+
+      <div class="card purple">
+        <h3>Phrase clé</h3>
+        <p>« The easiest way to create software in the AI era is no longer to type out code yourself. Instead, you should tell AI to do it for you. » <span class="source">⏱ 2:29</span></p>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('birthday')">Aller au cas pratique</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour adapter ton parcours.</p>
+      <div class="quiz">
+        <div class="q">
+          <p class="q-text">1. Ton niveau ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je n’ai jamais codé.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="intermediaire"> Intermédiaire : j’ai déjà testé ChatGPT / Gemini pour coder.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="avance"> Avancé : je veux structurer mes prompts et livrer un projet.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="amuser"> Créer un petit truc amusant.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="utile"> Construire un outil utile.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="pro"> Apprendre un workflow reproductible.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15 min.</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 45 min.</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="definition" class="section">
+      <h1>Vibe coding : demander à l’IA de construire le logiciel</h1>
+      <p class="lead">
+        Le transcript présente le vibe coding comme une façon de créer des logiciels en décrivant à l’IA ce qu’on veut,
+        puis en itérant. L’IA écrit le code, souvent du HTML, que tu télécharges et ouvres dans ton navigateur.
+        <span class="source">⏱ 0:04</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Pas besoin d’être ingénieur</h3><p>Andrew Ng montre une birthday card app construite en minutes, même si tu n’as jamais écrit une ligne de code. <span class="source">⏱ 0:20</span></p></div>
+        <div class="card good"><h3>Application web</h3><p>Le logiciel tourne dans le navigateur : tu saisis des valeurs, l’app génère un message, tu peux copier le résultat. <span class="source">⏱ 0:33</span></p></div>
+        <div class="card purple"><h3>Prompting</h3><p>« Telling AI what to do is called prompting. » Donner des instructions précises permet à l’IA de faire beaucoup de choses. <span class="source">⏱ 2:40</span></p></div>
+      </div>
+      <div class="card warn">
+        <h3>Pourquoi commencer par un exemple simple ?</h3>
+        <p>
+          Avant de construire ton idée, faire la birthday card app aide à comprendre comment parler à l’IA, comment obtenir
+          les résultats voulus, et comment de petits changements de prompt produisent des résultats très différents.
+          <span class="source">⏱ 1:43</span>
+        </p>
+      </div>
+      <div class="quiz" data-module="definition">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Le vibe coding consiste surtout à...</p>
+          <label class="q-option"><input type="radio" name="def-q0" value="0"> taper tout le code manuellement</label>
+          <label class="q-option"><input type="radio" name="def-q0" value="1"> décrire à l’IA ce qu’on veut et itérer</label>
+          <label class="q-option"><input type="radio" name="def-q0" value="2"> éviter les navigateurs</label>
+          <div class="explain">L’IA écrit le code ; toi tu guides, testes et améliores.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Quelle app est utilisée comme premier exemple ?</p>
+          <label class="q-option"><input type="radio" name="def-q1" value="0"> birthday card app</label>
+          <label class="q-option"><input type="radio" name="def-q1" value="1"> CRM professionnel</label>
+          <label class="q-option"><input type="radio" name="def-q1" value="2"> moteur de recherche</label>
+          <div class="explain">Simple, visuelle, immédiatement testable.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('definition')">← Précédent</button><button class="btn" onclick="nextFrom('definition')">Les 5 blocs →</button></div>
+    </section>
+
+    <section id="blocks" class="section">
+      <h1>Les 5 blocs de construction d’un bon prompt</h1>
+      <p class="lead">
+        Le transcript propose cinq éléments à considérer dans un prompt : goal, input, output, layout, special instructions.
+        Tu n’es pas obligé de tous les utiliser à chaque fois, mais ils structurent ta pensée.
+        <span class="source">⏱ 4:11</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>1. Goal</h3><p>Ce que tu veux créer. Exemple : « create a web page to help me write birthday cards ». <span class="source">⏱ 4:15</span></p></div>
+        <div class="card good"><h3>2. Input</h3><p>Ce que l’utilisateur doit fournir. Exemple : name, age, hobby. <span class="source">⏱ 4:20</span></p></div>
+        <div class="card purple"><h3>3. Output</h3><p>Ce que le logiciel doit produire. Exemple : un message drôle de carte d’anniversaire. <span class="source">⏱ 4:28</span></p></div>
+        <div class="card warn"><h3>4. Layout</h3><p>Comment organiser l’écran : gauche, droite, carte, formulaire, titre. <span class="source">⏱ 4:31</span></p></div>
+        <div class="card bad"><h3>5. Special instructions</h3><p>Fonctionnalités supplémentaires : couleurs, bouton copier, I’m feeling lucky, thème, etc. <span class="source">⏱ 4:37</span></p></div>
+      </div>
+      <div class="card">
+        <h3>Prompt long en une fois</h3>
+        <p>
+          Si tu sais déjà ce que tu veux, tu peux mettre les cinq blocs dans un seul prompt plus long. Sinon, tu peux
+          commencer par le goal, puis ajouter input/output/layout/features au fil de la conversation.
+          <span class="source">⏱ 5:22</span>
+        </p>
+      </div>
+      <div class="quiz" data-module="blocks">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. Lequel n’est PAS un bloc du transcript ?</p>
+          <label class="q-option"><input type="radio" name="blocks-q0" value="0"> goal</label>
+          <label class="q-option"><input type="radio" name="blocks-q0" value="1"> layout</label>
+          <label class="q-option"><input type="radio" name="blocks-q0" value="2"> database schema</label>
+          <div class="explain">Les blocs sont goal, input, output, layout, special instructions.</div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">2. Que faire si tu n’as pas encore toutes les idées ?</p>
+          <label class="q-option"><input type="radio" name="blocks-q1" value="0"> attendre d’être parfait</label>
+          <label class="q-option"><input type="radio" name="blocks-q1" value="1"> donner ce que tu as, puis itérer avec l’IA</label>
+          <label class="q-option"><input type="radio" name="blocks-q1" value="2"> ne pas utiliser l’IA</label>
+          <div class="explain">Le transcript encourage à commencer imparfait et à affiner.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('blocks')">← Précédent</button><button class="btn" onclick="nextFrom('blocks')">Cas pratique Birthday Card →</button></div>
+    </section>
+
+    <section id="birthday" class="section">
+      <h1>Cas pratique guidé : Birthday Card App</h1>
+      <p class="lead">
+        Voici le cœur du cours : construire une application de cartes d’anniversaire en plusieurs prompts, comme dans le
+        transcript. Tu peux copier chaque prompt dans ChatGPT, Gemini, Claude, ou l’IA intégrée au site du cours.
+        <span class="source">⏱ 1:19</span>
+      </p>
+
+      <h2>Étape 1 — Prompt de base</h2>
+      <div class="step"><span class="who">Prompt 1</span>create a web page to help me write birthday cards. When I give a person's name, age, and hobby, it should give me back a funny message.</div>
+      <p class="muted small">Résultat attendu : une première app fonctionnelle mais simple, avec nom, âge, hobby, et un message généré. <span class="source">⏱ 3:14</span></p>
+
+      <h2>Étape 2 — Rendre plus joli</h2>
+      <div class="step"><span class="who">Prompt 2</span>Make it prettier by adding a festive title and colors.</div>
+      <p class="muted small">Résultat attendu : titre festif, couleurs, meilleure présentation. <span class="source">⏱ 3:32</span></p>
+
+      <h2>Étape 3 — Modifier le layout</h2>
+      <div class="step"><span class="who">Prompt 3</span>Display the card on the right side, make it look like a birthday card.</div>
+      <p class="muted small">Résultat attendu : formulaire à gauche, carte à droite, aspect carte d’anniversaire. <span class="source">⏱ 3:42</span></p>
+
+      <h2>Étape 4 — Ajouter une fonctionnalité</h2>
+      <div class="step"><span class="who">Prompt 4</span>Add a fun title at the top.</div>
+      <p class="muted small">Le transcript montre qu’on peut continuer à enrichir l’app avec des instructions successives. <span class="source">⏱ 3:51</span></p>
+
+      <h2>Version étendue du transcript</h2>
+      <div class="grid">
+        <div class="card good"><h3>Cinq champs</h3><p>name, age, hobby, adjective, plural noun. Exemple : penguin fashion design, suspiciously fun, lucky socks. <span class="source">⏱ 0:51</span></p></div>
+        <div class="card info"><h3>I’m feeling lucky</h3><p>Remplit automatiquement les champs avec des mots aléatoires et drôles. <span class="source">⏱ 1:15</span></p></div>
+        <div class="card purple"><h3>Historique + copier</h3><p>L’app stocke les cartes générées ; un bouton copy envoie le message dans le clipboard pour email ou SMS. <span class="source">⏱ 1:30</span></p></div>
+        <div class="card warn"><h3>Thème de couleur</h3><p>Blue, pink, green, purple : tu peux changer d’avis, l’IA obéit. <span class="source">⏱ 16:31</span></p></div>
+      </div>
+
+      <h2>Simulateur pratique</h2>
+      <p class="muted small">Cet atelier imite le comportement de la birthday card app. Remplis les champs, clique Generate, puis copie le message.</p>
+      <div class="simulator">
+        <div class="grid">
+          <div><label for="sim-name">Name</label><input id="sim-name" value="Karen" /></div>
+          <div><label for="sim-age">Age</label><input id="sim-age" value="27" /></div>
+          <div><label for="sim-hobby">Hobby</label><input id="sim-hobby" value="penguin fashion design" /></div>
+          <div><label for="sim-adj">Adjective</label><input id="sim-adj" value="suspiciously fun" /></div>
+          <div><label for="sim-noun">Plural noun</label><input id="sim-noun" value="lucky socks" /></div>
+        </div>
+        <div class="toolbar no-print">
+          <button class="btn" onclick="generateCard()">Generate card</button>
+          <button class="btn secondary" onclick="luckyFill()">I’m feeling lucky</button>
+          <button class="btn secondary" onclick="copyCard()">Copy message</button>
+          <button class="btn secondary" onclick="clearSim()">Clear</button>
+        </div>
+        <div id="sim-card" class="sim-card">Ta carte apparaîtra ici.</div>
+        <h3>History</h3>
+        <div id="sim-history"><p class="muted small">Aucune carte générée pour l’instant.</p></div>
+      </div>
+
+      <div class="card bad">
+        <h3>Si ça ne marche pas</h3>
+        <p>
+          Le transcript montre un bug : cliquer sur Generate ne fait rien. La solution est de décrire précisément le problème :
+          « nothing happens when I click on the generate card button. Can you fix it for me? »
+          <span class="source">⏱ 17:45</span>
+        </p>
+      </div>
+
+      <div class="quiz" data-module="birthday">
+        <h3>Quiz cas pratique</h3>
+        <div class="q" data-answer="0">
+          <p class="q-text">1. Quel prompt ajoute l’aspect visuel festif ?</p>
+          <label class="q-option"><input type="radio" name="birthday-q0" value="0"> Make it prettier by adding a festive title and colors.</label>
+          <label class="q-option"><input type="radio" name="birthday-q0" value="1"> Add a database.</label>
+          <label class="q-option"><input type="radio" name="birthday-q0" value="2"> Use React only.</label>
+          <div class="explain">C’est le deuxième prompt du walkthrough.</div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">2. Que faire si le bouton Generate ne fait rien ?</p>
+          <label class="q-option"><input type="radio" name="birthday-q1" value="0"> Supprimer tout le projet</label>
+          <label class="q-option"><input type="radio" name="birthday-q1" value="1"> Dire à l’IA exactement ce qui se passe et demander de fixer</label>
+          <label class="q-option"><input type="radio" name="birthday-q1" value="2"> Ignorer le bug</label>
+          <div class="explain">L’IA est souvent bonne pour corriger les bugs de base si le symptôme est clair.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('birthday')">← Précédent</button><button class="btn" onclick="nextFrom('birthday')">Atelier prompt →</button></div>
+    </section>
+
+    <section id="lab" class="section">
+      <h1>Atelier : composer ton prompt avec les 5 blocs</h1>
+      <p class="lead">Utilise ce constructeur pour transformer une idée floue en prompt structuré. Puis copie-le dans ton IA préférée.</p>
+      <div class="simulator">
+        <div class="grid">
+          <div><label for="pc-goal">Goal</label><input id="pc-goal" value="Create a web page to help me write birthday cards" /></div>
+          <div><label for="pc-inputs">Input</label><input id="pc-inputs" value="name, age, hobby, adjective, plural noun" /></div>
+          <div><label for="pc-output">Output</label><input id="pc-output" value="a funny personalized birthday message" /></div>
+          <div><label for="pc-layout">Layout</label><input id="pc-layout" value="form on the left, birthday card on the right" /></div>
+          <div><label for="pc-features">Special instructions</label><input id="pc-features" value="festive colors, I'm feeling lucky button, copy to clipboard, history of generated cards" /></div>
+          <div><label for="pc-tone">Tone</label><select id="pc-tone"><option value="funny and playful">funny and playful</option><option value="warm and sincere">warm and sincere</option><option value="sarcastic">sarcastic</option><option value="professional">professional</option></select></div>
+        </div>
+        <div class="toolbar no-print">
+          <button class="btn" onclick="buildPrompt()">Générer le prompt</button>
+          <button class="btn secondary" onclick="copyPrompt()">Copier</button>
+          <button class="btn secondary" onclick="resetPrompt()">Réinitialiser</button>
+        </div>
+        <label for="pc-out">Prompt prêt à coller</label>
+        <textarea id="pc-out" rows="8" readonly></textarea>
+      </div>
+      <div class="card info">
+        <h3>Conseil du transcript</h3>
+        <p>Plus le prompt est précis, plus le résultat est prévisible. Mais même un prompt imparfait peut fonctionner : l’important est d’itérer. <span class="source">⏱ 7:58</span></p>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('lab')">← Précédent</button><button class="btn" onclick="nextFrom('lab')">Itérer & déboguer →</button></div>
+    </section>
+
+    <section id="iteration" class="section">
+      <h1>Itérer, préciser, déboguer, demander du feedback</h1>
+      <p class="lead">Le transcript insiste : on ne cherche pas la perfection du premier coup. On parle à l’IA comme à un collaborateur : on précise, on corrige, on améliore.</p>
+      <div class="grid">
+        <div class="card good"><h3>Analogie food truck</h3><p>« Give me a sandwich » est vague. « Vegetarian sandwich with hummus, cheese, multigrain bread, drink, to go » est précis. Résultat plus prévisible. <span class="source">⏱ 13:44</span></p></div>
+        <div class="card info"><h3>Variabilité normale</h3><p>Même prompt précis, résultats légèrement différents. Si ça surprend, donne des instructions supplémentaires pour orienter l’IA. <span class="source">⏱ 8:04</span></p></div>
+        <div class="card warn"><h3>Bugs</h3><p>Décris le symptôme clairement. Tu n’as pas besoin de comprendre les termes techniques ; demande juste le fix. <span class="source">⏱ 17:45</span></p></div>
+        <div class="card purple"><h3>Feedback humain</h3><p>Montrer l’app à des amis, famille, collègues. Leurs suggestions rendent le logiciel meilleur et te motivent. <span class="source">⏱ 11:51</span></p></div>
+      </div>
+      <div class="card">
+        <h3>Workflow recommandé</h3>
+        <ol>
+          <li>Décris le goal.</li>
+          <li>Ajoute input/output si tu les connais.</li>
+          <li>Génère une première version.</li>
+          <li>Ouvre le fichier HTML dans le navigateur.</li>
+          <li>Teste, observe ce qui manque ou casse.</li>
+          <li>Donne une instruction précise : layout, couleur, bouton, bug fix.</li>
+          <li>Montre à quelqu’un et recommence.</li>
+        </ol>
+      </div>
+      <div class="quiz" data-module="iteration">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Pourquoi être précis dans le prompt ?</p>
+          <label class="q-option"><input type="radio" name="it-q0" value="0"> pour impressionner l’IA</label>
+          <label class="q-option"><input type="radio" name="it-q0" value="1"> pour rendre le résultat plus prévisible</label>
+          <label class="q-option"><input type="radio" name="it-q0" value="2"> pour éviter le navigateur</label>
+          <div class="explain">C’est l’analogie du sandwich : plus c’est précis, plus ce que tu reçois correspond.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Que faire si l’IA produit un bouton qui ne marche pas ?</p>
+          <label class="q-option"><input type="radio" name="it-q1" value="0"> dire exactement ce qui se passe et demander un fix</label>
+          <label class="q-option"><input type="radio" name="it-q1" value="1"> tout recommencer depuis zéro</label>
+          <label class="q-option"><input type="radio" name="it-q1" value="2"> accepter le bug</label>
+          <div class="explain">Les symptômes clairs aident l’IA à trouver les bugs de base.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('iteration')">← Précédent</button><button class="btn" onclick="nextFrom('iteration')">Ping Pong →</button></div>
+    </section>
+
+    <section id="pingpong" class="section">
+      <h1>Cas pratique 2 : Ping Pong Game</h1>
+      <p class="lead">Après la birthday card app, le transcript applique les mêmes compétences à un deuxième projet : un jeu de table tennis en un seul fichier HTML.</p>
+      <div class="step"><span class="who">Prompt 1</span>Build me a table tennis game as a single HTML file. User plays against computer. Move the paddle with the arrow keys.</div>
+      <div class="step"><span class="who">Prompt 2</span>Add three difficulty levels, let the user specify the number of points required to win, and keep score.</div>
+      <div class="step"><span class="who">Prompt 3</span>Make the playground green, paddles beige, ball white, and insert this image into the background.</div>
+      <div class="grid">
+        <div class="card info"><h3>Pong historique</h3><p>Autrefois, une équipe mettait des semaines. Avec l’IA, on peut obtenir une version jouable en minutes. <span class="source">⏱ 19:48</span></p></div>
+        <div class="card good"><h3>Spécificité</h3><p>Couleurs, niveaux de difficulté, points pour gagner, score : ce sont des détails qui rendent le résultat plus proche de l’idée. <span class="source">⏱ 21:01</span></p></div>
+        <div class="card warn"><h3>Itération</h3><p>Tu n’as pas besoin de tout savoir au début. Dis ce que tu as en tête, vois ce que tu obtiens, affine. <span class="source">⏱ 21:25</span></p></div>
+      </div>
+      <div class="quiz" data-module="pingpong">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. Quel détail est ajouté dans le prompt 3 ?</p>
+          <label class="q-option"><input type="radio" name="pp-q0" value="0"> base de données</label>
+          <label class="q-option"><input type="radio" name="pp-q0" value="1"> login utilisateur</label>
+          <label class="q-option"><input type="radio" name="pp-q0" value="2"> couleurs du terrain, paddles, balle et image de fond</label>
+          <div class="explain">Le visuel est précisé explicitement.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('pingpong')">← Précédent</button><button class="btn" onclick="nextFrom('pingpong')">Projet final →</button></div>
+    </section>
+
+    <section id="project" class="section">
+      <h1>Projet final : ton fill-in-the-blanks story builder</h1>
+      <p class="lead">Le transcript propose un dernier exercice : créer ton propre générateur d’histoire à trous, avec 3 à 5 champs, un bouton de génération, et un affichage du résultat.</p>
+      <div class="grid">
+        <div class="card info"><h3>Exemple 1</h3><p>Funny product review generator : product name, number, noun, body part, etc. <span class="source">⏱ 23:05</span></p></div>
+        <div class="card good"><h3>Exemple 2</h3><p>Time off request generator : amount of time off, noun, body part, object. <span class="source">⏱ 23:26</span></p></div>
+        <div class="card purple"><h3>Ton idée</h3><p>Tu peux choisir un autre type de story generator : excuse generator, compliment generator, villain origin story, etc.</p></div>
+      </div>
+      <div class="card warn">
+        <h3>Cahier des charges minimal</h3>
+        <ul>
+          <li>3 à 5 input fields.</li>
+          <li>Un bouton qui prend les inputs et génère l’output.</li>
+          <li>Un endroit clair pour afficher le résultat.</li>
+          <li>Optionnel : historique, copier, thème couleur, bouton aléatoire.</li>
+        </ul>
+      </div>
+      <h2>Checklist de réussite</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="p1" onchange="toggleCheck('p1')"> J’ai écrit un prompt avec au moins goal + input + output.</label>
+        <label><input type="checkbox" id="p2" onchange="toggleCheck('p2')"> J’ai téléchargé le fichier HTML et ouvert dans le navigateur.</label>
+        <label><input type="checkbox" id="p3" onchange="toggleCheck('p3')"> J’ai testé au moins trois combinaisons d’inputs.</label>
+        <label><input type="checkbox" id="p4" onchange="toggleCheck('p4')"> J’ai demandé au moins une amélioration de layout ou couleur.</label>
+        <label><input type="checkbox" id="p5" onchange="toggleCheck('p5')"> J’ai signalé un bug à l’IA avec une description précise, si nécessaire.</label>
+        <label><input type="checkbox" id="p6" onchange="toggleCheck('p6')"> J’ai montré l’app à quelqu’un ou imaginé le feedback.</label>
+        <label><input type="checkbox" id="p7" onchange="toggleCheck('p7')"> Mon app a 3 à 5 champs, un bouton Generate, et une zone de résultat.</label>
+        <label><input type="checkbox" id="p8" onchange="toggleCheck('p8')"> Je peux expliquer quelles instructions ont le plus changé le résultat.</label>
+      </div>
+      <p class="muted small">Checklist : <span id="project-progress">0/8</span></p>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('project')">← Précédent</button><button class="btn" onclick="nextFrom('project')">Flashcards →</button></div>
+    </section>
+
+    <section id="flashcards" class="section">
+      <h1>Flashcards</h1>
+      <details open><summary>Vibe coding</summary><p>Créer un logiciel en décrivant à l’IA ce qu’on veut, puis en itérant sur le résultat. <span class="source">⏱ 2:29</span></p></details>
+      <details><summary>Prompting</summary><p>Telling AI what to do. Donner des instructions pour que l’IA écrive le code. <span class="source">⏱ 2:40</span></p></details>
+      <details><summary>5 building blocks</summary><p>Goal, input, output, layout, special instructions. <span class="source">⏱ 4:11</span></p></details>
+      <details><summary>Birthday card app</summary><p>Premier exemple : name, age, hobby, adjective, plural noun ; génère un message drôle. <span class="source">⏱ 0:51</span></p></details>
+      <details><summary>I’m feeling lucky</summary><p>Bouton qui remplit automatiquement les champs avec des mots aléatoires drôles. <span class="source">⏱ 1:15</span></p></details>
+      <details><summary>Copy to clipboard</summary><p>Copie le message généré pour l’envoyer par email ou SMS. <span class="source">⏱ 1:30</span></p></details>
+      <details><summary>Itération</summary><p>Commencer simple, voir le résultat, puis préciser couleurs, layout, fonctionnalités. <span class="source">⏱ 3:56</span></p></details>
+      <details><summary>Spécificité</summary><p>Plus le prompt est précis, plus le résultat est prévisible, comme commander un sandwich détaillé. <span class="source">⏱ 13:44</span></p></details>
+      <details><summary>Bug</summary><p>Si Generate ne fait rien, dire exactement le symptôme et demander à l’IA de fixer. <span class="source">⏱ 17:45</span></p></details>
+      <details><summary>Feedback</summary><p>Montrer l’app à des amis/famille pour obtenir des suggestions et de l’énergie. <span class="source">⏱ 11:51</span></p></details>
+      <details><summary>Ping pong game</summary><p>Deuxième cas : single HTML file, arrow keys, difficulty levels, score, colors, background image. <span class="source">⏱ 20:08</span></p></details>
+      <details><summary>Projet final</summary><p>Fill-in-the-blanks story builder avec 3-5 inputs, bouton generate, output display. <span class="source">⏱ 22:40</span></p></details>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button></div>
+    </section>
+
+    <section id="antipatterns" class="section">
+      <h1>Anti-patterns du vibe coding</h1>
+      <div class="grid">
+        <div class="card bad"><h3>Prompt trop vague</h3><p>« Create a birthday app » sans input/output/layout donne des résultats très variables.</p></div>
+        <div class="card bad"><h3>Vouloir tout parfait du premier coup</h3><p>Le transcript encourage à commencer imparfait et à itérer.</p></div>
+        <div class="card bad"><h3>Ne pas tester dans le navigateur</h3><p>Le fichier HTML doit être téléchargé et ouvert pour voir le vrai comportement.</p></div>
+        <div class="card bad"><h3>Paniquer devant un bug</h3><p>Décris le symptôme à l’IA ; pas besoin de comprendre le jargon technique.</p></div>
+        <div class="card bad"><h3>Garder l’app pour soi</h3><p>Le feedback humain est une étape clé pour améliorer et rester motivé.</p></div>
+        <div class="card bad"><h3>Croire que la compétence est liée à une plateforme</h3><p>Les mêmes prompts fonctionnent sur ChatGPT, Gemini, Claude, ou d’autres systèmes.</p></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button><button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button></div>
+    </section>
+
+    <section id="final" class="section">
+      <h1>Examen final</h1>
+      <p class="lead">10 questions. Seuil 8/10 pour débloquer le certificat.</p>
+      <div class="quiz" data-module="final" id="final-quiz">
+        <div class="q" data-answer="1"><p class="q-text">1. Prompting, c’est...</p><label class="q-option"><input type="radio" name="final-q0" value="0"> compiler du code</label><label class="q-option"><input type="radio" name="final-q0" value="1"> dire à l’IA quoi faire</label><label class="q-option"><input type="radio" name="final-q0" value="2"> dessiner des maquettes</label><div class="explain">Telling AI what to do is called prompting.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">2. Lequel n’est pas un building block ?</p><label class="q-option"><input type="radio" name="final-q1" value="0"> goal</label><label class="q-option"><input type="radio" name="final-q1" value="1"> layout</label><label class="q-option"><input type="radio" name="final-q1" value="2"> server cluster</label><div class="explain">Les blocs : goal, input, output, layout, special instructions.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">3. Premier prompt birthday card mentionne...</p><label class="q-option"><input type="radio" name="final-q2" value="0"> name, age, hobby, funny message</label><label class="q-option"><input type="radio" name="final-q2" value="1"> database, auth, payments</label><label class="q-option"><input type="radio" name="final-q2" value="2"> React, Tailwind, Node</label><div class="explain">On commence minimal.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">4. Prompt précis => résultat...</p><label class="q-option"><input type="radio" name="final-q3" value="0"> toujours identique</label><label class="q-option"><input type="radio" name="final-q3" value="1"> plus prévisible</label><label class="q-option"><input type="radio" name="final-q3" value="2"> moins utile</label><div class="explain">Il reste un peu de variabilité, mais elle diminue.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">5. Si Generate ne fait rien, il faut...</p><label class="q-option"><input type="radio" name="final-q4" value="0"> décrire le symptôme et demander un fix</label><label class="q-option"><input type="radio" name="final-q4" value="1"> supprimer le fichier</label><label class="q-option"><input type="radio" name="final-q4" value="2"> réécrire tout le code manuellement</label><div class="explain">L’IA corrige bien les bugs de base si le problème est clair.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">6. Ping pong prompt 3 ajoute...</p><label class="q-option"><input type="radio" name="final-q5" value="0"> multijoueur en ligne</label><label class="q-option"><input type="radio" name="final-q5" value="1"> base de données</label><label class="q-option"><input type="radio" name="final-q5" value="2"> couleurs et image de fond</label><div class="explain">Playground green, paddles beige, ball white, background image.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">7. Projet final exige...</p><label class="q-option"><input type="radio" name="final-q6" value="0"> un serveur backend</label><label class="q-option"><input type="radio" name="final-q6" value="1"> 3-5 inputs, bouton generate, output display</label><label class="q-option"><input type="radio" name="final-q6" value="2"> un modèle fine-tuné</label><div class="explain">Fill-in-the-blanks story builder minimal.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">8. Feedback humain sert à...</p><label class="q-option"><input type="radio" name="final-q7" value="0"> obtenir suggestions et motivation</label><label class="q-option"><input type="radio" name="final-q7" value="1"> remplacer l’IA</label><label class="q-option"><input type="radio" name="final-q7" value="2"> éviter de tester</label><div class="explain">Montrer à amis/famille est encouragé.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">9. Les compétences apprises...</p><label class="q-option"><input type="radio" name="final-q8" value="0"> dépendent de ChatGPT seulement</label><label class="q-option"><input type="radio" name="final-q8" value="1"> nécessitent un diplôme MIT</label><label class="q-option"><input type="radio" name="final-q8" value="2"> s’appliquent à plusieurs systèmes IA</label><div class="explain">ChatGPT, Gemini, Claude, etc.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">10. Être builder, c’est...</p><label class="q-option"><input type="radio" name="final-q9" value="0"> seulement suivre des cours</label><label class="q-option"><input type="radio" name="final-q9" value="1"> construire et continuer à apprendre</label><label class="q-option"><input type="radio" name="final-q9" value="2"> ne jamais montrer son travail</label><div class="explain">Le transcript dit que les deux sont importants.</div></div>
+        <button class="btn" onclick="submitFinal(this)">Soumettre l’examen</button>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('final')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('resources')">Voir certificat →</button></div>
+    </section>
+
+    <section id="resources" class="section">
+      <h1>Certificat, checklist & ressources</h1>
+      <div class="card info no-print">
+        <h3>Nom pour certificat</h3>
+        <input id="cert-name" placeholder="Prénom / pseudo" />
+        <div class="toolbar">
+          <button class="btn" onclick="generateCert()">Générer certificat</button>
+          <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+          <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+          <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="certificate" class="certificate">
+        <span class="badge">🎂</span>
+        <h2>Certificat de builder AI</h2>
+        <p>Décerné à</p>
+        <h3 id="cert-name-out">Apprenant</h3>
+        <p>pour avoir complété la masterclass</p>
+        <p class="highlight">Vibe Coding avec AI — Birthday Card, Prompting, Itération, Ping Pong, Projet final</p>
+        <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+      </div>
+
+      <h2>Checklist finale du builder</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Je sais écrire un prompt avec goal, input, output, layout, features.</label>
+        <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> J’ai généré un fichier HTML avec une IA et ouvert dans le navigateur.</label>
+        <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> J’ai itéré au moins trois fois sur une app.</label>
+        <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> J’ai utilisé des instructions spécifiques pour couleurs, layout ou boutons.</label>
+        <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> J’ai signalé un bug avec un symptôme clair.</label>
+        <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> J’ai demandé des idées à l’IA quand je manquais d’inspiration.</label>
+        <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> J’ai montré mon app à quelqu’un ou prévu de le faire.</label>
+        <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> J’ai terminé un projet final fill-in-the-blanks.</label>
+        <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Je comprends que les compétences sont transférables entre IA.</label>
+        <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Je vais continuer à construire et à suivre des cours.</label>
+      </div>
+      <p class="muted small">Checklist : <span id="check-progress">0/10</span></p>
+
+      <h2>Ressources</h2>
+      <div class="resources">
+        <ul>
+          <li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur AutoManus (Character VC), ex-MIT business analytics / Google / Walmart. Il enseigne à construire avec l’IA, un vrai projet à la fois. Formules : Q&amp;A live bimensuel (20 $/mois) et session 1h sur mesure (200 $).</li>
+          <li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend (Kimi K2 + LangChain), yt-supabase-tips-kanban, yt-kimi-k2-claude.</li>
+          <li><strong>Ollama</strong> : pour passer du vibe coding cloud à des modèles locaux gratuits et privés (Llama 3.2, CodeGemma, Llava multimodal, embeddings nomic), avec CLI, REST API, Python, RAG et agents Swarm. Compagnon naturel de ce cours quand tu veux expérimenter sans coût d’API.</li>
+        </ul>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn secondary" onclick="prevFrom('resources')">← Revenir à l’examen</button>
+        <button class="btn" onclick="showSection('home')">Retour accueil</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+var KEY = "vibe-coding-birthday-course-v2";
+var STATE = {
+  theme: "dark", visited: {}, quizScores: {}, diagnostic: null,
+  finalScore: 0, finalTotal: 10, finalPassed: false, sourcesHidden: false,
+  checklist: {}, projectChecklist: {}, certName: "", simHistory: [], currentCard: ""
+};
+function $(sel, root){ return (root || document).querySelector(sel); }
+function $$(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+function saveState(){ try { localStorage.setItem(KEY, JSON.stringify(STATE)); } catch(e){} }
+function loadState(){
+  try {
+    var raw = localStorage.getItem(KEY); if (!raw) return; var d = JSON.parse(raw);
+    STATE.theme = d.theme || "dark"; STATE.visited = d.visited || {}; STATE.quizScores = d.quizScores || {};
+    STATE.diagnostic = d.diagnostic || null; STATE.finalScore = d.finalScore || 0; STATE.finalTotal = d.finalTotal || 10;
+    STATE.finalPassed = !!d.finalPassed; STATE.sourcesHidden = !!d.sourcesHidden; STATE.checklist = d.checklist || {};
+    STATE.projectChecklist = d.projectChecklist || {}; STATE.certName = d.certName || "";
+    STATE.simHistory = d.simHistory || []; STATE.currentCard = d.currentCard || "";
+  } catch(e){}
+}
+function getSectionIds(){ return $$(".section").map(function(s){ return s.id; }); }
+function showSection(id){
+  var sections = $$(".section");
+  for (var i=0;i<sections.length;i++) sections[i].classList.toggle("active", sections[i].id === id);
+  var buttons = $$("#nav button");
+  for (var j=0;j<buttons.length;j++){ var t = buttons[j].getAttribute("data-target"); buttons[j].classList.toggle("active", t===id); buttons[j].classList.toggle("completed", !!STATE.visited[t]); }
+  STATE.visited[id] = true; saveState(); updateProgress(); initModule(id);
+  var sb = $("#sidebar"); if (sb) sb.classList.remove("mobile-open");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+function nextFrom(id){ var ids = getSectionIds(); for (var i=0;i<ids.length;i++) if (ids[i]===id && i<ids.length-1){ showSection(ids[i+1]); return; } }
+function prevFrom(id){ var ids = getSectionIds(); for (var i=0;i<ids.length;i++) if (ids[i]===id && i>0){ showSection(ids[i-1]); return; } }
+function updateProgress(){
+  var ids = getSectionIds(); var done = 0;
+  for (var i=0;i<ids.length;i++) if (STATE.visited[ids[i]]) done++;
+  var pct = Math.round(done/ids.length*100);
+  var bar = $("#progressBar"); if (bar) bar.style.width = pct+"%";
+  var text = $("#progressText"); if (text) text.textContent = pct+"%";
+}
+function updateScore(){
+  var c=0,t=0,keys=Object.keys(STATE.quizScores);
+  for (var i=0;i<keys.length;i++){ c += STATE.quizScores[keys[i]].correct||0; t += STATE.quizScores[keys[i]].total||0; }
+  var el = $("#scoreDisplay"); if (el) el.textContent = "Score "+c+"/"+t+(STATE.finalPassed?" • validé":"");
+}
+function toggleTheme(){ STATE.theme = STATE.theme==="dark"?"light":"dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+function toggleSources(){ STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+function toggleMobileNav(){ var s = $("#sidebar"); if (s) s.classList.toggle("mobile-open"); }
+function checkQuiz(btn){
+  var box = btn.closest(".quiz"); var moduleId = box.getAttribute("data-module"); var qs = $$(".q", box); var correct = 0;
+  for (var i=0;i<qs.length;i++){
+    var q = qs[i]; var sel = q.querySelector("input:checked"); var ex = q.querySelector(".explain"); var opts = $$(".q-option", q);
+    q.classList.remove("correct","incorrect");
+    for (var j=0;j<opts.length;j++) opts[j].classList.remove("correct","incorrect");
+    if (ex) ex.style.display = "block";
+    if (!sel){ q.classList.add("incorrect"); continue; }
+    var ans = parseInt(q.getAttribute("data-answer"),10); var val = parseInt(sel.value,10); var chosen = sel.closest(".q-option");
+    if (val===ans){ q.classList.add("correct"); if (chosen) chosen.classList.add("correct"); correct++; }
+    else { q.classList.add("incorrect"); if (chosen) chosen.classList.add("incorrect"); if (opts[ans]) opts[ans].classList.add("correct"); }
+  }
+  var result = box.querySelector(".result"); if (result) result.textContent = "Résultat : "+correct+"/"+qs.length;
+  STATE.quizScores[moduleId] = { correct: correct, total: qs.length }; saveState(); updateScore();
+  return { correct: correct, total: qs.length };
+}
+var DIAG_TEXT = {
+  debutant: "Commence par définition, les 5 blocs, puis le cas pratique Birthday Card. Ne saute pas l’itération : c’est là que tu apprends à piloter l’IA.",
+  intermediaire: "Va directement au cas pratique, à l’atelier prompt, puis à itérer/déboguer. Ajoute le ping pong pour consolider.",
+  avance: "Concentre-toi sur les blocs, le prompt lab, le projet final et la checklist de livraison. L’examen valide ton workflow."
+};
+function validateDiagnostic(){
+  var level = document.querySelector("input[name='diag-level']:checked");
+  var goal = document.querySelector("input[name='diag-goal']:checked");
+  var time = document.querySelector("input[name='diag-time']:checked");
+  if (!level||!goal||!time){ alert("Répondez aux trois questions."); return; }
+  STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value }; saveState();
+  var rec = $("#diag-rec"); var next = $("#diag-next");
+  if (rec){ rec.style.display="block"; rec.innerHTML = "<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.debutant)+"</p>"; }
+  if (next) next.style.display="inline-flex";
+}
+function restoreDiagnostic(){
+  if (!STATE.diagnostic) return; var rec = $("#diag-rec"); var next = $("#diag-next");
+  if (rec){ rec.style.display="block"; rec.innerHTML = "<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"; }
+  if (next) next.style.display="inline-flex";
+}
+var LUCKY = {
+  name: ["Karen","Alex","Sam","Jordan","Tina","Andrew"],
+  age: ["27","35","42","19","50","23"],
+  hobby: ["penguin fashion design","competitive napping","error 404 hunting","midnight snack archaeology","sock puppet diplomacy"],
+  adjective: ["suspiciously fun","mildly chaotic","legendarily awkward","aggressively cozy","statistically delightful"],
+  noun: ["lucky socks","rubber ducks","disco balls","emergency snacks","tiny hats"]
+};
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function val(id, fb){ var el = $(id); return el && el.value.trim() ? el.value.trim() : fb; }
+function generateCard(){
+  var name=val("#sim-name","Karen"), age=val("#sim-age","27"), hobby=val("#sim-hobby","penguin fashion design"), adj=val("#sim-adj","suspiciously fun"), noun=val("#sim-noun","lucky socks");
+  var templates = [
+    name+", against all odds, you've turned "+age+". Your devotion to "+hobby+" is the stuff of legends, and your "+adj+" "+noun+" is iconic. Statistically speaking, most people like you.",
+    "Breaking news: "+name+" has survived "+age+" trips around the sun. Experts credit "+hobby+" and an abundant supply of "+adj+" "+noun+".",
+    name+", at "+age+" you have mastered "+hobby+". May your "+adj+" "+noun+" bring you joy, confusion, and at least one group chat reaction.",
+    "Happy birthday, "+name+"! Scientists say people who enjoy "+hobby+" are "+adj+". Also, your "+noun+" are legendary. Enjoy being "+age+"."
+  ];
+  var message = pick(templates);
+  STATE.currentCard = message; STATE.simHistory.unshift(message);
+  if (STATE.simHistory.length > 8) STATE.simHistory.pop();
+  saveState(); renderSim();
+}
+function luckyFill(){
+  var sets = { "#sim-name":LUCKY.name, "#sim-age":LUCKY.age, "#sim-hobby":LUCKY.hobby, "#sim-adj":LUCKY.adjective, "#sim-noun":LUCKY.noun };
+  for (var id in sets){ var el = $(id); if (el) el.value = pick(sets[id]); }
+  generateCard();
+}
+function copyCard(){
+  if (!STATE.currentCard){ alert("Génère d’abord une carte."); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(STATE.currentCard).then(function(){ alert("Message copié."); }, function(){ fallbackCopy(STATE.currentCard); });
+  else fallbackCopy(STATE.currentCard);
+}
+function fallbackCopy(text){
+  var ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.left="-9999px";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); alert("Copié."); } catch(e){ alert("Copie non disponible."); }
+  document.body.removeChild(ta);
+}
+function clearSim(){ STATE.currentCard=""; STATE.simHistory=[]; saveState(); renderSim(); }
+function renderSim(){
+  var card = $("#sim-card"); if (card) card.textContent = STATE.currentCard || "Ta carte apparaîtra ici.";
+  var hist = $("#sim-history"); if (!hist) return;
+  if (!STATE.simHistory.length){ hist.innerHTML = "<p class='muted small'>Aucune carte générée pour l’instant.</p>"; return; }
+  var h = ""; for (var i=0;i<STATE.simHistory.length;i++) h += "<div class='history-item'>"+escapeHtml(STATE.simHistory[i])+"</div>";
+  hist.innerHTML = h;
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]; }); }
+function buildPrompt(){
+  var goal=val("#pc-goal","Create a web page to help me write birthday cards");
+  var inputs=val("#pc-inputs","name, age, hobby, adjective, plural noun");
+  var output=val("#pc-output","a funny personalized birthday message");
+  var layout=val("#pc-layout","form on the left, birthday card on the right");
+  var features=val("#pc-features","festive colors, I'm feeling lucky button, copy to clipboard, history of generated cards");
+  var tone=$("#pc-tone")?$("#pc-tone").value:"funny and playful";
+  var prompt = "Create a web app.\n\nGoal: "+goal+".\n\nInput fields: "+inputs+".\n\nOutput: "+output+".\n\nLayout: "+layout+".\n\nSpecial instructions: "+features+".\n\nTone/style: "+tone+".\n\nPlease provide the complete code as a single HTML file that I can save and open in my browser.";
+  var out = $("#pc-out"); if (out) out.value = prompt;
+}
+function copyPrompt(){
+  var out = $("#pc-out"); if (!out || !out.value) buildPrompt();
+  if (!out || !out.value) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(out.value).then(function(){ alert("Prompt copié."); }, function(){ fallbackCopy(out.value); });
+  else fallbackCopy(out.value);
+}
+function resetPrompt(){
+  var g=$("#pc-goal"); if(g) g.value="Create a web page to help me write birthday cards";
+  var i=$("#pc-inputs"); if(i) i.value="name, age, hobby, adjective, plural noun";
+  var o=$("#pc-output"); if(o) o.value="a funny personalized birthday message";
+  var l=$("#pc-layout"); if(l) l.value="form on the left, birthday card on the right";
+  var f=$("#pc-features"); if(f) f.value="festive colors, I'm feeling lucky button, copy to clipboard, history of generated cards";
+  var t=$("#pc-tone"); if(t) t.value="funny and playful";
+  var out=$("#pc-out"); if(out) out.value="";
+}
+function submitFinal(btn){
+  var res = checkQuiz(btn);
+  STATE.finalScore = res.correct; STATE.finalTotal = res.total; STATE.finalPassed = res.correct >= 8; saveState(); updateScore();
+  var result = $("#exam-result");
+  if (result){
+    var advice = STATE.finalPassed ? "Tu sais guider une IA pour construire une app web simple, itérer, déboguer et livrer un projet." : "Revois les 5 blocs, le cas pratique birthday card, l’itération et le projet final.";
+    result.innerHTML = "<strong>Résultat : "+res.correct+"/"+res.total+"</strong><br>"+(STATE.finalPassed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+advice+"</span>";
+  }
+  var go = $("#go-cert"); if (go) go.style.display = STATE.finalPassed ? "inline-flex" : "none";
+}
+function generateCert(){
+  if (!STATE.finalPassed){ alert("Termine d’abord l’examen final avec au moins 8/10."); return; }
+  var ni = $("#cert-name"); var name = ni ? ni.value.trim() : ""; if (!name) name = "Apprenant";
+  STATE.certName = name; saveState();
+  var block = $("#certificate"); if (!block) return; block.classList.add("show");
+  $("#cert-name-out").textContent = name;
+  $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+  $("#cert-score").textContent = STATE.finalScore+"/"+STATE.finalTotal;
+  $("#cert-level").textContent = STATE.finalPassed ? "Builder validé" : "En progression";
+  block.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+function toggleCheck(id){
+  var el = document.getElementById(id); if (!el) return;
+  if (id.indexOf("p")===0 && id.length<=3) STATE.projectChecklist[id] = el.checked; else STATE.checklist[id] = el.checked;
+  saveState(); updateChecklistProgress();
+}
+function updateChecklistProgress(){
+  var boxes = $$(".checklist input[type=checkbox]"); var done=0;
+  for (var i=0;i<boxes.length;i++) if (boxes[i].checked) done++;
+  var el = $("#check-progress"); if (el) el.textContent = done+"/"+boxes.length;
+  var pboxes = $$("#project .checklist input[type=checkbox]"); var pdone=0;
+  for (var j=0;j<pboxes.length;j++) if (pboxes[j].checked) pdone++;
+  var pel = $("#project-progress"); if (pel) pel.textContent = pdone+"/"+pboxes.length;
+}
+function exportJSON(){
+  var data = {
+    cours: "Vibe Coding avec AI — Birthday Card, Prompting, Ping Pong, Projet final",
+    date: new Date().toISOString(), profil: STATE.diagnostic, progression: STATE.visited, quiz: STATE.quizScores,
+    examen: { score: STATE.finalScore, total: STATE.finalTotal, reussi: STATE.finalPassed },
+    simulateur_birthday: { carte_actuelle: STATE.currentCard, historique: STATE.simHistory },
+    checklist: STATE.checklist, checklist_projet: STATE.projectChecklist,
+    ressources: ["Sean Chen seanchen.io","GitHub ShenSeanChen","Ollama pour modèles locaux"]
+  };
+  var blob = new Blob([JSON.stringify(data,null,2)], { type:"application/json" });
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "rapport-vibe-coding-birthday.json";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+}
+function resetCourse(){ if (!confirm("Réinitialiser toute la progression ?")) return; try { localStorage.removeItem(KEY); } catch(e){} location.reload(); }
+function initModule(id){
+  if (id==="diagnostic") restoreDiagnostic();
+  if (id==="birthday") renderSim();
+  if (id==="lab") buildPrompt();
+  if (id==="resources"){
+    var ni = $("#cert-name"); if (ni && STATE.certName) ni.value = STATE.certName;
+    var keys = Object.keys(STATE.checklist); for (var i=0;i<keys.length;i++){ var el = document.getElementById(keys[i]); if (el) el.checked = STATE.checklist[keys[i]]; }
+    var pkeys = Object.keys(STATE.projectChecklist); for (var j=0;j<pkeys.length;j++){ var pel = document.getElementById(pkeys[j]); if (pel) pel.checked = STATE.projectChecklist[pkeys[j]]; }
+    updateChecklistProgress();
+    if (STATE.finalPassed){ var block = $("#certificate"); if (block) block.classList.add("show"); var go = $("#go-cert"); if (go) go.style.display = "inline-flex"; }
+  }
+}
+function init(){
+  loadState(); document.body.setAttribute("data-theme", STATE.theme); document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+  var buttons = $$("#nav button");
+  for (var i=0;i<buttons.length;i++) buttons[i].addEventListener("click", function(){ showSection(this.getAttribute("data-target")); });
+  showSection("home"); updateScore(); updateChecklistProgress(); renderSim();
+}
+window.showSection=showSection; window.nextFrom=nextFrom; window.prevFrom=prevFrom;
+window.toggleTheme=toggleTheme; window.toggleSources=toggleSources; window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic; window.checkQuiz=checkQuiz;
+window.generateCard=generateCard; window.luckyFill=luckyFill; window.copyCard=copyCard; window.clearSim=clearSim;
+window.buildPrompt=buildPrompt; window.copyPrompt=copyPrompt; window.resetPrompt=resetPrompt;
+window.submitFinal=submitFinal; window.generateCert=generateCert; window.toggleCheck=toggleCheck;
+window.exportJSON=exportJSON; window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded", init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

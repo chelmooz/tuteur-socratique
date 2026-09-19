@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture Agent IA - Graphe de Connaissances</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="h-screen w-screen flex flex-col text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 shadow-sm z-10 flex justify-between items-center shrink-0 transition-colors duration-200">
+        <div>
+            <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                Explorateur de Graphe Sémantique
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Déplacez les nœuds et cliquez dessus pour explorer le lien entre métier et technique.</p>
+        </div>
+        <div class="flex gap-4 text-sm font-medium items-center">
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <span class="w-3 h-3 rounded-full bg-teal-500 block"></span>
+                <span>Ontologie Métier</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <span class="w-3 h-3 rounded-full bg-amber-500 block"></span>
+                <span>Ontologie Technique</span>
+            </div>
+            
+            <!-- Bouton Dark Mode -->
+            <button id="theme-toggle" class="p-2 ml-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Zone du Graphe SVG -->
+        <div class="flex-1 relative svg-bg" id="svg-container">
+            <svg id="knowledge-graph" class="w-full h-full absolute top-0 left-0">
+                <!-- Les lignes de connexion seront générées ici -->
+                <g id="links-layer"></g>
+                <!-- Les nœuds seront générés ici -->
+                <g id="nodes-layer"></g>
+            </svg>
+        </div>
+
+        <!-- Panneau d'informations latéral -->
+        <aside id="info-panel" class="w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl flex flex-col shrink-0 transition-all transform translate-x-full absolute right-0 top-0 h-full sm:relative sm:translate-x-0 sm:shadow-none z-20">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h2 class="font-bold text-slate-700 dark:text-slate-200">Détails du Nœud</h2>
+                <!-- Bouton de fermeture pour petits écrans -->
+                <button id="close-panel" class="sm:hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <div id="info-content" class="p-5 flex-1 overflow-y-auto">
+                <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 text-center space-y-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mb-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <p>Sélectionnez un nœud sur le graphe pour afficher ses détails, sa source et ses traces d'exécution.</p>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        // Couleurs par défaut (Thème de l'application)
+        const COLORS = {
+            business: { fill: '#14b8a6', border: '#0d9488', text: '#ffffff' }, // Teal
+            technical: { fill: '#f59e0b', border: '#d97706', text: '#ffffff' } // Amber
+        };
+
+        // Données des nœuds
+        // x et y sont des pourcentages (0 à 100) pour être responsifs au lancement
+        const nodesData = [
+            // Ontologie Métier
+            { id: 'client', type: 'business', label: 'Client', x: 20, y: 30, radius: 45, 
+              desc: 'Entité représentant une personne physique ou morale.',
+              attributes: ['Prénom', 'Nom', 'Date de Naissance', 'Statut KYC'] },
+            { id: 'compte', type: 'business', label: 'Compte', x: 35, y: 50, radius: 45, 
+              desc: 'Le produit bancaire détenu par le client.',
+              attributes: ['IBAN', 'Solde', 'Devise', 'Statut'] },
+            { id: 'transaction', type: 'business', label: 'Transaction', x: 20, y: 70, radius: 45, 
+              desc: 'Opération financière enregistrée sur le compte.',
+              attributes: ['Montant', 'Date', 'Type (Débit/Crédit)', 'Bénéficiaire'] },
+              
+            // Ontologie Technique
+            { id: 'api_kyc', type: 'technical', label: 'API KYC Gov', x: 65, y: 20, radius: 40, 
+              desc: 'Service web externe pour la validation d\'identité (Passeport/ID).',
+              attributes: ['Endpoint: /verify', 'Protocole: REST', 'Latence moy: 1.2s'] },
+            { id: 'db_oracle', type: 'technical', label: 'Oracle (Core)', x: 75, y: 50, radius: 40, 
+              desc: 'Base de données transactionnelle historique (Core Banking).',
+              attributes: ['Table: ACCOUNTS_TB', 'Table: CLIENTS_TB', 'Sync: Temps réel'] },
+            { id: 's3_lake', type: 'technical', label: 'S3 Data Lake', x: 65, y: 80, radius: 40, 
+              desc: 'Stockage froid et analytique (fichiers Parquet/CSV).',
+              attributes: ['Bucket: prod-txn-logs', 'Rétention: 10 ans'] }
+        ];
+
+        // Lignes reliant les nœuds
+        const linksData = [
+            { source: 'client', target: 'compte', label: 'détient' },
+            { source: 'compte', target: 'transaction', label: 'enregistre' },
+            { source: 'client', target: 'api_kyc', label: 'identifié par' },
+            { source: 'client', target: 'db_oracle', label: 'stocké dans' },
+            { source: 'compte', target: 'db_oracle', label: 'géré par' },
+            { source: 'transaction', target: 's3_lake', label: 'archivé dans' }
+        ];
+
+        // État de l'application
+        const state = {
+            nodes: [], // Contiendra les objets DOM et positions absolues
+            links: linksData,
+            draggedNode: null,
+            selectedNodeId: null,
+            offset: { x: 0, y: 0 }, // Offset du clic lors du drag
+            containerWidth: 0,
+            containerHeight: 0
+        };
+
+        // DOM Elements
+        const svgContainer = document.getElementById('svg-container');
+        const svgEl = document.getElementById('knowledge-graph');
+        const nodesLayer = document.getElementById('nodes-layer');
+        const linksLayer = document.getElementById('links-layer');
+        const infoContent = document.getElementById('info-content');
+        const infoPanel = document.getElementById('info-panel');
+        const closePanelBtn = document.getElementById('close-panel');
+
+        
+        // Convertit les positions en % en pixels lors de l'initialisation
+        function initGraph() {
+            const rect = svgContainer.getBoundingClientRect();
+            state.containerWidth = rect.width;
+            state.containerHeight = rect.height;
+
+            // Préparation des nœuds
+            state.nodes = nodesData.map(data => {
+                return {
+                    ...data,
+                    // Conversion % -> px
+                    cx: (data.x / 100) * state.containerWidth,
+                    cy: (data.y / 100) * state.containerHeight,
+                    element: null // Sera assigné plus tard
+                };
+            });
+
+            renderLinks();
+            renderNodes();
+            setupEvents();
+        }
+
+        // Création des éléments SVG
+        const svgNS = "http://www.w3.org/2000/svg";
+
+        function renderNodes() {
+            nodesLayer.innerHTML = '';
+            
+            state.nodes.forEach(node => {
+                const group = document.createElementNS(svgNS, 'g');
+                group.setAttribute('class', `node-group ${state.selectedNodeId === node.id ? 'selected' : ''}`);
+                group.setAttribute('data-id', node.id);
+                // On utilise transform pour déplacer facilement tout le groupe
+                group.setAttribute('transform', `translate(${node.cx}, ${node.cy})`);
+
+                const colorConfig = COLORS[node.type];
+
+                const circle = document.createElementNS(svgNS, 'circle');
+                circle.setAttribute('class', 'node-circle');
+                circle.setAttribute('r', node.radius);
+                circle.setAttribute('fill', colorConfig.fill);
+                circle.setAttribute('stroke', colorConfig.border);
+                circle.setAttribute('stroke-width', '2');
+
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('fill', colorConfig.text);
+                text.setAttribute('font-weight', '600');
+                text.setAttribute('font-size', '12px');
+                text.setAttribute('pointer-events', 'none'); // Ne pas bloquer les clics sur le cercle
+                text.textContent = node.label;
+
+                group.appendChild(circle);
+                group.appendChild(text);
+                nodesLayer.appendChild(group);
+
+                node.element = group;
+            });
+        }
+
+        function renderLinks() {
+            linksLayer.innerHTML = '';
+
+            state.links.forEach(link => {
+                const sourceNode = state.nodes.find(n => n.id === link.source);
+                const targetNode = state.nodes.find(n => n.id === link.target);
+
+                if (!sourceNode || !targetNode) return;
+
+                const lineGroup = document.createElementNS(svgNS, 'g');
+
+                // Ligne de fond (plus épaisse, transparente pour faciliter le clic si besoin)
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('id', `line-${link.source}-${link.target}`);
+                line.setAttribute('x1', sourceNode.cx);
+                line.setAttribute('y1', sourceNode.cy);
+                line.setAttribute('x2', targetNode.cx);
+                line.setAttribute('y2', targetNode.cy);
+                line.setAttribute('class', 'stroke-slate-400 dark:stroke-slate-600 transition-colors');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-dasharray', '5,5'); // Style pointillé
+
+                // Texte au milieu de la ligne
+                const midX = (sourceNode.cx + targetNode.cx) / 2;
+                const midY = (sourceNode.cy + targetNode.cy) / 2;
+                
+                // Petit fond blanc pour lire le texte
+                const bgRect = document.createElementNS(svgNS, 'rect');
+                bgRect.setAttribute('id', `rect-${link.source}-${link.target}`);
+                bgRect.setAttribute('class', 'fill-white/90 dark:fill-slate-900/90 transition-colors');
+                bgRect.setAttribute('rx', '4');
+                
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('id', `text-${link.source}-${link.target}`);
+                text.setAttribute('x', midX);
+                text.setAttribute('y', midY);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('class', 'fill-slate-500 dark:fill-slate-400 transition-colors');
+                text.setAttribute('font-size', '10px');
+                text.textContent = link.label;
+
+                lineGroup.appendChild(line);
+                lineGroup.appendChild(bgRect);
+                lineGroup.appendChild(text);
+                linksLayer.appendChild(lineGroup);
+
+                // Ajuster la taille du rectangle de fond après avoir ajouté le texte (nécessite que ça soit dans le DOM)
+                // Petite astuce : on l'estime en fonction de la longueur de la chaîne
+                const textWidth = link.label.length * 6;
+                bgRect.setAttribute('x', midX - (textWidth/2) - 4);
+                bgRect.setAttribute('y', midY - 8);
+                bgRect.setAttribute('width', textWidth + 8);
+                bgRect.setAttribute('height', '16');
+            });
+        }
+
+        // Mise à jour rapide des positions sans tout recréer
+        function updatePositions() {
+            // Mettre à jour la transformation du nœud déplacé
+            if (state.draggedNode) {
+                state.draggedNode.element.setAttribute('transform', `translate(${state.draggedNode.cx}, ${state.draggedNode.cy})`);
+            }
+
+            // Mettre à jour les lignes connectées à ce nœud (ou tous pour la simplicité)
+            state.links.forEach(link => {
+                const sourceNode = state.nodes.find(n => n.id === link.source);
+                const targetNode = state.nodes.find(n => n.id === link.target);
+
+                const line = document.getElementById(`line-${link.source}-${link.target}`);
+                const text = document.getElementById(`text-${link.source}-${link.target}`);
+                const bgRect = document.getElementById(`rect-${link.source}-${link.target}`);
+
+                if (line && text && bgRect) {
+                    line.setAttribute('x1', sourceNode.cx);
+                    line.setAttribute('y1', sourceNode.cy);
+                    line.setAttribute('x2', targetNode.cx);
+                    line.setAttribute('y2', targetNode.cy);
+
+                    const midX = (sourceNode.cx + targetNode.cx) / 2;
+                    const midY = (sourceNode.cy + targetNode.cy) / 2;
+
+                    text.setAttribute('x', midX);
+                    text.setAttribute('y', midY);
+                    
+                    const textWidth = link.label.length * 6;
+                    bgRect.setAttribute('x', midX - (textWidth/2) - 4);
+                    bgRect.setAttribute('y', midY - 8);
+                }
+            });
+        }
+
+        function getMousePos(evt) {
+            const rect = svgEl.getBoundingClientRect();
+            // Support Touch et Mouse
+            const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+            const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function handleDragStart(evt) {
+            // Identifier si on clique sur un groupe de nœuds
+            const targetGroup = evt.target.closest('.node-group');
+            if (!targetGroup) return;
+
+            evt.preventDefault(); // Empêche le scrolling sur mobile pendant le drag
+
+            const nodeId = targetGroup.getAttribute('data-id');
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            state.draggedNode = node;
+            
+            // Calculer l'offset entre la souris et le centre du nœud pour éviter les sauts
+            const mousePos = getMousePos(evt);
+            state.offset.x = mousePos.x - node.cx;
+            state.offset.y = mousePos.y - node.cy;
+
+            // Si clic, mettre à jour le panneau
+            selectNode(node);
+        }
+
+        function handleDragMove(evt) {
+            if (!state.draggedNode) return;
+            evt.preventDefault();
+
+            const mousePos = getMousePos(evt);
+            
+            // Limiter le déplacement à la zone SVG
+            let newX = mousePos.x - state.offset.x;
+            let newY = mousePos.y - state.offset.y;
+            
+            const r = state.draggedNode.radius;
+            newX = Math.max(r, Math.min(state.containerWidth - r, newX));
+            newY = Math.max(r, Math.min(state.containerHeight - r, newY));
+
+            state.draggedNode.cx = newX;
+            state.draggedNode.cy = newY;
+
+            updatePositions();
+        }
+
+        function handleDragEnd(evt) {
+            if (state.draggedNode) {
+                state.draggedNode = null;
+            }
+        }
+
+        function selectNode(node) {
+            // Mettre à jour l'UI SVG
+            state.selectedNodeId = node.id;
+            document.querySelectorAll('.node-group').forEach(group => {
+                if (group.getAttribute('data-id') === node.id) {
+                    group.classList.add('selected');
+                    // Placer le nœud sélectionné au-dessus des autres
+                    nodesLayer.appendChild(group); 
+                } else {
+                    group.classList.remove('selected');
+                }
+            });
+
+            // Afficher le panneau mobile (si caché)
+            infoPanel.classList.remove('translate-x-full');
+
+            // Préparer les badges
+            const typeLabel = node.type === 'business' ? 'Ontologie Métier' : 'Ontologie Technique';
+            const badgeColor = node.type === 'business' ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
+            
+            let attributesHtml = '';
+            if (node.attributes && node.attributes.length > 0) {
+                attributesHtml = `
+                    <div class="mt-4">
+                        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Propriétés</h4>
+                        <ul class="space-y-2">
+                            ${node.attributes.map(attr => `
+                                <li class="text-sm bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/50 p-2 rounded flex items-center before:content-[''] before:w-1.5 before:h-1.5 before:bg-slate-300 dark:before:bg-slate-600 before:rounded-full before:mr-2 dark:text-slate-300">
+                                    ${attr}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // Simuler des statistiques d'agent IA
+            const agentStatsHtml = `
+                <div class="mt-6 border-t border-slate-100 dark:border-slate-700/70 pt-4">
+                    <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-indigo-500 dark:text-indigo-400"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        Signaux d'Agent IA (Traces)
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded text-center">
+                            <span class="block text-xl font-bold text-slate-700 dark:text-slate-200">${Math.floor(Math.random() * 80 + 20)}%</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Taux de Succès</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded text-center">
+                            <span class="block text-xl font-bold text-slate-700 dark:text-slate-200">${Math.floor(Math.random() * 500 + 50)}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Invocations</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Mettre à jour le HTML du panneau avec animation
+            infoContent.innerHTML = `
+                <div class="animate-slide-in">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">${node.label}</h3>
+                            <span class="inline-block mt-1 px-2 py-1 rounded text-xs font-medium ${badgeColor}">
+                                ${typeLabel}
+                            </span>
+                        </div>
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
+                            ${node.type === 'business' 
+                                ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" class="dark:stroke-teal-400"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>'
+                                : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" class="dark:stroke-amber-400"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>'
+                            }
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 p-3 rounded shadow-sm">
+                        ${node.desc}
+                    </p>
+
+                    ${attributesHtml}
+                    ${agentStatsHtml}
+                </div>
+            `;
+        }
+
+        function setupEvents() {
+            // Événements Souris
+            svgEl.addEventListener('mousedown', handleDragStart);
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('mouseup', handleDragEnd);
+
+            // Événements Touch (Mobile)
+            svgEl.addEventListener('touchstart', handleDragStart, { passive: false });
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
+            window.addEventListener('touchend', handleDragEnd);
+
+            // Bouton de fermeture mobile
+            closePanelBtn.addEventListener('click', () => {
+                infoPanel.classList.add('translate-x-full');
+                state.selectedNodeId = null;
+                document.querySelectorAll('.node-group').forEach(group => group.classList.remove('selected'));
+            });
+
+            // Gérer le redimensionnement de la fenêtre
+            window.addEventListener('resize', () => {
+                // On pourrait recalculer en % ici, mais pour la simplicité du Drag&Drop 
+                // on met juste à jour les dimensions du conteneur.
+                const rect = svgContainer.getBoundingClientRect();
+                state.containerWidth = rect.width;
+                state.containerHeight = rect.height;
+                
+                // On s'assure que les nœuds ne sortent pas de l'écran s'il est réduit
+                state.nodes.forEach(node => {
+                    let changed = false;
+                    const r = node.radius;
+                    if (node.cx > state.containerWidth - r) { node.cx = state.containerWidth - r; changed = true; }
+                    if (node.cy > state.containerHeight - r) { node.cy = state.containerHeight - r; changed = true; }
+                    
+                    if (changed) {
+                        node.element.setAttribute('transform', `translate(${node.cx}, ${node.cy})`);
+                    }
+                });
+                updatePositions();
+            });
+            
+            // --- Theme Toggle Logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            function updateThemeUI(isDark) {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    darkIcon.classList.add('hidden');
+                    lightIcon.classList.remove('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    lightIcon.classList.add('hidden');
+                    darkIcon.classList.remove('hidden');
+                }
+            }
+
+            // Initialisation basée sur la préférence système ou le choix sauvegardé
+            const isDarkMode = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            updateThemeUI(isDarkMode);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const willBeDark = !document.documentElement.classList.contains('dark');
+                updateThemeUI(willBeDark);
+                localStorage.setItem('theme', willBeDark ? 'dark' : 'light');
+            });
+        }
+
+        // Lancer l'application quand le DOM est prêt
+        window.addEventListener('DOMContentLoaded', initGraph);
+
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours LLM — roadmap interactif (d'après mlabonne/llm-course)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<header class="site">
+  <div class="site-inner">
+    <div class="brand">Roadmap LLM</div>
+    <nav class="toc">
+      <a href="#carte">Carte</a>
+      <a href="#fondamentaux">Fondamentaux</a>
+      <a href="#scientist">Scientist</a>
+      <a href="#engineer">Engineer</a>
+      <a href="#outils">Outils</a>
+    </nav>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Changer de thème">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      <span id="theme-label">Mode sombre</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero" style="border-top:none;">
+      <p class="kicker mono">D'après le dépôt mlabonne/llm-course</p>
+      <h1>Le parcours complet pour comprendre et construire des LLM</h1>
+      <p class="lede">Maxime Labonne a organisé son dépôt <strong>llm-course</strong> en trois parcours : des fondamentaux optionnels, la voie <strong>LLM Scientist</strong> pour construire les meilleurs modèles, et la voie <strong>LLM Engineer</strong> pour créer et déployer des applications autour de ces modèles. Cette page reprend cette carte et la rend explorable : cliquez une étape pour lire son détail.</p>
+      <div class="badge-row">
+        <span class="badge">79k+ étoiles GitHub</span>
+        <span class="badge">Licence Apache 2.0</span>
+        <span class="badge"><a href="https://github.com/mlabonne/llm-course" target="_blank" rel="noopener">Voir le dépôt original</a></span>
+        <span class="badge"><a href="https://deepwiki.com/mlabonne/llm-course/" target="_blank" rel="noopener">Version DeepWiki détaillée</a></span>
+      </div>
+      <div class="callout">
+        L'auteur, Maxime Labonne, a prolongé ce cours avec <em>LLM Engineer's Handbook</em>, un livre qui suit une application LLM de bout en bout, de la conception au déploiement. Le cours en ligne, lui, reste gratuit.
+      </div>
+
+      <div class="hero-visual">
+        <svg viewBox="0 0 1000 420" role="img" aria-label="Illustration du parcours : un chemin part d'un point de départ, passe éventuellement par un détour Fondamentaux, puis se sépare en deux voies, LLM Scientist et LLM Engineer">
+          <path d="M40,380 C150,370 210,320 255,285 C310,245 380,225 500,200" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"></path>
+
+          <path d="M235,295 C170,260 160,190 200,155" fill="none" stroke="var(--slate)" stroke-width="2" stroke-dasharray="6,5" stroke-linecap="round"></path>
+          <path d="M232,168 C270,205 300,235 320,255" fill="none" stroke="var(--slate)" stroke-width="2" stroke-dasharray="6,5" stroke-linecap="round"></path>
+
+          <path d="M500,200 C570,155 610,110 650,68" fill="none" stroke="var(--violet)" stroke-width="2.4" stroke-linecap="round"></path>
+          <path d="M500,200 C630,150 770,105 878,68" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round"></path>
+
+          <circle cx="40" cy="380" r="6" fill="var(--ink)"></circle>
+          <text x="40" y="402" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--font-sans)">Départ</text>
+
+          <circle cx="500" cy="200" r="5" fill="var(--muted)"></circle>
+
+          <g>
+            <circle cx="200" cy="150" r="32" fill="var(--surface)" stroke="var(--slate)" stroke-width="2.5"></circle>
+            <rect x="188" y="138" width="24" height="24" rx="2" fill="none" stroke="var(--slate)" stroke-width="1.6"></rect>
+            <line x1="192" y1="146" x2="208" y2="146" stroke="var(--slate)" stroke-width="1.4"></line>
+            <line x1="192" y1="151" x2="208" y2="151" stroke="var(--slate)" stroke-width="1.4"></line>
+            <line x1="192" y1="156" x2="204" y2="156" stroke="var(--slate)" stroke-width="1.4"></line>
+            <text x="200" y="200" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)" font-family="var(--font-sans)">Fondamentaux</text>
+            <text x="200" y="216" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--font-sans)">optionnel, au besoin</text>
+          </g>
+
+          <g>
+            <circle cx="650" cy="68" r="36" fill="var(--violet)"></circle>
+            <path d="M642,48 L642,56 L636,70 Q634,76 640,78 L660,78 Q666,76 664,70 L658,56 L658,48 Z" fill="none" stroke="#1B1740" stroke-width="1.8"></path>
+            <line x1="640" y1="48" x2="660" y2="48" stroke="#1B1740" stroke-width="1.8"></line>
+            <text x="650" y="120" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)" font-family="var(--font-sans)">LLM Scientist</text>
+            <text x="650" y="136" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--font-sans)">construire le meilleur modèle</text>
+          </g>
+
+          <g>
+            <circle cx="878" cy="68" r="36" fill="var(--teal)"></circle>
+            <polygon points="878,50 891,58 891,74 878,82 865,74 865,58" fill="none" stroke="#0C201D" stroke-width="1.8"></polygon>
+            <circle cx="878" cy="66" r="6" fill="none" stroke="#0C201D" stroke-width="1.8"></circle>
+            <text x="878" y="120" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)" font-family="var(--font-sans)">LLM Engineer</text>
+            <text x="878" y="136" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--font-sans)">construire et déployer</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap-wide">
+    <section id="carte" style="padding-top:8px;">
+      <h2>Carte interactive du parcours</h2>
+      <p style="color:var(--muted); max-width:70ch;">Les fondamentaux sont une ressource de référence, pas une étape obligatoire : on y revient au besoin. Les deux parcours principaux, Scientist et Engineer, se lisent chacun de haut en bas.</p>
+      <div class="diagram-shell">
+        <div id="mermaid-diagram"></div>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--slate)"></span>Fondamentaux</span>
+          <span><span class="swatch" style="background:var(--violet)"></span>LLM Scientist</span>
+          <span><span class="swatch" style="background:var(--teal)"></span>LLM Engineer</span>
+        </div>
+        <p class="hint">Cliquez une étape pour ouvrir directement son détail plus bas sur la page.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+
+    <section id="fondamentaux">
+      <div class="part-head"><h2>Fondamentaux</h2><span class="part-tag">optionnel</span></div>
+      <p style="color:var(--muted);">Mathématiques, Python et réseaux de neurones : une base à consulter au besoin plutôt qu'un prérequis strict avant de commencer.</p>
+
+      <details class="module mod-fund" id="mod-f1">
+        <summary><span class="mod-num">1</span><span>Mathématiques pour le machine learning</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Les bases mathématiques qui sous-tendent les algorithmes de machine learning : l'algèbre linéaire pour manipuler vecteurs et matrices, le calcul différentiel pour l'optimisation par gradient, et les probabilités/statistiques pour comprendre comment un modèle apprend à partir de données.</p>
+          <div class="chip-row"><span class="chip">Algèbre linéaire</span><span class="chip">Calcul différentiel</span><span class="chip">Probabilités &amp; statistiques</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://www.youtube.com/watch?v=fNk_zzaMoSs&list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" rel="noopener">3Blue1Brown — The Essence of Linear Algebra</a></li>
+              <li><a href="https://www.khanacademy.org/math/calculus-1" target="_blank" rel="noopener">Khan Academy — Calculus</a></li>
+              <li><a href="https://seeing-theory.brown.edu/" target="_blank" rel="noopener">Seeing Theory</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-fund" id="mod-f2">
+        <summary><span class="mod-num">2</span><span>Python pour le machine learning</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Python est le langage de référence du machine learning grâce à son écosystème : manipulation des données avec NumPy et Pandas, visualisation avec Matplotlib et Seaborn, prétraitement (normalisation, valeurs manquantes, encodage) et bibliothèques comme Scikit-learn pour les algorithmes classiques.</p>
+          <div class="chip-row"><span class="chip">NumPy / Pandas</span><span class="chip">Prétraitement des données</span><span class="chip">Scikit-learn</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://realpython.com/" target="_blank" rel="noopener">Real Python</a></li>
+              <li><a href="https://jakevdp.github.io/PythonDataScienceHandbook/" target="_blank" rel="noopener">Python Data Science Handbook</a></li>
+              <li><a href="https://youtu.be/i_LwzRVP7bg" target="_blank" rel="noopener">freeCodeCamp — Machine Learning for Everybody</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-fund" id="mod-f3">
+        <summary><span class="mod-num">3</span><span>Réseaux de neurones</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Les réseaux de neurones sont au cœur du deep learning : structure en couches, poids, biais et fonctions d'activation ; entraînement par rétropropagation et descente de gradient ; et gestion du surapprentissage par régularisation (dropout, L1/L2, early stopping).</p>
+          <div class="chip-row"><span class="chip">Rétropropagation</span><span class="chip">Fonctions d'activation</span><span class="chip">Régularisation</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank" rel="noopener">3Blue1Brown — But what is a Neural Network?</a></li>
+              <li><a href="https://www.youtube.com/watch?v=VyWAvY2CF9c" target="_blank" rel="noopener">freeCodeCamp — Deep Learning Crash Course</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-fund" id="mod-f4">
+        <summary><span class="mod-num">4</span><span>Traitement du langage naturel (NLP)</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Avant les LLM, le NLP posait déjà les bases : prétraitement du texte (tokenisation, lemmatisation), extraction de features (TF-IDF, n-grams), plongements lexicaux (Word2Vec, GloVe) et réseaux récurrents (RNN, LSTM, GRU) pour traiter des séquences.</p>
+          <div class="chip-row"><span class="chip">Tokenisation</span><span class="chip">Word embeddings</span><span class="chip">RNN / LSTM</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://jalammar.github.io/illustrated-word2vec/" target="_blank" rel="noopener">Jay Alammar — The Illustrated Word2Vec</a></li>
+              <li><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank" rel="noopener">colah's blog — Understanding LSTM Networks</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="scientist">
+      <div class="part-head"><h2>LLM Scientist</h2><span class="part-tag">construire</span></div>
+      <p style="color:var(--muted);">De l'architecture des Transformers jusqu'aux tendances les plus récentes : tout ce qu'il faut pour entraîner, aligner et évaluer un LLM.</p>
+
+      <details class="module mod-sci" id="mod-s1">
+        <summary><span class="mod-num">1</span><span>L'architecture des LLM</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Comprendre les grandes étapes d'un LLM moderne : la tokenisation transforme le texte en nombres, les mécanismes d'attention (self-attention) traitent les dépendances à longue portée, et différentes stratégies d'échantillonnage (greedy, beam search, nucleus sampling) génèrent le texte final.</p>
+          <div class="chip-row"><span class="chip">Tokenisation</span><span class="chip">Self-attention</span><span class="chip">Échantillonnage</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://bbycroft.net/llm" target="_blank" rel="noopener">LLM Visualization — Brendan Bycroft</a></li>
+              <li><a href="https://www.youtube.com/watch?v=wjZofJX0v4M" target="_blank" rel="noopener">3Blue1Brown — Visual intro to Transformers</a></li>
+              <li><a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" target="_blank" rel="noopener">nanoGPT — Andrej Karpathy</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s2">
+        <summary><span class="mod-num">2</span><span>Pré-entraînement</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Étape coûteuse en calcul : préparation de jeux de données massifs (des milliers de milliards de tokens), entraînement distribué combinant parallélisme de données, de pipeline et de tenseurs, optimisation (warm-up, mixed precision, AdamW) et suivi rigoureux des métriques d'entraînement.</p>
+          <div class="chip-row"><span class="chip">Données à l'échelle</span><span class="chip">Entraînement distribué</span><span class="chip">Monitoring</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1" target="_blank" rel="noopener">FineWeb — Hugging Face</a></li>
+              <li><a href="https://github.com/huggingface/nanotron" target="_blank" rel="noopener">nanotron — Hugging Face</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s3">
+        <summary><span class="mod-num">3</span><span>Jeux de données de post-entraînement</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Les données de post-entraînement suivent une structure conversationnelle précise (instruction/réponse, ou choisi/rejeté). Elles combinent formats de stockage (ShareGPT, ChatML), génération synthétique avec des modèles frontière, et filtrage qualité (déduplication, décontamination).</p>
+          <div class="chip-row"><span class="chip">Chat templates</span><span class="chip">Génération synthétique</span><span class="chip">Filtrage qualité</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://github.com/mlabonne/llm-datasets" target="_blank" rel="noopener">LLM Datasets — Maxime Labonne</a></li>
+              <li><a href="https://huggingface.co/docs/transformers/main/en/chat_templating" target="_blank" rel="noopener">Chat Template — Hugging Face</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s4">
+        <summary><span class="mod-num">4</span><span>Fine-tuning supervisé (SFT)</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Le SFT transforme un modèle de base en assistant utile. Le fine-tuning complet met à jour tous les paramètres ; les techniques efficaces comme LoRA et QLoRA n'entraînent qu'un petit nombre de paramètres d'adaptateurs, avec des frameworks comme TRL, Unsloth ou Axolotl.</p>
+          <div class="chip-row"><span class="chip">LoRA / QLoRA</span><span class="chip">Hyperparamètres</span><span class="chip">Entraînement distribué</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/blog/mlabonne/sft-llama3" target="_blank" rel="noopener">Fine-tune Llama 3.1 avec Unsloth — Maxime Labonne</a></li>
+              <li><a href="https://axolotl-ai-cloud.github.io/axolotl/" target="_blank" rel="noopener">Axolotl — Documentation</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s5">
+        <summary><span class="mod-num">5</span><span>Alignement sur les préférences</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Deuxième étape du post-entraînement : aligner les réponses générées sur les préférences humaines. DPO optimise directement la politique sans modèle de récompense ; les techniques de RL comme GRPO et PPO sont plus coûteuses mais adaptées aux modèles de raisonnement.</p>
+          <div class="chip-row"><span class="chip">DPO</span><span class="chip">Modèle de récompense</span><span class="chip">GRPO / PPO</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/blog/rlhf" target="_blank" rel="noopener">Illustrating RLHF — Hugging Face</a></li>
+              <li><a href="https://mlabonne.github.io/blog/posts/Fine_tune_Mistral_7b_with_DPO.html" target="_blank" rel="noopener">Fine-tune avec DPO — Maxime Labonne</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s6">
+        <summary><span class="mod-num">6</span><span>Évaluation</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Évaluer un LLM guide la génération de données et l'entraînement. Les benchmarks automatisés (comme MMLU) sont efficaces sur des tâches concrètes mais sensibles à la contamination ; l'évaluation humaine et les modèles juges apportent d'autres angles, chacun avec ses propres biais.</p>
+          <div class="chip-row"><span class="chip">Benchmarks automatisés</span><span class="chip">Évaluation humaine</span><span class="chip">Modèles juges</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard" target="_blank" rel="noopener">Open LLM Leaderboard — Hugging Face</a></li>
+              <li><a href="https://lmarena.ai/" target="_blank" rel="noopener">Chatbot Arena — LMSYS</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s7">
+        <summary><span class="mod-num">7</span><span>Quantization</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Réduire la précision des poids et activations (par exemple de FP16 vers INT4) diminue le coût mémoire et calcul. GGUF et llama.cpp dominent sur matériel grand public ; GPTQ, AWQ et SmoothQuant affinent la calibration pour préserver la performance à très basse précision.</p>
+          <div class="chip-row"><span class="chip">GGUF / llama.cpp</span><span class="chip">GPTQ / AWQ</span><span class="chip">SmoothQuant</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://mlabonne.github.io/blog/posts/Introduction_to_Weight_Quantization.html" target="_blank" rel="noopener">Introduction to quantization — Maxime Labonne</a></li>
+              <li><a href="https://mlabonne.github.io/blog/posts/4_bit_Quantization_with_GPTQ.html" target="_blank" rel="noopener">4-bit LLM Quantization with GPTQ — Maxime Labonne</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-sci" id="mod-s8">
+        <summary><span class="mod-num">8</span><span>Nouvelles tendances</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Des sujets en évolution rapide : le model merging (SLERP, DARE, TIES) crée des modèles performants sans entraînement, les modèles multimodaux unifient texte/image/audio, l'interprétabilité mécanistique éclaire le fonctionnement interne, et le test-time compute améliore le raisonnement en allouant plus de calcul à l'inférence.</p>
+          <div class="chip-row"><span class="chip">Model merging</span><span class="chip">Multimodalité</span><span class="chip">Test-time compute</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://mlabonne.github.io/blog/posts/2024-01-08_Merge_LLMs_with_mergekit.html" target="_blank" rel="noopener">Merge LLMs with mergekit — Maxime Labonne</a></li>
+              <li><a href="https://huggingface.co/spaces/HuggingFaceH4/blogpost-scaling-test-time-compute" target="_blank" rel="noopener">Scaling test-time compute — Beeching et al.</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="engineer">
+      <div class="part-head"><h2>LLM Engineer</h2><span class="part-tag">déployer</span></div>
+      <p style="color:var(--muted);">De la première requête API jusqu'à la sécurisation en production : construire de vraies applications autour d'un LLM.</p>
+
+      <details class="module mod-eng" id="mod-e1">
+        <summary><span class="mod-num">1</span><span>Faire tourner un LLM</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Selon le cas d'usage, on consomme un LLM via une API (OpenAI, Anthropic, Google) ou on le fait tourner en local via le Hugging Face Hub, LM Studio ou llama.cpp/Ollama. Le prompt engineering (zero-shot, few-shot, chain-of-thought) et le structured output affinent les résultats obtenus.</p>
+          <div class="chip-row"><span class="chip">APIs vs local</span><span class="chip">Prompt engineering</span><span class="chip">Sorties structurées</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://www.promptingguide.ai/" target="_blank" rel="noopener">Prompt engineering guide — DAIR.AI</a></li>
+              <li><a href="https://dottxt-ai.github.io/outlines/latest/quickstart/" target="_blank" rel="noopener">Outlines — Quickstart</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e2">
+        <summary><span class="mod-num">2</span><span>Construire un stockage vectoriel</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Première étape d'un pipeline RAG : ingérer des documents (PDF, HTML, Markdown), les découper en chunks sémantiquement cohérents, les transformer en vecteurs avec un modèle d'embedding adapté à la tâche, puis les stocker dans une base vectorielle (Chroma, Pinecone, FAISS, Milvus).</p>
+          <div class="chip-row"><span class="chip">Chunking</span><span class="chip">Embeddings</span><span class="chip">Bases vectorielles</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/spaces/mteb/leaderboard" target="_blank" rel="noopener">MTEB Leaderboard</a></li>
+              <li><a href="https://www.sbert.net/" target="_blank" rel="noopener">Sentence Transformers</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e3">
+        <summary><span class="mod-num">3</span><span>Retrieval Augmented Generation (RAG)</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Le RAG augmente les réponses d'un LLM avec des documents récupérés dans une base, sans fine-tuning. Les orchestrateurs (LangChain, LlamaIndex, MCP) connectent le modèle aux outils et données ; l'évaluation porte à la fois sur la récupération (précision, rappel) et la génération (fidélité, pertinence).</p>
+          <div class="chip-row"><span class="chip">Orchestrateurs</span><span class="chip">Retrievers</span><span class="chip">Évaluation RAG</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://python.langchain.com/docs/tutorials/rag/" target="_blank" rel="noopener">LangChain — Q&amp;A with RAG</a></li>
+              <li><a href="https://modelcontextprotocol.io/introduction" target="_blank" rel="noopener">Model Context Protocol</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e4">
+        <summary><span class="mod-num">4</span><span>RAG avancé</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Pour des cas réels plus complexes : la construction de requêtes traduit une instruction en langage naturel vers SQL ou Cypher, les agents sélectionnent automatiquement des outils pertinents, le post-processing améliore la pertinence des documents récupérés (re-ranking, RAG-fusion), et des frameworks comme DSPy optimisent les prompts de façon programmatique.</p>
+          <div class="chip-row"><span class="chip">Query construction</span><span class="chip">Re-ranking</span><span class="chip">DSPy</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://blog.langchain.dev/query-construction/" target="_blank" rel="noopener">LangChain — Query Construction</a></li>
+              <li><a href="https://dspy-docs.vercel.app/docs/building-blocks/solving_your_task" target="_blank" rel="noopener">DSPy in 8 Steps</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e5">
+        <summary><span class="mod-num">5</span><span>Agents</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Un agent LLM agit de façon autonome en alternant réflexion, action (via des outils) et observation des résultats. Le Model Context Protocol (MCP) standardise la connexion aux outils externes ; des frameworks comme LangGraph, CrewAI ou AutoGen orchestrent des workflows mono- ou multi-agents.</p>
+          <div class="chip-row"><span class="chip">Réflexion / Action / Observation</span><span class="chip">MCP</span><span class="chip">Multi-agents</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/learn/agents-course/unit0/introduction" target="_blank" rel="noopener">Agents Course — Hugging Face</a></li>
+              <li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">Model Context Protocol</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e6">
+        <summary><span class="mod-num">6</span><span>Optimisation de l'inférence</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Générer du texte reste coûteux. Flash Attention rend le mécanisme d'attention linéaire plutôt que quadratique, le cache clé-valeur (amélioré par MQA et GQA) évite de recalculer les représentations passées, et le speculative decoding utilise un petit modèle pour accélérer un plus grand modèle.</p>
+          <div class="chip-row"><span class="chip">Flash Attention</span><span class="chip">Cache clé-valeur</span><span class="chip">Speculative decoding</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://huggingface.co/docs/transformers/main/en/llm_tutorial_optimization" target="_blank" rel="noopener">Optimizing LLMs for Speed and Memory — Hugging Face</a></li>
+              <li><a href="https://huggingface.co/blog/assisted-generation" target="_blank" rel="noopener">Assisted Generation — Hugging Face</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e7">
+        <summary><span class="mod-num">7</span><span>Déployer des LLM</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Le déploiement local préserve la confidentialité (LM Studio, Ollama, kobold.cpp) ; les démos se prototypent vite avec Gradio ou Streamlit ; le déploiement à grande échelle s'appuie sur des frameworks optimisés comme vLLM ou TGI ; et l'edge deployment fait tourner des modèles dans le navigateur ou sur mobile.</p>
+          <div class="chip-row"><span class="chip">Déploiement local</span><span class="chip">Démos</span><span class="chip">Passage à l'échelle</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://docs.streamlit.io/knowledge-base/tutorials/build-conversational-apps" target="_blank" rel="noopener">Streamlit — Build a basic LLM app</a></li>
+              <li><a href="https://github.com/vllm-project/vllm/tree/main" target="_blank" rel="noopener">vLLM</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="module mod-eng" id="mod-e8">
+        <summary><span class="mod-num">8</span><span>Sécuriser les LLM</span><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
+        <div class="mod-body">
+          <p>Les LLM ont des failles propres à leur fonctionnement : le prompt hacking regroupe l'injection de prompt, la fuite de données et le jailbreak ; les backdoors empoisonnent les données d'entraînement ; la défense passe par le red teaming (garak) et l'observation en production (langfuse).</p>
+          <div class="chip-row"><span class="chip">Prompt hacking</span><span class="chip">Backdoors</span><span class="chip">Red teaming</span></div>
+          <div class="mod-resources"><span class="res-label">Ressources</span>
+            <ul>
+              <li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener">OWASP LLM Top 10</a></li>
+              <li><a href="https://llmsecurity.net/" target="_blank" rel="noopener">LLM Security — @llm_sec</a></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="outils">
+      <h2>Notebooks et outils pratiques</h2>
+      <p style="color:var(--muted);">Le dépôt inclut aussi une boîte à outils de notebooks Colab prêts à l'emploi, en plus de la roadmap.</p>
+      <div class="tool-grid">
+        <div class="tool-item"><strong>LLM AutoEval</strong> — évaluer automatiquement un LLM sur RunPod. <a href="https://github.com/mlabonne/llm-autoeval" target="_blank" rel="noopener">Voir le dépôt</a></div>
+        <div class="tool-item"><strong>LazyMergekit</strong> — fusionner des modèles en un clic avec MergeKit. <a href="https://github.com/cg123/mergekit" target="_blank" rel="noopener">Voir mergekit</a></div>
+        <div class="tool-item"><strong>Decoding Strategies in LLMs</strong> — guide sur la génération de texte, du beam search au nucleus sampling. <a href="https://mlabonne.github.io/blog/posts/2022-06-07-Decoding_strategies.html" target="_blank" rel="noopener">Lire l'article</a></div>
+        <div class="tool-item"><strong>Blog de Maxime Labonne</strong> — tous les articles qui accompagnent le cours. <a href="https://mlabonne.github.io/blog" target="_blank" rel="noopener">Voir le blog</a></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Résumé pédagogique en français du dépôt <a href="https://github.com/mlabonne/llm-course" target="_blank" rel="noopener">mlabonne/llm-course</a> (licence Apache 2.0), à but d'apprentissage — pas une traduction officielle. Cette roadmap s'inspire elle-même du DevOps Roadmap de Milan Milanović et Romano Roth.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  // --- Thème ---
+  var root = document.documentElement;
+  (function(){
+    var btn = document.getElementById('theme-toggle');
+    var label = document.getElementById('theme-label');
+    function sync(){
+      var dark = root.getAttribute('data-theme') === 'dark';
+      label.textContent = dark ? 'Mode clair' : 'Mode sombre';
+      btn.setAttribute('aria-pressed', String(dark));
+    }
+    sync();
+    btn.addEventListener('click', function(){
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      sync();
+      renderMermaid();
+    });
+  })();
+
+  // --- Mermaid ---
+  var mermaidGraph = [
+    'flowchart LR',
+    '  subgraph FOND["Fondamentaux (optionnel)"]',
+    '  direction TB',
+    '  F1["1. Mathématiques"]',
+    '  F2["2. Python"]',
+    '  F3["3. Réseaux de neurones"]',
+    '  F4["4. NLP"]',
+    '  F1-->F2-->F3-->F4',
+    '  end',
+    '  subgraph SCI["LLM Scientist"]',
+    '  direction TB',
+    '  S1["1. Architecture LLM"]',
+    '  S2["2. Pré-entraînement"]',
+    '  S3["3. Jeux de données"]',
+    '  S4["4. Fine-tuning supervisé"]',
+    '  S5["5. Alignement"]',
+    '  S6["6. Évaluation"]',
+    '  S7["7. Quantization"]',
+    '  S8["8. Nouvelles tendances"]',
+    '  S1-->S2-->S3-->S4-->S5-->S6-->S7-->S8',
+    '  end',
+    '  subgraph ENG["LLM Engineer"]',
+    '  direction TB',
+    '  E1["1. Faire tourner un LLM"]',
+    '  E2["2. Stockage vectoriel"]',
+    '  E3["3. RAG"]',
+    '  E4["4. RAG avancé"]',
+    '  E5["5. Agents"]',
+    '  E6["6. Optimisation inférence"]',
+    '  E7["7. Déploiement"]',
+    '  E8["8. Sécurité"]',
+    '  E1-->E2-->E3-->E4-->E5-->E6-->E7-->E8',
+    '  end',
+    '  FOND -.-> SCI',
+    '  FOND -.-> ENG',
+    '  classDef fund fill:#8B93A6,stroke:#5C6478,color:#141821',
+    '  classDef sci fill:#8171D8,stroke:#5B4FB0,color:#1B1740',
+    '  classDef eng fill:#3FA79C,stroke:#2A7A72,color:#0C201D',
+    '  class F1,F2,F3,F4 fund',
+    '  class S1,S2,S3,S4,S5,S6,S7,S8 sci',
+    '  class E1,E2,E3,E4,E5,E6,E7,E8 eng',
+    '  click F1 href "#mod-f1" "Voir la section"',
+    '  click F2 href "#mod-f2" "Voir la section"',
+    '  click F3 href "#mod-f3" "Voir la section"',
+    '  click F4 href "#mod-f4" "Voir la section"',
+    '  click S1 href "#mod-s1" "Voir la section"',
+    '  click S2 href "#mod-s2" "Voir la section"',
+    '  click S3 href "#mod-s3" "Voir la section"',
+    '  click S4 href "#mod-s4" "Voir la section"',
+    '  click S5 href "#mod-s5" "Voir la section"',
+    '  click S6 href "#mod-s6" "Voir la section"',
+    '  click S7 href "#mod-s7" "Voir la section"',
+    '  click S8 href "#mod-s8" "Voir la section"',
+    '  click E1 href "#mod-e1" "Voir la section"',
+    '  click E2 href "#mod-e2" "Voir la section"',
+    '  click E3 href "#mod-e3" "Voir la section"',
+    '  click E4 href "#mod-e4" "Voir la section"',
+    '  click E5 href "#mod-e5" "Voir la section"',
+    '  click E6 href "#mod-e6" "Voir la section"',
+    '  click E7 href "#mod-e7" "Voir la section"',
+    '  click E8 href "#mod-e8" "Voir la section"'
+  ].join('\n');
+
+  function mermaidThemeVars(dark){
+    return dark ? {
+      background:'#181C26', mainBkg:'#1F2430',
+      primaryColor:'#1F2430', primaryTextColor:'#E9E9EE', primaryBorderColor:'#3A3F4D',
+      secondaryColor:'#1F2430', secondaryTextColor:'#E9E9EE',
+      tertiaryColor:'#1F2430', tertiaryTextColor:'#E9E9EE',
+      lineColor:'#5B5F6B', textColor:'#E9E9EE',
+      clusterBkg:'#181C26', clusterBorder:'#3A3F4D',
+      edgeLabelBackground:'#181C26', fontFamily:'var(--font-sans)', fontSize:'14px'
+    } : {
+      background:'#FFFFFF', mainBkg:'#EAE8E1',
+      primaryColor:'#EAE8E1', primaryTextColor:'#1C1F26', primaryBorderColor:'#C9C6BC',
+      secondaryColor:'#EAE8E1', secondaryTextColor:'#1C1F26',
+      tertiaryColor:'#EAE8E1', tertiaryTextColor:'#1C1F26',
+      lineColor:'#8B8F99', textColor:'#1C1F26',
+      clusterBkg:'#FFFFFF', clusterBorder:'#C9C6BC',
+      edgeLabelBackground:'#FFFFFF', fontFamily:'var(--font-sans)', fontSize:'14px'
+    };
+  }
+
+  function renderMermaid(){
+    var dark = root.getAttribute('data-theme') === 'dark';
+    var container = document.getElementById('mermaid-diagram');
+    container.removeAttribute('data-processed');
+    container.innerHTML = mermaidGraph;
+    mermaid.initialize({ startOnLoad:false, securityLevel:'loose', theme:'base', themeVariables: mermaidThemeVars(dark) });
+    mermaid.run({ nodes:[container] });
+  }
+  renderMermaid();
+
+  // --- Navigation dynamique : ouvrir + défiler vers un module cliqué (Mermaid ou lien interne) ---
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#mod-"]');
+    if(!a) return;
+    var id = a.getAttribute('href').slice(1);
+    var target = document.getElementById(id);
+    if(target){
+      e.preventDefault();
+      if(target.tagName.toLowerCase() === 'details'){ target.open = true; }
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

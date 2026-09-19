@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Loop Engineering · Cours Interactif Illustré</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="container">
+    <span class="eyebrow"><i class="fas fa-infinity"></i> Cours interactif illustré</span>
+    <h1>Le Loop Engineering</h1>
+    <p class="subtitle">
+      Concevez des systèmes où l'agent IA observe, planifie, agit, vérifie, mémorise
+      et recommence — de manière autonome, mesurable et contrôlée.
+    </p>
+
+    <!-- Hero SVG : boucle en 6 phases -->
+    <div class="svg-container" style="max-width:520px;margin:34px auto 0;background:transparent;border:none;">
+      <svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Boucle en six phases : observer, planifier, agir, vérifier, mémoriser, recommencer">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+            <polygon points="0 0, 10 4, 0 8" fill="#2dd4bf"/>
+          </marker>
+          <linearGradient id="loopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2dd4bf"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+          </linearGradient>
+          <radialGradient id="centerGlow">
+            <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <circle cx="300" cy="180" r="130" fill="none" stroke="url(#loopGrad)" stroke-width="2" stroke-dasharray="6 8" opacity="0.5" class="pulse"/>
+        <circle cx="300" cy="180" r="112" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.25"/>
+
+        <path d="M 300 52 A 130 130 0 0 1 412 90" fill="none" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M 425 110 A 130 130 0 0 1 425 250" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M 412 270 A 130 130 0 0 1 300 308" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M 188 270 A 130 130 0 0 1 175 250" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M 175 110 A 130 130 0 0 1 188 90" fill="none" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <circle cx="300" cy="180" r="52" fill="url(#centerGlow)"/>
+        <circle cx="300" cy="180" r="46" fill="#0f1a20" stroke="#38bdf8" stroke-width="2"/>
+        <text x="300" y="176" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="15" fill="#e6f1f3" font-weight="700">LOOP</text>
+        <text x="300" y="193" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#8ea3ab">ENGINEERING</text>
+
+        <g><circle cx="300" cy="52" r="30" fill="#101820" stroke="#2dd4bf" stroke-width="2"/><text x="300" y="56" text-anchor="middle" font-size="9.5" fill="#e6f1f3" font-family="Inter,sans-serif">Observer</text></g>
+        <g><circle cx="412" cy="110" r="30" fill="#101820" stroke="#38bdf8" stroke-width="2"/><text x="412" y="114" text-anchor="middle" font-size="9.5" fill="#e6f1f3" font-family="Inter,sans-serif">Planifier</text></g>
+        <g><circle cx="412" cy="250" r="30" fill="#101820" stroke="#34d399" stroke-width="2"/><text x="412" y="254" text-anchor="middle" font-size="9.5" fill="#e6f1f3" font-family="Inter,sans-serif">Agir</text></g>
+        <g><circle cx="300" cy="308" r="30" fill="#101820" stroke="#34d399" stroke-width="2"/><text x="300" y="312" text-anchor="middle" font-size="9.5" fill="#e6f1f3" font-family="Inter,sans-serif">Vérifier</text></g>
+        <g><circle cx="188" cy="250" r="30" fill="#101820" stroke="#f59e0b" stroke-width="2"/><text x="188" y="254" text-anchor="middle" font-size="9" fill="#e6f1f3" font-family="Inter,sans-serif">Mémoriser</text></g>
+        <g><circle cx="188" cy="110" r="30" fill="#101820" stroke="#8b5cf6" stroke-width="2"/><text x="188" y="114" text-anchor="middle" font-size="8" fill="#e6f1f3" font-family="Inter,sans-serif">Recommencer</text></g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="container">
+    <ul>
+      <li><a href="#intro" class="nav-link">Introduction</a></li>
+      <li><a href="#niveaux" class="nav-link">4 niveaux</a></li>
+      <li><a href="#definition" class="nav-link">Définition</a></li>
+      <li><a href="#composants" class="nav-link">6 composants</a></li>
+      <li><a href="#boucle" class="nav-link">La boucle</a></li>
+      <li><a href="#couches" class="nav-link">3 couches</a></li>
+      <li><a href="#connaissances" class="nav-link">Connaissances</a></li>
+      <li><a href="#gardefous" class="nav-link">Garde-fous</a></li>
+      <li><a href="#exemple" class="nav-link">Exemple</a></li>
+      <li><a href="#pratiques" class="nav-link">Pratiques</a></li>
+      <li><a href="#synthese" class="nav-link">Synthèse</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+<!-- ================= 1. INTRODUCTION ================= -->
+<section id="intro">
+  <h2><span class="num">01</span> Introduction</h2>
+
+  <div class="info-box">
+    <span class="lbl">Définition</span>
+    Le <strong>loop engineering</strong> désigne une manière de concevoir des systèmes où un agent IA
+    ne se contente pas d'exécuter une demande ponctuelle : il peut <strong>observer, planifier, agir,
+    vérifier, mémoriser et recommencer</strong> de manière autonome.
+  </div>
+
+  <p>L'idée centrale est de placer une <strong>boucle d'exécution</strong> au-dessus des mécanismes déjà utilisés avec les agents IA. Chaque niveau répond à une limite différente :</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Niveau</th><th>Question principale</th><th>Exemple</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Prompt engineering</strong></td><td>Que dois-je demander à l'IA ?</td><td>« Crée une page de connexion. »</td></tr>
+        <tr><td><strong>Context engineering</strong></td><td>De quelles informations l'IA a-t-elle besoin ?</td><td>Lire le code, la documentation et la base de données.</td></tr>
+        <tr><td><strong>Harness engineering</strong></td><td>Comment gérer une tâche longue ?</td><td>Découper un projet en tâches persistantes.</td></tr>
+        <tr><td><strong>Loop engineering</strong></td><td>Comment faire fonctionner l'agent dans la durée ?</td><td>Vérifier régulièrement les erreurs, corriger et améliorer.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Le loop engineering ne remplace donc pas les autres approches. Il les <strong>superpose</strong> pour permettre à l'agent de travailler sur des tâches continues, évolutives ou récurrentes.</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+graph TD
+    A["Prompt engineering<br>Que demander ?"] --> B["Context engineering<br>Quelles informations ?"]
+    B --> C["Harness engineering<br>Comment gérer la tâche ?"]
+    C --> D["Loop engineering<br>Comment fonctionner dans la durée ?"]
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class A,B,C n;
+    classDef d fill:#0f1a20,stroke:#8b5cf6,stroke-width:2.5px,color:#fff;
+    class D d;
+    </pre>
+    <div class="diagram-caption">chaque niveau se superpose au précédent — le loop est la couche d'orchestration</div>
+  </div>
+</section>
+
+<!-- ================= 2. LES QUATRE NIVEAUX ================= -->
+<section id="niveaux">
+  <h2><span class="num">02</span> Les quatre niveaux d'ingénierie</h2>
+  <p>Cliquez sur chaque niveau pour explorer son fonctionnement, ses exemples et ses limites.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-group="niv" onclick="openTab(event,'niv','prompt')"><i class="fas fa-comment-dots"></i> Prompt</button>
+    <button class="tab-btn" data-group="niv" onclick="openTab(event,'niv','context')"><i class="fas fa-database"></i> Context</button>
+    <button class="tab-btn" data-group="niv" onclick="openTab(event,'niv','harness')"><i class="fas fa-toolbox"></i> Harness</button>
+    <button class="tab-btn" data-group="niv" onclick="openTab(event,'niv','loop')"><i class="fas fa-infinity"></i> Loop</button>
+  </div>
+
+  <!-- Prompt -->
+  <div class="tab-content active" data-group="niv" data-target="prompt">
+    <div class="card level-card">
+      <span class="level-number">01</span>
+      <h3>2.1 Prompt engineering</h3>
+      <p>Formuler une instruction destinée à l'agent : rôle, objectif immédiat, ton, contraintes, format attendu.</p>
+      <pre class="codeblock">Tu es un agent de support client.
+Réponds de manière polie, claire et concise.
+Propose une solution concrète à chaque problème.</pre>
+      <p>Efficace pour les tâches simples, lorsque toutes les informations nécessaires sont déjà disponibles dans la conversation.</p>
+      <div class="limit-box">
+        <span class="lbl">Limite</span>
+        Un prompt seul ne permet pas nécessairement à l'agent de consulter des fichiers, interroger une base de données, utiliser une API, vérifier la réalité d'un résultat, ou maintenir un travail pendant plusieurs heures ou jours.
+      </div>
+    </div>
+  </div>
+
+  <!-- Context -->
+  <div class="tab-content" data-group="niv" data-target="context">
+    <div class="card level-card">
+      <span class="level-number">02</span>
+      <h3>2.2 Context engineering</h3>
+      <p>Permettre à l'agent de <strong>construire le contexte dont il a besoin</strong> via des outils : lecture de fichiers, recherche web, base de données, tickets, API, documents internes, connecteurs externes.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+graph TD
+    A["Analyser la demande"] --> B["Identifier l'info manquante"]
+    B --> C["Utiliser un outil"]
+    C --> D["Ajouter le résultat au contexte"]
+    D --> E{"Chercher encore ?"}
+    E -->|Oui| B
+    E -->|Non| F["Répondre"]
+    classDef n fill:#101820,stroke:#38bdf8,stroke-width:1.5px,color:#e6f1f3;
+    class A,B,C,D,F n;
+    classDef d fill:#101820,stroke:#f59e0b,stroke-width:1.5px,color:#e6f1f3;
+    class E d;
+        </pre>
+      </div>
+      <div class="limit-box">
+        <span class="lbl">Limite</span>
+        Le contexte reste limité par la taille de la fenêtre, le coût des tokens, la perte d'informations lors des résumés et l'accumulation de décisions intermédiaires. Fonctionne bien pour une tâche courte ; moins fiable sur un projet complexe et long.
+      </div>
+    </div>
+  </div>
+
+  <!-- Harness -->
+  <div class="tab-content" data-group="niv" data-target="harness">
+    <div class="card level-card">
+      <span class="level-number">03</span>
+      <h3>2.3 Harness engineering</h3>
+      <p>Créer une structure externe qui pilote l'agent et gère son exécution : liste de tâches, état de progression, plans, tests, checkpoints, gestion des erreurs, reprise après interruption.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+graph TD
+    A["Lire la tâche courante"] --> B["Préparer le contexte"]
+    B --> C["Exécuter la tâche"]
+    C --> D["Lancer les tests"]
+    D --> E["Enregistrer le résultat"]
+    E --> F["Tâche suivante"]
+    F --> A
+    classDef n fill:#101820,stroke:#38bdf8,stroke-width:1.5px,color:#e6f1f3;
+    class A,B,C,D,E,F n;
+        </pre>
+      </div>
+      <p><strong>Exemple :</strong> cloner un site complexe — le harness découpe le travail en 9 étapes persistantes : analyser la structure, identifier les pages, reproduire la navigation, la page d'accueil, les composants, les données simulées, tester le responsive, corriger et vérifier.</p>
+      <div class="limit-box">
+        <span class="lbl">Limite</span>
+        Le harness répond à la question « comment faire terminer à l'agent une tâche longue ? » mais pas à « comment faire en sorte que l'agent continue à travailler de lui-même après la fin de la tâche initiale ? ». C'est là que le loop engineering intervient.
+      </div>
+    </div>
+  </div>
+
+  <!-- Loop -->
+  <div class="tab-content" data-group="niv" data-target="loop">
+    <div class="card level-card loop">
+      <span class="level-number">04</span>
+      <h3>2.4 Loop engineering</h3>
+      <p>Ajouter une couche d'autonomie continue : l'agent s'auto-déclenche, planifie, agit, vérifie ses résultats, consigne son état et recommence sans intervention humaine constante.</p>
+      <div class="info-box">
+        <span class="lbl">Principe</span>
+        Le système fonctionne en permanence, s'adaptant aux retours et aux erreurs de manière autonome et mesurable.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3. DEFINITION ================= -->
+<section id="definition">
+  <h2><span class="num">03</span> Définition du loop engineering</h2>
+  <p>Le loop engineering consiste à concevoir une boucle autonome qui permet à un agent de recevoir ou détecter un objectif, déterminer ce qu'il doit faire ensuite, exécuter une ou plusieurs actions, vérifier le résultat, enregistrer son état, apprendre ou améliorer ses procédures, et recommencer selon un déclencheur ou une condition d'arrêt.</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+graph LR
+    subgraph SG1["Agent classique"]
+        H1["Humain"] --> P1["Prompt"] --> A1["Agent"] --> R1["Résultat"]
+    end
+    subgraph SG2["Agent avec loop engineering"]
+        O2["Objectif"] --> A2["Agent"] --> AC2["Action"] --> V2["Vérification"] --> E2["État"]
+        E2 --> AC2
+    end
+    classDef n fill:#101820,stroke:#38bdf8,stroke-width:1.5px,color:#e6f1f3;
+    class H1,P1,A1,R1,O2,A2,AC2,V2,E2 n;
+    </pre>
+    <div class="diagram-caption">le système n'attend plus nécessairement une nouvelle instruction humaine à chaque étape</div>
+  </div>
+
+  <h3>Exemple</h3>
+  <p>Un site web affiche les résultats d'une compétition sportive.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--danger);">Sans loop engineering</h4>
+      <p style="margin-bottom:0;">Le développeur demande : <em>« Mets à jour les scores. »</em></p>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--success);">Avec loop engineering</h4>
+      <p style="margin-bottom:0;font-size:0.88rem;">Toutes les heures : vérifier les nouvelles données, détecter les changements, mettre à jour le site, tester, vérifier le déploiement, corriger les erreurs simples, journaliser, signaler ce qui nécessite un humain.</p>
+    </div>
+  </div>
+  <p>L'agent ne construit donc pas seulement le site. Il participe à son <strong>fonctionnement continu</strong>.</p>
+</section>
+
+<!-- ================= 4. COMPOSANTS ================= -->
+<section id="composants">
+  <h2><span class="num">04</span> Les six composants du loop engineering</h2>
+  <p>Six composants fondamentaux travaillent ensemble pour rendre une boucle fiable.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-group="comp" onclick="openTab(event,'comp','auto')">Automatisation</button>
+    <button class="tab-btn" data-group="comp" onclick="openTab(event,'comp','wt')">Worktrees</button>
+    <button class="tab-btn" data-group="comp" onclick="openTab(event,'comp','skills')">Skills</button>
+    <button class="tab-btn" data-group="comp" onclick="openTab(event,'comp','plugins')">Plugins</button>
+    <button class="tab-btn" data-group="comp" onclick="openTab(event,'comp','sub')">Sous-agents</button>
+    <button class="tab-btn" data-group="comp" onclick="openTab(event,'comp','state')">État persistant</button>
+  </div>
+
+  <div class="tab-content active" data-group="comp" data-target="auto">
+    <div class="card">
+      <h3>4.1 Automatisation</h3>
+      <p>L'automatisation déclenche les boucles sans intervention humaine constante : planification horaire, événement, nouveau ticket, changement de fichier, erreur détectée, commit, webhook, seuil dépassé.</p>
+      <pre class="codeblock"><span class="cm"># Pseudo-configuration</span>
+name: Surveillance du site
+schedule: "toutes les heures"
+steps:
+  - récupérer les nouvelles données
+  - comparer avec l'état précédent
+  - mettre à jour les fichiers concernés
+  - lancer les tests
+  - déployer si les tests réussissent
+  - notifier en cas d'échec</pre>
+      <div class="limit-box">
+        <span class="lbl">Attention</span>
+        Une boucle permanente peut consommer beaucoup de tokens, répéter une erreur ou déclencher des actions dangereuses. Toute automatisation doit avoir une fréquence raisonnable, des limites, des conditions d'arrêt, une journalisation et des règles d'approbation humaine.
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="comp" data-target="wt">
+    <div class="card">
+      <h3>4.2 Worktrees et isolation</h3>
+      <p>Lorsqu'un agent travaille sur plusieurs corrections en parallèle, les modifications peuvent entrer en conflit. Un <em>worktree</em> isole plusieurs versions de travail d'un même dépôt Git.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+graph TD
+    R["repository"] --> M["main"]
+    R --> W1["worktree - bug authentification"]
+    R --> W2["worktree - menu mobile"]
+    R --> W3["worktree - timeout API"]
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class R,M,W1,W2,W3 n;
+        </pre>
+      </div>
+      <p>Exemple : trois bugs (authentification, menu mobile, API 500) sont confiés à trois agents dans trois worktrees indépendants — chaque modification est testée et revue avant fusion, ce qui évite la contamination entre tâches.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="comp" data-target="skills">
+    <div class="card">
+      <h3>4.3 Skills</h3>
+      <p>Une <em>skill</em> est une procédure réutilisable qu'un agent peut invoquer pour accomplir une tâche spécifique : description, préconditions, fichiers à consulter, étapes, commandes autorisées, critères de validation, cas d'échec.</p>
+      <pre class="codeblock"><span class="cm"># Skill : créer une migration de base de données</span>
+
+## Étapes
+1. Lire le schéma actuel.
+2. Vérifier les migrations existantes.
+3. Produire une migration numérotée + inverse.
+4. Mettre à jour les tests.
+5. Exécuter dans un environnement de test.
+
+## Interdictions
+- Ne jamais supprimer une colonne sans approbation.
+- Ne jamais modifier les données de production directement.</pre>
+      <blockquote>Si une tâche est réalisée plusieurs fois, elle mérite probablement de devenir une skill.</blockquote>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="comp" data-target="plugins">
+    <div class="card">
+      <h3>4.4 Plugins et connecteurs</h3>
+      <p>Ils permettent à l'agent d'interagir avec son environnement — dépôts de code, gestion de projet, messagerie, bases SQL, monitoring, déploiement — via deux capacités essentielles :</p>
+      <div class="grid-2">
+        <div>
+          <h4 style="font-size:0.95rem;color:var(--accent);">Agir</h4>
+          <ul class="flist">
+            <li>Créer une branche, modifier un fichier</li>
+            <li>Ouvrir une pull request, créer un ticket</li>
+            <li>Redémarrer un service</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size:0.95rem;color:var(--accent-2);">Vérifier</h4>
+          <ul class="flist">
+            <li>Lire les logs, les métriques</li>
+            <li>Vérifier le statut du déploiement</li>
+            <li>Comparer deux versions</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:14px;">Un agent qui modifie un fichier sans pouvoir vérifier le résultat travaille en partie à l'aveugle : <code>Action locale → Signal externe → Analyse du signal → Correction éventuelle</code>.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="comp" data-target="sub">
+    <div class="card">
+      <h3>4.5 Sous-agents</h3>
+      <p>Les sous-agents permettent de répartir le travail entre plusieurs rôles spécialisés : recherche, implémentation, test, sécurité, revue.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+graph TD
+    P["Agent principal"] --> R["Agent analyste"]
+    P --> D["Agent développeur"]
+    P --> T["Agent testeur"]
+    P --> C["Agent critique"]
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class P,R,D,T,C n;
+        </pre>
+      </div>
+      <p>Ils sont utiles lorsque les rôles sont clairement séparés, leurs critères d'évaluation indépendants, et le résultat vérifiable. Il faut éviter de créer des sous-agents uniquement pour multiplier les appels au modèle.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="comp" data-target="state">
+    <div class="card">
+      <h3>4.6 État persistant</h3>
+      <p>L'état persistant permet à la boucle de savoir ce qui a déjà été fait, ce qui reste à faire, quelles erreurs ont été rencontrées, quelle version est active. Sans lui, l'agent risque de recommencer les mêmes opérations à chaque exécution.</p>
+      <pre class="codeblock">{
+  "last_run": "2026-09-13T12:00:00Z",
+  "last_success": "2026-09-13T12:00:00Z",
+  "version_checked": "v1.8.2",
+  "pending_tasks": ["vérifier les nouveaux scores"],
+  "known_issues": [],
+  "attempts": 0
+}</pre>
+      <p>Un état utile est lisible, structuré, mis à jour après chaque étape importante, résistant aux interruptions et suffisamment détaillé pour reprendre le travail.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. BOUCLE COMPLETE ================= -->
+<section id="boucle">
+  <h2><span class="num">05</span> La boucle complète</h2>
+  <p>Une architecture de loop engineering assemble tous les composants précédents :</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+graph TD
+    T["Déclencheur horaire / événement"] --> S["Lire l'état et les tâches"]
+    S --> C["Construire le contexte<br>fichiers / APIs / logs"]
+    C --> P["Planifier la prochaine action"]
+    P --> E["Exécuter dans un environnement isolé"]
+    E --> V["Vérifier · tests / métriques"]
+    V --> U["Mettre à jour l'état et le journal"]
+    U --> D{"Condition d'arrêt ?"}
+    D -->|Oui| F["Terminer"]
+    D -->|Non| T
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class T,S,C,P,E,V,U,F n;
+    classDef d fill:#101820,stroke:#f59e0b,stroke-width:1.5px,color:#e6f1f3;
+    class D d;
+    </pre>
+  </div>
+
+  <p>En pseudo-code :</p>
+  <pre class="codeblock">while not should_stop():
+    state = load_state()
+    task = select_next_task(state)
+
+    context = collect_context(task)
+    plan = create_plan(task, context)
+
+    workspace = create_isolated_workspace(task)
+    result = execute(plan, workspace)
+
+    verification = verify(result, context)
+
+    state = update_state(state=state, task=task,
+                         result=result, verification=verification)
+    save_state(state)
+    write_log(result, verification)
+
+    if requires_human_approval(result, verification):
+        notify_human()
+        break</pre>
+</section>
+
+<!-- ================= 6. TROIS COUCHES ================= -->
+<section id="couches">
+  <h2><span class="num">06</span> La méthode en trois couches</h2>
+  <p>Pour rendre la boucle fiable : la spécification, le vérificateur, l'environnement.</p>
+
+  <div class="atelier">
+    <div class="item"><i class="fas fa-file-signature"></i><div class="t">Spécification</div><div class="d">le plan de construction</div></div>
+    <div class="item"><i class="fas fa-clipboard-check"></i><div class="t">Vérificateur</div><div class="d">le poste de contrôle</div></div>
+    <div class="item"><i class="fas fa-industry"></i><div class="t">Environnement</div><div class="d">l'atelier</div></div>
+    <div class="item"><i class="fas fa-book"></i><div class="t">État + Skills</div><div class="d">carnet & procédures</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-group="couche" onclick="openTab(event,'couche','spec')">1 · Spécification</button>
+    <button class="tab-btn" data-group="couche" onclick="openTab(event,'couche','verif')">2 · Vérificateur</button>
+    <button class="tab-btn" data-group="couche" onclick="openTab(event,'couche','env')">3 · Environnement</button>
+  </div>
+
+  <div class="tab-content active" data-group="couche" data-target="spec">
+    <div class="card">
+      <p>Une spécification ne doit pas seulement décrire une tâche : elle doit expliquer le but réel, le résultat attendu, les contraintes, les priorités, les critères d'acceptation, et ce que l'agent ne doit pas inventer.</p>
+      <div class="grid-2">
+        <div class="limit-box" style="border-color:var(--warn);background:rgba(245,158,11,0.08);">
+          <span class="lbl" style="color:var(--warn);">Tâche</span>
+          Créer un rapport de fin de mois.
+        </div>
+        <div class="info-box">
+          <span class="lbl" style="color:var(--accent-2);display:block;font-family:'JetBrains Mono',monospace;font-size:0.82rem;margin-bottom:6px;">OBJECTIF</span>
+          Identifier les causes de la baisse des ventes et décider quelles actions l'équipe doit lancer le mois prochain.
+        </div>
+      </div>
+      <h3 style="font-size:1.02rem;">Favoriser les petites spécifications</h3>
+      <p>Découper une tâche importante en unités courtes, validées une à une, plutôt que de tout demander en un seul bloc.</p>
+      <pre class="codeblock">Étape 1 : Conçois uniquement le modèle de données des projets et des tâches.
+Ne crée pas encore l'interface. Présente les choix et attends validation.
+
+Étape 2 : Implémente l'API correspondant au modèle validé.
+Ajoute les tests unitaires. Ne modifie pas l'interface.</pre>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="couche" data-target="verif">
+    <div class="card">
+      <p>Le vérificateur définit comment déterminer si le résultat est correct — avec des critères observables, pas une déclaration vague.</p>
+      <div class="grid-2">
+        <div class="limit-box">
+          <span class="lbl">Vague</span>
+          Le rapport doit être de bonne qualité.
+        </div>
+        <div class="info-box">
+          <span class="lbl" style="color:var(--accent-2);display:block;font-family:'JetBrains Mono',monospace;font-size:0.82rem;margin-bottom:6px;">PRÉCIS</span>
+          Trois sections, données des 6 dernières périodes, recommandation par section, faits distingués des hypothèses, source citée, aucune donnée inventée.
+        </div>
+      </div>
+      <h3 style="font-size:1.02rem;">Un second agent comme critique</h3>
+      <div class="diagram">
+        <pre class="mermaid">
+graph LR
+    A["Agent A · implémente"] --> B["Agent B · critique"]
+    B --> C["Agent A · corrige"]
+    C --> D["Agent B · vérification finale"]
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class A,B,C,D n;
+        </pre>
+      </div>
+      <p>La vérification la plus fiable s'appuie sur des <strong>preuves externes</strong> : tests, logs, statut de déploiement, métriques, réponse réelle d'une API — jamais uniquement un code de sortie 0.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" data-group="couche" data-target="env">
+    <div class="card">
+      <p>L'environnement est l'espace de travail permanent de l'agent : structure du projet, règles, skills, base de connaissances, commandes disponibles, garde-fous, conventions.</p>
+      <pre class="codeblock"><span class="cm"># CLAUDE.md — Instructions du projet</span>
+
+## Architecture
+- src/    → code applicatif
+- tests/  → tests
+- docs/   → documentation
+- scripts/→ automatisation
+
+## Vérification obligatoire (modif. multi-fichier)
+1. expliquer le plan
+2. implémenter
+3. lancer les tests
+4. inspecter le diff
+5. résumer les risques restants</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7. CONNAISSANCES ================= -->
+<section id="connaissances">
+  <h2><span class="num">07</span> Construire une base de connaissances</h2>
+  <p>L'agent devient plus efficace lorsqu'il dispose d'une base de connaissances organisée par domaine :</p>
+  <pre class="codeblock">knowledge/
+├── business/
+│   ├── objectifs.md
+│   ├── utilisateurs.md
+│   └── règles-metier.md
+├── architecture/
+│   ├── vue-densemble.md
+│   ├── conventions.md
+│   └── dependances.md
+├── operations/
+│   ├── deploy.md
+│   ├── monitoring.md
+│   └── incident-response.md
+├── decisions/
+│   └── 2026-09-architecture-api.md
+└── history/
+    ├── incidents.md
+    └── erreurs-connues.md</pre>
+  <p>Elle doit rester organisée par domaine, régulièrement nettoyée, datée, reliée aux décisions, et débarrassée des informations obsolètes — sans quoi elle devient un dépôt désordonné plutôt qu'une ressource utile aux skills et aux vérificateurs.</p>
+</section>
+
+<!-- ================= 8. GARDE-FOUS ================= -->
+<section id="gardefous">
+  <h2><span class="num">08</span> Les garde-fous</h2>
+  <p>Une boucle autonome doit distinguer trois catégories d'actions.</p>
+
+  <div class="grid-3">
+    <div class="guard-card guard-toujours">
+      <h4><i class="fas fa-check-circle"></i> Toujours faire</h4>
+      <ul class="flist">
+        <li>Lancer les tests après modification</li>
+        <li>Lire le diff avant un commit</li>
+        <li>Mettre à jour le journal</li>
+        <li>Signaler les erreurs</li>
+      </ul>
+    </div>
+    <div class="guard-card guard-demander">
+      <h4><i class="fas fa-hand-paper"></i> Demander avant</h4>
+      <ul class="flist">
+        <li>Modifier une API publique</li>
+        <li>Fusionner en branche principale</li>
+        <li>Déployer en production</li>
+        <li>Supprimer une ressource cloud</li>
+      </ul>
+    </div>
+    <div class="guard-card guard-jamais">
+      <h4><i class="fas fa-ban"></i> Ne jamais faire</h4>
+      <ul class="flist">
+        <li>Exposer des secrets</li>
+        <li>Supprimer une base de production</li>
+        <li>Contourner une authentification</li>
+        <li>Désactiver les contrôles de sécurité</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Il faut distinguer une instruction textuelle (<code>« Ne modifie jamais /important »</code>) d'une véritable règle technique imposée au niveau de l'outil :</p>
+  <pre class="codeblock">PROTECTED = ["/important", "/production-secrets"]
+
+def before_write(path):
+    if any(path.startswith(folder) for folder in PROTECTED):
+        raise PermissionError("Écriture interdite sur ce chemin")</pre>
+
+  <p>Les garde-fous doivent être placés au niveau le plus bas possible :</p>
+  <div class="diagram">
+    <pre class="mermaid">
+graph TD
+    A["Prompt — conseil"] --> B["Règle agent — contrainte comportementale"]
+    B --> C["Hook outil — blocage technique"]
+    C --> D["Permission — restriction système"]
+    classDef n fill:#101820,stroke:#f59e0b,stroke-width:1.5px,color:#e6f1f3;
+    class A,B,C,D n;
+    </pre>
+    <div class="diagram-caption">plus on descend, plus la protection est solide</div>
+  </div>
+</section>
+
+<!-- ================= 9. EXEMPLE COMPLET ================= -->
+<section id="exemple">
+  <h2><span class="num">09</span> Exemple complet : maintenance autonome d'un site</h2>
+  <p><strong>Objectif :</strong> maintenir automatiquement un site affichant les résultats d'une compétition.</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+graph TD
+    S["Scheduler"] --> M["Agent de surveillance"]
+    M --> API["API de données sportives"]
+    API --> U["Agent de mise à jour"]
+    U --> W["Worktree isolé"]
+    W --> T["Tests et validation"]
+    T --> Dep["Déploiement"]
+    Dep --> Mon["Monitoring"]
+    Mon --> St["État persistant"]
+    St -.-> S
+    classDef n fill:#101820,stroke:#2dd4bf,stroke-width:1.5px,color:#e6f1f3;
+    class S,M,API,U,W,T,Dep,Mon,St n;
+    </pre>
+  </div>
+
+  <div class="timeline">
+    <div class="tstep"><h4>1 · Déclenchement</h4><p style="margin:0;">Le scheduler lance la boucle toutes les heures.</p></div>
+    <div class="tstep"><h4>2 · Lecture de l'état</h4><p style="margin:0;">L'agent lit le dernier match traité, le dernier déploiement, les incidents en cours.</p></div>
+    <div class="tstep"><h4>3 · Collecte du contexte</h4><p style="margin:0;">Derniers scores, état du dépôt, incidents connus, dernier déploiement, logs récents.</p></div>
+    <div class="tstep"><h4>4 · Décision</h4><p style="margin:0;">Deux nouveaux scores détectés, aucun incident critique → tâche créée : mettre à jour les matchs 105 et 106.</p></div>
+    <div class="tstep"><h4>5 · Implémentation</h4><p style="margin:0;">Worktree dédié, données modifiées, tests mis à jour et exécutés, rendu vérifié.</p></div>
+    <div class="tstep"><h4>6 · Vérification</h4><p style="margin:0;">Un sous-agent critique confirme : scores corrects, aucun historique supprimé, horaires exacts, rendu mobile fonctionnel, tests au vert.</p></div>
+    <div class="tstep"><h4>7 · Déploiement</h4><p style="margin:0;">Commit, pull request, approbation si nécessaire, déploiement, vérification de l'URL réelle, lecture des logs.</p></div>
+    <div class="tstep"><h4>8 · Reprise</h4><p style="margin:0;">L'état est mis à jour avec le dernier match traité, la version déployée et l'heure de la prochaine exécution.</p></div>
+  </div>
+
+  <h3>Extrait de spécification</h3>
+  <pre class="codeblock"><span class="cm"># Mise à jour automatique des scores</span>
+
+## Critères de réussite
+- Toutes les données proviennent d'une source autorisée.
+- Aucun match existant n'est supprimé.
+- Les tests passent, le schéma JSON reste valide.
+- Le déploiement est vérifié par une requête réelle.
+
+## Demander une validation humaine si
+- L'API renvoie des données contradictoires.
+- Plus de 20 matchs doivent être modifiés.
+- Un test critique échoue.
+
+## Ne jamais faire
+- Inventer un score manquant.
+- Supprimer un résultat historique.
+- Modifier directement la base de production.</pre>
+</section>
+
+<!-- ================= 10. BONNES PRATIQUES ================= -->
+<section id="pratiques">
+  <h2><span class="num">10</span> Quand l'utiliser, et bonnes pratiques</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--success);">Adapté quand la tâche est…</h4>
+      <ul class="flist">
+        <li>récurrente, longue, pilotée par événements</li>
+        <li>vérifiable automatiquement</li>
+        <li>composée de petites tâches successives</li>
+        <li>connectée à plusieurs outils</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--danger);">Moins adapté quand…</h4>
+      <ul class="flist" style="--c:var(--danger);">
+        <li>l'objectif est très subjectif</li>
+        <li>les critères de réussite sont inconnus</li>
+        <li>les actions sont irréversibles</li>
+        <li>la vérification automatique est impossible</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Commencer petit : la montée en autonomie</h3>
+  <div class="maturity">
+    <div class="step"><span class="badge">ÉTAPE 1</span><span class="flow"><b>Détection</b> → Proposition → <b>Validation humaine</b></span></div>
+    <div class="step"><span class="badge">ÉTAPE 2</span><span class="flow"><b>Détection</b> → Action limitée → Vérification → Rapport</span></div>
+    <div class="step"><span class="badge">ÉTAPE 3</span><span class="flow"><b>Détection</b> → Action automatique → Vérification → Correction limitée</span></div>
+  </div>
+
+  <h3>Définir une condition d'arrêt</h3>
+  <pre class="codeblock">if attempts >= 3:
+    stop("Nombre maximal de tentatives atteint")
+
+if same_error_repeated >= 2:
+    escalate("Erreur répétée")
+
+if risk_level == "critical":
+    require_human_approval()</pre>
+
+  <h3>Préférer les preuves aux déclarations</h3>
+  <div class="grid-2">
+    <div class="limit-box"><span class="lbl">Éviter</span>Dis-moi si le déploiement a réussi.</div>
+    <div class="info-box"><span class="lbl" style="color:var(--accent-2);display:block;font-family:'JetBrains Mono',monospace;font-size:0.82rem;margin-bottom:6px;">PRÉFÉRER</span>Vérifie le statut, appelle l'URL publique, consulte les logs, confirme avec des preuves.</div>
+  </div>
+</section>
+
+<!-- ================= 11. SYNTHESE ================= -->
+<section id="synthese">
+  <h2><span class="num">11</span> Synthèse opérationnelle</h2>
+  <p>Pour construire un système de loop engineering :</p>
+  <ol style="color:var(--text-dim);padding-left:20px;margin-bottom:20px;">
+    <li style="margin-bottom:8px;">Définir l'objectif réel, pas seulement la tâche apparente.</li>
+    <li style="margin-bottom:8px;">Transformer l'objectif en petite spécification vérifiable.</li>
+    <li style="margin-bottom:8px;">Définir les critères d'acceptation avant l'exécution.</li>
+    <li style="margin-bottom:8px;">Organiser l'environnement et la base de connaissances.</li>
+    <li style="margin-bottom:8px;">Créer des skills pour les opérations répétitives.</li>
+    <li style="margin-bottom:8px;">Ajouter connecteurs et signaux externes nécessaires.</li>
+    <li style="margin-bottom:8px;">Isoler les tâches parallèles avec des worktrees.</li>
+    <li style="margin-bottom:8px;">Utiliser des sous-agents aux rôles clairement séparés.</li>
+    <li style="margin-bottom:8px;">Stocker l'état et le journal de chaque exécution.</li>
+    <li style="margin-bottom:8px;">Ajouter limites, permissions et conditions d'arrêt.</li>
+    <li style="margin-bottom:8px;">Commencer avec une validation humaine.</li>
+    <li>Augmenter l'autonomie progressivement, seulement si les résultats sont fiables.</li>
+  </ol>
+
+  <div class="formula">
+    Loop engineering <span class="plus">=</span> automatisation <span class="plus">+</span> contexte <span class="plus">+</span> harness<br>
+    <span class="plus">+</span> spécification <span class="plus">+</span> vérification <span class="plus">+</span> environnement <span class="plus">+</span> état <span class="plus">+</span> garde-fous
+  </div>
+
+  <blockquote>On ne demande pas seulement à l'IA de produire une réponse. On conçoit un système dans lequel elle peut accomplir une suite d'actions, vérifier ses résultats et reprendre le travail sans perdre l'objectif.</blockquote>
+
+  <div class="reflect-box">
+    <p style="font-size:1.05rem;color:var(--text);font-weight:600;margin-bottom:6px;">Pour vérifier votre compréhension :</p>
+    <p style="font-size:0.9rem;">Selon vous, quelle est la différence essentielle entre le <em>harness engineering</em> et le <em>loop engineering</em> ? Écrivez votre réponse ci-dessous.</p>
+    <textarea class="reflect-input" id="reflectAnswer" placeholder="Ex : le harness structure une tâche longue jusqu'à sa fin, tandis que la boucle..."></textarea>
+    <button class="btn" onclick="submitReflect()"><i class="fas fa-paper-plane"></i> Vérifier ma réponse</button>
+    <div class="feedback" id="reflectFeedback">
+      <p style="margin-bottom:10px;"><strong style="color:var(--accent);">Élément clé :</strong> le harness engineering découpe et fait <em>terminer</em> une tâche longue (un début, une fin). Le loop engineering ajoute le déclenchement, la mémoire et la condition d'arrêt qui permettent à l'agent de <strong>continuer à travailler de lui-même</strong> après la fin de la tâche initiale — de façon récurrente, mesurable et contrôlée.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Cours interactif conçu pour l'apprentissage · Le Loop Engineering</p>
+    <p style="margin-top:8px;font-size:0.78rem;opacity:0.7;">2026</p>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'base',
+    themeVariables:{
+      background:'#0a0f14',
+      primaryColor:'#101820',
+      primaryTextColor:'#e6f1f3',
+      primaryBorderColor:'#2dd4bf',
+      lineColor:'#2dd4bf',
+      secondaryColor:'#0f1720',
+      tertiaryColor:'#0f1720',
+      fontFamily:'Inter, sans-serif',
+      fontSize:'13px',
+      edgeLabelBackground:'#0a0f14',
+      clusterBkg:'#0f1720',
+      clusterBorder:'#2dd4bf'
+    },
+    flowchart:{curve:'basis', htmlLabels:true}
+  });
+
+  window.onscroll = function() {
+    let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById("progressBar").style.width = (winScroll/height)*100 + "%";
+
+    let sections = document.querySelectorAll("section");
+    let navLinks = document.querySelectorAll(".nav-link");
+    sections.forEach((sec) => {
+      let top = window.scrollY;
+      let offset = sec.offsetTop - 140;
+      let h = sec.offsetHeight;
+      let id = sec.getAttribute("id");
+      if (top >= offset && top < offset + h) {
+        navLinks.forEach(link => {
+          link.classList.remove("active");
+          if (link.getAttribute("href") === "#" + id) link.classList.add("active");
+        });
+      }
+    });
+  };
+
+  function openTab(event, group, target) {
+    document.querySelectorAll(`.tab-content[data-group="${group}"]`).forEach(el => el.classList.remove('active'));
+    document.querySelectorAll(`.tab-btn[data-group="${group}"]`).forEach(el => el.classList.remove('active'));
+    document.querySelector(`.tab-content[data-group="${group}"][data-target="${target}"]`).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function submitReflect() {
+    const answer = document.getElementById("reflectAnswer").value;
+    const feedback = document.getElementById("reflectFeedback");
+    if (answer.trim().length < 8) {
+      alert("Écrivez quelques mots avant de valider !");
+      return;
+    }
+    feedback.classList.add("show");
+    feedback.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>
