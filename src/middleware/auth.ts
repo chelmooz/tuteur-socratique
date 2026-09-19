@@ -1,3 +1,4 @@
+import { randomBytes, timingSafeEqual } from "crypto";
 import { Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../types";
 
@@ -8,11 +9,21 @@ if (process.env.NODE_ENV === "production" && !process.env.API_KEY) {
   process.exit(1);
 }
 
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  const apiKey = authHeader?.replace('Bearer ', '') || req.query.api_key as string;
+  const apiKey = authHeader?.replace('Bearer ', '');
   
-  if (!apiKey || apiKey !== API_KEY) {
+  if (!apiKey || !safeCompare(apiKey, API_KEY)) {
     res.status(401).json({ error: "Non autorisé - API key invalide ou manquante" });
     return;
   }
