@@ -46,8 +46,7 @@ services:
     command: >
       sh -c "
         ollama pull qwen2.5:7b &&
-        ollama pull bge-m3:latest &&
-        ollama pull prof-ia:latest
+        ollama pull bge-m3:latest
       "
     profiles:
       - init

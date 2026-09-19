@@ -8,7 +8,7 @@ Ce projet adopte une architecture **hybride** explicite :
 
 | Composant | Localisation | Technologie |
 |-----------|--------------|-------------|
-| **LLM & Chat** | 100% Local | Ollama (qwen2.5:7b, prof-ia, etc.) |
+| **LLM & Chat** | 100% Local | Ollama (qwen2.5:7b, prof-ia*) |
 | **Embeddings** | 100% Local | Ollama (bge-m3:latest) |
 | **Vector Store** | 100% Local | ChromaDB |
 | **Extraction PDF/PPTX/DOCX/OCR** | 100% Local | officeparser (Node.js) |
@@ -54,7 +54,7 @@ L'application sera accessible sur `http://localhost:3001`.
 ```bash
 # Ollama (requis)
 OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL_TUTEUR=prof-ia:latest
+OLLAMA_MODEL_TUTEUR=qwen2.5:7b
 OLLAMA_MODEL_EXPERT=qwen2.5:7b
 OLLAMA_MODEL_EMBEDDING=bge-m3:latest
 
@@ -68,13 +68,14 @@ PORT=3001
 
 # Sécurité (OBLIGATOIRE en production)
 API_KEY=votre-cle-secrete-tres-longue-et-aleatoire
-SESSION_SECRET=un-autre-secret-pour-les-sessions
 
 # Firebase (optionnel - pour auth/export Drive)
 # Voir firebase-applet-config.json
 ```
 
 > ⚠️ **En production** : `API_KEY` **doit** être définie. L'application refuse de démarrer avec la valeur par défaut `dev-secret-change-me`.
+
+> 💡 **Modèle tuteur personnalisé** : Pour utiliser un modèle `prof-ia` spécialisé (mode socratique), voir `docs/prof-ia-Modelfile.example` et créez-le avec `ollama create prof-ia -f docs/prof-ia-Modelfile.example`.
 
 ## 📚 Corpus Pédagogique
 
@@ -90,7 +91,7 @@ Les 101 pages HTML interactives ont été normalisées avec un design system par
 
 ## 🔌 API Principales
 
-Toutes les routes `/api/ai/*` et `/api/rag/*` nécessitent une authentification par **Bearer token** ou **query parameter** `?api_key=`.
+Toutes les routes `/api/ai/*` et `/api/rag/*` nécessitent une authentification par **Bearer token** dans le header `Authorization`.
 
 | Route | Méthode | Description |
 |-------|---------|-------------|
@@ -167,4 +168,4 @@ Le build produit :
 
 ---
 
-**Licence** : Apache-2.0 (voir en-têtes des fichiers source)
+**Licence** : Apache-2.0

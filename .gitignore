@@ -7,3 +7,4 @@ coverage/
 .env*
 !.env.example
 data/student_state.db
+data/private/

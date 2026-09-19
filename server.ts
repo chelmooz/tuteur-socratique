@@ -58,7 +58,7 @@ async function startServer() {
     console.log(`  API Quiz: http://localhost:${PORT}/api/ai/quiz-generate (protégé)`);
     console.log(`  API Test Prompt: http://localhost:${PORT}/api/ai/test-prompt (protégé)`);
     console.log(`  API Embed: http://localhost:${PORT}/api/ai/embed (protégé)`);
-    console.log(`  Auth: Bearer token ou ?api_key= dans query`);
+    console.log(`  Auth: Bearer token dans header Authorization`);
   });
 }
 

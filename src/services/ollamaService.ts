@@ -28,7 +28,7 @@ export interface OllamaHealthResponse {
 }
 
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
-const MODEL_TUTEUR = process.env.OLLAMA_MODEL_TUTEUR || 'prof-ia:latest';
+const MODEL_TUTEUR = process.env.OLLAMA_MODEL_TUTEUR || 'qwen2.5:7b';
 const MODEL_EXPERT = process.env.OLLAMA_MODEL_EXPERT || 'qwen2.5:7b';
 const MODEL_EMBEDDING = process.env.OLLAMA_MODEL_EMBEDDING || 'bge-m3:latest';
 

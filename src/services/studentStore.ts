@@ -3,7 +3,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Use import.meta.url in ESM (dev), fallback to process.cwd() in CJS (prod build)
+const getDirname = (): string => {
+  try {
+    return path.dirname(fileURLToPath(import.meta.url));
+  } catch {
+    return path.join(process.cwd(), 'src', 'services');
+  }
+};
+
+const __dirname = getDirname();
 const DB_PATH = process.env.STUDENT_DB_PATH || path.join(__dirname, '..', '..', 'data', 'student_state.db');
 
 interface StudentState {
