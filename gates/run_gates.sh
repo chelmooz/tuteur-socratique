@@ -27,14 +27,11 @@ gate_D2() {
   local tmp port pid available
   tmp="$(mktemp -d)"
   port=$((39000 + RANDOM % 900))
-  printf 'OPENCODE_FALLBACK_ENABLED=true\nOPENCODE_PATH=/bin/true\n' > "$tmp/.env"
 
-  cd "$tmp" || return 2
-  env -u OPENCODE_FALLBACK_ENABLED -u OPENCODE_PATH \
+  OPENCODE_FALLBACK_ENABLED=true OPENCODE_PATH=/bin/true \
     API_KEY=gate NODE_ENV=production PORT="$port" \
     setsid "$ROOT/node_modules/.bin/tsx" "$ROOT/server.ts" > "$tmp/server.log" 2>&1 &
   pid=$!
-  cd "$ROOT" || return 2
 
   for _ in $(seq 1 40); do
     curl -sf -m 2 "localhost:$port/api/health" > /dev/null 2>&1 && break

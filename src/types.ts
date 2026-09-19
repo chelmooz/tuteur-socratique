@@ -142,3 +142,42 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+import { Request } from "express";
+
+export interface AIMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatRequest {
+  message: string;
+  history?: Array<{ role: string; content?: string; text?: string }>;
+  mode?: 'tuteur_eleve' | 'expert_rag';
+}
+
+export interface QuizRequest {
+  topic?: string;
+  difficulty?: string;
+}
+
+export interface TestPromptRequest {
+  userQuery: string;
+  withCtx?: boolean;
+  withCot?: boolean;
+  withRtoc?: boolean;
+  withPed?: boolean;
+}
+
+export interface AuthenticatedRequest extends Request {
+  requestId?: string;
+  user?: { id: string; apiKey: string };
+  studentSession?: {
+    sessionId: string;
+    studentId: string;
+    currentFrustration: number;
+    messageCount: number;
+    pedagogicalStep: string;
+  };
+  sessionId?: string;
+}

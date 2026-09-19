@@ -5,7 +5,7 @@ const { checkOutputGate, generateJSONWithFallback } = vi.hoisted(() => ({
   generateJSONWithFallback: vi.fn(),
 }));
 
-vi.mock("../server", () => ({
+vi.mock("../src/ai", () => ({
   checkOutputGate,
   generateJSONWithFallback,
 }));

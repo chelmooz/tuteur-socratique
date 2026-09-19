@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { buildMessages } from "../server";
+import { buildMessages } from "../src/ai";
 
 describe("buildMessages", () => {
   it("should build messages with system prompt and user message", () => {

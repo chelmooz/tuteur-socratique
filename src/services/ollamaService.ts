@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface OllamaMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -156,14 +158,24 @@ export class OllamaService {
     return fullContent;
   }
 
-  async chatJSON<T>(messages: Message[], model: string, _schema: object): Promise<T> {
+  async chatJSON<T>(messages: Message[], model: string, jsonSchema: object, zodSchema?: z.ZodType<T>): Promise<T> {
     const content = await this.chat(messages, { model, format: 'json', temperature: 0.3 });
+    let parsed: unknown;
     try {
-      return JSON.parse(content) as T;
+      parsed = JSON.parse(content);
     } catch (e) {
       console.error('Failed to parse JSON from Ollama:', content);
       throw new Error(`Invalid JSON response from ${model}: ${e}`);
     }
+    if (zodSchema) {
+      const result = zodSchema.safeParse(parsed);
+      if (!result.success) {
+        console.error('Zod validation failed:', result.error.format(), 'raw:', content);
+        throw new Error(`Schema validation failed: ${result.error.issues.map(i => i.message).join(', ')}`);
+      }
+      return result.data;
+    }
+    return parsed as T;
   }
 
   async *stream(messages: Message[], model: string, options: Partial<OllamaChatOptions> = {}): AsyncGenerator<string> {
