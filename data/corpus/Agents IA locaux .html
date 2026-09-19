@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Local AI Agents | OpenClaw, Claude Cowork, Anatomie, Safety, Demos</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🤖 <span>Local AI Agents</span> Masterclass</div>
+        <div class="muted small">OpenClaw • Claude Cowork • Anatomie • Safety • Multi-agents • Démos</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Références transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar"><nav id="nav" aria-label="Navigation du cours"></nav></aside>
+    <main id="content">
+
+      <section id="home" class="section active">
+        <h1>Agents IA locaux : le cliffnotes pour gagner des mois</h1>
+        <p class="lead">Ce cours condense ce que le transcript apprend sur les agents IA locaux : ce qu'ils sont, comment les concevoir, comment les sécuriser, et comment les utiliser concrètement avec OpenClaw ou Claude Cowork. L'idée n'est pas seulement de tester un chatbot, mais de construire un système qui vit sur votre machine, agit, se souvient, s'ordonnance et peut travailler 24/7. <span class="source">⏱ 0:00</span></p>
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 980 260" role="img" aria-label="Anatomie agent local">
+            <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+            <rect x="20" y="90" width="130" height="70" class="node"/><text x="85" y="118" text-anchor="middle">Machine</text><text x="85" y="138" text-anchor="middle" class="sub">où il vit</text>
+            <path class="dash" d="M150 125 L200 125" marker-end="url(#arr)"/>
+            <rect x="200" y="90" width="140" height="70" class="node green"/><text x="270" y="118" text-anchor="middle">Canal</text><text x="270" y="138" text-anchor="middle" class="sub">bouche / oreilles</text>
+            <path class="dash green" d="M340 125 L390 125" marker-end="url(#arr)"/>
+            <rect x="390" y="90" width="150" height="70" class="node purple pulse"/><text x="465" y="118" text-anchor="middle">Cerveau</text><text x="465" y="138" text-anchor="middle" class="sub">LLM + mémoire</text>
+            <path class="dash purple" d="M540 125 L590 125" marker-end="url(#arr)"/>
+            <rect x="590" y="90" width="140" height="70" class="node yellow"/><text x="660" y="118" text-anchor="middle">Tools</text><text x="660" y="138" text-anchor="middle" class="sub">tentacules</text>
+            <path class="dash yellow" d="M730 125 L780 125" marker-end="url(#arr)"/>
+            <rect x="780" y="90" width="80" height="70" class="node red"/><text x="820" y="118" text-anchor="middle">Heart</text><text x="820" y="138" text-anchor="middle" class="sub">cron</text>
+            <path class="dash red" d="M860 125 L900 125" marker-end="url(#arr)"/>
+            <rect x="900" y="90" width="60" height="70" class="node"/><text x="930" y="118" text-anchor="middle">Eyes</text><text x="930" y="138" text-anchor="middle" class="sub">écran</text>
+          </svg>
+        </div>
+        <div class="grid">
+          <div class="card info"><h3>Objectif</h3><p>Comprendre la nouvelle catégorie des agents IA locaux et savoir concevoir le vôtre : machine, canal, cerveau, mémoire, tools, heartbeat, eyes, sécurité.</p></div>
+          <div class="card warn"><h3>Méthode</h3><p>Diagnostic, constructeur d'agent interactif, simulateur OpenClaw, calculateur de sécurité, scénarios, flashcards, examen, certificat.</p></div>
+          <div class="card good"><h3>Livrable</h3><p>Un blueprint personnel : où héberger votre agent, quel modèle choisir, quels outils donner, comment le sécuriser, et par quelle démo commencer.</p></div>
+        </div>
+        <div class="card purple"><h3>Phrase clé</h3><p>Un agent IA local est un agent qui prend des actions et complète des tâches seul, tout en tournant directement sur votre machine. <span class="source">⏱ 1:19</span></p></div>
+        <div class="toolbar no-print"><button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button><button class="btn secondary" onclick="showSection('definition')">Aller au cours</button></div>
+      </section>
+
+      <section id="diagnostic" class="section">
+        <h1>Diagnostic initial</h1>
+        <p class="lead">Trois questions pour orienter votre parcours.</p>
+        <div class="quiz">
+          <div class="q"><p class="q-text">1. Votre niveau ?</p>
+            <label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre les agents locaux.</label>
+            <label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : je veux concevoir mon propre agent.</label>
+            <label class="q-option"><input type="radio" name="diag-level" value="ops"> Ops : je veux sécurité, multi-agents et production personnelle.</label>
+          </div>
+          <div class="q"><p class="q-text">2. Objectif ?</p>
+            <label class="q-option"><input type="radio" name="diag-goal" value="workflow"> Automatiser mon workflow quotidien.</label>
+            <label class="q-option"><input type="radio" name="diag-goal" value="build"> Construire des agents et logiciels.</label>
+            <label class="q-option"><input type="radio" name="diag-goal" value="safe"> Comprendre safety et good engineering.</label>
+          </div>
+          <div class="q"><p class="q-text">3. Temps ?</p>
+            <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15-20 min.</label>
+            <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass 45-60 min.</label>
+          </div>
+          <button class="btn" onclick="validateDiagnostic()">Valider</button>
+          <div class="result" id="diag-rec" style="display:none"></div>
+          <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+        </div>
+      </section>
+
+      <section id="definition" class="section">
+        <h1>Définition : qu'est-ce qu'un local AI agent ?</h1>
+        <p class="lead">Un agent IA est une IA qui peut prendre des actions et compléter des tâches seule. Ce qui devient excitant, c'est qu'il est local : il vit et tourne sur votre machine personnelle. <span class="source">⏱ 1:19</span></p>
+        <div class="grid">
+          <div class="card info"><h3>Agent IA</h3><p>Pas seulement répondre. Il agit, appelle des outils, lit, écrit, exécute, planifie, itère.</p></div>
+          <div class="card good"><h3>Local</h3><p>Sur laptop, vieux laptop, Mac Mini, Mac Studio, PC ou VPS. Vos données peuvent rester chez vous.</p></div>
+          <div class="card purple"><h3>Exemples du transcript</h3><ul><li>Morning brief personnalisé : calendrier, emails, priorités, portfolio, notes, news.</li><li>Recherche continue pour améliorer un business.</li><li>Construction autonome de logiciels : finance tracker, accounting, dashboard étudiants, trading bots.</li><li>Interaction distante depuis le téléphone.</li></ul><span class="source">⏱ 1:42</span></div>
+        </div>
+        <div class="card warn"><h3>Pourquoi c'est une nouvelle catégorie</h3><p>Le transcript insiste : ce n'est pas juste un hype. Ces quelques derniers mois ont transformé des workflows quotidiens. Un agent local peut être à la fois assistant, chercheur, builder, monitor et opérateur de votre machine. <span class="source">⏱ 0:26</span></p></div>
+        <div class="quiz" data-module="definition">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="1"><p class="q-text">1. Un local AI agent se distingue surtout par...</p><label class="q-option"><input type="radio" name="def-q0" value="0"> un chatbot plus rapide</label><label class="q-option"><input type="radio" name="def-q0" value="1"> un agent qui agit seul et tourne sur votre machine</label><label class="q-option"><input type="radio" name="def-q0" value="2"> un modèle fermé dans le cloud</label><div class="explain">Local + autonome : ce sont les deux dimensions clés.</div></div>
+          <div class="q" data-answer="0"><p class="q-text">2. Le transcript cite des exemples concrets comme...</p><label class="q-option"><input type="radio" name="def-q1" value="0"> finance tracker, accounting, dashboard, trading bots</label><label class="q-option"><input type="radio" name="def-q1" value="1"> seulement rédaction d'emails</label><label class="q-option"><input type="radio" name="def-q1" value="2"> jeux vidéo AAA</label><div class="explain">Les agents locaux peuvent rechercher et construire des logiciels utiles.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('definition')">← Précédent</button><button class="btn" onclick="nextFrom('definition')">Anatomie →</button></div>
+      </section>
+
+      <section id="anatomy" class="section">
+        <h1>Anatomie : construisez votre agent Inky</h1>
+        <p class="lead">Le transcript utilise un agent fictif nommé Inky pour expliquer les composants. Vous allez choisir sa machine, son canal, son cerveau, sa mémoire, ses tools, son heartbeat et ses eyes. <span class="source">⏱ 2:25</span></p>
+        <div class="simulator">
+          <div class="anatomy-grid">
+            <div class="anatomy-group"><h4>Machine</h4>
+              <button class="anatomy-btn" data-cat="machine" data-key="laptop" onclick="chooseAnatomy('machine','laptop')">Laptop personnel</button>
+              <button class="anatomy-btn" data-cat="machine" data-key="old_laptop" onclick="chooseAnatomy('machine','old_laptop')">Vieux laptop dédié</button>
+              <button class="anatomy-btn" data-cat="machine" data-key="mac_mini" onclick="chooseAnatomy('machine','mac_mini')">Mac Mini</button>
+              <button class="anatomy-btn" data-cat="machine" data-key="mac_studio" onclick="chooseAnatomy('machine','mac_studio')">Mac Studio</button>
+              <button class="anatomy-btn" data-cat="machine" data-key="vps" onclick="chooseAnatomy('machine','vps')">VPS</button>
+            </div>
+            <div class="anatomy-group"><h4>Canal</h4>
+              <button class="anatomy-btn" data-cat="channel" data-key="telegram" onclick="chooseAnatomy('channel','telegram')">Telegram</button>
+              <button class="anatomy-btn" data-cat="channel" data-key="discord" onclick="chooseAnatomy('channel','discord')">Discord</button>
+              <button class="anatomy-btn" data-cat="channel" data-key="whatsapp" onclick="chooseAnatomy('channel','whatsapp')">WhatsApp</button>
+              <button class="anatomy-btn" data-cat="channel" data-key="imessage" onclick="chooseAnatomy('channel','imessage')">iMessage</button>
+              <button class="anatomy-btn" data-cat="channel" data-key="slack" onclick="chooseAnatomy('channel','slack')">Slack</button>
+              <button class="anatomy-btn" data-cat="channel" data-key="dispatch" onclick="chooseAnatomy('channel','dispatch')">Dispatch</button>
+            </div>
+            <div class="anatomy-group"><h4>Cerveau</h4>
+              <button class="anatomy-btn" data-cat="brain" data-key="claude_opus" onclick="chooseAnatomy('brain','claude_opus')">Claude Opus</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="claude_sonnet" onclick="chooseAnatomy('brain','claude_sonnet')">Claude Sonnet</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="openai" onclick="chooseAnatomy('brain','openai')">OpenAI</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="qwen" onclick="chooseAnatomy('brain','qwen')">Qwen</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="kimi" onclick="chooseAnatomy('brain','kimi')">Kimi</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="ministral" onclick="chooseAnatomy('brain','ministral')">Ministral</button>
+              <button class="anatomy-btn" data-cat="brain" data-key="deepseek" onclick="chooseAnatomy('brain','deepseek')">DeepSeek</button>
+            </div>
+            <div class="anatomy-group"><h4>Mémoire</h4>
+              <button class="anatomy-btn" data-cat="memory" data-key="files" onclick="chooseAnatomy('memory','files')">Fichiers texte</button>
+              <button class="anatomy-btn" data-cat="memory" data-key="obsidian" onclick="chooseAnatomy('memory','obsidian')">Obsidian</button>
+              <button class="anatomy-btn" data-cat="memory" data-key="second_brain" onclick="chooseAnatomy('memory','second_brain')">Second brain</button>
+            </div>
+            <div class="anatomy-group"><h4>Tools</h4>
+              <button class="anatomy-btn" data-cat="tools" data-key="web_search" onclick="chooseAnatomy('tools','web_search')">Web search</button>
+              <button class="anatomy-btn" data-cat="tools" data-key="email" onclick="chooseAnatomy('tools','email')">Email</button>
+              <button class="anatomy-btn" data-cat="tools" data-key="screenshots" onclick="chooseAnatomy('tools','screenshots')">Screenshots</button>
+              <button class="anatomy-btn" data-cat="tools" data-key="tts" onclick="chooseAnatomy('tools','tts')">Text to speech</button>
+              <button class="anatomy-btn" data-cat="tools" data-key="image_gen" onclick="chooseAnatomy('tools','image_gen')">Image gen</button>
+              <button class="anatomy-btn" data-cat="tools" data-key="code_exec" onclick="chooseAnatomy('tools','code_exec')">Code exec</button>
+            </div>
+            <div class="anatomy-group"><h4>Heartbeat</h4>
+              <button class="anatomy-btn" data-cat="heartbeat" data-key="cron" onclick="chooseAnatomy('heartbeat','cron')">Cron time-based</button>
+              <button class="anatomy-btn" data-cat="heartbeat" data-key="interval" onclick="chooseAnatomy('heartbeat','interval')">Interval</button>
+              <button class="anatomy-btn" data-cat="heartbeat" data-key="event" onclick="chooseAnatomy('heartbeat','event')">Event-based</button>
+              <button class="anatomy-btn" data-cat="heartbeat" data-key="none" onclick="chooseAnatomy('heartbeat','none')">Aucun</button>
+            </div>
+            <div class="anatomy-group"><h4>Eyes</h4>
+              <button class="anatomy-btn" data-cat="eyes" data-key="computer_use" onclick="chooseAnatomy('eyes','computer_use')">Computer use</button>
+              <button class="anatomy-btn" data-cat="eyes" data-key="folders" onclick="chooseAnatomy('eyes','folders')">Folders</button>
+              <button class="anatomy-btn" data-cat="eyes" data-key="none" onclick="chooseAnatomy('eyes','none')">Aucun</button>
+            </div>
+          </div>
+          <pre id="anatomy-out" class="prompt"></pre>
+          <div class="toolbar no-print"><button class="btn secondary" onclick="resetAnatomy()">Réinitialiser</button></div>
+        </div>
+        <div class="card purple"><h3>Le point crucial</h3><p>La majorité des gens échouent à tirer le meilleur de leurs agents locaux parce qu'ils ne les designent pas proprement. Ce n'est pas seulement un modèle : c'est un corps complet. <span class="source">⏱ 0:48</span></p></div>
+        <div class="quiz" data-module="anatomy">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="2"><p class="q-text">1. Les tentacules représentent...</p><label class="q-option"><input type="radio" name="ana-q0" value="0"> la mémoire</label><label class="q-option"><input type="radio" name="ana-q0" value="1"> le canal</label><label class="q-option"><input type="radio" name="ana-q0" value="2"> skills et tools</label><div class="explain">Tools et skills sont les capacités d'action de l'agent.</div></div>
+          <div class="q" data-answer="1"><p class="q-text">2. Le heartbeat sert à...</p><label class="q-option"><input type="radio" name="ana-q1" value="0"> stocker les vecteurs</label><label class="q-option"><input type="radio" name="ana-q1" value="1"> planifier des tâches autonomes</label><label class="q-option"><input type="radio" name="ana-q1" value="2"> changer de modèle</label><div class="explain">Cron, interval ou event-based : l'agent tourne sans qu'on lui demande à chaque fois.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('anatomy')">← Précédent</button><button class="btn" onclick="nextFrom('anatomy')">Machine →</button></div>
+      </section>
+
+      <section id="machine" class="section">
+        <h1>Machine : où vit votre agent ?</h1>
+        <p class="lead">Un agent local peut vivre sur laptop personnel, vieux laptop wipe, Mac Mini, Mac Studio, PC ou VPS. Trois facteurs décident du bon hébergement. <span class="source">⏱ 2:35</span></p>
+        <div class="grid">
+          <div class="card info"><h3>1. 24/7</h3><p>Si vous voulez un agent continuellement actif, un laptop que vous transportez ne suffit pas. Il faut une machine always-on. <span class="source">⏱ 3:00</span></p></div>
+          <div class="card good"><h3>2. Specs</h3><p>CPU, GPU, mais surtout RAM. Les gros modèles open-source exigent une machine capable de les porter. <span class="source">⏱ 3:10</span></p></div>
+          <div class="card bad"><h3>3. Privacy / security</h3><p>À quel point êtes-vous paranoïaque ? Des agents mal gardés sur machine personnelle ont pu supprimer des emails ou accéder à trop de choses. <span class="source">⏱ 3:31</span></p></div>
+        </div>
+        <div class="card purple"><h3>Setup du transcript</h3><p>Le créateur commence avec un vieux MacBook Pro wipe, 16 GB RAM, 24/7, dédié. Comme la RAM est limitée, il utilise Claude Sonnet/Opus plutôt que gros modèles open-source. Puis il passe à Mac Mini, Mac Studio, et d'autres machines dédiées. <span class="source">⏱ 4:04</span></p></div>
+        <div class="card warn"><h3>Conseil pratique</h3><p>Le transcript propose un prompt à coller dans Claude ou ChatGPT pour vous aider à choisir l'option d'hébergement selon votre hardware. Hosting et hardware sont de vrais blockers pour beaucoup. <span class="source">⏱ 4:51</span></p></div>
+        <div class="quiz" data-module="machine">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="1"><p class="q-text">Quelle ressource est mise en avant pour les modèles open-source locaux ?</p><label class="q-option"><input type="radio" name="mac-q0" value="0"> La taille de l'écran</label><label class="q-option"><input type="radio" name="mac-q0" value="1"> La RAM</label><label class="q-option"><input type="radio" name="mac-q0" value="2"> Le clavier</label><div class="explain">RAM/unified memory dicte la taille des modèles possibles.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('machine')">← Précédent</button><button class="btn" onclick="nextFrom('machine')">Communication →</button></div>
+      </section>
+
+      <section id="communication" class="section">
+        <h1>Communication : bouche et oreilles</h1>
+        <p class="lead">Il faut donner à Inky un canal pour que vous puissiez lui parler et qu'il vous réponde. C'est aussi ce qui permet l'interaction distante depuis le téléphone. <span class="source">⏱ 5:15</span></p>
+        <div class="grid">
+          <div class="card good"><h3>Facile</h3><p>Single-channel messaging. Telegram est souvent l'option de départ. Dispatch si vous êtes dans l'écosystème Claude. <span class="source">⏱ 5:38</span></p></div>
+          <div class="card info"><h3>Avancé</h3><p>Discord avec plusieurs channels pour organiser projets, alertes, pipelines de contenu, logs. <span class="source">⏱ 5:46</span></p></div>
+          <div class="card warn"><h3>Options</h3><p>WhatsApp, iMessage, Slack, Telegram, Discord, Dispatch. Beaucoup sont déjà familiers. <span class="source">⏱ 5:28</span></p></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('communication')">← Précédent</button><button class="btn" onclick="nextFrom('communication')">Cerveau & mémoire →</button></div>
+      </section>
+
+      <section id="brain-memory" class="section">
+        <h1>Cerveau et mémoire</h1>
+        <p class="lead">Le cerveau est le LLM. La mémoire est un ensemble de fichiers texte qui documentent qui est l'agent, ce qu'il fait, ce qu'il sait de vous, et ce qu'il a appris. <span class="source">⏱ 6:06</span></p>
+        <div class="grid">
+          <div class="card info"><h3>Cloud models</h3><p>Claude Opus, Claude Sonnet, OpenAI. Souvent plus capables, mais payants et hors machine.</p></div>
+          <div class="card good"><h3>Open source</h3><p>Qwen, Kimi, Ministral, DeepSeek. Trade-offs : capabilities, size, speed, cost, privacy. <span class="source">⏱ 6:13</span></p></div>
+          <div class="card purple"><h3>Popularité</h3><p>Selon le transcript, les options les plus populaires pour agents locaux sont Claude Opus/Sonnet, et côté open-source Qwen/Kimi. <span class="source">⏱ 6:33</span></p></div>
+          <div class="card warn"><h3>Mémoire</h3><p>Littéralement des fichiers texte : personnalité, workflows, données, infos utilisateur, logs de tâches. La plupart des frameworks ont une mémoire pré-construite. Les power users renforcent avec Obsidian. <span class="source">⏱ 6:48</span></p></div>
+        </div>
+        <div class="code">Exemple de contenu mémoire :
+- Qui est Inky ?
+- Personality type
+- Workflows attendus
+- Données accessibles
+- Qui est l'utilisateur ?
+- Job, démographie, préférences
+- Ce que l'agent a fait récemment</div>
+        <div class="quiz" data-module="brain-memory">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="0"><p class="q-text">La mémoire d'un agent local est souvent...</p><label class="q-option"><input type="radio" name="brain-q0" value="0"> des fichiers texte documentant contexte et historique</label><label class="q-option"><input type="radio" name="brain-q0" value="1"> un GPU dédié</label><label class="q-option"><input type="radio" name="brain-q0" value="2"> un canal Telegram</label><div class="explain">Simple mais puissant : texte structuré, logs, Obsidian.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('brain-memory')">← Précédent</button><button class="btn" onclick="nextFrom('brain-memory')">Tools / Heartbeat / Eyes →</button></div>
+      </section>
+
+      <section id="tools-heartbeat-eyes" class="section">
+        <h1>Tools, Heartbeat, Eyes</h1>
+        <div class="grid">
+          <div class="card info"><h3>Tentacules = skills/tools</h3><p>Inky vient avec des tentacules pré-construites : chercher dans les fichiers, exécuter du code. Vous pouvez ajouter web search, email, screenshots, text to speech, image generation, etc. <span class="source">⏱ 7:45</span></p></div>
+          <div class="card good"><h3>Heartbeat</h3><p>Permet de scheduler des tâches sans demande explicite : toutes les 30 minutes scanner email, chaque mois rendez-vous médecin, chaque matin 7h morning brief, ou à chaque fichier ajouté dans un dossier comptabilité. <span class="source">⏱ 8:14</span></p></div>
+          <div class="card purple"><h3>Eyes</h3><p>Computer use : voir ce qui se passe sur l'ordinateur, interagir comme un humain, bouger la souris, voir l'écran, faire des choses à votre place. <span class="source">⏱ 8:47</span></p></div>
+        </div>
+        <div class="card warn"><h3>Game changers</h3><p>Le transcript met l'accent sur le heartbeat et les workflows schedulés. C'est ce qui transforme un chatbot réactif en système autonome. <span class="source">⏱ 8:41</span></p></div>
+        <div class="quiz" data-module="tools-heartbeat-eyes">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="1"><p class="q-text">Un cron job du matin à 7h est un exemple de...</p><label class="q-option"><input type="radio" name="the-q0" value="0"> mémoire</label><label class="q-option"><input type="radio" name="the-q0" value="1"> heartbeat</label><label class="q-option"><input type="radio" name="the-q0" value="2"> eyes</label><div class="explain">Time-based scheduling.</div></div>
+          <div class="q" data-answer="2"><p class="q-text">Les eyes correspondent à...</p><label class="q-option"><input type="radio" name="the-q1" value="0"> les embeddings</label><label class="q-option"><input type="radio" name="the-q1" value="1"> le canal Discord</label><label class="q-option"><input type="radio" name="the-q1" value="2"> computer use / vision de l'écran</label><div class="explain">Voir et interagir avec la machine.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('tools-heartbeat-eyes')">← Précédent</button><button class="btn" onclick="nextFrom('tools-heartbeat-eyes')">Multi-agents →</button></div>
+      </section>
+
+      <section id="multi-agents" class="section">
+        <h1>Multi-agents : équipes et tâches parallèles</h1>
+        <p class="lead">Une fois Inky conçu, il n'y a aucune raison d'en avoir un seul. Vous pouvez avoir plusieurs agents faisant plusieurs tâches en parallèle, ou des équipes où chaque agent a une fonction spécifique. <span class="source">⏱ 9:32</span></p>
+        <div class="grid">
+          <div class="card info"><h3>Research team</h3><p>Exemple du transcript : une équipe qui regarde des stocks potentiels.</p></div>
+          <div class="card good"><h3>Software team</h3><p>Une équipe qui recherche, prend des décisions produit et construit des logiciels pour la company.</p></div>
+          <div class="card warn"><h3>Parallélisme</h3><p>Un agent fait de la recherche, un autre gère le calendrier, un autre écrit une campagne marketing. Le tout simultanément.</p></div>
+          <div class="card purple"><h3>Principe</h3><p>Ensemble, ils produisent quelque chose de supérieur à la somme des parties. Mais multi-agent introduit de la complexité de design. <span class="source">⏱ 9:46</span></p></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('multi-agents')">← Précédent</button><button class="btn" onclick="nextFrom('multi-agents')">Sécurité →</button></div>
+      </section>
+
+      <section id="safety" class="section">
+        <h1>Sécurité et good engineering</h1>
+        <p class="lead">Safety est la préoccupation primaire : vous donnez à un agent intelligent l'accès à votre computer. Il faut éviter qu'il devienne bananas. <span class="source">⏱ 11:56</span></p>
+        <div class="grid">
+          <div class="card bad"><h3>Isoler</h3><p>Ne pas tourner sur la machine principale contenant toutes vos données. Utiliser des machines dédiées sans informations sensibles. <span class="source">⏱ 12:24</span></p></div>
+          <div class="card warn"><h3>Limiter l'accès</h3><p>Donner accès à certaines emails de screening, pas aux emails personnels sensibles. Créer des boîtes dédiées. <span class="source">⏱ 12:37</span></p></div>
+          <div class="card bad"><h3>Méfier des skills tiers</h3><p>Les workflows partagés peuvent contenir des choses malveillantes. Ne pas installer sans confiance forte. <span class="source">⏱ 12:51</span></p></div>
+          <div class="card good"><h3>Scanner et réécrire</h3><p>Si une skill semble utile, la donner à Claude pour scan et rewrite, puis seulement la donner à l'agent local. <span class="source">⏱ 13:13</span></p></div>
+          <div class="card info"><h3>Audit automatique</h3><p>Utiliser le heartbeat pour lancer un security audit toutes les heures ou minimalement chaque jour. <span class="source">⏱ 13:33</span></p></div>
+          <div class="card purple"><h3>Engineering</h3><p>Toujours donner des instructions claires. Ajouter une feature ou un workflow à la fois. Ne pas demander cinq choses en même temps. <span class="source">⏱ 13:48</span></p></div>
+        </div>
+        <h2>Calculateur de préparation sécurité</h2>
+        <div class="simulator">
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox" id="sec1" onchange="updateSafety()"><span><span class="label">Machine dédiée</span><span class="hint">pas votre laptop principal</span></span></label>
+            <label class="check-item"><input type="checkbox" id="sec2" onchange="updateSafety()"><span><span class="label">Données sensibles isolées</span><span class="hint">pas de passwords / emails critiques</span></span></label>
+            <label class="check-item"><input type="checkbox" id="sec3" onchange="updateSafety()"><span><span class="label">Accès minimal</span><span class="hint">least privilege sur tools</span></span></label>
+            <label class="check-item"><input type="checkbox" id="sec4" onchange="updateSafety()"><span><span class="label">Skills vérifiées</span><span class="hint">scan / rewrite avant usage</span></span></label>
+            <label class="check-item"><input type="checkbox" id="sec5" onchange="updateSafety()"><span><span class="label">Audit heartbeat</span><span class="hint">security check régulier</span></span></label>
+            <label class="check-item"><input type="checkbox" id="sec6" onchange="updateSafety()"><span><span class="label">Human review</span><span class="hint">validation sur actions risquées</span></span></label>
+          </div>
+          <div class="meter"><div class="meter-fill" id="sec-fill"></div></div>
+          <p id="sec-label" class="status-line"></p>
+          <div id="sec-advice" class="card"></div>
+        </div>
+        <div class="quiz" data-module="safety">
+          <h3>Quiz express</h3>
+          <div class="q" data-answer="0"><p class="q-text">La règle de thumb du transcript est...</p><label class="q-option"><input type="radio" name="safe-q0" value="0"> être aussi paranoïaque que possible</label><label class="q-option"><input type="radio" name="safe-q0" value="1"> tout donner à l'agent pour aller vite</label><label class="q-option"><input type="radio" name="safe-q0" value="2"> installer toutes les skills publiques</label><div class="explain">Safety d'abord.</div></div>
+          <button class="btn" onclick="checkQuiz(this)">Vérifier</button><div class="result" aria-live="polite"></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('safety')">← Précédent</button><button class="btn" onclick="nextFrom('safety')">Démo OpenClaw →</button></div>
+      </section>
+
+      <section id="demo-openclaw" class="section">
+        <h1>Démo OpenClaw : agent office avec code</h1>
+        <p class="lead">OpenClaw est présenté comme une option plus technique, personnalisable, avec une équipe d'agents visibles dans un agent office. Le transcript utilise un outil custom appelé emission control pour monitorer les agents. <span class="source">⏱ 14:20</span></p>
+        <div class="grid">
+          <div class="card info"><h3>Team</h3><ul><li>Founder / CEO / Human</li><li>Inky : chief of staff, Claude Sonnet 4.6</li><li>Content pipeline : Blinky, Pinky, Dinky, Sonnet</li><li>Linky : builder / decoder, Claude Opus 4.6 + Qwen Coder 2.5 local</li><li>Winky : system monitor, Ministral 3B local</li></ul><span class="source">⏱ 14:49</span></div>
+          <div class="card good"><h3>Cost optimization</h3><p>Linky route les tâches de coding mécaniques vers Qwen Coder 2.5 local gratuit, et garde Claude Opus pour planning, architecture et coding intense. <span class="source">⏱ 15:31</span></p></div>
+          <div class="card warn"><h3>Hardware</h3><p>Tout tourne sur un secondary MacBook Pro 16 GB RAM. C'est la maison de ce setup OpenClaw. <span class="source">⏱ 16:03</span></p></div>
+          <div class="card purple"><h3>Content pipeline</h3><p>Morning brief, top stories AI, topic watch list, video ideas, channel content ideas, approve/pass dans mission control, routing vers YouTube long form avec titre, bullets, outline. <span class="source">⏱ 16:26</span></p></div>
+        </div>
+        <h2>Simulateur : workflow OpenClaw</h2>
+        <div class="simulator">
+          <p class="muted small" id="openclaw-status"></p>
+          <div id="openclaw-log"></div>
+          <div class="toolbar no-print"><button class="btn" id="openclaw-next" onclick="nextOpenClawStep()">Étape suivante →</button><button class="btn secondary" onclick="resetOpenClaw()">Réinitialiser</button></div>
+        </div>
+        <div class="grid">
+          <div class="card bad"><h3>ClawHub caution</h3><p>Le transcript dit ne pas télécharger depuis ClawHub sauf développeurs très trusted, à cause de security risk / scam situation. Mieux : donner la skill à Claude pour qu'il la reconstruise. <span class="source">⏱ 18:10</span></p></div>
+          <div class="card good"><h3>Memory aggressive</h3><p>Inky documente tout : docs, daily logs, memory.md, Obsidian. Avec eyes, il voit les changements et documentation aggressive pour ne rien laisser non documenté. <span class="source">⏱ 19:18</span></p></div>
+          <div class="card info"><h3>Nightly build</h3><p>Chaque nuit, Inky construit quelque chose de delightful pour un projet courant. Exemple : quiz MVP micro-SaaS pour déterminer quelle AI skill apprendre next. <span class="source">⏱ 18:44</span></p></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('demo-openclaw')">← Précédent</button><button class="btn" onclick="nextFrom('demo-openclaw')">Démo Claude Cowork →</button></div>
+      </section>
+
+      <section id="demo-claude-cowork" class="section">
+        <h1>Démo Claude Cowork : no-code plus safe</h1>
+        <p class="lead">Claude Cowork est présenté comme l'option Anthropic, plus sûre et plus facile pour les non-techniques. Contrepartie : moins de customisation et lock-in à l'écosystème Anthropic. <span class="source">⏱ 20:05</span></p>
+        <div class="grid">
+          <div class="card good"><h3>Folder-based</h3><p>Cowork vit sur votre computer et correspond à un folder. Projects séparés : content studio, portfolio, personal, etc. <span class="source">⏱ 20:49</span></p></div>
+          <div class="card info"><h3>Memory files</h3><p>CLAUDE.md et memory.md, lisibles via Obsidian. Informations sur l'utilisateur, coworkplace, mémoire système. <span class="source">⏱ 21:02</span></p></div>
+          <div class="card purple"><h3>Portfolio dashboard</h3><p>Questions sur investissement : top winner, biggest loser. Claude Code peut construire un investments dashboard qui se met à jour : positions, research segments, watch list. <span class="source">⏱ 21:26</span></p></div>
+          <div class="card warn"><h3>Skills / connectors / plugins</h3><p>Connexion Google Drive, Google Calendar, Gmail, Microsoft 365. Plugins = combinaisons de skills et connectors pour un purpose, par exemple finance. <span class="source">⏱ 22:20</span></p></div>
+          <div class="card info"><h3>Scheduled tasks</h3><p>Heartbeat : chaque jour à 20h daily investment deep dive, portfolio daily briefing, macro briefing. <span class="source">⏱ 22:53</span></p></div>
+          <div class="card bad"><h3>Computer use mobile</h3><p>Via Dispatch, demander un fichier ou un screenshot. L'agent utilise littéralement le computer pour chercher, ouvrir, capturer et renvoyer. <span class="source">⏱ 23:07</span></p></div>
+        </div>
+        <div class="card good"><h3>Quand choisir Cowork ?</h3><p>Si vous débutez, voulez une option plus safe, moins de code, et acceptez moins de customisation. Le transcript l'utilise en parallèle d'OpenClaw pour différents use cases. <span class="source">⏱ 24:11</span></p></div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('demo-claude-cowork')">← Précédent</button><button class="btn" onclick="nextFrom('demo-claude-cowork')">Opportunités →</button></div>
+      </section>
+
+      <section id="opportunities" class="section">
+        <h1>Opportunités : pourquoi apprendre maintenant</h1>
+        <p class="lead">Le transcript cite Jensen Huang : la question devient quelle est votre stratégie OpenClaw / agent local. Chaque company devra avoir une stratégie d'agents. <span class="source">⏱ 24:36</span></p>
+        <div class="grid">
+          <div class="card info"><h3>SaaS -> AaaS</h3><p>Software as a Service devient agentic as a service. Les workflows logiciels intègrent des agents qui font le travail. <span class="source">⏱ 24:56</span></p></div>
+          <div class="card good"><h3>Compétition gagnante</h3><p>Combiner : utiliser agents locaux, savoir construire ses propres agents, et faire du AI coding. Cette combinaison est overpowered. <span class="source">⏱ 25:20</span></p></div>
+          <div class="card purple"><h3>Opportunité personnelle</h3><p>Ce n'est pas juste un outil. C'est une nouvelle catégorie de produits IA qui transforme workflows personnels et business. <span class="source">⏱ 0:26</span></p></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('opportunities')">← Précédent</button><button class="btn" onclick="nextFrom('opportunities')">Scénarios →</button></div>
+      </section>
+
+      <section id="scenarios" class="section">
+        <h1>Scénarios : choisir son setup</h1>
+        <div class="simulator">
+          <div class="matcher-grid">
+            <button class="matcher-btn" onclick="chooseScenario('privacy')">Paranoïaque privacy</button>
+            <button class="matcher-btn" onclick="chooseScenario('cost')">Optimiser coût</button>
+            <button class="matcher-btn" onclick="chooseScenario('nocode')">Débutant no-code</button>
+            <button class="matcher-btn" onclick="chooseScenario('memory')">Mémoire personnalisée</button>
+            <button class="matcher-btn" onclick="chooseScenario('heartbeat')">Automatiser scheduling</button>
+            <button class="matcher-btn" onclick="chooseScenario('skills')">Skills tierces</button>
+            <button class="matcher-btn" onclick="chooseScenario('team')">Équipe multi-agents</button>
+            <button class="matcher-btn" onclick="chooseScenario('mobile')">Computer use mobile</button>
+          </div>
+          <pre id="scenario-out" class="prompt" style="display:none"></pre>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button><button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button></div>
+      </section>
+
+      <section id="flashcards" class="section">
+        <h1>Flashcards</h1>
+        <p class="lead">35 cartes couvrant le transcript et les ressources associées.</p>
+        <div class="flashcards"><div id="flashcard" class="flashcard"></div><div class="toolbar no-print"><button class="btn secondary" onclick="prevFlash()">← Précédente</button><button class="btn" onclick="flipFlash()">Retourner</button><button class="btn secondary" onclick="nextFlash()">Suivante →</button><button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button></div></div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button></div>
+      </section>
+
+      <section id="antipatterns" class="section">
+        <h1>Anti-patterns</h1>
+        <div class="grid">
+          <div class="card bad"><h3>1. Agent sur machine principale</h3><p>Toutes vos données accessibles. Risque élevé si guardrails absents.</p></div>
+          <div class="card bad"><h3>2. Installer des skills publiques sans audit</h3><p>Le transcript mentionne security risk / scam via ClawHub.</p></div>
+          <div class="card bad"><h3>3. Demander cinq features à la fois</h3><p>Impossible de debugger. Une workflow à la fois.</p></div>
+          <div class="card bad"><h3>4. Oublier la mémoire</h3><p>Sans fichiers de contexte, l'agent n'est pas personnalisé et ne capitalise pas.</p></div>
+          <div class="card bad"><h3>5. Pas de heartbeat</h3><p>Reste réactif. Les vrais gains viennent des tâches schedulées.</p></div>
+          <div class="card bad"><h3>6. Surestimer un vieux laptop 16GB</h3><p>Petit modèle ou cloud. Gros open-source exige RAM.</p></div>
+          <div class="card bad"><h3>7. Computer use sans supervision</h3><p>L'agent peut bouger souris et écran. Human review nécessaire.</p></div>
+          <div class="card bad"><h3>8. Croire qu'un seul agent suffit</h3><p>Teams et parallel tasks peuvent être supérieures, mais design plus complexe.</p></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button><button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button></div>
+      </section>
+
+      <section id="final" class="section">
+        <h1>Examen final chronométré</h1>
+        <p class="lead">10 questions. 8 minutes. Seuil 7/10.</p>
+        <div class="toolbar no-print"><button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button><div id="exam-timer" class="pill">⏱ 8:00</div></div>
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Questions</h3>
+          <div class="q" data-answer="1"><p class="q-text">1. Un local AI agent est...</p><label class="q-option"><input type="radio" name="final-q0" value="0"> un modèle cloud payant</label><label class="q-option"><input type="radio" name="final-q0" value="1"> un agent qui agit seul et tourne sur votre machine</label><label class="q-option"><input type="radio" name="final-q0" value="2"> un simple prompt</label><div class="explain">Local + autonomous.</div></div>
+          <div class="q" data-answer="0"><p class="q-text">2. Quels trois facteurs pour l'hébergement ?</p><label class="q-option"><input type="radio" name="final-q1" value="0"> 24/7, specs/RAM, privacy/security</label><label class="q-option"><input type="radio" name="final-q1" value="1"> couleur, taille, prix</label><label class="q-option"><input type="radio" name="final-q1" value="2"> Telegram, Discord, Slack</label><div class="explain">Machine always-on, capacité hardware, isolation.</div></div>
+          <div class="q" data-answer="1"><p class="q-text">3. Le canal le plus simple pour débuter est souvent...</p><label class="q-option"><input type="radio" name="final-q2" value="0"> Slack enterprise</label><label class="q-option"><input type="radio" name="final-q2" value="1"> Telegram ou Dispatch</label><label class="q-option"><input type="radio" name="final-q2" value="2"> iMessage seulement</label><div class="explain">Single-channel messaging.</div></div>
+          <div class="q" data-answer="2"><p class="q-text">4. Côté open-source, les modèles populaires cités sont...</p><label class="q-option"><input type="radio" name="final-q3" value="0"> GPT-5 et Gemini</label><label class="q-option"><input type="radio" name="final-q3" value="1"> Llama uniquement</label><label class="q-option"><input type="radio" name="final-q3" value="2"> Qwen et Kimi</label><div class="explain">Avec Ministral et DeepSeek aussi mentionnés.</div></div>
+          <div class="q" data-answer="0"><p class="q-text">5. La mémoire est principalement...</p><label class="q-option"><input type="radio" name="final-q4" value="0"> des fichiers texte de contexte, logs et préférences</label><label class="q-option"><input type="radio" name="final-q4" value="1"> un vector database obligatoire</label><label class="q-option"><input type="radio" name="final-q4" value="2"> le GPU</label><div class="explain">Simple mais essentiel.</div></div>
+          <div class="q" data-answer="1"><p class="q-text">6. Le heartbeat permet...</p><label class="q-option"><input type="radio" name="final-q5" value="0"> de changer de canal</label><label class="q-option"><input type="radio" name="final-q5" value="1"> de scheduler des tâches cron, interval ou event</label><label class="q-option"><input type="radio" name="final-q5" value="2"> de quantifier le modèle</label><div class="explain">Autonomie temporelle.</div></div>
+          <div class="q" data-answer="2"><p class="q-text">7. Les eyes correspondent à...</p><label class="q-option"><input type="radio" name="final-q6" value="0"> la mémoire Obsidian</label><label class="q-option"><input type="radio" name="final-q6" value="1"> le web search</label><label class="q-option"><input type="radio" name="final-q6" value="2"> computer use / voir l'écran</label><div class="explain">Interaction avec la machine comme un humain.</div></div>
+          <div class="q" data-answer="0"><p class="q-text">8. Principe safety du transcript :</p><label class="q-option"><input type="radio" name="final-q7" value="0"> isoler, limiter, vérifier skills, audit, paranoïa</label><label class="q-option"><input type="radio" name="final-q7" value="1"> tout donner accès pour la commodité</label><label class="q-option"><input type="radio" name="final-q7" value="2"> installer toutes les skills</label><div class="explain">Safety primary concern.</div></div>
+          <div class="q" data-answer="1"><p class="q-text">9. Dans OpenClaw, Linky optimise le coût en utilisant...</p><label class="q-option"><input type="radio" name="final-q8" value="0"> seulement Opus</label><label class="q-option"><input type="radio" name="final-q8" value="1"> Opus pour planning/coding intense et Qwen Coder local pour tâches mécaniques</label><label class="q-option"><input type="radio" name="final-q8" value="2"> Telegram</label><div class="explain">Hybrid local/cloud cost routing.</div></div>
+          <div class="q" data-answer="2"><p class="q-text">10. Jensen Huang est cité pour dire que les companies doivent avoir...</p><label class="q-option"><input type="radio" name="final-q9" value="0"> plus de SaaS classique</label><label class="q-option"><input type="radio" name="final-q9" value="1"> un seul chatbot</label><label class="q-option"><input type="radio" name="final-q9" value="2"> une stratégie agent local / OpenClaw</label><div class="explain">SaaS devient agentic as a service.</div></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn" onclick="submitExam()">Soumettre l'examen</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button></div>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </section>
+
+      <section id="action" class="section">
+        <h1>Certificat et checklist</h1>
+        <div class="card info no-print">
+          <h3>Nom pour certificat</h3>
+          <input id="cert-name" placeholder="Prénom / pseudo" />
+          <div class="toolbar">
+            <button class="btn" onclick="generateCert()">Générer certificat</button>
+            <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+            <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+            <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+          </div>
+        </div>
+        <div id="certificate" class="certificate">
+          <span class="badge">🤖</span>
+          <h2>Certificat de maîtrise</h2>
+          <p>Décerné à</p>
+          <h3 id="cert-name-out">Apprenant</h3>
+          <p>pour avoir complété la masterclass</p>
+          <p class="highlight">Local AI Agents : OpenClaw, Claude Cowork, Anatomie, Safety, Multi-Agents</p>
+          <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+        </div>
+        <h2>Checklist 16 points</h2>
+        <div class="card checklist">
+          <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Définir l'usage : morning brief, research, software, monitoring, email, accounting.</label>
+          <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Choisir une machine dédiée si 24/7 ou données sensibles.</label>
+          <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Vérifier RAM/VRAM avant modèles open-source.</label>
+          <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Commencer avec un canal simple : Telegram ou Dispatch.</label>
+          <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Graduer vers Discord multi-channels si projets multiples.</label>
+          <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Choisir cerveau : Claude Sonnet/Opus ou Qwen/Kimi/Ministral/DeepSeek.</label>
+          <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Créer mémoire texte : identité, workflows, user, logs.</label>
+          <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Ajouter Obsidian si mémoire devient centrale.</label>
+          <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Donner tools progressivement : web search, email, screenshots, code exec.</label>
+          <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Configurer heartbeat : cron, interval ou event-based.</label>
+          <label><input type="checkbox" id="c11" onchange="toggleCheck('c11')"> Activer eyes / computer use seulement avec guardrails.</label>
+          <label><input type="checkbox" id="c12" onchange="toggleCheck('c12')"> Isoler emails sensibles et créer boîtes dédiées.</label>
+          <label><input type="checkbox" id="c13" onchange="toggleCheck('c13')"> Scanner/réécrire skills tierces avant installation.</label>
+          <label><input type="checkbox" id="c14" onchange="toggleCheck('c14')"> Lancer security audit via heartbeat.</label>
+          <label><input type="checkbox" id="c15" onchange="toggleCheck('c15')"> Construire une feature à la fois avec instructions claires.</label>
+          <label><input type="checkbox" id="c16" onchange="toggleCheck('c16')"> Explorer multi-agents seulement après maître d'un agent simple.</label>
+        </div>
+        <p class="muted small">Checklist : <span id="check-progress">0/16</span></p>
+        <h2>Ressources</h2>
+        <div class="resources">
+          <ul>
+            <li><strong>Transcript source</strong> : cliffnotes local AI agents, OpenClaw, Claude Cowork, safety, demos, opportunités.</li>
+            <li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur AutoManus, MIT business analytics, Google, Walmart. Chaîne qui enseigne à construire avec AI, un vrai projet à la fois.</li>
+            <li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend, yt-supabase-tips-kanban, yt-kimi-k2-claude.</li>
+            <li><strong>Ollama</strong> : utile pour exécuter localement des modèles open-source comme Qwen, Kimi, Ministral ou DeepSeek si votre hardware le permet.</li>
+          </ul>
+        </div>
+        <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('action')">← Revenir à l'examen</button><button class="btn" onclick="showSection('home')">Retour accueil</button></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    var KEY = "local-ai-agents-premium-v1";
+    var STATE = {
+      theme: "dark",
+      visited: {},
+      quizScores: {},
+      diagnostic: null,
+      flash: { index: 0, known: {} },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    function $(s, r) { return (r || document).querySelector(s); }
+    function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+    function saveState() {
+      try { localStorage.setItem(KEY, JSON.stringify(STATE)); } catch (e) {}
+    }
+    function loadState() {
+      try {
+        var raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        var d = JSON.parse(raw);
+        STATE.theme = d.theme || "dark";
+        STATE.visited = d.visited || {};
+        STATE.quizScores = d.quizScores || {};
+        STATE.diagnostic = d.diagnostic || null;
+        STATE.flash = d.flash || { index: 0, known: {} };
+        STATE.checklist = d.checklist || {};
+        STATE.certName = d.certName || "";
+        STATE.sourcesHidden = !!d.sourcesHidden;
+        if (d.exam) {
+          STATE.exam.finished = !!d.exam.finished;
+          STATE.exam.score = d.exam.score || 0;
+          STATE.exam.total = d.exam.total || 10;
+          STATE.exam.passed = !!d.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    var SECTIONS = [
+      { id: "home", title: "🏠 Accueil" },
+      { id: "diagnostic", title: "🎯 Diagnostic" },
+      { id: "definition", title: "1. Définition" },
+      { id: "anatomy", title: "2. Anatomie Inky" },
+      { id: "machine", title: "3. Machine" },
+      { id: "communication", title: "4. Communication" },
+      { id: "brain-memory", title: "5. Cerveau & mémoire" },
+      { id: "tools-heartbeat-eyes", title: "6. Tools / Heart / Eyes" },
+      { id: "multi-agents", title: "7. Multi-agents" },
+      { id: "safety", title: "8. Sécurité" },
+      { id: "demo-openclaw", title: "9. Démo OpenClaw" },
+      { id: "demo-claude-cowork", title: "10. Démo Cowork" },
+      { id: "opportunities", title: "11. Opportunités" },
+      { id: "scenarios", title: "🎬 Scénarios" },
+      { id: "flashcards", title: "🃏 Flashcards" },
+      { id: "antipatterns", title: "🚫 Anti-patterns" },
+      { id: "final", title: "✅ Examen final" },
+      { id: "action", title: "🏆 Certificat" }
+    ];
+
+    function renderNav() {
+      var nav = $("#nav");
+      var h = "";
+      for (var i = 0; i < SECTIONS.length; i++) {
+        h += "<button data-target='" + SECTIONS[i].id + "'>" + SECTIONS[i].title + "</button>";
+      }
+      nav.innerHTML = h;
+      $$("#nav button").forEach(function (b) {
+        b.addEventListener("click", function () { showSection(b.getAttribute("data-target")); });
+      });
+    }
+
+    function showSection(id) {
+      $$(".section").forEach(function (s) {
+        if (s.id === id) s.classList.add("active"); else s.classList.remove("active");
+      });
+      $$("#nav button").forEach(function (b) {
+        if (b.getAttribute("data-target") === id) b.classList.add("active"); else b.classList.remove("active");
+        if (STATE.visited[b.getAttribute("data-target")]) b.classList.add("completed"); else b.classList.remove("completed");
+      });
+      STATE.visited[id] = true;
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "anatomy") resetAnatomy();
+      if (id === "safety") updateSafety();
+      if (id === "demo-openclaw") resetOpenClaw();
+      if (id === "scenarios") resetScenario();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      var sections = $$(".section");
+      var done = 0;
+      for (var i = 0; i < sections.length; i++) {
+        if (STATE.visited[sections[i].id]) done++;
+      }
+      var pct = sections.length ? Math.round(done / sections.length * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      var c = 0, t = 0;
+      for (var k in STATE.quizScores) {
+        c += STATE.quizScores[k].correct || 0;
+        t += STATE.quizScores[k].total || 0;
+      }
+      if (STATE.exam.finished) { c += STATE.exam.score; t += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + c + "/" + t;
+    }
+
+    function toggleTheme() {
+      STATE.theme = STATE.theme === "dark" ? "light" : "dark";
+      document.body.setAttribute("data-theme", STATE.theme);
+      saveState();
+    }
+    function toggleSources() {
+      STATE.sourcesHidden = !STATE.sourcesHidden;
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      saveState();
+    }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      for (var i = 0; i < SECTIONS.length; i++) {
+        if (SECTIONS[i].id === id && i < SECTIONS.length - 1) { showSection(SECTIONS[i + 1].id); return; }
+      }
+    }
+    function prevFrom(id) {
+      for (var i = 0; i < SECTIONS.length; i++) {
+        if (SECTIONS[i].id === id && i > 0) { showSection(SECTIONS[i - 1].id); return; }
+      }
+    }
+
+    function checkQuiz(btn) {
+      var box = btn.closest(".quiz");
+      var moduleId = box.getAttribute("data-module");
+      var qs = $$(".q", box);
+      var correct = 0;
+      qs.forEach(function (q) {
+        var sel = q.querySelector("input:checked");
+        var ex = q.querySelector(".explain");
+        var opts = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        opts.forEach(function (o) { o.classList.remove("correct", "incorrect"); });
+        if (ex) ex.style.display = "block";
+        if (!sel) { q.classList.add("incorrect"); return; }
+        var ans = Number(q.getAttribute("data-answer"));
+        var val = Number(sel.value);
+        var chosen = sel.closest(".q-option");
+        if (val === ans) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (opts[ans]) opts[ans].classList.add("correct");
+        }
+      });
+      var res = box.querySelector(".result");
+      if (res) res.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct: correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    var DIAG_TEXT = {
+      novice: "Commencez par définition, anatomie, machine et communication. Ne sautez pas la partie sécurité avant de donner des tools.",
+      builder: "Focus sur anatomie, cerveau/mémoire, heartbeat, tools et démo OpenClaw. Construisez un agent simple puis itérez.",
+      ops: "Allez vers safety, multi-agents, OpenClaw team, Claude Cowork computer use et bonnes pratiques d'ingénierie."
+    };
+
+    function validateDiagnostic() {
+      var level = document.querySelector("input[name='diag-level']:checked");
+      var goal = document.querySelector("input[name='diag-goal']:checked");
+      var time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions."); return; }
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      saveState();
+      var rec = $("#diag-rec");
+      var next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = "<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : " + level.value + "</span><span class='pill'>Objectif : " + goal.value + "</span><span class='pill'>Mode : " + time.value + "</span></p><p>" + (DIAG_TEXT[level.value] || DIAG_TEXT.builder) + "</p>";
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      var rec = $("#diag-rec");
+      var next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = "<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : " + STATE.diagnostic.level + "</span><span class='pill'>Objectif : " + STATE.diagnostic.goal + "</span><span class='pill'>Mode : " + STATE.diagnostic.time + "</span></p><p>" + (DIAG_TEXT[STATE.diagnostic.level] || "") + "</p>";
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    var ANATOMY_DATA = {
+      machine: {
+        laptop: { label: "Laptop personnel", desc: "Pratique mais rarement 24/7 et partage vos données sensibles." },
+        old_laptop: { label: "Vieux laptop dédié", desc: "Wipe complet, 24/7, isolation. Bon premier choix paranoid." },
+        mac_mini: { label: "Mac Mini", desc: "Machine dédiée, meilleur hardware pour modèles open-source." },
+        mac_studio: { label: "Mac Studio", desc: "Plus de RAM/unified memory pour modèles locaux plus grands." },
+        vps: { label: "VPS", desc: "Machine louée dans le cloud, 24/7, mais données hors de chez vous." }
+      },
+      channel: {
+        telegram: { label: "Telegram", desc: "Simple, rapide, bon pour démarrer en single-channel." },
+        discord: { label: "Discord", desc: "Multi-channels, idéal pour organiser projets et alertes." },
+        whatsapp: { label: "WhatsApp", desc: "Familier, mais moins natif pour power users." },
+        imessage: { label: "iMessage", desc: "Pratique sur Apple, moins flexible pour équipes." },
+        slack: { label: "Slack", desc: "Utile en contexte pro, channels et intégrations." },
+        dispatch: { label: "Dispatch", desc: "Mentionné pour Claude / interaction mobile." }
+      },
+      brain: {
+        claude_opus: { label: "Claude Opus", desc: "Fort pour planning, architecture, coding intense. Coûteux." },
+        claude_sonnet: { label: "Claude Sonnet", desc: "Populaire pour agents locaux, bon équilibre qualité/coût." },
+        openai: { label: "OpenAI", desc: "Cloud models, capabilities fortes, mais dépendance API." },
+        qwen: { label: "Qwen", desc: "Open-source populaire, bon pour local si hardware suffit." },
+        kimi: { label: "Kimi", desc: "Open-source/agentic, cité comme option populaire." },
+        ministral: { label: "Ministral", desc: "Petit modèle local pour tâches légères type monitoring." },
+        deepseek: { label: "DeepSeek", desc: "Open-source, selon hardware et use case." }
+      },
+      memory: {
+        files: { label: "Fichiers texte", desc: "Base simple : identité, user, workflows, logs." },
+        obsidian: { label: "Obsidian", desc: "Pour rendre mémoire plus robuste et lisible." },
+        second_brain: { label: "Second brain", desc: "Vision avancée : documentation agressive et réutilisation." }
+      },
+      tools: {
+        web_search: { label: "Web search", desc: "Recherche d'infos fraîches pour briefs et research." },
+        email: { label: "Email", desc: "Puissant mais sensible. Boîtes dédiées recommandées." },
+        screenshots: { label: "Screenshots", desc: "Voir l'état de l'écran, utile pour computer use." },
+        tts: { label: "Text to speech", desc: "Sortie vocale, briefings, accessibilité." },
+        image_gen: { label: "Image generation", desc: "Création visuelle pour contenus et prototypes." },
+        code_exec: { label: "Code execution", desc: "Construire/logiciels, scripts, analyses. À sandboxer." }
+      },
+      heartbeat: {
+        cron: { label: "Cron time-based", desc: "Exemple : morning brief à 7h chaque jour." },
+        interval: { label: "Interval", desc: "Exemple : scanner emails toutes les 30 minutes." },
+        event: { label: "Event-based", desc: "Exemple : fichier ajouté dans dossier accounting déclenche workflow." },
+        none: { label: "Aucun", desc: "Agent seulement réactif." }
+      },
+      eyes: {
+        computer_use: { label: "Computer use", desc: "Voir écran, bouger souris, agir comme un humain." },
+        folders: { label: "Folders", desc: "Voir fichiers/dossiers sans contrôle complet de l'écran." },
+        none: { label: "Aucun", desc: "Pas d'accès visuel à la machine." }
+      }
+    };
+
+    var anatomySelected = {};
+
+    function resetAnatomy() {
+      anatomySelected = {};
+      $$(".anatomy-btn").forEach(function (b) { b.classList.remove("active"); });
+      var out = $("#anatomy-out");
+      if (out) out.textContent = "Choisissez machine, canal, cerveau, mémoire, tools, heartbeat et eyes pour construire votre Inky.";
+    }
+
+    function chooseAnatomy(cat, key) {
+      anatomySelected[cat] = key;
+      $$(".anatomy-btn").forEach(function (b) {
+        var isActive = b.getAttribute("data-cat") === cat && b.getAttribute("data-key") === key;
+        if (isActive) b.classList.add("active"); else b.classList.remove("active");
+      });
+      renderAnatomy();
+    }
+
+    function renderAnatomy() {
+      var out = $("#anatomy-out");
+      if (!out) return;
+      var order = ["machine", "channel", "brain", "memory", "tools", "heartbeat", "eyes"];
+      var titles = { machine: "Machine", channel: "Canal", brain: "Cerveau", memory: "Mémoire", tools: "Tools", heartbeat: "Heartbeat", eyes: "Eyes" };
+      var lines = [];
+      for (var i = 0; i < order.length; i++) {
+        var cat = order[i];
+        var key = anatomySelected[cat];
+        if (key && ANATOMY_DATA[cat] && ANATOMY_DATA[cat][key]) {
+          lines.push(titles[cat] + " : " + ANATOMY_DATA[cat][key].label + " — " + ANATOMY_DATA[cat][key].desc);
+        } else {
+          lines.push(titles[cat] + " : non choisi");
+        }
+      }
+      var m = anatomySelected.machine;
+      var b = anatomySelected.brain;
+      var t = anatomySelected.tools;
+      var e = anatomySelected.eyes;
+      var hb = anatomySelected.heartbeat;
+      if (m === "old_laptop" && (b === "qwen" || b === "kimi" || b === "deepseek" || b === "ministral")) {
+        lines.push("⚠️ 16GB RAM peut être juste pour gros open-source. Commencez petit ou utilisez cloud.");
+      }
+      if (m === "laptop" && t === "email") {
+        lines.push("⚠️ Évitez l'email sensible sur machine principale. Isolez ou créez une boîte dédiée.");
+      }
+      if (e === "computer_use" && m === "laptop") {
+        lines.push("⚠️ Computer use sur machine personnelle = risque élevé. Préférez machine dédiée.");
+      }
+      if (hb === "none") {
+        lines.push("ℹ️ Sans heartbeat, l'agent est surtout réactif. Ajoutez cron/event pour l'autonomie.");
+      }
+      if (anatomySelected.memory === "files" && t === "web_search") {
+        lines.push("💡 Memory textuelle + web search : bon combo simple pour research et morning brief.");
+      }
+      if (b === "claude_opus" && t === "code_exec") {
+        lines.push("💡 Opus + code exec : puissant pour builder, mais coûteux. Routez tâches mécaniques vers modèle local si possible.");
+      }
+      out.textContent = lines.join("\n\n");
+    }
+
+    function updateSafety() {
+      var ids = ["sec1", "sec2", "sec3", "sec4", "sec5", "sec6"];
+      var count = 0;
+      for (var i = 0; i < ids.length; i++) {
+        if (document.getElementById(ids[i]) && document.getElementById(ids[i]).checked) count++;
+      }
+      var fill = $("#sec-fill");
+      if (fill) fill.style.width = (count / ids.length * 100) + "%";
+      var label = $("#sec-label");
+      var advice = $("#sec-advice");
+      if (label) {
+        if (count === 0) label.textContent = "Préparation faible : ne pas donner d'accès large.";
+        else if (count <= 2) label.textContent = "Préparation minimale : ajouter isolation et audit.";
+        else if (count <= 4) label.textContent = "Préparation correcte : renforcer skills tierces et human review.";
+        else label.textContent = "Préparation solide : machine dédiée, accès limité, audit et review.";
+      }
+      var m = [];
+      if (document.getElementById("sec1") && document.getElementById("sec1").checked) m.push("Machine dédiée : réduit la surface d'attaque sur vos données personnelles.");
+      if (document.getElementById("sec2") && document.getElementById("sec2").checked) m.push("Données sensibles isolées : pas de passwords ni emails critiques dans l'environnement agent.");
+      if (document.getElementById("sec3") && document.getElementById("sec3").checked) m.push("Accès minimal : chaque tool doit avoir une raison d'être.");
+      if (document.getElementById("sec4") && document.getElementById("sec4").checked) m.push("Skills vérifiées : scan et rewrite avant usage, surtout si tierces.");
+      if (document.getElementById("sec5") && document.getElementById("sec5").checked) m.push("Audit heartbeat : sécurité continue, pas seulement au setup.");
+      if (document.getElementById("sec6") && document.getElementById("sec6").checked) m.push("Human review : validation sur actions irréversibles ou sensibles.");
+      if (advice) advice.innerHTML = m.length ? "<strong>Mitigations :</strong><ul>" + m.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" : "Cochez les bonnes pratiques pour voir les mitigations.";
+    }
+
+    var OPENCLAW_STEPS = [
+      { who: "Agent office", text: "Vue visuelle de tous les agents et de leurs interactions. Emission control permet de monitorer ce qu'ils font." },
+      { who: "Inky", text: "Chief of staff. Utilise Claude Sonnet 4.6 comme cerveau central de coordination." },
+      { who: "Content pipeline", text: "Blinky, Pinky et Dinky utilisent Sonnet pour morning brief, topic watch list, video ideas et routage vers contenu." },
+      { who: "Linky", text: "Builder / decoder. Claude Opus 4.6 pour planning, architecture et coding intense." },
+      { who: "Linky local", text: "Qwen Coder 2.5 open-source local gratuit pour tâches de coding mécaniques. Optimisation coût." },
+      { who: "Winky", text: "System monitor. Tourne deux fois par jour pour health check et security check avec Ministral 3B local." },
+      { who: "Discord", text: "Channels pour projets, alertes, content ideas. Approve ou pass dans mission control, puis outline YouTube." },
+      { who: "Memory", text: "Documentation agressive : daily logs, memory.md, docs, Obsidian. Rien ne doit rester non documenté." },
+      { who: "Nightly build", text: "Chaque nuit, Inky construit quelque chose d'utile ou delight pour un projet courant." }
+    ];
+    var openclawIndex = 0;
+
+    function resetOpenClaw() {
+      openclawIndex = 0;
+      var log = $("#openclaw-log");
+      if (log) log.innerHTML = "";
+      var st = $("#openclaw-status");
+      if (st) st.textContent = "Cliquez sur Étape suivante pour dérouler le workflow OpenClaw.";
+      var btn = $("#openclaw-next");
+      if (btn) { btn.disabled = false; btn.textContent = "Étape suivante →"; }
+    }
+
+    function nextOpenClawStep() {
+      var log = $("#openclaw-log");
+      if (!log || openclawIndex >= OPENCLAW_STEPS.length) return;
+      var s = OPENCLAW_STEPS[openclawIndex];
+      var div = document.createElement("div");
+      div.className = "step-msg";
+      div.innerHTML = "<span class='who'>" + s.who + "</span>" + s.text;
+      log.appendChild(div);
+      requestAnimationFrame(function () { div.classList.add("visible"); });
+      openclawIndex++;
+      var st = $("#openclaw-status");
+      if (st) st.textContent = "Étape " + openclawIndex + "/" + OPENCLAW_STEPS.length + " — équipe locale en action.";
+      if (openclawIndex >= OPENCLAW_STEPS.length) {
+        var btn = $("#openclaw-next");
+        if (btn) btn.disabled = true;
+        if (st) st.textContent = "✅ Workflow OpenClaw terminé. Agents spécialisés, mémoire, heartbeat et cost routing combinés.";
+      }
+    }
+
+    var SCENARIOS = {
+      privacy: "Cas : vous voulez un agent 24/7 mais vous êtes paranoïaque.\nSolution : vieux laptop wipe ou Mac Mini dédié, pas de données sensibles, accès minimal, audit heartbeat.",
+      cost: "Cas : Claude Opus coûte trop cher pour toutes les tâches.\nSolution : routing hybride. Opus pour planning/architecture/coding intense, Qwen Coder local pour tâches mécaniques, Ministral local pour monitoring.",
+      nocode: "Cas : vous débutez et ne voulez pas gérer code, skills et sécurité finement.\nSolution : Claude Cowork. Plus safe, plus simple, folder-based, memory files, scheduled tasks, mais moins customisable.",
+      memory: "Cas : l'agent oublie vos préférences et répète des erreurs.\nSolution : mémoire texte agressive. Identity, user, workflows, daily logs, memory.md. Obsidian pour lire et structurer.",
+      heartbeat: "Cas : vous devez sans cesse demander à l'agent d'agir.\nSolution : heartbeat. Cron pour morning brief, interval pour scan email, event pour dossier accounting ou nouveau fichier.",
+      skills: "Cas : une skill publique semble utile.\nSolution : ne pas installer directement. Donner la skill à Claude pour scan et rewrite, puis tester isolément.",
+      team: "Cas : une tâche unique devient trop large.\nSolution : multi-agents. Research team, software team, content pipeline. Mais commencer simple puis ajouter orchestration.",
+      mobile: "Cas : vous êtes hors de chez vous et avez besoin d'un fichier ou screenshot.\nSolution : canal mobile type Dispatch + computer use. Demander fichier, screenshot, validation permissions, review humain."
+    };
+
+    function resetScenario() {
+      var out = $("#scenario-out");
+      if (out) { out.style.display = "none"; out.textContent = ""; }
+    }
+
+    function chooseScenario(key) {
+      var out = $("#scenario-out");
+      if (out) {
+        out.style.display = "block";
+        out.textContent = SCENARIOS[key] || "";
+      }
+    }
+
+    var FLASHCARDS = [
+      { front: "Local AI agent", back: "Agent IA qui prend des actions et complète des tâches seul, en tournant directement sur votre machine.", tip: "1:19" },
+      { front: "Nouvelle catégorie", back: "Le transcript considère les agents IA locaux comme une nouvelle catégorie de produits IA, pas juste un hype.", tip: "0:26" },
+      { front: "Morning brief", back: "Exemple d'usage : calendrier, emails, priorités, stock portfolio, notes, news personnalisés.", tip: "1:42" },
+      { front: "Anatomie", back: "Machine, canal, cerveau, mémoire, tools/tentacules, heartbeat, eyes.", tip: "2:25" },
+      { front: "Trois facteurs machine", back: "24/7, specs/RAM, privacy/security.", tip: "3:00" },
+      { front: "Vieux laptop dédié", back: "Bon premier setup : wipe complet, 24/7, isolation, mais RAM limitée pour gros open-source.", tip: "4:04" },
+      { front: "Mac Mini / Studio", back: "Machines dédiées avec meilleur hardware pour tourner des modèles open-source plus grands.", tip: "4:28" },
+      { front: "VPS", back: "Virtual private server : machine louée dans le cloud, 24/7, mais données hors de chez vous.", tip: "2:49" },
+      { front: "Canal simple", back: "Telegram ou Dispatch pour démarrer. Discord pour multi-channels et organisation avancée.", tip: "5:38" },
+      { front: "Cerveau cloud", back: "Claude Opus et Sonnet sont les options populaires pour agents locaux selon le transcript.", tip: "6:33" },
+      { front: "Open-source", back: "Qwen, Kimi, Ministral, DeepSeek. Trade-offs capabilities, size, speed, cost, privacy.", tip: "6:13" },
+      { front: "Mémoire", back: "Fichiers texte documentant identité, workflows, données, utilisateur, historique de tâches.", tip: "6:48" },
+      { front: "Obsidian", back: "Outil utilisé par power users pour rendre la mémoire plus robuste, lisible et organisée.", tip: "7:35" },
+      { front: "Tentacules", back: "Skills et tools : web search, email, screenshots, TTS, image generation, code execution.", tip: "7:45" },
+      { front: "Heartbeat", back: "Scheduling autonome : cron, interval, event-based.", tip: "8:14" },
+      { front: "Cron", back: "Exemple : chaque matin à 7h envoyer morning brief.", tip: "8:29" },
+      { front: "Event-based", back: "Exemple : fichier ajouté dans dossier accounting déclenche workflow comptable.", tip: "8:35" },
+      { front: "Eyes", back: "Computer use : voir l'écran, bouger la souris, interagir comme un humain.", tip: "8:47" },
+      { front: "Multi-agents", back: "Plusieurs agents ou équipes : research team, software team, tâches parallèles.", tip: "9:32" },
+      { front: "Safety primaire", back: "Vous donnez accès à votre computer. Il faut isoler, limiter, vérifier, auditer.", tip: "11:56" },
+      { front: "Isolation", back: "Ne pas tourner sur machine principale avec toutes vos données. Machines dédiées.", tip: "12:24" },
+      { front: "Emails dédiés", back: "Donner accès à screening emails, pas aux emails personnels sensibles.", tip: "12:37" },
+      { front: "Skills tierces", back: "Risque security/scam. Ne pas installer sans confiance forte.", tip: "12:51" },
+      { front: "Scan rewrite", back: "Donner une skill utile à Claude pour scan et rewrite avant de l'offrir à l'agent local.", tip: "13:13" },
+      { front: "Security audit", back: "Utiliser heartbeat pour audit horaire ou quotidien.", tip: "13:33" },
+      { front: "Engineering", back: "Instructions claires, une feature ou workflow à la fois.", tip: "13:48" },
+      { front: "OpenClaw", back: "Option code/personnalisable avec agent office, équipe d'agents, emission control, Discord, memory, nightly build.", tip: "14:20" },
+      { front: "Inky", back: "Chief of staff dans la démo OpenClaw, propulsé par Claude Sonnet 4.6.", tip: "14:56" },
+      { front: "Linky", back: "Builder / decoder. Opus pour planning/architecture/coding intense, Qwen Coder local pour tâches mécaniques.", tip: "15:13" },
+      { front: "Winky", back: "System monitor deux fois par jour avec Ministral 3B local gratuit.", tip: "15:41" },
+      { front: "Content pipeline", back: "Blinky, Pinky, Dinky : morning brief, topic watch list, video ideas, approve/pass, outline YouTube.", tip: "16:26" },
+      { front: "Claude Cowork", back: "Option Anthropic no-code plus safe, folder-based, memory files, scheduled tasks, computer use.", tip: "20:05" },
+      { front: "CLAUDE.md / memory.md", back: "Fichiers mémoire de Cowork, lisibles via Obsidian, contenant contexte utilisateur et système.", tip: "21:02" },
+      { front: "Jensen Huang", back: "Cité pour dire que chaque company doit avoir une stratégie agent local / OpenClaw.", tip: "24:36" },
+      { front: "SaaS -> AaaS", back: "Software as a Service devient agentic as a service avec agents qui exécutent workflows.", tip: "24:56" }
+    ];
+
+    function renderFlashcard() {
+      var card = $("#flashcard");
+      if (!card) return;
+      var i = STATE.flash.index;
+      var c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = "<div class='flash-inner' onclick='flipFlash()'><div class='flash-face flash-front'><h3>" + c.front + "</h3><p class='muted'>Cliquez pour retourner.</p><div><span class='pill'>Carte " + (i + 1) + "/" + FLASHCARDS.length + "</span><span class='pill'>⏱ " + c.tip + "</span></div></div><div class='flash-face flash-back'><p><strong>" + c.back + "</strong></p><p class='muted'>" + (STATE.flash.known[i] ? "Déjà marquée connue." : "Marquez connue si maîtrisée.") + "</p></div></div>";
+      var kb = $("#flash-known");
+      if (kb) kb.textContent = STATE.flash.known[i] ? "✅ Connue" : "Marquer connue";
+    }
+    function flipFlash() { var c = $("#flashcard"); if (c) c.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() { var i = STATE.flash.index; if (STATE.flash.known[i]) delete STATE.flash.known[i]; else STATE.flash.known[i] = true; saveState(); renderFlashcard(); }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(function () {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      var b = $("#exam-start");
+      if (b) b.style.display = "none";
+    }
+    function updateExamTimer() {
+      var el = $("#exam-timer");
+      if (!el) return;
+      var m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      var s = String(Math.max(0, STATE.exam.remaining) % 60);
+      if (s.length < 2) s = "0" + s;
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      var box = $("#final-quiz");
+      if (!box) return;
+      var qs = $$(".q", box);
+      var correct = 0;
+      qs.forEach(function (q) {
+        var sel = q.querySelector("input:checked");
+        var ex = q.querySelector(".explain");
+        var opts = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        opts.forEach(function (o) { o.classList.remove("correct", "incorrect"); });
+        if (ex) ex.style.display = "block";
+        if (!sel) { q.classList.add("incorrect"); return; }
+        var ans = Number(q.getAttribute("data-answer"));
+        var val = Number(sel.value);
+        var chosen = sel.closest(".q-option");
+        if (val === ans) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (opts[ans]) opts[ans].classList.add("correct");
+        }
+      });
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+      var res = $("#exam-result");
+      if (res) {
+        var advice = STATE.exam.passed ? "Vous comprenez l'anatomie, la sécurité, les démos et les opportunités des agents IA locaux." : "Revoyez anatomie, safety, OpenClaw, Claude Cowork et heartbeat.";
+        res.innerHTML = "<strong>Résultat : " + correct + "/" + qs.length + "</strong><br>" + (STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider") + "<br><span class='muted'>" + advice + "</span>";
+      }
+      var cb = $("#go-cert");
+      if (cb) cb.style.display = "inline-flex";
+    }
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        var b = $("#exam-start");
+        if (b) b.style.display = "none";
+        var r = $("#exam-result");
+        if (r && !r.innerHTML) r.innerHTML = "Examen terminé : " + STATE.exam.score + "/" + STATE.exam.total + ".";
+        var cb = $("#go-cert");
+        if (cb) cb.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d'abord l'examen final."); return; }
+      var nameInput = $("#cert-name");
+      var name = nameInput ? nameInput.value.trim() : "";
+      if (!name) name = "Apprenant";
+      STATE.certName = name;
+      saveState();
+      var block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    function restoreAction() {
+      var ni = $("#cert-name");
+      if (ni && STATE.certName) ni.value = STATE.certName;
+      for (var id in STATE.checklist) {
+        var el = document.getElementById(id);
+        if (el) el.checked = STATE.checklist[id];
+      }
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+    function toggleCheck(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+    function updateChecklistProgress() {
+      var boxes = $$(".checklist input[type=checkbox]");
+      var done = 0;
+      for (var i = 0; i < boxes.length; i++) { if (boxes[i].checked) done++; }
+      var el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      var data = {
+        cours: "Local AI Agents Masterclass",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        progression: STATE.visited,
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: STATE.flash.known,
+        checklist: STATE.checklist,
+        ressources: ["Sean Chen seanchen.io", "GitHub ShenSeanChen", "Ollama pour modèles locaux"]
+      };
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-local-ai-agents.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      showSection("home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.checkQuiz = checkQuiz;
+    window.chooseAnatomy = chooseAnatomy;
+    window.resetAnatomy = resetAnatomy;
+    window.updateSafety = updateSafety;
+    window.nextOpenClawStep = nextOpenClawStep;
+    window.resetOpenClaw = resetOpenClaw;
+    window.chooseScenario = chooseScenario;
+    window.resetScenario = resetScenario;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

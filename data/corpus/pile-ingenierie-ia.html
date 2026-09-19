@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La pile d'ingénierie IA — cours en 10 modules</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="eyebrow-mono">cours — 10 modules</div>
+      <h1>La pile d'ingénierie <span class="accent">IA</span></h1>
+      <p class="lede">Dix couches d'outils et d'habitudes qui, ensemble, transforment l'écriture de code assisté par IA en une véritable discipline d'ingénierie. Cliquez sur un module pour l'ouvrir.</p>
+    </div>
+    <button class="toggle" id="darkToggle" aria-pressed="false">
+      <span id="toggleLabel">mode clair</span>
+      <span class="knob"></span>
+    </button>
+  </header>
+
+  <div class="progress-line"></div>
+
+  <div class="stack" id="stack">
+
+    <!-- 1 -->
+    <section class="module" data-n="1">
+      <div class="module-head">
+        <span class="num">01</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <rect x="4" y="7" width="32" height="26" rx="3" class="s-ink" stroke-width="1.6"/>
+            <path d="M11 16l5 4-5 4" class="s-teal" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 24h9" class="s-teal" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Code Claude
+          <span class="sub">l'assistant qui pense comme un ingénieur senior</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Planifie et conçoit l'architecture</b> des projets avant d'écrire la moindre ligne.</span></li>
+              <li><span class="dot"></span><span><b>Révise et refactorise le code</b> existant pour l'améliorer en continu.</span></li>
+              <li><span class="dot"></span><span><b>Agit comme un ingénieur senior</b>, capable de raisonner sur un système entier.</span></li>
+            </ul>
+            <p class="explain">La première couche de la pile n'est pas un simple autocomplétion : c'est un <strong>collaborateur qui garde la vue d'ensemble</strong>. Le confier à des tâches de conception, pas seulement de saisie, change la nature du travail : vous passez du temps à décider, l'IA passe du temps à exécuter.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <rect x="20" y="20" width="220" height="26" rx="5" class="f-panel s-ink" stroke-width="1.4"/>
+              <circle cx="34" cy="33" r="3" class="f-accent"/>
+              <circle cx="44" cy="33" r="3" class="f-teal"/>
+              <circle cx="54" cy="33" r="3" class="f-soft"/>
+              <rect x="20" y="58" width="90" height="122" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="120" y="58" width="120" height="55" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="120" y="123" width="120" height="57" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <g class="s-teal" stroke-width="1.6" stroke-linecap="round">
+                <path d="M32 74h60"/><path d="M32 86h44"/><path d="M32 98h54"/>
+                <path d="M32 112h36"/><path d="M32 126h60"/><path d="M32 140h40"/>
+              </g>
+              <path d="M136 78h90M136 92h60M136 106h72" class="s-soft" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M136 143h90M136 157h50" class="s-accent" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="module" data-n="2">
+      <div class="module-head">
+        <span class="num">02</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <rect x="8" y="6" width="24" height="28" rx="2.5" class="s-ink" stroke-width="1.6"/>
+            <rect x="12" y="4" width="16" height="6" rx="1.5" class="f-panel s-ink" stroke-width="1.4"/>
+            <path d="M13 16h14M13 21h14M13 26h9" class="s-teal" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Mémoire du projet
+          <span class="sub">un contexte qui s'enrichit au fil du temps</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Définit les objectifs et les règles</b> du projet dès la première conversation.</span></li>
+              <li><span class="dot"></span><span><b>Documente les décisions architecturales</b> avant même qu'elles ne soient prises.</span></li>
+              <li><span class="dot"></span><span><b>Améliore chaque conversation future</b> en évitant de tout réexpliquer.</span></li>
+            </ul>
+            <p class="explain">Un fichier de mémoire (type <code>CLAUDE.md</code>) sert d'ancrage : il évite que chaque session reparte de zéro. C'est la différence entre <strong>parler à un stagiaire chaque matin</strong> et <strong>travailler avec un collègue qui se souvient d'hier</strong>.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <circle cx="130" cy="100" r="58" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <circle cx="130" cy="100" r="34" class="f-panel s-teal" stroke-width="1.6"/>
+              <path d="M130 100 L130 42" class="s-accent" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M130 100 L178 128" class="s-accent" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M130 100 L86 128" class="s-accent" stroke-width="1.6" stroke-linecap="round"/>
+              <circle cx="130" cy="42" r="5" class="f-accent"/>
+              <circle cx="178" cy="128" r="5" class="f-accent"/>
+              <circle cx="86" cy="128" r="5" class="f-accent"/>
+              <text x="130" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" class="f-ink">CLAUDE.md</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="module" data-n="3">
+      <div class="module-head">
+        <span class="num">03</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="12" cy="10" r="4" class="s-ink" stroke-width="1.6"/>
+            <circle cx="12" cy="30" r="4" class="s-ink" stroke-width="1.6"/>
+            <circle cx="28" cy="20" r="4" class="s-teal" stroke-width="1.8"/>
+            <path d="M12 14v12M12 20h12M16 12l8 5" class="s-soft" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Intégration GitHub
+          <span class="sub">comprendre un historique sans le relire ligne à ligne</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Explique les pull requests</b> instantanément, sans lecture manuelle du diff.</span></li>
+              <li><span class="dot"></span><span><b>Résume les commits et les changements</b> sur une période ou une branche.</span></li>
+              <li><span class="dot"></span><span><b>Simplifie la navigation</b> dans de grandes bases de code inconnues.</span></li>
+            </ul>
+            <p class="explain">Relier l'IA directement au dépôt <strong>court-circuite le travail de synthèse</strong> qui prenait auparavant un temps disproportionné : comprendre "ce qui a changé et pourquoi" devient une question, pas une enquête.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <path d="M60 40v120" class="s-soft" stroke-width="1.6"/>
+              <path d="M60 40 C60 70 140 70 140 100" class="s-teal" stroke-width="1.6" fill="none"/>
+              <path d="M60 160 C60 130 140 130 140 100" class="s-accent" stroke-width="1.6" fill="none"/>
+              <circle cx="60" cy="40" r="7" class="f-panel s-ink" stroke-width="1.4"/>
+              <circle cx="60" cy="100" r="7" class="f-panel s-ink" stroke-width="1.4"/>
+              <circle cx="60" cy="160" r="7" class="f-panel s-ink" stroke-width="1.4"/>
+              <circle cx="140" cy="100" r="9" class="f-teal"/>
+              <rect x="164" y="82" width="76" height="36" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <path d="M174 96h56M174 106h34" class="s-soft" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="module" data-n="4">
+      <div class="module-head">
+        <span class="num">04</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 8a12 12 0 1 1-8.5 3.5" class="s-teal" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M11.5 8v4.5H16" class="s-teal" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="20" cy="20" r="2.5" class="f-ink"/>
+          </svg>
+        </span>
+        <span class="module-title">Apprentissage continu
+          <span class="sub">la compétence la plus précieuse de toute la pile</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Les outils et flux de travail changent constamment</b> ; ce qui marchait hier peut être dépassé demain.</span></li>
+              <li><span class="dot"></span><span><b>L'expérimentation mène à un meilleur processus</b> que l'application rigide d'une méthode figée.</span></li>
+              <li><span class="dot"></span><span>C'est <b>la compétence la plus précieuse</b> : apprendre plus vite que l'écosystème ne change.</span></li>
+            </ul>
+            <p class="explain">Aucun des neuf autres modules n'est figé. La vraie compétence transversale, c'est <strong>la capacité à réévaluer ses habitudes</strong> régulièrement plutôt que de s'accrocher au flux de travail qui fonctionnait il y a six mois.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <path d="M60 140 A70 70 0 1 1 190 145" class="s-teal" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M182 128l8 17 18-6" class="s-teal" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="90" cy="80" r="4" class="f-accent"/>
+              <circle cx="130" cy="60" r="4" class="f-accent"/>
+              <circle cx="170" cy="75" r="4" class="f-accent"/>
+              <text x="130" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" class="f-soft">itère</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="module" data-n="5">
+      <div class="module-head">
+        <span class="num">05</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="5" class="s-teal" stroke-width="1.8"/>
+            <circle cx="7" cy="10" r="3" class="s-ink" stroke-width="1.6"/>
+            <circle cx="33" cy="10" r="3" class="s-ink" stroke-width="1.6"/>
+            <circle cx="7" cy="30" r="3" class="s-ink" stroke-width="1.6"/>
+            <circle cx="33" cy="30" r="3" class="s-ink" stroke-width="1.6"/>
+            <path d="M9 12l8 6M31 12l-8 6M9 28l8-6M31 28l-8-6" class="s-soft" stroke-width="1.3"/>
+          </svg>
+        </span>
+        <span class="module-title">API et MCP
+          <span class="sub">brancher les modèles sur le monde réel</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Connecte les LLM et les bases de données</b> pour lire et écrire des données réelles.</span></li>
+              <li><span class="dot"></span><span><b>Lie les paiements et les services internes</b> à un agent capable d'agir, pas seulement de répondre.</span></li>
+              <li><span class="dot"></span><span><b>Comprendre les API est essentiel</b> : c'est le langage commun de tous les systèmes.</span></li>
+            </ul>
+            <p class="explain">Le Model Context Protocol (MCP) standardise la façon dont un modèle découvre et appelle des outils externes. Sans cette couche, une IA reste un <strong>excellent rédacteur enfermé dans une boîte</strong> ; avec elle, elle devient un agent capable d'agir sur des systèmes réels.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <rect x="18" y="82" width="56" height="36" rx="6" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="46" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" class="f-ink">LLM</text>
+              <rect x="102" y="82" width="56" height="36" rx="6" class="f-panel s-teal" stroke-width="1.6"/>
+              <text x="130" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" class="f-teal">MCP</text>
+              <rect x="186" y="40" width="56" height="30" rx="6" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="214" y="59" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" class="f-soft">BDD</text>
+              <rect x="186" y="88" width="56" height="30" rx="6" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="214" y="107" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" class="f-soft">Paiements</text>
+              <rect x="186" y="136" width="56" height="30" rx="6" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="214" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" class="f-soft">Services</text>
+              <path d="M74 100h28M158 100h20M186 55l-6 45M186 151l-6-51" class="s-accent" stroke-width="1.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="module" data-n="6">
+      <div class="module-head">
+        <span class="num">06</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <rect x="6" y="11" width="28" height="18" rx="2" class="s-ink" stroke-width="1.6"/>
+            <path d="M11 24v-9l4.5 5 4.5-5v9" class="s-teal" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M25 15v9M22 21l3 3 3-3" class="s-teal" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </span>
+        <span class="module-title">Markdown
+          <span class="sub">le format que l'humain et l'IA lisent aussi bien l'un que l'autre</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Conserve les plans en texte brut</b>, sans dépendance à un logiciel propriétaire.</span></li>
+              <li><span class="dot"></span><span><b>Lisible par l'humain et par l'IA</b>, sans étape de conversion.</span></li>
+              <li><span class="dot"></span><span><b>Simplifie les prompts et la mémoire</b> en gardant une structure légère.</span></li>
+            </ul>
+            <p class="explain">Le markdown est le point de rencontre entre deux lecteurs très différents. En écrivant plans, notes et documentation dans ce format, vous évitez de <strong>traduire votre pensée</strong> à chaque fois que vous passez d'un humain à un modèle.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <rect x="40" y="30" width="180" height="140" rx="6" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="58" y="58" font-family="IBM Plex Mono, monospace" font-size="12" class="f-teal"># Plan</text>
+              <path d="M58 74h140" class="s-soft" stroke-width="1.3"/>
+              <path d="M58 90h100" class="s-soft" stroke-width="1.3"/>
+              <text x="58 " y="112" font-family="IBM Plex Mono, monospace" font-size="10" class="f-accent">- étape 1</text>
+              <text x="58" y="130" font-family="IBM Plex Mono, monospace" font-size="10" class="f-accent">- étape 2</text>
+              <path d="M58 146h120" class="s-soft" stroke-width="1.3"/>
+              <path d="M58 158h80" class="s-soft" stroke-width="1.3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="module" data-n="7">
+      <div class="module-head">
+        <span class="num">07</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="6" class="s-ink" stroke-width="1.6"/>
+            <path d="M20 8v4M20 28v4M8 20h4M28 20h4M11 11l3 3M26 26l3 3M29 11l-3 3M14 26l-3 3" class="s-teal" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Automatisation
+          <span class="sub">transformer une habitude en système</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Automatise la documentation et les tests</b> qui autrement seraient repoussés indéfiniment.</span></li>
+              <li><span class="dot"></span><span><b>Supprime les tâches manuelles répétitives</b> du quotidien de l'équipe.</span></li>
+              <li><span class="dot"></span><span><b>Transforme les habitudes en systèmes</b> fiables, indépendants de la mémoire humaine.</span></li>
+            </ul>
+            <p class="explain">Ce qui est fait deux fois mérite d'être scripté. L'automatisation n'est pas un luxe technique : c'est ce qui garantit qu'une <strong>bonne pratique survit</strong> au changement d'équipe, de projet ou d'humeur.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <rect x="20" y="86" width="46" height="30" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <path d="M66 101h30" class="s-accent" stroke-width="1.6"/>
+              <rect x="96" y="70" width="60" height="60" rx="8" class="f-panel s-teal" stroke-width="1.8"/>
+              <circle cx="126" cy="100" r="14" class="s-teal" stroke-width="1.6" fill="none"/>
+              <path d="M126 86v-6M126 114v6M112 100h-6M140 100h6" class="s-teal" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M156 101h30" class="s-accent" stroke-width="1.6"/>
+              <rect x="186" y="86" width="46" height="30" rx="5" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="43" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" class="f-soft">tâche</text>
+              <text x="209" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" class="f-soft">résultat</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="module" data-n="8">
+      <div class="module-head">
+        <span class="num">08</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M12 6h12l6 6v22a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" class="s-ink" stroke-width="1.6" fill="none"/>
+            <path d="M24 6v6h6" class="s-ink" stroke-width="1.6" fill="none"/>
+            <path d="M13 20h14M13 25h14M13 30h9" class="s-teal" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Documentation
+          <span class="sub">le contexte que vous n'aurez plus à réexpliquer</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Capture l'architecture et les contraintes</b> au moment où elles sont encore fraîches.</span></li>
+              <li><span class="dot"></span><span><b>Devient un contexte réutilisable pour l'IA</b>, module après module.</span></li>
+              <li><span class="dot"></span><span><b>Réduit les ré-explications et le retravail</b> pour toute l'équipe, humaine ou non.</span></li>
+            </ul>
+            <p class="explain">Documenter n'est plus une corvée après-coup : c'est un <strong>investissement direct dans la qualité des réponses futures de l'IA</strong>. Chaque page bien écrite aujourd'hui est une explication que vous n'aurez pas à refaire demain.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <rect x="60" y="26" width="70" height="92" rx="5" class="f-panel-soft s-ink" stroke-width="1.2" transform="rotate(-6 95 72)"/>
+              <rect x="90" y="40" width="70" height="92" rx="5" class="f-panel s-teal" stroke-width="1.6"/>
+              <path d="M100 58h50M100 70h50M100 82h34" class="s-soft" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M100 100h50M100 112h30" class="s-accent" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="module" data-n="9">
+      <div class="module-head">
+        <span class="num">09</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M8 30l8-14 6 8 5-10 5 16" class="s-teal" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="32" cy="14" r="3" class="s-ink" stroke-width="1.6"/>
+            <path d="M6 32h28" class="s-ink" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="module-title">Évaluation de l'IA
+          <span class="sub">remplacer l'intuition par la mesure</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>Teste la qualité des prompts et de la récupération</b> avec des jeux d'essai reproductibles.</span></li>
+              <li><span class="dot"></span><span><b>Mesure les hallucinations et la latence</b> plutôt que de les constater après coup.</span></li>
+              <li><span class="dot"></span><span><b>Transforme les conjectures en ingénierie</b>, avec des chiffres à l'appui des décisions.</span></li>
+            </ul>
+            <p class="explain">« Ça a l'air de bien marcher » n'est pas une méthode. Une suite d'évaluation (evals) transforme un ressenti en <strong>métrique suivie dans le temps</strong>, indispensable dès qu'un système touche de vrais utilisateurs.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <path d="M30 160V40M30 160h200" class="s-ink" stroke-width="1.4" stroke-linecap="round"/>
+              <rect x="48" y="110" width="24" height="50" class="f-panel-soft s-ink" stroke-width="1"/>
+              <rect x="84" y="80" width="24" height="80" class="f-teal" />
+              <rect x="120" y="120" width="24" height="40" class="f-panel-soft s-ink" stroke-width="1"/>
+              <rect x="156" y="60" width="24" height="100" class="f-accent"/>
+              <path d="M48 100l36-25 36 30 36-55" class="s-soft" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="module" data-n="10">
+      <div class="module-head">
+        <span class="num">10</span>
+        <span class="icon-slot">
+          <svg viewBox="0 0 40 40" fill="none">
+            <ellipse cx="20" cy="11" rx="12" ry="5" class="s-ink" stroke-width="1.6"/>
+            <path d="M8 11v18c0 2.8 5.4 5 12 5s12-2.2 12-5V11" class="s-ink" stroke-width="1.6" fill="none"/>
+            <path d="M8 20c0 2.8 5.4 5 12 5s12-2.2 12-5" class="s-teal" stroke-width="1.6" fill="none"/>
+          </svg>
+        </span>
+        <span class="module-title">Bases vectorielles &amp; récupération
+          <span class="sub">donner à l'IA une mémoire documentaire à grande échelle</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <ul class="points">
+              <li><span class="dot"></span><span><b>FAISS et ChromaDB pour les prototypes</b>, simples à lancer en local.</span></li>
+              <li><span class="dot"></span><span><b>Qdrant pour l'échelle de production</b>, quand le volume et la charge augmentent.</span></li>
+              <li><span class="dot"></span><span><b>Embeddings et chunking comptent tout autant</b> que la base de données elle-même.</span></li>
+            </ul>
+            <p class="explain">Une base vectorielle ne vaut que par ce qu'on y met : la façon de <strong>découper (chunking) et d'encoder (embeddings)</strong> les documents détermine la pertinence de ce que l'IA retrouve, bien avant le choix du moteur de recherche.</p>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 260 200" fill="none">
+              <g class="s-soft" stroke-width="1">
+                <circle cx="60" cy="60" r="2" class="f-soft"/>
+                <circle cx="90" cy="45" r="2" class="f-soft"/>
+                <circle cx="200" cy="150" r="2" class="f-soft"/>
+                <circle cx="70" cy="150" r="2" class="f-soft"/>
+                <circle cx="180" cy="55" r="2" class="f-soft"/>
+              </g>
+              <circle cx="120" cy="90" r="7" class="f-teal"/>
+              <circle cx="140" cy="70" r="7" class="s-teal" stroke-width="1.6" fill="none"/>
+              <circle cx="150" cy="105" r="7" class="s-teal" stroke-width="1.6" fill="none"/>
+              <circle cx="110" cy="115" r="7" class="s-teal" stroke-width="1.6" fill="none"/>
+              <path d="M120 90l20-20M120 90l30 15M120 90l-10 25" class="s-accent" stroke-width="1.3"/>
+              <text x="130" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" class="f-soft">plus proche = plus pertinent</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>10 modules · 30 points clés</span>
+    <span id="clock"></span>
+  </footer>
+</div>
+
+<script>
+  // dark mode toggle
+  const root = document.documentElement;
+  const toggle = document.getElementById('darkToggle');
+  const label = document.getElementById('toggleLabel');
+  function setMode(dark){
+    root.classList.toggle('dark', dark);
+    toggle.setAttribute('aria-pressed', String(dark));
+    label.textContent = dark ? 'mode sombre' : 'mode clair';
+  }
+  const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setMode(prefers);
+  toggle.addEventListener('click', () => setMode(!root.classList.contains('dark')));
+
+  // accordion
+  document.querySelectorAll('.module').forEach(mod => {
+    const head = mod.querySelector('.module-head');
+    const body = mod.querySelector('.module-body');
+    head.setAttribute('role','button');
+    head.setAttribute('tabindex','0');
+    function toggleOpen(){
+      const isOpen = mod.classList.contains('open');
+      if(isOpen){
+        body.style.maxHeight = '0px';
+        mod.classList.remove('open');
+      } else {
+        mod.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+    head.addEventListener('click', toggleOpen);
+    head.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleOpen(); } });
+  });
+
+  // open first module by default
+  const first = document.querySelector('.module');
+  first.classList.add('open');
+  first.querySelector('.module-body').style.maxHeight = first.querySelector('.module-body').scrollHeight + 'px';
+
+  // small mono clock in footer, just a nice technical touch
+  const clock = document.getElementById('clock');
+  function tick(){
+    const d = new Date();
+    clock.textContent = d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric'});
+  }
+  tick();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Apprendre Python pour l’IA | Fondations, Projets, IA Collaborative, Jugement</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🐍 <span>Python pour l’IA</span> Masterclass</div>
+        <div class="muted small">Fondations ciblées • Projets en couches • IA collaborative • Jugement • Ownership</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "python-ai-learning-premium-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express") {
+      return `
+        <div class="quiz" data-module="${moduleId}">
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "method") updatePractice();
+      if (id === "foundations") updateVenv();
+      if (id === "projects") updateProjectStack();
+      if (id === "ai-rule") evaluateAiGate();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    // ============ DIAGNOSTIC ============
+    const DIAG_TEXT = {
+      debutant: "Commencez par les 4 groupes de fondations, puis un premier projet API LLM. Ne regardez pas seulement : écrivez, cassez, réparez.",
+      intermediaire: "Vous connaissez peut-être les bases, mais il faut les orienter IA : APIs, JSON, erreurs, fichiers, environnements, puis projets en couches.",
+      experimente: " Concentrez-vous sur la méthode : ne laissez pas l’IA écrire à votre place pendant les fondations, puis maîtrisez specs, tests, evals, code review et trade-offs."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.intermediaire}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ PRACTICE BALANCE ============
+    function updatePractice() {
+      const watch = Number($("#pb-watch")?.value ?? 70);
+      const code = 100 - watch;
+      $("#pbv-watch").textContent = watch + "%";
+      $("#pbv-code").textContent = code + "%";
+
+      const fill = $("#pb-fill");
+      if (fill) {
+        fill.style.width = watch + "%";
+        fill.style.background = watch > 50 ? "linear-gradient(90deg, var(--yellow), var(--red))" : "linear-gradient(90deg, var(--green), var(--accent))";
+      }
+
+      const out = $("#pb-out");
+      if (!out) return;
+      if (watch >= 70) {
+        out.textContent = "Piège du tutoriel : vous consommez beaucoup plus que vous ne produisez. Le transcript est clair : regarder 40 heures de code écrit par quelqu’un d’autre peut ne rien ancrer. Baissez la part de visionnage, augmentez la part d’écriture, d’exécution, de cassure et de réparation.";
+      } else if (watch >= 40) {
+        out.textContent = "Équilibre perfectible. Un peu de théorie est utile, mais la compétence se construit surtout quand vous prenez le clavier : éditer le code, le lancer, le casser, le corriger, puis recommencer.";
+      } else {
+        out.textContent = "Bon signal : vous êtes dans l’apprentissage actif. La théorie doit servir la pratique, pas la remplacer. Enchaînez petits projets, erreurs, débogage et répétition.";
+      }
+    }
+
+    // ============ VENV SIMULATOR ============
+    function updateVenv() {
+      const a = $("#venv-a")?.value || "v2";
+      const b = $("#venv-b")?.value || "v1";
+      const iso = !!$("#venv-iso")?.checked;
+      const out = $("#venv-out");
+      if (!out) return;
+
+      if (a === b) {
+        out.textContent = "Résultat : pas de conflit de version détecté. Les deux projets utilisent la même version de la bibliothèque. C’est plus simple, mais l’isolation reste une bonne habitude.";
+        return;
+      }
+
+      if (!iso) {
+        out.textContent = "Résultat : conflit probable. Vous installez la version du Projet A, puis le Projet B casse parce qu’il attend une autre version. Sans environnement virtuel, les paquets partagent le même espace global. C’est exactement le problème que pip/UV + virtual environments résolvent.";
+        return;
+      }
+
+      out.textContent = "Résultat : isolation réussie. Chaque projet a son propre environnement virtuel. Le Projet A garde sa version, le Projet B garde la sienne. Installer une dépendance pour l’un ne casse plus l’autre. C’est une fondation non négociable en ingénierie IA.";
+    }
+
+    // ============ PROJECT STACK ============
+    const PROJECT_STAGES = [
+      { id: "proj-api", name: "Script API LLM", skills: "HTTP requests, JSON, gestion d’erreurs, variables d’environnement, appels de modèle" },
+      { id: "proj-rag", name: "RAG sur vos données", skills: "vector databases, embeddings, chunking documentaire, retrieval, contexte" },
+      { id: "proj-judge", name: "LLM judge / evals", skills: "évaluation de sortie, rubriques, grading logic, mesure de qualité" },
+      { id: "proj-agent", name: "Couche agentique", skills: "outils, décisions, workflows multi-étapes, observabilité, boucle" }
+    ];
+
+    function updateProjectStack() {
+      const selected = PROJECT_STAGES.filter(s => document.getElementById(s.id)?.checked);
+      const out = $("#project-out");
+      if (!out) return;
+
+      if (!selected.length) {
+        out.textContent = "Sélectionnez au moins une étape. L’idée n’est pas de faire quatre projets séparés, mais une seule échelle de complexité : API → RAG → evals → agent.";
+        return;
+      }
+
+      const allSkills = [...new Set(selected.flatMap(s => s.skills.split(", ").flatMap(x => x.split("/"))))];
+      let text = "Votre échelle de projet :\n";
+      selected.forEach((s, i) => {
+        text += (i + 1) + ". " + s.name + " — " + s.skills + "\n";
+      });
+
+      text += "\nCompétences cumulées : " + allSkills.join(" ; ") + ".\n";
+
+      if (selected.length === PROJECT_STAGES.length) {
+        text += "\nExcellent : vous n’avez pas quatre petits projets random. Vous avez un système de plus en plus sophistiqué, qui mappe directement ce que font les AI engineers en poste : appeler des modèles, brancher des données, évaluer les sorties, puis ajouter des outils et des décisions.";
+      } else if (selected.length === 1) {
+        text += "\nBon début. Le transcript insiste : commencez petit, mais layerisez. Un simple appel d’API LLM bien fait couvre déjà JSON, requests, erreurs et environnement.";
+      } else {
+        text += "\nVous êtes sur la bonne voie. Ajoutez les étapes manquantes dans l’ordre : d’abord fiabiliser les données et le retrieval, puis mesurer la qualité, puis seulement donner des outils et une boucle à l’agent.";
+      }
+
+      out.textContent = text;
+    }
+
+    // ============ AI GATE ============
+    function evaluateAiGate() {
+      const phase = document.querySelector("input[name='ai-phase']:checked")?.value;
+      const usage = document.querySelector("input[name='ai-usage']:checked")?.value;
+      const readyRead = !!document.getElementById("ready-read")?.checked;
+      const readyDebug = !!document.getElementById("ready-debug")?.checked;
+      const readyFlow = !!document.getElementById("ready-flow")?.checked;
+      const readiness = readyRead && readyDebug && readyFlow;
+
+      const out = $("#ai-gate-out");
+      if (!out) return;
+
+      if (!phase || !usage) {
+        out.textContent = "Sélectionnez une phase et un usage de l’IA.";
+        return;
+      }
+
+      if (phase === "foundations") {
+        if (usage === "write") {
+          out.textContent = "❌ Sabotage. Pendant la phase fondations, laisser l’IA écrire tout le projet vous prive de la construction de l’intuition. Le transcript est direct : si vous faites ça avant d’être prêt, vous ne serez pas qualifié pour un vrai rôle d’AI engineering.";
+        } else if (usage === "review") {
+          out.textContent = "⚠️ Limite acceptable seulement si vous comprenez déjà le code. En phase fondations, l’IA doit surtout expliquer des concepts et tester votre compréhension. La revue de code suppose que vous savez déjà lire et raisonner sur le code.";
+        } else {
+          out.textContent = "✅ Bonne utilisation. En phase fondations, l’IA est autorisée pour expliquer des concepts et tester votre compréhension. Vous écrivez le code vous-même, même si c’est lent et frustrant : c’est ainsi que se construisent les vraies compétences.";
+        }
+        return;
+      }
+
+      if (phase === "transition") {
+        if (!readiness) {
+          out.textContent = "🔒 Pas encore prêt. Les trois critères du transcript sont : lire du code inconnu et expliquer ce qu’il fait ; déboguer un test qui échoue seul ; raisonner sur le data flow et les points de rupture probables. Cochez-les seulement si c’est réellement vrai.";
+        } else if (usage === "write") {
+          out.textContent = "⚠️ Vous pouvez commencer à utiliser l’IA comme collaboratrice, mais pas comme auteur unique. Le rôle devient : spécifier, contraindre, tester, évaluer, relire. Si l’IA écrit tout sans que vous poussiez de retour, vous reproduisez le piège des fondations à un niveau supérieur.";
+        } else {
+          out.textContent = "✅ Vous avez gagné l’accès à l’étape suivante. L’IA peut devenir un accélérateur : prompts structurés, contraintes claires, tests, evals, revue de code. Écrivez encore des parties critiques vous-même pour garder la main.";
+        }
+        return;
+      }
+
+      if (phase === "production") {
+        if (usage === "write") {
+          out.textContent = "⚠️ En production, l’IA peut générer beaucoup de code, mais votre travail devient surtout revue, garde-fous, tests, evals et arbitrages. Laissons l’IA produire, mais ne validez jamais sans comprendre le mode de défaillance.";
+        } else {
+          out.textContent = "✅ Usage professionnel. La compétence n’est plus seulement écrire du code à la main : c’est diriger l’IA avec des specs, vérifier les tests, mesurer les sorties, relire le code, documenter les trade-offs et communiquer les choix.";
+        }
+      }
+    }
+
+    // ============ TRADEOFF GENERATOR ============
+    function generateTradeoff() {
+      const db = $("#tr-db")?.value || "une base locale simple";
+      const model = $("#tr-model")?.value || "un modèle API généraliste";
+      const users = $("#tr-users")?.value || "1000";
+      const constraint = $("#tr-constraint")?.value || "le coût";
+      const out = $("#tradeoff-out");
+      if (!out) return;
+
+      out.textContent =
+"Défense du choix technique\n\n" +
+"J’ai choisi " + db + " parce qu’elle correspond au stade actuel du produit et à la contrainte principale : " + constraint + ". " +
+"Pour environ " + users + " utilisateurs, le point sensible n’est pas seulement la fonctionnalité, mais le coût récurrent, la latence, la fiabilité du retrieval et la facilité de débogage.\n\n" +
+"Le modèle retenu, " + model + ", est justifié tant qu’il respecte les exigences de qualité et de confidentialité. Si le volume augmente, il faudra recalculer le coût par requête, mesurer la qualité des réponses, prévoir un fallback, et peut-être déplacer une partie du workload vers un modèle local ou plus petit pour les tâches simples.\n\n" +
+"Ce que je surveillerai : coût par utilisateur actif, taux d’échec du retrieval, latence P95, erreurs d’API, qualité évaluée par judge, et incidents de sécurité. Si ces métriques se dégradent, la décision sera réexaminée — pas défendue par ego, mais par données.";
+    }
+
+    // ============ SCENARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        tutorial_loop: "Cas : vous avez suivi 40 heures de tutoriels Python, mais vous galérez à écrire un script simple.\nDiagnostic : apprentissage passif. Le transcript dit clairement que regarder n’est pas apprendre.\nRemède : passez en mode actif. Éditez le code, exécutez-le, cassez-le, corrigez-le. Un petit projet réel vaut mieux qu’une longue playlist visionnée.",
+        tf_pytorch: "Cas : vous préparez un rôle d’AI engineer en entraînant des modèles avec TensorFlow ou PyTorch from scratch.\nDiagnostic : mauvais ciblage. Ce sont des bibliothèques pour entraîner des modèles, pas forcément ce que fait un AI engineer en pratique.\nRemède : concentrez-vous sur APIs, JSON, erreurs, fichiers, environnements, RAG, evals et agents.",
+        claude_writes_rag: "Cas : Claude vous a écrit un RAG qui tourne en une heure, mais vous ne savez pas pourquoi il échoue quand un document change.\nDiagnostic : vous avez sauté la phase fondations.\nRemède : réécrivez les briques vous-même, comprenez le flux de données, ajoutez des tests, puis seulement réutilisez l’IA comme collaboratrice.",
+        ai_tests_pass_wrong: "Cas : l’IA a généré des tests qui passent, mais le système échoue en production.\nDiagnostic : tests superficiels. L’IA peut écrire des tests qui passent pour les mauvaises raisons.\nRemède : relisez chaque test, demandez-vous s’il attrape vraiment le mode de défaillance visé, ajoutez des evals sur les sorties.",
+        cost_tradeoff: "Cas : vous avez choisi un modèle cher et une base vectorielle complexe sans justifier le coût.\nDiagnostic : absence de jugement produit et business.\nRemède : documentez les trade-offs : pourquoi ce modèle, pourquoi cette DB, coût par requête, impact si 10x plus d’utilisateurs, alternative plus simple.",
+        portfolio_generic: "Cas : votre portfolio contient un classificateur MNIST, un modèle de prédiction et un notebook Kaggle.\nDiagnostic : c’est du machine learning générique, pas de l’AI engineering.\nRemède : construisez une échelle : API LLM → RAG → LLM judge → agent, avec code, tests, logs et décisions documentées."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "AI tools amplify skill", back: "Les outils IA amplifient la compétence déjà présente. Bon ingénieur → excellent. Mauvais fondations → mauvais code très vite.", tip: "0:38" },
+      { front: "Working Python ≠ job-ready", back: "Obtenir du Python qui fonctionne via Cursor ou Claude Code n’est pas suffisant pour un rôle d’AI engineering à 300k $. Il faut être vraiment bon.", tip: "0:30" },
+      { front: "Ignorer le superflu", back: "Un cours Python complet standard fait passer des semaines sur des choses qu’un AI engineer n’utilisera pas. Il faut une liste précise.", tip: "1:07" },
+      { front: "TensorFlow / PyTorch", back: "Ce sont des bibliothèques pour entraîner des modèles from scratch. Ce n’est pas forcément le cœur du travail d’un AI engineer.", tip: "1:20" },
+      { front: "Les 4 groupes", back: "Fondations data structures/control flow, APIs, fichiers/logs, gestion d’environnement.", tip: "1:29" },
+      { front: "Fondations Python", back: "Variables, listes, dictionnaires, conditionnels, boucles for/while, fonctions, et juste assez de POO pour comprendre conceptuellement.", tip: "1:34" },
+      { front: "APIs", back: "HTTP requests, JSON, gestion sûre des API keys, erreurs. Une grande partie de l’AI engineering pratique, c’est appeler des APIs.", tip: "1:49" },
+      { front: "Fichiers et logs", back: "Lire/écrire des fichiers pour charger des documents, sauvegarder des outputs, travailler avec des logs.", tip: "2:04" },
+      { front: "Environment management", back: "Virtual environments, pip ou UV, isolation des versions de paquets par projet. C’est la fondation que beaucoup débutants sautent.", tip: "2:11" },
+      { front: "Isolation", back: "Sans isolation, installer une dépendance pour un projet peut casser un autre projet. Les environnements virtuels évitent ça.", tip: "2:22" },
+      { front: "Comment apprendre", back: "Savoir quoi apprendre est la première partie. Comment apprendre est presque plus important.", tip: "2:31" },
+      { front: "Piège du tutoriel", back: "La plupart des gens étudient Python en regardant des tutoriels. Regarder est exactement pourquoi ils n’apprennent pas.", tip: "2:37" },
+      { front: "Pratique active", back: "Il faut éditer, exécuter, casser, réparer. C’est comme ça que la matière colle.", tip: "2:55" },
+      { front: "Portfolio générique", back: "Les portfolios standards de ML simple ne sont pas de l’AI engineering. Il faut des projets spécifiques IA, en couches.", tip: "3:21" },
+      { front: "Premier projet", back: "Appeler une API LLM : prendre du texte, envoyer à GPT/Claude, recevoir une réponse, en faire quelque chose d’utile.", tip: "3:42" },
+      { front: "Layer RAG", back: "Transformer le même projet en RAG : travailler avec vos données, vector DB, embeddings, chunking documentaire.", tip: "4:03" },
+      { front: "LLM judge", back: "Ajouter un juge LLM pour évaluer la sortie du RAG. Les evals sont une des compétences les plus demandées.", tip: "4:16" },
+      { front: "Agentic layer", back: "Ajouter des outils, des décisions, des workflows multi-étapes. Là, on a un système, pas quatre projets random.", tip: "4:25" },
+      { front: "Règle IA fondations", back: "Pendant les fondations, l’IA est seulement autorisée pour expliquer des concepts et tester votre compréhension.", tip: "5:13" },
+      { front: "Trois critères de prêt", back: "Lire du code inconnu et expliquer ce qu’il fait ; déboguer un test qui échoue seul ; raisonner sur le data flow et les points de rupture.", tip: "5:28" },
+      { front: "IA coding assistance", back: "Sur le job, vous n’écrirez probablement pas tout à la main, mais utiliser l’assistance IA bien est une compétence à part entière.", tip: "5:50" },
+      { front: "Prompting pro", back: "Pas juste taper des instructions rapides. Approche systématique, contraintes claires, définitions, specs.", tip: "6:13" },
+      { front: "Tests IA", back: "L’IA est bonne pour écrire des tests, mais peut écrire des tests qui passent pour les mauvaises raisons. Il faut les relire.", tip: "6:22" },
+      { front: "Evals", back: "Avoir des checks sur les outputs IA est crucial. C’est une compétence différenciante sur le marché.", tip: "6:32" },
+      { front: "Code review", back: "Devenir très bon en revue de code est probablement la compétence la plus sous-estimée. Une grande partie du job, c’est relire ce que l’IA a écrit et pousser back quand c’est faux.", tip: "7:02" },
+      { front: "Jugement", back: "Développer du jugement sur les trade-offs : performance, coût, fiabilité, sécurité, contraintes business.", tip: "7:21" },
+      { front: "Communication", back: "L’anglais est presque la langue du coding IA, encore plus que Python. Expliquer les choix techniques à l’équipe et au leadership est essentiel.", tip: "7:34" },
+      { front: "End-to-end ownership", back: "Le but n’est pas seulement apprendre Python, mais devenir quelqu’un qui peut posséder un produit de bout en bout, des requirements flous à un système en production.", tip: "8:03" },
+      { front: "Timeline réaliste", back: "Après avoir coaché 200+ personnes, le message est clair : le chemin réel est plus long que les roadmaps de trois mois.", tip: "8:23" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ EXAM ============
+    const FINAL_QUESTIONS = [
+      { q: "Pourquoi les outils IA amplifient-ils votre niveau actuel ?", o: ["Parce qu’ils rendent plus rapide ce que vous savez déjà faire — bon ou mauvais", "Parce qu’ils remplacent la compétence", "Parce qu’ils écrivent seulement du bon code"], a: 0, e: "Si vous êtes fort, ils vous rendent excellent. Si vous ne savez pas ce que vous faites, ils produisent du mauvais code très vite." },
+      { q: "Qu’est-ce qui n’est généralement PAS le cœur du travail d’un AI engineer selon le transcript ?", o: ["Entraîner des modèles from scratch avec TensorFlow/PyTorch", "Appeler des APIs", "Gérer des environnements", "Évaluer des sorties"], a: 0, e: "Ce sont des bibliothèques pour entraîner des modèles, pas forcément ce que vous ferez comme AI engineer." },
+      { q: "Quelle fondation les débutants sautent-ils le plus souvent ?", o: ["La gestion d’environnement : virtual env, pip/UV, isolation", "Les boucles", "Les fonctions", "Les variables"], a: 0, e: "Sans isolation, installer un paquet pour un projet peut casser un autre projet." },
+      { q: "Pourquoi regarder 40 heures de tutoriels ne suffit pas ?", o: ["Parce que l’apprentissage passif ancre très peu ; il faut écrire, exécuter, casser, réparer", "Parce que les tutoriels sont toujours mauvais", "Parce que Python est inutile"], a: 0, e: "Le transcript dit : regarder est exactement pourquoi ils n’apprennent pas." },
+      { q: "Quel est un bon premier projet AI engineering ?", o: ["Un script Python qui appelle une API LLM et fait quelque chose d’utile avec la réponse", "Un classifier MNIST", "Un notebook Kaggle générique", "Un modèle entraîné from scratch"], a: 0, e: "Ce projet couvre JSON, requests, erreurs et environnement." },
+      { q: "Que faut-il ajouter après le premier projet API ?", o: ["Le transformer en RAG pour travailler avec vos propres données", "Supprimer les tests", "Changer de langage", "Ignorer les erreurs"], a: 0, e: "On ajoute vector databases, embeddings, chunking, retrieval." },
+      { q: "Pourquoi ajouter un LLM judge ?", o: ["Pour apprendre les evals, une compétence très demandée", "Pour rendre le modèle plus gros", "Pour éviter d’écrire du code", "Pour remplacer les tests unitaires"], a: 0, e: "Les evals mesurent si les sorties servent réellement le besoin." },
+      { q: "Quelle est la règle pendant la phase fondations ?", o: ["L’IA seulement pour expliquer des concepts et tester votre compréhension ; vous écrivez le code", "L’IA écrit tout", "Interdire totalement l’IA", "Copier-coller sans comprendre"], a: 0, e: "Écrire soi-même, même lentement, construit l’intuition." },
+      { q: "Quand êtes-vous prêt à passer à l’IA comme collaboratrice ?", o: ["Quand vous pouvez lire du code inconnu, déboguer un test seul, et raisonner le data flow", "Quand vous avez regardé 10 heures de vidéos", "Quand l’IA a fini le projet", "Quand vous avez un GPU"], a: 0, e: "Ce sont les trois critères du transcript." },
+      { q: "Quelle compétence est présentée comme probablement la plus sous-estimée ?", o: ["La revue de code", "Le prompt engineering magique", "L’entraînement de modèles", "Le déploiement Kubernetes"], a: 0, e: "Une grande partie du job consiste à relire ce que l’IA a écrit et pousser back quand c’est faux." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous comprenez la méthode : ignorer le superflu, bâtir les 4 fondations, apprendre en pratiquant, construire une échelle de projets, utiliser l’IA d’abord comme explicateur puis comme collaboratrice, et développer jugement + communication."
+          : (correct >= 5 ? "Bases correctes. Revoyez la règle IA pendant les fondations, les 4 groupes de compétences et la différence entre ML générique et AI engineering." : "Reprenez les modules 1 à 5, puis les simulateurs pratique, venv et projet, avant de réessayer.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d’abord l’examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Apprendre Python pour l’IA — méthode premium",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-python-ai-learning.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencez par un script API LLM, mais écrivez-le vous-même. Ajoutez JSON, erreurs, variables d’environnement et virtual env avant de toucher au RAG.";
+      if (d.level === "experimente") return "Focus sur la méthode pro : specs, tests, evals, code review, trade-offs documentés et communication des choix techniques.";
+      return "Consolidez les 4 fondations, puis construisez l’échelle API → RAG → LLM judge → agent en pratique active, pas en tutoriels passifs.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Pourquoi la plupart des gens apprennent Python mal — et comment éviter de perdre des mois</h1>
+          <p class="lead">
+            J’ai coaché plus de 200 personnes vers des rôles IA et machine learning, et je construis des systèmes IA de production chez Twitch.
+            La façon d’écrire du code aujourd’hui a changé, mais apprendre Python importe plus que jamais : l’ingénierie IA évolue assez vite
+            pour que étudier le mauvais matériel vous fasse reculer de plusieurs mois. <span class="source">⏱ 0:00</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 960 260" role="img" aria-label="Le chemin d apprentissage Python pour IA">
+              <defs>
+                <marker id="arrow-path" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="20" y="90" width="140" height="70" class="node red" />
+              <text x="90" y="118" text-anchor="middle">Ignorer</text>
+              <text x="90" y="140" text-anchor="middle" class="sub">le superflu</text>
+              <path class="dash red" d="M160 125 L205 125" marker-end="url(#arrow-path)" />
+
+              <rect x="205" y="90" width="140" height="70" class="node" />
+              <text x="275" y="118" text-anchor="middle">Fondations</text>
+              <text x="275" y="140" text-anchor="middle" class="sub">4 groupes</text>
+              <path class="dash" d="M345 125 L390 125" marker-end="url(#arrow-path)" />
+
+              <rect x="390" y="90" width="140" height="70" class="node green" />
+              <text x="460" y="118" text-anchor="middle">Pratique</text>
+              <text x="460" y="140" text-anchor="middle" class="sub">active</text>
+              <path class="dash green" d="M530 125 L575 125" marker-end="url(#arrow-path)" />
+
+              <rect x="575" y="90" width="140" height="70" class="node yellow" />
+              <text x="645" y="118" text-anchor="middle">Projets</text>
+              <text x="645" y="140" text-anchor="middle" class="sub">en couches</text>
+              <path class="dash yellow" d="M715 125 L760 125" marker-end="url(#arrow-path)" />
+
+              <rect x="760" y="90" width="170" height="70" class="node purple pulse" />
+              <text x="845" y="118" text-anchor="middle">IA + jugement</text>
+              <text x="845" y="140" text-anchor="middle" class="sub">ownership</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez quoi ignorer, quelles 4 fondations apprendre, comment pratiquer sans tomber dans le piège du tutoriel passif, quels projets construire, et comment utiliser l’IA sans vous saboter.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, 12 modules progressifs, simulateurs : équilibre pratique/tutoriel, isolation d’environnements, échelle de projets, portique IA, générateur de trade-offs, flashcards, examen chronométré.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Un plan d’apprentissage Python orienté AI engineering, une feuille de route projet API → RAG → evals → agent, et une méthode pour devenir propriétaire de bout en bout.</p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Phrase clé du transcript</h3>
+            <p>« Les outils IA amplifient la compétence que vous avez déjà. Si vous êtes déjà un bon ingénieur, ils peuvent vous rendre excellent. Mais si vous ne savez pas ce que vous faites, l’IA vous permet juste de produire du mauvais code très vite. » <span class="source">⏱ 0:38</span></p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('why')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Où en êtes-vous avec Python ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre Python.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="intermediaire"> Intermédiaire : je connais les bases, mais je veux les orienter IA.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="experimente"> Expérimenté : je code déjà, je veux la méthode AI engineering.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="emploi"> Décrocher un rôle d’AI engineer.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="production"> Construire des systèmes IA fiables.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="productivite"> Devenir plus efficace avec l’IA sans perdre les fondations.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l’essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours avec simulateurs.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "why", title: "1. Pourquoi Python compte encore", express: true,
+        content: `
+          <h1>Python à l’ère IA : travailler du code ne suffit pas</h1>
+          <p class="lead">
+            Vous pouvez ouvrir Cursor ou Claude Code, taper ce que vous voulez, et obtenir du Python fonctionnel immédiatement.
+            Mais du Python qui fonctionne n’est pas ce qu’il faut pour décrocher un rôle d’AI engineering à 300 000 $ par an.
+            Pour ça, il faut être vraiment bon. <span class="source">⏱ 0:24</span>
+          </p>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Si vous êtes déjà fort</h3>
+              <p>Les outils IA peuvent vous rendre excellent : aller plus vite, prendre des systèmes plus complexes, construire ce qui aurait demandé une équipe l’année dernière. <span class="source">⏱ 0:42</span></p>
+            </div>
+            <div class="card bad">
+              <h3>Si vous ne savez pas ce que vous faites</h3>
+              <p>L’IA vous permet juste de produire du mauvais code très vite. Et le pire : vous vous privez de la chance de devenir vraiment bon, parce que vous avez sauté la construction de l’intuition. <span class="source">⏱ 0:50</span></p>
+            </div>
+            <div class="card info">
+              <h3>La question légitime</h3>
+              <p>Si vous voulez aller vite, il est naturel de vous demander s’il faut encore passer du temps sur Python. La réponse du transcript : oui, mais seulement sur la bonne moitié. <span class="source">⏱ 0:19</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Comment devenir bon vite ?</h3>
+            <p>En ignorant tout ce qui ne vous rapproche pas de vos objectifs. Un cours Python complet standard vous fera passer des semaines sur des choses que vous n’utiliserez jamais comme AI engineer. Il existe une liste très précise de compétences pour performer en entretien et sur le job. <span class="source">⏱ 1:03</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi du Python « qui fonctionne » ne suffit pas ?", o: ["Parce que les rôles d’AI engineering exigent de la profondeur, du jugement et la capacité à comprendre ce que l’IA produit", "Parce que Python est obsolète", "Parce que les API sont payantes"], a: 0, e: "Les outils IA amplifient la compétence existante." },
+            { q: "Quel est le risque principal à laisser l’IA écrire sans fondations ?", o: ["Produire du mauvais code très vite et se priver de construire de l’intuition", "Perdre du temps", "Ne pas avoir de GPU"], a: 0, e: "Vous sautez la partie où vous devenez vraiment bon." }
+          ], "why")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('why')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('why')">Ce qu’il faut ignorer →</button>
+          </div>
+        `
+      },
+      {
+        id: "skip", title: "2. La moitié à ignorer", express: true,
+        content: `
+          <h1>Ce qu’il faut ignorer pour ne pas reculer de mois</h1>
+          <p class="lead">
+            Quand la plupart des gens pensent AI engineering, ils pensent TensorFlow et PyTorch. Mais ce sont des bibliothèques
+            pour entraîner des modèles from scratch — ce qui n’est pas forcément ce que vous ferez comme AI engineer.
+            <span class="source">⏱ 1:18</span>
+          </p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>À ne pas confondre</h3>
+              <ul>
+                <li>Entraîner un modèle from scratch ≠ AI engineering produit.</li>
+                <li>Notebook ML générique ≠ système IA fiable.</li>
+                <li>Cours Python complet ≠ parcours ciblé IA.</li>
+              </ul>
+            </div>
+            <div class="card good">
+              <h3>Les 4 groupes à maîtriser d’abord</h3>
+              <ol>
+                <li>Fondations : data structures, control flow, boucles, fonctions, POO conceptuelle.</li>
+                <li>APIs : HTTP, JSON, clés, erreurs.</li>
+                <li>Fichiers : documents, outputs, logs.</li>
+                <li>Environnements : virtual env, pip/UV, isolation.</li>
+              </ol>
+              <p class="muted small">C’est déjà suffisant pour commencer à construire des choses utiles. <span class="source">⏱ 2:27</span></p>
+            </div>
+          </div>
+
+          <div class="card info">
+            <h3>L’erreur de ciblage</h3>
+            <p>Beaucoup d’aspirants se préparent avec des projets ML génériques : entraîner un modèle simple, faire un notebook, présenter une métrique. Le transcript dit que ce n’est pas de l’AI engineering. Ce qu’il faut, ce sont des projets spécifiques IA qui vous rendent job-ready bit by bit. <span class="source">⏱ 3:21</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi TensorFlow/PyTorch ne sont-ils pas le premier cible ?", o: ["Parce qu’ils servent surtout à entraîner des modèles from scratch, pas forcément le travail quotidien d’un AI engineer", "Parce qu’ils sont interdits", "Parce qu’ils sont trop simples"], a: 0, e: "Il faut d’abord les 4 groupes de fondations pratiques." },
+            { q: "Quel est le problème des portfolios ML génériques ?", o: ["Ils ne montrent pas les compétences d’AI engineering : APIs, données, evals, agents, fiabilité", "Ils sont trop beaux", "Ils utilisent Python"], a: 0, e: "Construisez des projets spécifiques IA, en couches." }
+          ], "skip")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('skip')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('skip')">Les 4 fondations →</button>
+          </div>
+        `
+      },
+      {
+        id: "foundations", title: "3. Les 4 fondations", express: true,
+        content: `
+          <h1>Les 4 groupes de compétences Python pour l’IA</h1>
+          <p class="lead">
+            Pour commencer, il vous faut des fondations en data structures, control flow et boucles. Ensuite, APIs, fichiers,
+            et surtout gestion d’environnement — la pièce fondamentale que la plupart des débutants sautent.
+            <span class="source">⏱ 1:32</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>1. Fondations语言</h3>
+              <ul>
+                <li>Variables, listes, dictionnaires.</li>
+                <li>Conditionnels, boucles for et while.</li>
+                <li>Fonctions.</li>
+                <li>Juste assez de POO pour comprendre conceptuellement. <span class="source">⏱ 1:38</span></li>
+              </ul>
+            </div>
+            <div class="card info">
+              <h3>2. APIs</h3>
+              <ul>
+                <li>HTTP requests.</li>
+                <li>JSON.</li>
+                <li>Gestion sûre des API keys.</li>
+                <li>Traiter correctement les erreurs. <span class="source">⏱ 1:56</span></li>
+              </ul>
+              <p class="muted small">Appeler des APIs est honnêtement une grande partie de ce qu’est l’AI engineering en pratique.</p>
+            </div>
+            <div class="card info">
+              <h3>3. Fichiers et logs</h3>
+              <ul>
+                <li>Lire/écrire des fichiers.</li>
+                <li>Charger des documents.</li>
+                <li>Sauvegarder des outputs.</li>
+                <li>Travailler avec des logs. <span class="source">⏱ 2:04</span></li>
+              </ul>
+            </div>
+            <div class="card warn">
+              <h3>4. Environnements</h3>
+              <ul>
+                <li>Virtual environments.</li>
+                <li>Package management avec pip ou UV.</li>
+                <li>Isoler les versions de paquets par projet. <span class="source">⏱ 2:15</span></li>
+              </ul>
+              <p class="muted small">Différents projets ont besoin de versions différentes des mêmes bibliothèques. Sans isolation, installer l’un peut casser l’autre.</p>
+            </div>
+          </div>
+
+          <h2>Simulateur : pourquoi isoler les environnements ?</h2>
+          <div class="simulator">
+            <p class="muted small">Deux projets, deux versions incompatibles de la même bibliothèque. Testez avec ou sans environnement virtuel.</p>
+            <div class="grid">
+              <div>
+                <label for="venv-a">Version utilisée par Projet A</label>
+                <select id="venv-a" onchange="updateVenv()">
+                  <option value="v1">v1 — ancienne</option>
+                  <option value="v2" selected>v2 — actuelle</option>
+                  <option value="v3">v3 — dernière</option>
+                </select>
+              </div>
+              <div>
+                <label for="venv-b">Version requise par Projet B</label>
+                <select id="venv-b" onchange="updateVenv()">
+                  <option value="v1" selected>v1 — ancienne</option>
+                  <option value="v2">v2 — actuelle</option>
+                  <option value="v3">v3 — dernière</option>
+                </select>
+              </div>
+            </div>
+            <label class="check-item" style="margin-top:0.6rem">
+              <input type="checkbox" id="venv-iso" onchange="updateVenv()">
+              <span><span class="label">Utiliser des environnements virtuels séparés</span><span class="hint">pip / UV / venv par projet</span></span>
+            </label>
+            <button class="btn" onclick="updateVenv()">Simuler l’installation</button>
+            <pre id="venv-out" class="prompt"></pre>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle fondation les débutants sautent-ils le plus ?", o: ["La gestion d’environnement : virtual env, pip/UV, isolation", "Les variables", "Les commentaires", "Les imports"], a: 0, e: "Sans isolation, un paquet peut casser un autre projet." },
+            { q: "Pourquoi les APIs sont-elles centrales en AI engineering ?", o: ["Parce qu’une grande partie du travail consiste à appeler des modèles, des services, des données et à gérer JSON/erreurs", "Parce que Python n’a pas de fonctions", "Parce que les APIs remplacent les tests"], a: 0, e: "HTTP, JSON, clés, erreurs : compétences pratiques essentielles." }
+          ], "foundations")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('foundations')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('foundations')">Comment apprendre →</button>
+          </div>
+        `
+      },
+      {
+        id: "method", title: "4. Comment apprendre", express: true,
+        content: `
+          <h1>Sortir du piège du tutoriel passif</h1>
+          <p class="lead">
+            Savoir quoi apprendre n’est que la première partie. Comment apprendre est presque plus important.
+            La plupart des gens étudient Python en regardant des tutoriels — et c’est exactement pourquoi ils n’apprennent pas.
+            <span class="source">⏱ 2:31</span>
+          </p>
+
+          <div class="card bad">
+            <h3>40 heures regardées, zéro ancrage</h3>
+            <p>Vous pouvez assister à 40 heures de quelqu’un d’autre qui écrit du code et ne retenir pratiquement aucune connaissance utile. La compétence ne vient pas de la consommation, elle vient de la production. <span class="source">⏱ 2:41</span></p>
+          </div>
+
+          <h2>Simulateur : équilibre tutoriel vs pratique</h2>
+          <div class="simulator">
+            <div class="slider-row">
+              <label for="pb-watch">% de temps à regarder</label>
+              <input type="range" id="pb-watch" min="0" max="100" step="5" value="70" oninput="updatePractice()">
+              <span class="slider-val" id="pbv-watch">70%</span>
+            </div>
+            <div class="slider-row">
+              <label>% de temps à coder</label>
+              <div></div>
+              <span class="slider-val" id="pbv-code">30%</span>
+            </div>
+            <div class="risk-meter"><div class="risk-fill" id="pb-fill"></div></div>
+            <pre id="pb-out" class="prompt"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>La méthode active</h3>
+            <p>Regarder un instructeur coder peut aider, mais seulement si vous pouvez pause, prendre le contrôle, éditer, exécuter, casser, réparer, puis continuer. C’est comme ça que la matière colle. <span class="source">⏱ 2:55</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi regarder des tutoriels ne suffit pas ?", o: ["Parce que l’apprentissage passif ancre très peu ; il faut écrire, exécuter, casser, réparer", "Parce que les tutoriels sont toujours faux", "Parce que Python est visuel"], a: 0, e: "Le transcript dit : regarder est exactement pourquoi ils n’apprennent pas." },
+            { q: "Quel est le bon rôle de la théorie ?", o: ["Servir la pratique immédiate, pas la remplacer", "Être consommée en boucle", "Remplacer les projets"], a: 0, e: "Éditer, run, break, fix." }
+          ], "method")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('method')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('method')">Que construire →</button>
+          </div>
+        `
+      },
+      {
+        id: "projects", title: "5. Que construire", express: true,
+        content: `
+          <h1>Construire une échelle de projets, pas quatre projets random</h1>
+          <p class="lead">
+            Une fois que vous savez écrire du Python, la question est : que construire ? Les portfolios standards de préparation
+            à l’emploi sont souvent du ML générique. Ce qu’il faut, ce sont des projets spécifiques AI engineering, assez
+            challengeants pour enseigner, mais assez motivants pour continuer. <span class="source">⏱ 3:16</span>
+          </p>
+
+          <div class="card info">
+            <h3>Commencer petit</h3>
+            <p>Un bon premier projet peut être simplement d’appeler une API LLM. Un script Python qui prend du texte, l’envoie à un modèle comme GPT ou Claude, reçoit une réponse, et en fait quelque chose d’utile. Bien fait, ce projet enseigne déjà JSON, requests, gestion d’erreurs et environnement. <span class="source">⏱ 3:42</span></p>
+          </div>
+
+          <h2>Constructeur d’échelle de projet</h2>
+          <div class="simulator">
+            <p class="muted small">Cochez les étapes que vous voulez intégrer dans votre projet évolutif.</p>
+            <div class="check-grid">
+              <label class="check-item"><input type="checkbox" id="proj-api" onchange="updateProjectStack()"> <span><span class="label">1. Script API LLM</span><span class="hint">HTTP, JSON, erreurs, env</span></span></label>
+              <label class="check-item"><input type="checkbox" id="proj-rag" onchange="updateProjectStack()"> <span><span class="label">2. RAG app</span><span class="hint">Vector DB, embeddings, chunking</span></span></label>
+              <label class="check-item"><input type="checkbox" id="proj-judge" onchange="updateProjectStack()"> <span><span class="label">3. LLM judge</span><span class="hint">Evals, rubriques, qualité</span></span></label>
+              <label class="check-item"><input type="checkbox" id="proj-agent" onchange="updateProjectStack()"> <span><span class="label">4. Couche agentique</span><span class="hint">Tools, décisions, multi-step</span></span></label>
+            </div>
+            <button class="btn" onclick="updateProjectStack()">Générer le récit portfolio</button>
+            <pre id="project-out" class="prompt"></pre>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Étape 1 — API LLM</h3>
+              <p>Prendre du texte, envoyer à un modèle, recevoir une réponse, faire quelque chose d’utile. Fondations : requests, JSON, erreurs, env. <span class="source">⏱ 3:46</span></p>
+            </div>
+            <div class="card good">
+              <h3>Étape 2 — RAG</h3>
+              <p>Le même projet devient une app RAG : l’IA travaille avec vos données, pas seulement son entraînement. Ajoute vector DB, embeddings, chunking. <span class="source">⏱ 4:05</span></p>
+            </div>
+            <div class="card good">
+              <h3>Étape 3 — LLM judge</h3>
+              <p>Évaluer la sortie du RAG. Vous apprenez les evals, une des compétences les plus demandées pour les AI engineers en ce moment. <span class="source">⏱ 4:16</span></p>
+            </div>
+            <div class="card good">
+              <h3>Étape 4 — Agent</h3>
+              <p>Ajouter un comportement agentique : outils, décisions, workflows multi-étapes. Là, vous avez un système, pas quatre petits projets. <span class="source">⏱ 4:25</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est le bon premier projet ?", o: ["Un script qui appelle une API LLM et fait quelque chose d’utile avec la réponse", "Un modèle entraîné from scratch", "Un notebook Kaggle générique", "Une app Streamlit sans erreurs"], a: 0, e: "Il couvre JSON, requests, erreurs, environnement." },
+            { q: "Pourquoi ajouter un LLM judge après le RAG ?", o: ["Pour apprendre les evals et mesurer si les sorties servent réellement le besoin", "Pour rendre le modèle plus rapide", "Pour remplacer le retrieval"], a: 0, e: "Les evals sont une compétence très demandée." }
+          ], "projects")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('projects')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('projects')">Règle IA fondations →</button>
+          </div>
+        `
+      },
+      {
+        id: "ai-rule", title: "6. Règle IA fondations", express: true,
+        content: `
+          <h1>La règle qui empêche de se saboter avec l’IA</h1>
+          <p class="lead">
+            La tentation est de pointer Claude sur le projet et de le laisser tout écrire. L’IA est là, c’est rapide, ça marche.
+            Vous pouvez avoir un RAG fonctionnel en une heure sans cette pénible tension cognitive. Mais si vous faites ça
+            avant d’être prêt, vous ne serez jamais qualifié pour un vrai rôle d’AI engineering. <span class="source">⏱ 4:52</span>
+          </p>
+
+          <div class="card bad">
+            <h3>La règle de la phase fondations</h3>
+            <p>Pendant que vous construisez ces premiers projets, l’IA est seulement autorisée pour expliquer des concepts et tester votre compréhension. Vous écrivez le code vous-même, même quand c’est lent et frustrant, parce que c’est ainsi qu’on construit les vraies compétences. <span class="source">⏱ 5:13</span></p>
+          </div>
+
+          <h2>Portique IA : êtes-vous prêt à changer de phase ?</h2>
+          <div class="simulator">
+            <div class="q">
+              <p class="q-text">Phase actuelle</p>
+              <label class="q-option"><input type="radio" name="ai-phase" value="foundations" checked> Fondations : j’apprends les bases et je construis mon premier projet.</label>
+              <label class="q-option"><input type="radio" name="ai-phase" value="transition"> Transition : je veux commencer à utiliser l’IA comme collaboratrice.</label>
+              <label class="q-option"><input type="radio" name="ai-phase" value="production"> Production : je construis des systèmes avec IA, tests, evals et revue.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">Usage de l’IA</p>
+              <label class="q-option"><input type="radio" name="ai-usage" value="explain" checked> Expliquer un concept.</label>
+              <label class="q-option"><input type="radio" name="ai-usage" value="test"> Tester ma compréhension.</label>
+              <label class="q-option"><input type="radio" name="ai-usage" value="review"> Relire / améliorer mon code.</label>
+              <label class="q-option"><input type="radio" name="ai-usage" value="write"> Écrire tout le projet à ma place.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">Critères de préparation</p>
+              <label class="check-item"><input type="checkbox" id="ready-read"> <span><span class="label">Je peux lire du code inconnu et expliquer ce qu’il fait</span></span></label>
+              <label class="check-item"><input type="checkbox" id="ready-debug"> <span><span class="label">Je peux déboguer un test qui échoue seul</span></span></label>
+              <label class="check-item"><input type="checkbox" id="ready-flow"> <span><span class="label">Je peux raisonner sur le data flow et les points de rupture</span></span></label>
+            </div>
+
+            <button class="btn" onclick="evaluateAiGate()">Évaluer mon usage IA</button>
+            <pre id="ai-gate-out" class="prompt"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>Quand passer à l’étape suivante ?</h3>
+            <p>Quand trois choses sont vraies : vous pouvez lire du code inconnu et expliquer ce qu’il fait ; vous pouvez déboguer un test qui échoue seul ; vous pouvez raisonner sur le data flow et où un système est susceptible de casser. Une fois que vous pouvez faire tout ça, vous avez gagné l’accès à l’étape suivante. <span class="source">⏱ 5:28</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pendant les fondations, quel est le rôle autorisé de l’IA ?", o: ["Expliquer des concepts et tester votre compréhension", "Écrire tout le projet", "Remplacer les tests", "Supprimer la nécessité de lire du code"], a: 0, e: "Vous écrivez le code vous-même, même lentement." },
+            { q: "Quels sont les trois critères pour passer à l’IA collaboratrice ?", o: ["Lire du code inconnu, déboguer un test seul, raisonner le data flow", "Regarder 40 heures, avoir un GPU, connaître PyTorch", "Avoir un portfolio, un certificat, un tweet"], a: 0, e: "Ce sont les critères du transcript." }
+          ], "ai-rule")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('ai-rule')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('ai-rule')">Coder avec IA comme pro →</button>
+          </div>
+        `
+      },
+      {
+        id: "ai-collab", title: "7. Coder avec IA", express: true,
+        content: `
+          <h1>La partie que presque tout le monde rate : utiliser l’IA comme un pro</h1>
+          <p class="lead">
+            Il est 100% nécessaire d’avoir la capacité d’écrire du code à la main. Mais la réalité, c’est que sur le job,
+            vous ne l’écrirez probablement pas entièrement. Utiliser l’assistance IA en codage correctement est une compétence
+            qui mérite sa propre attention. <span class="source">⏱ 5:50</span>
+          </p>
+
+          <div class="card bad">
+            <h3>L’usage amateur</h3>
+            <p>La plupart des gens commencent par taper quelques instructions rapides dans l’IDE en espérant le meilleur, puis sont surpris quand l’IA donne des sorties pourries. <span class="source">⏱ 6:00</span></p>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Prompting systématique</h3>
+              <p>Même quelque chose d’aussi simple que prompter doit être approché systématiquement, avec des contraintes claires et des définitions. <span class="source">⏱ 6:13</span></p>
+            </div>
+            <div class="card info">
+              <h3>Specs</h3>
+              <p>Une fois que vous vous sentez à l’aise pour écrire de fortes specs, tournez votre focus vers les tests. <span class="source">⏱ 6:19</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Tests</h3>
+              <p>L’IA est excellente pour écrire des tests, mais elle écrira aussi des tests qui passent pour les mauvaises raisons. Vous devez pouvoir regarder un test et demander s’il attrape réellement le mode de défaillance qu’il est censé détecter. <span class="source">⏱ 6:22</span></p>
+            </div>
+            <div class="card warn">
+              <h3>Evals</h3>
+              <p>Je ne peux pas assez insister sur l’importance d’avoir des checks sur vos outputs IA. C’est une compétence à part entière en AI engineering, et être bon là-dedans est un vrai différenciateur sur le marché. <span class="source">⏱ 6:32</span></p>
+            </div>
+            <div class="card good">
+              <h3>Code review</h3>
+              <p>Devenir vraiment bon en revue de code est probablement la compétence la plus sous-estimée de cette liste. Une grande partie de votre job sera de relire ce que l’IA a écrit et de pousser back là où c’est faux. <span class="source">⏱ 7:02</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Comment s’entraîner</h3>
+            <p>Reprenez des projets déjà construits, une nouvelle compétence à la fois, en utilisant l’IA comme collaboratrice. Par exemple, sur le projet LLM judge : définissez précisément ce qui rend une réponse bonne, comment le LLM doit noter, et comment vous évaluerez si cela améliore la performance du système. <span class="source">⏱ 6:43</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi l’usage amateur de l’IA échoue-t-il ?", o: ["Parce qu’on tape des instructions rapides sans contraintes, specs, tests ni revue", "Parce que les modèles sont toujours faux", "Parce que Python est trop lent"], a: 0, e: "Le prompting doit être systématique." },
+            { q: "Quel est le danger des tests générés par IA ?", o: ["Ils peuvent passer pour les mauvaises raisons", "Ils sont toujours trop lents", "Ils ne peuvent pas détecter d’erreurs"], a: 0, e: "Il faut relire chaque test et vérifier le mode de défaillance couvert." }
+          ], "ai-collab")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('ai-collab')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('ai-collab')">Jugement et trade-offs →</button>
+          </div>
+        `
+      },
+      {
+        id: "judgment", title: "8. Jugement & trade-offs", express: true,
+        content: `
+          <h1>Ce qui compte vraiment : jugement, arbitrages et communication</h1>
+          <p class="lead">
+            L’idée n’est pas seulement de devenir bon à écrire du code ou à auditer du code généré par IA.
+            Il s’agit de développer du jugement sur les trade-offs : performance et coût, fiabilité, sécurité.
+            Et vous devez être capable de raisonner sur la conception d’un système qui fonctionne dans les contraintes
+            de votre business — puis de communiquer ces choix. <span class="source">⏱ 7:13</span>
+          </p>
+
+          <div class="card info">
+            <h3>L’anglais, langue de l’AI coding</h3>
+            <p>L’anglais est plus ou moins la langue de l’AI coding, encore plus que Python. Les compétences de communication ont toujours été essentielles, mais elles le sont plus que jamais maintenant que nous communiquons des exigences à l’IA et expliquons des décisions techniques à notre équipe et au leadership. <span class="source">⏱ 7:34</span></p>
+          </div>
+
+          <h2>Générateur de défense de trade-offs</h2>
+          <div class="generator">
+            <p class="muted small">Remplissez les choix de votre projet pour générer un paragraphe de justification technique et business.</p>
+            <div class="grid">
+              <div>
+                <label for="tr-db">Stockage / retrieval</label>
+                <select id="tr-db">
+                  <option value="une base Supabase/Postgres">Supabase / Postgres</option>
+                  <option value="une vector database dédiée">Vector database dédiée</option>
+                  <option value="des fichiers locaux + index simple">Fichiers locaux + index simple</option>
+                </select>
+              </div>
+              <div>
+                <label for="tr-model">Modèle</label>
+                <select id="tr-model">
+                  <option value="un modèle API généraliste">Modèle API généraliste</option>
+                  <option value="un modèle local via Ollama">Modèle local via Ollama</option>
+                  <option value="un petit modèle spécialisé">Petit modèle spécialisé</option>
+                </select>
+              </div>
+              <div>
+                <label for="tr-constraint">Contrainte principale</label>
+                <select id="tr-constraint">
+                  <option value="le coût">Coût</option>
+                  <option value="la latence">Latence</option>
+                  <option value="la confidentialité">Confidentialité</option>
+                  <option value="la fiabilité du retrieval">Fiabilité du retrieval</option>
+                </select>
+              </div>
+              <div>
+                <label for="tr-users">Volume d’utilisateurs estimé</label>
+                <input id="tr-users" value="1000" />
+              </div>
+            </div>
+            <button class="btn" onclick="generateTradeoff()">Générer la défense</button>
+            <pre id="tradeoff-out" class="prompt"></pre>
+          </div>
+
+          <div class="card good">
+            <h3>À écrire pendant que vous construisez</h3>
+            <p>Pourquoi cette base et pas une autre ? Pourquoi ce modèle ? Comment calculeriez-vous les coûts ? Que se passerait-il avec beaucoup plus d’utilisateurs ? Ces réponses transforment un projet en preuve de jugement. <span class="source">⏱ 7:53</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle compétence humaine est soulignée comme cruciale ?", o: ["Communiquer des choix techniques et des trade-offs, y compris à l’IA et au leadership", "Mémoriser toute la syntaxe Python", "Utiliser le plus gros modèle possible"], a: 0, e: "L’anglais est presque la langue de l’AI coding." },
+            { q: "Que faut-il documenter pendant les projets ?", o: ["Les trade-offs : DB, modèle, coûts, fiabilité, sécurité, scalabilité", "Seulement le code final", "Seulement les screenshots"], a: 0, e: "Défendre ses choix est une compétence d’AI engineer." }
+          ], "judgment")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('judgment')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('judgment')">End-to-end ownership →</button>
+          </div>
+        `
+      },
+      {
+        id: "ownership", title: "9. End-to-end ownership", express: true,
+        content: `
+          <h1>La vraie destination : posséder le système de bout en bout</h1>
+          <p class="lead">
+            La façon de penser à tout cela n’est plus seulement d’apprendre Python. C’est l’ownership de bout en bout.
+            Le but vers lequel nous travaillons est de devenir quelqu’un qui peut non seulement écrire du Python,
+            mais posséder un produit de bout en bout, depuis les premières exigences floues jusqu’à un système fonctionnel en production.
+            <span class="source">⏱ 8:03</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Requirements floues</h3>
+              <p>Comprendre le problème, les contraintes, les utilisateurs, ce qui compte comme succès.</p>
+            </div>
+            <div class="card info">
+              <h3>Design technique</h3>
+              <p>Choisir modèles, données, retrieval, evals, outils, garde-fous, coûts.</p>
+            </div>
+            <div class="card info">
+              <h3>Build itératif</h3>
+              <p>API → RAG → judge → agent, avec pratique active et tests.</p>
+            </div>
+            <div class="card info">
+              <h3>Production</h3>
+              <p>Logs, monitoring, revue de code, communication des trade-offs, maintenance.</p>
+            </div>
+          </div>
+
+          <div class="card warn">
+            <h3>Timeline réaliste</h3>
+            <p>Python n’est que le point d’entrée de l’AI engineering. Après avoir coaché plus de 200 personnes dans des rôles IA et ML, le message est clair : le chemin réel pour devenir un vrai AI engineer est beaucoup plus long que ce que suggèrent la plupart des vidéos de roadmap de trois mois. <span class="source">⏱ 8:18</span></p>
+          </div>
+
+          <div class="card good">
+            <h3>Ce que ça change dans votre apprentissage</h3>
+            <p>Vous ne construisez plus pour « finir un tuto ». Vous construisez pour comprendre un système, le défendre, le mesurer, le faire évoluer. C’est cela qui vous rend employable, pas la quantité de vidéos consommées.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel est le but final au-delà de Python ?", o: ["Être capable de posséder un produit IA de bout en bout, des requirements flous à la production", "Connaître tous les frameworks ML", "Avoir un certificat", "Publier beaucoup de notebooks"], a: 0, e: "Python est le point d’entrée, pas la destination." },
+            { q: "Que dit le transcript sur les roadmaps de trois mois ?", o: ["Le chemin réel est plus long que ce qu’elles suggèrent", "Elles sont toujours exactes", "Elles suffisent pour un rôle senior"], a: 0, e: "Après 200+ coachings, la réalité est plus longue." }
+          ], "ownership")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('ownership')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('ownership')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios", title: "🎬 Scénarios", express: false,
+        content: `
+          <h1>Scénarios : diagnostiquer et corriger</h1>
+          <p class="lead">Sélectionnez un scénario pour voir le diagnostic et le remède issus du transcript.</p>
+
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('tutorial_loop')">Piège du tutoriel</button>
+              <button class="tab-btn" onclick="chooseScenario('tf_pytorch')">TF/PyTorch trop tôt</button>
+              <button class="tab-btn" onclick="chooseScenario('claude_writes_rag')">Claude écrit le RAG</button>
+              <button class="tab-btn" onclick="chooseScenario('ai_tests_pass_wrong')">Tests qui passent mal</button>
+              <button class="tab-btn" onclick="chooseScenario('cost_tradeoff')">Coût non justifié</button>
+              <button class="tab-btn" onclick="chooseScenario('portfolio_generic')">Portfolio générique</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "🃏 Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. 29 cartes couvrant tout le transcript, avec ancres temporelles.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button>
+          </div>
+        `
+      },
+      {
+        id: "antipatterns", title: "🚫 Anti-patterns", express: true,
+        content: `
+          <h1>Anti-patterns : les erreurs qui bloquent les carrières IA</h1>
+          <p class="lead">Le transcript identifie plusieurs façons de se saboter. Les voici regroupées pour ne plus les répéter.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Regarder au lieu de coder</h3>
+              <p>40 heures de tutoriels passifs peuvent n’ancrer presque rien. La compétence vient de l’édition, l’exécution, la cassure et la réparation.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Commencer par TensorFlow/PyTorch</h3>
+              <p>Ce sont des outils pour entraîner des modèles from scratch. Ce n’est pas forcément le cœur de l’AI engineering produit.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Négliger les environnements</h3>
+              <p>Sans virtual env, pip/UV et isolation, un projet peut casser un autre à cause de versions incompatibles.</p>
+            </div>
+            <div class="card bad">
+              <h3>4. Laisser l’IA écrire les fondations</h3>
+              <p>Un RAG fonctionnel en une heure ne veut pas dire compréhension. Si vous sautez la tension cognitive, vous ne devenez pas qualifiable.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. Accepter les tests IA sans revue</h3>
+              <p>L’IA peut écrire des tests qui passent pour les mauvaises raisons. Il faut vérifier qu’ils attrapent le bon mode de défaillance.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Ne pas mesurer les outputs</h3>
+              <p>Les evals sont une compétence différenciante. Sans checks sur les sorties IA, vous ne savez pas si votre système sert réellement l’utilisateur.</p>
+            </div>
+            <div class="card bad">
+              <h3>7. Construire des projets génériques ML</h3>
+              <p>Notebooks Kaggle et classifiteurs simples ne montrent pas l’AI engineering : APIs, données, evals, agents, fiabilité.</p>
+            </div>
+            <div class="card bad">
+              <h3>8. Ne pas documenter les trade-offs</h3>
+              <p>Choisir un modèle, une DB, un coût, une latence, une sécurité sans justification empêche de démontrer du jugement.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel anti-pattern consiste à consommer sans produire ?", o: ["Regarder des tutoriels passivement au lieu d’écrire, exécuter, casser, réparer", "Utiliser virtual env", "Écrire des tests", "Documenter les trade-offs"], a: 0, e: "L’apprentissage actif est indispensable." },
+            { q: "Pourquoi les tests IA doivent-ils être relus ?", o: ["Parce qu’ils peuvent passer pour les mauvaises raisons", "Parce qu’ils sont toujours faux", "Parce qu’ils sont illisibles"], a: 0, e: "Vérifiez qu’ils couvrent le mode de défaillance visé." }
+          ], "antipatterns")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider la méthode Python pour l’AI engineering.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l’examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et plan d’action 14 jours</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et transformez la méthode en projets réels.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🐍</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Apprendre Python pour l’IA : Fondations, Projets en couches, IA Collaborative, Jugement, Ownership</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Checklist de méthode 12 points</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> J’ignore les cours Python complets génériques et je cible les 4 groupes de fondations.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Je maîtrise variables, listes, dictionnaires, conditionnels, boucles, fonctions et POO conceptuelle.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Je sais faire des HTTP requests, parser du JSON, gérer les API keys et les erreurs.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Je lis/écris des fichiers et je travaille avec des logs.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> J’utilise des environnements virtuels et pip/UV pour isoler chaque projet.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> J’apprends en pratiquant : éditer, exécuter, casser, réparer — pas seulement regarder.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Mon premier projet appelle une API LLM et fait quelque chose d’utile.</label>
+            <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> J’ajoute du RAG sur mes données : vector DB, embeddings, chunking, retrieval.</label>
+            <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> J’ajoute un LLM judge / des evals pour mesurer la qualité des sorties.</label>
+            <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> J’ajoute une couche agentique : outils, décisions, workflows multi-étapes.</label>
+            <label><input type="checkbox" id="c11" onchange="toggleCheck('c11')"> Pendant les fondations, j’utilise l’IA seulement pour expliquer et tester ma compréhension.</label>
+            <label><input type="checkbox" id="c12" onchange="toggleCheck('c12')"> Je documente les trade-offs et je communique mes choix techniques comme un AI engineer.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/12</span></p>
+
+          <h2>Plan 14 jours</h2>
+          <div class="card">
+            <ol>
+              <li><strong>Jours 1-2 :</strong> environnements virtuels, pip/UV, premier script Python exécuté localement.</li>
+              <li><strong>Jours 3-4 :</strong> HTTP requests, JSON, erreurs, API key via variable d’environnement.</li>
+              <li><strong>Jours 5-6 :</strong> appel à une API LLM : texte en entrée, réponse en sortie, écriture dans un fichier.</li>
+              <li><strong>Jours 7-8 :</strong> ajouter du retrieval simple sur des documents locaux ; comprendre chunking et embeddings.</li>
+              <li><strong>Jours 9-10 :</strong> construire un LLM judge minimal : rubric, score, logs.</li>
+              <li><strong>Jours 11-12 :</strong> ajouter un outil à l’agent : recherche, calcul, lecture de fichier, avec limites et observabilité.</li>
+              <li><strong>Jours 13-14 :</strong> écrire la défense des trade-offs : modèle, DB, coût, latence, fiabilité, sécurité.</li>
+            </ol>
+          </div>
+
+          <h2>Ressources ancrées au transcript et au contexte fourni</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Transcript source</strong> : « Why most people learn Python wrong ».</li>
+              <li><strong>Message central</strong> : les outils IA amplifient la compétence existante ; sans fondations, ils accélèrent le mauvais code.</li>
+              <li><strong>Les 4 groupes</strong> : fondations language, APIs, fichiers/logs, environnements.</li>
+              <li><strong>Échelle de projets</strong> : API LLM → RAG → LLM judge → agent.</li>
+              <li><strong>Règle IA</strong> : pendant les fondations, l’IA explique/teste ; vous écrivez le code.</li>
+              <li><strong>Compétence sous-estimée</strong> : code review, tests, evals, trade-offs, communication.</li>
+              <li><strong>Exemples publics de progression portfolio</strong> : repos GitHub fournis dans le contexte — DeepResearch backend, Supabase tips, Kimi K2/Claude Code, MVP Next.js/Stripe/Supabase — utiles pour voir des projets réels allant de l’API au système complet.</li>
+              <li><strong>Option locale gratuite</strong> : pour le premier projet API LLM, le contexte Ollama fourni montre qu’on peut aussi tester des modèles locaux (Llama 3.2, embeddings, RAG, agents) sans payer d’API, ce qui est excellent pour pratiquer les fondations en privé.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l’examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l’accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.updatePractice = updatePractice;
+    window.updateVenv = updateVenv;
+    window.updateProjectStack = updateProjectStack;
+    window.evaluateAiGate = evaluateAiGate;
+    window.generateTradeoff = generateTradeoff;
+    window.chooseScenario = chooseScenario;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

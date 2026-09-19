@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : AutoGen ConversableAgent | Multi-Agent Chat, Termination, Summary, État</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🤖 <span>AutoGen</span> ConversableAgent</div>
+      <div class="muted small">Multi-Agent Chat • max_turns • is_termination_msg • Summary • État</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les citations ⏱"></button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="concept">1. La notion d'agent</button>
+      <button data-target="setup">2. Premier ConversableAgent</button>
+      <button data-target="stateless">3. generate_reply & état</button>
+      <button data-target="comedy">4. Cas : deux comédiens</button>
+      <button data-target="inspect">5. Historique, coût, résumé</button>
+      <button data-target="termination">6. is_termination_msg</button>
+      <button data-target="continue">7. Continuer & mémoriser</button>
+      <button data-target="local">8. Extension : local (Ollama)</button>
+      <button data-target="patterns">9. Patterns & anti-patterns</button>
+      <button data-target="scenarios">🎬 Scénarios</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat & ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>ConversableAgent : faire converser plusieurs agents</h1>
+      <p class="lead">
+        Cette leçon introduit le <strong>ConversableAgent</strong>, classe d'agents intégrée à AutoGen, utilisée pour construire
+        des conversations multi-agents. Tu apprends la fonctionnalité de base, puis tu construis ton premier chat à deux agents :
+        la conversation amusante entre deux stand-up comedians. <span class="source">⏱ 0:00</span>
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 980 250" role="img" aria-label="Abstraction ConversableAgent et chat à deux agents">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          <rect x="20" y="40" width="200" height="170" class="node purple pulse"/>
+          <text x="120" y="70" text-anchor="middle">ConversableAgent</text>
+          <text x="120" y="92" text-anchor="middle" class="sub">même abstraction</text>
+          <text x="120" y="118" text-anchor="middle" class="sub">• envoyer / recevoir</text>
+          <text x="120" y="136" text-anchor="middle" class="sub">• agir, générer replies</text>
+          <text x="120" y="154" text-anchor="middle" class="sub">• code / tools / human</text>
+          <text x="120" y="172" text-anchor="middle" class="sub">• stopping condition</text>
+          <path class="dash purple" d="M220 125 L300 70" marker-end="url(#arr)"/>
+          <path class="dash purple" d="M220 125 L300 180" marker-end="url(#arr)"/>
+          <rect x="300" y="40" width="150" height="60" class="node"/><text x="375" y="66" text-anchor="middle">Rôle : Joe</text><text x="375" y="86" text-anchor="middle" class="sub">comédien</text>
+          <rect x="300" y="150" width="150" height="60" class="node green"/><text x="375" y="176" text-anchor="middle">Rôle : Cassie</text><text x="375" y="196" text-anchor="middle" class="sub">comédienne</text>
+          <path class="dash" d="M450 70 L560 70" marker-end="url(#arr)"/>
+          <path class="dash green" d="M560 180 L450 180" marker-end="url(#arr)"/>
+          <rect x="560" y="95" width="170" height="60" class="node yellow"/><text x="645" y="120" text-anchor="middle">initiate_chat</text><text x="645" y="140" text-anchor="middle" class="sub">recipient, max_turns</text>
+          <path class="dash yellow" d="M730 125 L820 125" marker-end="url(#arr)"/>
+          <rect x="820" y="95" width="140" height="60" class="node red"/><text x="890" y="120" text-anchor="middle">ChatResult</text><text x="890" y="140" text-anchor="middle" class="sub">history, cost, summary</text>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Objectif</h3><p>Comprendre l'abstraction ConversableAgent, lancer un chat à deux agents, contrôler l'arrêt (max_turns vs is_termination_msg), inspecter historique/coût/résumé, et préserver l'état.</p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Concept → setup → démonstration sans état → cas pratique comédiens → inspection → termination → continuation. Chaque module a son simulateur.</p></div>
+        <div class="card good"><h3>Livrable pratique</h3><p>Ton premier two-agent chat fonctionnel, plus un blueprint : quel mode d'arrêt, quel résumé, quel human_input_mode pour ton usage.</p></div>
+      </div>
+
+      <div class="card purple">
+        <h3>Phrase clé</h3>
+        <p>« A agent is a entity that can act on behalf of human intent, send messages, receive messages, perform actions, generate replies, and interact with other agents. » <span class="source">⏱ 0:32</span></p>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('concept')">Aller au cours</button>
+        <button class="btn secondary" onclick="showSection('comedy')">Sauter au cas pratique</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour orienter ton parcours.</p>
+      <div class="quiz">
+        <div class="q">
+          <p class="q-text">1. Ton niveau ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre les agents AutoGen.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="builder"> Builder : je veux coder un multi-agent chat.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="architect"> Architecte : je veux contrôler arrêt, résumé, état, patterns.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre l'abstraction ConversableAgent.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire mon premier two-agent chat.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="controler"> Maîtriser termination, summary, state.</label>
+        </div>
+        <div class="q">
+          <p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15 min.</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 45 min.</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="concept" class="section">
+      <h1>La notion d'agent dans AutoGen</h1>
+      <p class="lead">
+        Dans AutoGen, un agent est une entité qui peut agir au nom de l'intention humaine, envoyer des messages, recevoir des
+        messages, performer des actions, générer des replies, et interagir avec d'autres agents. AutoGen fournit une classe
+        intégrée, <strong>ConversableAgent</strong>, qui unifie différents types d'agents dans la même abstraction de programmation.
+        <span class="source">⏱ 0:27</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Même interface, rôles différents</h3><p>Grâce à ces capacités, tu crées des agents de rôles différents en utilisant la même interface. <span class="source">⏱ 1:14</span></p></div>
+        <div class="card good"><h3>Fonctionnalités intégrées</h3><p>Liste de configurations LLM pour générer des replies ; exécution de code ; exécution de fonctions et d'outils. <span class="source">⏱ 0:55</span></p></div>
+        <div class="card purple"><h3>Human-in-the-loop & stopping</h3><p>Un composant pour garder l'humain dans la boucle et vérifier l'arrêt de la réponse. Tu allumes/éteins et personnalises chaque composant selon ton application. <span class="source">⏱ 1:03</span></p></div>
+      </div>
+      <div class="card warn">
+        <h3>Pourquoi une seule classe ?</h3>
+        <p>Unifier les agents dans la même abstraction signifie que tu n'apprends pas cinq API différentes : tu configures des
+        composants (LLM, code exec, tools, human, stopping) à la hausse ou à la baisse. C'est ce qui rend le passage d'un agent
+        « générique » à un agent « rôle précis » trivial — il suffit de changer le <code>system_message</code>. <span class="source">⏱ 1:19</span></p>
+      </div>
+      <div class="quiz" data-module="concept">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. ConversableAgent sert à...</p>
+          <label class="q-option"><input type="radio" name="con-q0" value="0"> remplacer le LLM</label>
+          <label class="q-option"><input type="radio" name="con-q0" value="1"> unifier différents types d'agents dans la même abstraction</label>
+          <label class="q-option"><input type="radio" name="con-q0" value="2"> stocker des vecteurs</label>
+          <div class="explain">C'est la classe intégrée d'AutoGen pour construire des conversations multi-agents.</div>
+        </div>
+        <div class="q" data-answer="2">
+          <p class="q-text">2. Laquelle n'est PAS une capacité intégrée citée ?</p>
+          <label class="q-option"><input type="radio" name="con-q1" value="0"> exécution de code</label>
+          <label class="q-option"><input type="radio" name="con-q1" value="1"> human-in-the-loop</label>
+          <label class="q-option"><input type="radio" name="con-q1" value="2"> entraînement de modèles</label>
+          <div class="explain">LLM configs, code exec, function/tool exec, human-in-the-loop, stopping. Pas d'entraînement.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('concept')">← Précédent</button><button class="btn" onclick="nextFrom('concept')">Premier agent →</button></div>
+    </section>
+
+    <section id="setup" class="section">
+      <h1>Premier ConversableAgent</h1>
+      <p class="lead">On importe la clé OpenAI depuis l'environnement, on définit une configuration LLM (GPT-3.5 Turbo), puis on instancie un agent nommé <code>chatbot</code> avec <code>human_input_mode="NEVER"</code>. <span class="source">⏱ 1:24</span></p>
+      <pre class="code">from autogen import ConversableAgent
+import os
+
+# 1) clé depuis l'environnement (utility get_openai_api_key)
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+
+# 2) configuration LLM : liste de configs
+llm_config = {
+    "config_list": [
+        {"model": "gpt-3.5-turbo", "api_key": openai_api_key}
+    ]
+}
+
+# 3) premier agent
+chatbot = ConversableAgent(
+    name="chatbot",
+    llm_config=llm_config,
+    human_input_mode="NEVER",   # ne demande jamais d'input humain
+)</pre>
+      <div class="grid">
+        <div class="card info"><h3>human_input_mode</h3><p><code>NEVER</code> : l'agent n'seek jamais l'input humain, il utilise seulement le LLM. <code>ALWAYS</code> : il demande toujours un input humain avant de générer seul. <span class="source">⏱ 2:19</span></p></div>
+        <div class="card good"><h3>Config passe à l'agent</h3><p>On passe la configuration définie plus haut au ConversableAgent ; l'agent peut alors utiliser ce grand modèle pour générer des replies. <span class="source">⏱ 2:05</span></p></div>
+        <div class="card purple"><h3>Setup minimal</h3><p>Ce ne sont que les réglages de base. En général on ajoute code execution config, function execution, etc. Mais on commence simple. <span class="source">⏱ 2:46</span></p></div>
+      </div>
+      <div class="card warn">
+        <h3>Première action : generate_reply</h3>
+        <p>On appelle <code>generate_reply</code> avec une <em>message list</em> : <code>{content: "tell me a joke", role: "user"}</code>. L'agent répond — exemple du transcript : « Why did the scarecrow win the award? Because he was outstanding in his field. » <span class="source">⏱ 2:57</span></p>
+      </div>
+      <div class="quiz" data-module="setup">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="0">
+          <p class="q-text">1. human_input_mode="NEVER" signifie...</p>
+          <label class="q-option"><input type="radio" name="set-q0" value="0"> l'agent n'seek jamais d'input humain</label>
+          <label class="q-option"><input type="radio" name="set-q0" value="1"> l'agent demande toujours un humain</label>
+          <label class="q-option"><input type="radio" name="set-q0" value="2"> l'agent est désactivé</label>
+          <div class="explain">ALWAYS = demande un humain avant de générer seul.</div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">2. generate_reply reçoit...</p>
+          <label class="q-option"><input type="radio" name="set-q1" value="0"> un string libre</label>
+          <label class="q-option"><input type="radio" name="set-q1" value="1"> une message list (content + role)</label>
+          <label class="q-option"><input type="radio" name="set-q1" value="2"> un fichier</label>
+          <div class="explain">Exemple : {content:"tell me a joke", role:"user"}.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('setup')">← Précédent</button><button class="btn" onclick="nextFrom('setup')">État vs sans état →</button></div>
+    </section>
+
+    <section id="stateless" class="section">
+      <h1>generate_reply ne garde PAS l'état</h1>
+      <p class="lead">
+        Point crucial du transcript : rappeler <code>generate_reply</code> avec « repeat the joke » ne fait PAS répéter la blague.
+        L'appel n'altère pas l'état interne de l'agent ; c'est un appel frais, qui génère une nouvelle reply sans savoir qu'il a
+        déjà répondu. Pour garder l'état et enchaîner des tâches, il faut une approche différente : la conversation.
+        <span class="source">⏱ 3:36</span>
+      </p>
+
+      <div class="two-col">
+        <div class="simulator">
+          <h3>Sans état — generate_reply</h3>
+          <p class="muted small">Chaque appel est indépendant. Clique deux fois : tu obtiens deux replies différentes, sans mémoire.</p>
+          <div class="toolbar no-print">
+            <button class="btn" onclick="statelessCall('tell me a joke')">generate_reply("tell me a joke")</button>
+            <button class="btn secondary" onclick="statelessCall('repeat the joke')">generate_reply("repeat the joke")</button>
+            <button class="btn secondary" onclick="resetStateless()">Reset</button>
+          </div>
+          <div id="stateless-log"></div>
+        </div>
+        <div class="simulator">
+          <h3>Avec état — initiate_chat</h3>
+          <p class="muted small">La conversation conserve l'historique : les messages s'enchaînent et l'agent « se souvient ».</p>
+          <div class="toolbar no-print">
+            <button class="btn" onclick="statefulStep()">initiate_chat (étape suivante)</button>
+            <button class="btn secondary" onclick="resetStateful()">Reset</button>
+          </div>
+          <div id="stateful-log"></div>
+        </div>
+      </div>
+
+      <div class="card info">
+        <h3>À retenir</h3>
+        <p>Tu peux utiliser <code>generate_reply</code> sans état pour générer des replies différentes volontairement. Mais dès que
+        tu veux <em>maintenir l'état</em> et faire accomplir une série de tâches, tu passes à la conversation entre agents.
+        <span class="source">⏱ 4:11</span></p>
+      </div>
+
+      <div class="quiz" data-module="stateless">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Si on rappelle generate_reply avec « repeat the joke », l'agent...</p>
+          <label class="q-option"><input type="radio" name="st-q0" value="0"> répète la même blague</label>
+          <label class="q-option"><input type="radio" name="st-q0" value="1"> génère une nouvelle reply, sans mémoire du passé</label>
+          <label class="q-option"><input type="radio" name="st-q0" value="2"> erreur</label>
+          <div class="explain">L'appel n'altère pas l'état interne : c'est frais à chaque fois.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Pour conserver l'état et enchaîner des tâches, on utilise...</p>
+          <label class="q-option"><input type="radio" name="st-q1" value="0"> une conversation entre agents (initiate_chat)</label>
+          <label class="q-option"><input type="radio" name="st-q1" value="1"> plusieurs generate_reply</label>
+          <label class="q-option"><input type="radio" name="st-q1" value="2"> human_input_mode=ALWAYS</label>
+          <div class="explain">C'est le sujet de la partie suivante.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('stateless')">← Précédent</button><button class="btn" onclick="nextFrom('stateless')">Cas comédiens →</button></div>
+    </section>
+
+    <section id="comedy" class="section">
+      <h1>Cas pratique : deux stand-up comedians</h1>
+      <p class="lead">
+        On veut une application où deux comédiens se parlent et se moquent l'un de l'autre. Premier agent : ConversableAgent nommé
+        <strong>Cassie</strong>, avec un system message « your name is Cassie and you are stand up comedian ». Même llm_config,
+        même human_input_mode=NEVER. Sans system message, l'agent a un system message vide et agit comme assistant générique.
+        <span class="source">⏱ 4:33</span>
+      </p>
+      <pre class="code">cassie = ConversableAgent(
+    name="Cassie",
+    system_message="Your name is Cassie and you are a stand-up comedian.",
+    llm_config=llm_config, human_input_mode="NEVER",
+)
+
+joe = ConversableAgent(
+    name="Joe",
+    system_message="Your name is Joe and you are a stand-up comedian. "
+                   "Start the next joke from the punch line of the previous joke.",
+    llm_config=llm_config, human_input_mode="NEVER",
+)
+
+# Joe initie la conversation
+result = joe.initiate_chat(
+    recipient=cassie,
+    message="I'm Joe. Cassie, let's keep the jokes rolling.",
+    max_turns=2,
+)</pre>
+      <div class="grid">
+        <div class="card info"><h3>system_message</h3><p>Il personnalise le comportement de l'agent. Ici il donne le rôle (comédien) et une instruction de continuité (démarrer la blague suivante depuis la punchline précédente). <span class="source">⏱ 4:48</span></p></div>
+        <div class="card good"><h3>Instruction de carry-over</h3><p>« start the next joke from the punch line of the previous joke » : c'est ce qui rend l'échange cohérent et drôle. <span class="source">⏱ 5:25</span></p></div>
+        <div class="card purple"><h3>initiate_chat</h3><p>On l'appelle depuis un agent (Joe), recipient = Cassie, message initial donné, max_turns = 2 → deux tours puis fin. <span class="source">⏱ 5:42</span></p></div>
+      </div>
+
+      <h2>Simulateur : déroule la conversation</h2>
+      <div class="simulator">
+        <p class="muted small" id="chat-status">Clique « Message suivant » pour dérouler l'échange Joe ↔ Cassie (max_turns=2).</p>
+        <div id="chat-log"></div>
+        <div class="toolbar no-print">
+          <button class="btn" id="chat-next" onclick="nextChatStep()">Message suivant →</button>
+          <button class="btn secondary" onclick="resetChat()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="quiz" data-module="comedy">
+        <h3>Quiz cas pratique</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. Sans system_message, l'agent...</p>
+          <label class="q-option"><input type="radio" name="cm-q0" value="0"> ne répond pas</label>
+          <label class="q-option"><input type="radio" name="cm-q0" value="1"> demande un humain</label>
+          <label class="q-option"><input type="radio" name="cm-q0" value="2"> a un system message vide et agit comme assistant générique</label>
+          <div class="explain">Le system message sert à personnaliser le rôle/comportement.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. max_turns=2 veut dire...</p>
+          <label class="q-option"><input type="radio" name="cm-q1" value="0"> deux tours de conversation puis fin</label>
+          <label class="q-option"><input type="radio" name="cm-q1" value="1"> deux messages par agent</label>
+          <label class="q-option"><input type="radio" name="cm-q1" value="2"> deux secondes d'attente</label>
+          <div class="explain">Après les échanges, la conversation s'arrête.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('comedy')">← Précédent</button><button class="btn" onclick="nextFrom('comedy')">Historique, coût, résumé →</button></div>
+    </section>
+
+    <section id="inspect" class="section">
+      <h1>Inspecter le résultat : historique, coût, résumé</h1>
+      <p class="lead">Une fois la conversation finie, on inspecte <code>chat_history</code> (via pprint), le coût (<code>chat_result.cost</code>), et le résumé (<code>chat_result.summary</code>). <span class="source">⏱ 7:09</span></p>
+
+      <div class="grid">
+        <div class="card info"><h3>chat_history</h3><p>Tous les messages échangés : d'abord Joe, puis Cassie, puis Joe, puis Cassie. <span class="source">⏱ 7:20</span></p></div>
+        <div class="card good"><h3>cost</h3><p>Modèle gpt-3.5-turbo : 97 completion tokens, 219 prompt tokens, total 316, plus un coût total en dollars. <span class="source">⏱ 7:32</span></p></div>
+        <div class="card purple"><h3>summary (LAST par défaut)</h3><p>Par défaut le résumé = le dernier message. Ici le dernier message de Cassie. <span class="source">⏱ 8:00</span></p></div>
+      </div>
+
+      <h2>Comparateur de résumé : LAST vs REFLECTION</h2>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" onclick="showSummary('LAST')">summary_method = LAST (défaut)</button>
+          <button class="btn secondary" onclick="showSummary('REFLECTION')">summary_method = REFLECTION</button>
+        </div>
+        <div id="summary-out" class="code" style="min-height:90px">Clique un bouton pour comparer les deux méthodes de résumé.</div>
+        <p class="muted small">Avec REFLECTION, après la conversation on rappelle le LLM avec un prompt (« Summarize the conversation ») ; le modèle réfléchit et produit un nouveau résumé. Le transcript note que, par défaut, le caching régénère les mêmes messages pour la même entrée. <span class="source">⏱ 8:17</span></p>
+      </div>
+
+      <h2>Calculateur de tokens (exemple du transcript)</h2>
+      <div class="simulator">
+        <div class="grid">
+          <div><label for="cost-prompt">Prompt tokens</label><input id="cost-prompt" type="number" value="219" /></div>
+          <div><label for="cost-completion">Completion tokens</label><input id="cost-completion" type="number" value="97" /></div>
+        </div>
+        <div class="toolbar no-print"><button class="btn" onclick="computeCost()">Calculer le total</button></div>
+        <div class="meter"><div class="meter-fill" id="cost-fill" style="width:0%;background:var(--accent)"></div><span class="meter-label" id="cost-label">0</span></div>
+        <p class="muted small" id="cost-note">Le transcript indique 219 + 97 = 316 tokens pour cet échange ; le coût en dollars dépend du tarif du modèle (gpt-3.5-turbo ici).</p>
+      </div>
+
+      <div class="quiz" data-module="inspect">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1">
+          <p class="q-text">1. Par défaut, chat_result.summary renvoie...</p>
+          <label class="q-option"><input type="radio" name="in-q0" value="0"> un résumé généré par le LLM</label>
+          <label class="q-option"><input type="radio" name="in-q0" value="1"> le dernier message de la conversation</label>
+          <label class="q-option"><input type="radio" name="in-q0" value="2"> le coût total</label>
+          <div class="explain">Pour un vrai résumé, utiliser summary_method="reflection" + prompt.</div>
+        </div>
+        <div class="q" data-answer="0">
+          <p class="q-text">2. Dans l'exemple, total tokens =</p>
+          <label class="q-option"><input type="radio" name="in-q1" value="0"> 316</label>
+          <label class="q-option"><input type="radio" name="in-q1" value="1"> 97</label>
+          <label class="q-option"><input type="radio" name="in-q1" value="2"> 219</label>
+          <div class="explain">219 prompt + 97 completion = 316.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('inspect')">← Précédent</button><button class="btn" onclick="nextFrom('inspect')">is_termination_msg →</button></div>
+    </section>
+
+    <section id="termination" class="section">
+      <h1>is_termination_msg : un arrêt plus flexible</h1>
+      <p class="lead">
+        Et si tu ne connais pas le bon nombre de tours à l'avance ? On change la condition de terminaison via une configuration
+        <code>is_termination_msg</code> : une fonction booléenne qui prend un message et retourne true/false (faut-il arrêter ?).
+        On passe le message « when you're ready to end the conversation say I got go », et la condition vérifie si « I got go » est
+        dans le message. Chaque agent vérifie la condition sur le message reçu de l'autre ; s'il voit « I got go », il arrête de répondre.
+        <span class="source">⏱ 9:16</span>
+      </p>
+      <pre class="code">def is_termination_msg(msg):
+    return "I got go" in msg.get("content", "")
+
+cassie = ConversableAgent(..., is_termination_msg=is_termination_msg)
+joe    = ConversableAgent(..., is_termination_msg=is_termination_msg)
+# instruction ajoutée : "when you're ready to end the conversation say I got go"</pre>
+
+      <h2>Playground : évalue la condition d'arrêt</h2>
+      <div class="simulator">
+        <label for="term-input">Message reçu de l'autre agent</label>
+        <input id="term-input" placeholder='ex : Haha nice one! I got go' />
+        <div class="toolbar no-print">
+          <button class="btn" onclick="evalTermination()">Évaluer is_termination_msg</button>
+          <button class="btn secondary" onclick="resetTermination()">Effacer</button>
+        </div>
+        <div id="term-result"></div>
+      </div>
+
+      <div class="grid">
+        <div class="card good"><h3>Résultat observé</h3><p>Avec cette condition, la conversation a plus de tours ; le dernier message de Joe est « Glad you enjoyed it Cassie. Puns are always a hit. Thanks for the laughs. I got go. » Cassie le voit en premier et arrête de répondre. <span class="source">⏱ 10:34</span></p></div>
+        <div class="card info"><h3>Plus flexible que max_turns</h3><p>max_turns impose un nombre fixe ; is_termination_msg laisse les agents décider quand finir, selon un signal dans le contenu. <span class="source">⏱ 11:13</span></p></div>
+        <div class="card warn"><h3>Appliqué aux deux agents</h3><p>La condition est donnée à chaque agent : chacun vérifie le message reçu de l'autre avant de répondre. <span class="source">⏱ 10:09</span></p></div>
+      </div>
+
+      <div class="quiz" data-module="termination">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2">
+          <p class="q-text">1. is_termination_msg est...</p>
+          <label class="q-option"><input type="radio" name="tm-q0" value="0"> un nombre de tours</label>
+          <label class="q-option"><input type="radio" name="tm-q0" value="1"> un string de comparaison</label>
+          <label class="q-option"><input type="radio" name="tm-q0" value="2"> une fonction booléenne prenant un message</label>
+          <div class="explain">Retourne true si le message signifie qu'il faut terminer.</div>
+        </div>
+        <div class="q" data-answer="1">
+          <p class="q-text">2. Qui arrête de répondre quand « I got go » apparaît ?</p>
+          <label class="q-option"><input type="radio" name="tm-q1" value="0"> l'agent qui l'a écrit</label>
+          <label class="q-option"><input type="radio" name="tm-q1" value="1"> l'agent qui le reçoit en premier</label>
+          <label class="q-option"><input type="radio" name="tm-q1" value="2"> personne</label>
+          <div class="explain">Chaque agent vérifie la condition sur le message reçu de l'autre.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('termination')">← Précédent</button><button class="btn" onclick="nextFrom('termination')">Continuer & mémoriser →</button></div>
+    </section>
+
+    <section id="continue" class="section">
+      <h1>Continuer la conversation & préserver l'état</h1>
+      <p class="lead">
+        Après la fin, veut-on continuer et vérifier que l'agent préserve l'état ? On teste : Cassie envoie un nouveau message à Joe,
+        « What's the last joke we talked about? ». Bingo : Joe se souvient — la dernière blague était l'épouvantail primé parce qu'il
+        était « outstanding in his field ». La même condition de terminaison s'applique : Cassie dit « I got go », Joe arrête de répondre.
+        <span class="source">⏱ 11:17</span>
+      </p>
+      <pre class="code"># continuer : Cassie -> Joe, même condition d'arrêt
+result2 = cassie.initiate_chat(
+    recipient=joe,
+    message="What's the last joke we talked about?",
+    max_turns=2,  # ou is_termination_msg partagé
+)
+# Joe se souvient de la blague précédente (état préservé)</pre>
+      <div class="grid">
+        <div class="card good"><h3>Démonstration clé</h3><p>Cela montre comment mélanger le travail des agents en conversation : démarrer, continuer, se souvenir de ce qu'ils ont fait. <span class="source">⏱ 12:09</span></p></div>
+        <div class="card info"><h3>Condition partagée</h3><p>Ils suivent la même termination condition ; le signal « I got go » circule dans les deux sens. <span class="source">⏱ 12:02</span></p></div>
+        <div class="card purple"><h3>Perspective</h3><p>Ceci n'est qu'une démonstration de base ; les leçons suivantes couvrent tool using, reflection, planning, code execution. <span class="source">⏱ 12:21</span></p></div>
+      </div>
+      <div class="quiz" data-module="continue">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="0">
+          <p class="q-text">1. Quand Cassie redemande « la dernière blague », Joe...</p>
+          <label class="q-option"><input type="radio" name="co-q0" value="0"> se souvient (état préservé via la conversation)</label>
+          <label class="q-option"><input type="radio" name="co-q0" value="1"> invente une nouvelle blague</label>
+          <label class="q-option"><input type="radio" name="co-q0" value="2"> erreur</label>
+          <div class="explain">Contrairement à generate_reply isolé, la conversation garde l'historique.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('continue')">← Précédent</button><button class="btn" onclick="nextFrom('continue')">Extension locale →</button></div>
+    </section>
+
+    <section id="local" class="section">
+      <h1>Extension : faire tourner les agents en local (Ollama)</h1>
+      <p class="lead">
+        Le transcript AutoGen utilise OpenAI (GPT-3.5 Turbo). Pour éviter les coûts d'API et garder tes données chez toi, tu peux
+        brancher un modèle local compatible OpenAI via Ollama. <strong>Cette partie est une extension</strong> issue de ta base de
+        connaissances (mini-cours Ollama), pas du transcript AutoGen lui-même — mais le principe est identique : on remplace la
+        <code>config_list</code> par une base URL locale.
+      </p>
+      <pre class="code"># Ollama tourne un serveur compatible OpenAI sur localhost:11434
+# AutoGen : même abstraction ConversableAgent, autre config LLM
+llm_config = {
+    "config_list": [
+        {
+            "model": "llama3.2",                 # modèle local Ollama
+            "base_url": "http://localhost:11434/v1",
+            "api_key": "ollama",                 # non requis mais à passer
+        }
+    ]
+}
+# Le reste (ConversableAgent, initiate_chat, is_termination_msg...) est inchangé.</pre>
+      <div class="grid">
+        <div class="card info"><h3>Pourquoi ça marche</h3><p>Ollama expose une API REST compatible OpenAI (endpoint /v1) ; AutoGen, qui parle OpenAI, n'a qu'à changer la base URL et la clé. <span class="source">Base Ollama ⏱ 1:00:55</span></p></div>
+        <div class="card good"><h3>Avantages</h3><p>Gratuit, privé (données non envoyées à un serveur externe), latence réduite, et tu peux tester tes agents avant la prod. <span class="source">Base Ollama ⏱ 10:22</span></p></div>
+        <div class="card warn"><h3>Trade-off</h3><p>Un petit modèle local (ex. llama3.2 3B) sera moins fiable qu'un grand modèle cloud pour le raisonnement multi-étapes. Teste et choisis le modèle qui convient à ta tâche.</p></div>
+      </div>
+      <div class="card purple">
+        <h3>Pont avec la base de connaissances</h3>
+        <p>Le mini-cours Ollama construit justement une « AI Recruiter Agency » avec le framework <strong>Swarm</strong> (agents qui
+        se délèguent des tâches) en local via llama3.2 — un cousin direct des conversations multi-agents AutoGen. Les mêmes idées
+        (orchestrateur, agents spécialisés, délégation) s'y retrouvent. <span class="source">Base Ollama ⏱ 28:44</span></p>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('local')">← Précédent</button><button class="btn" onclick="nextFrom('local')">Patterns →</button></div>
+    </section>
+
+    <section id="patterns" class="section">
+      <h1>Patterns & anti-patterns</h1>
+      <p class="lead">Ce que la leçon annonce pour la suite, et les pièges classiques du multi-agent chat.</p>
+      <div class="grid">
+        <div class="card info"><h3>À venir (transcript)</h3><p>Tool using, reflection, planning, code execution, etc. — d'autres patterns de conversation et de design d'agents. <span class="source">⏱ 12:28</span></p></div>
+        <div class="card good"><h3>Pattern : rôle via system_message</h3><p>Un seul ConversableAgent, des rôles différents obtenus juste en changeant le system_message (et ses instructions de carry-over).</p></div>
+        <div class="card warn"><h3>Pattern : arrêt sémantique</h3><p>is_termination_msg pour finir sur un signal de contenu (« I got go ») plutôt qu'un nombre arbitraire de tours.</p></div>
+      </div>
+      <h2>Anti-patterns</h2>
+      <div class="grid">
+        <div class="card bad"><h3>Confondre generate_reply et conversation</h3><p>Vouloir « répéter » via generate_reply isolé : pas d'état, donc pas de mémoire. Utilise initiate_chat pour enchaîner.</p></div>
+        <div class="card bad"><h3>max_turns trop grand « au cas où »</h3><p>Coût et latence inutiles. Préfère une condition d'arrêt sémantique quand le nombre de tours est inconnu.</p></div>
+        <div class="card bad"><h3>Oublier la condition des deux côtés</h3><p>is_termination_msg doit être donnée à chaque agent, sinon l'un des deux continue indéfiniment.</p></div>
+        <div class="card bad"><h3>summary=LAST pris pour un résumé</h3><p>Le dernier message n'est pas une synthèse. Utilise REFLECTION + prompt pour un vrai résumé.</p></div>
+        <div class="card bad"><h3>human_input_mode mal calibré</h3><p>NEVER partout = aucune supervision ; ALWAYS partout = friction. Choisis selon le risque de l'action.</p></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('patterns')">← Précédent</button><button class="btn" onclick="nextFrom('patterns')">Scénarios →</button></div>
+    </section>
+
+    <section id="scenarios" class="section">
+      <h1>Scénarios : quel réglage pour quel besoin ?</h1>
+      <div class="simulator">
+        <div class="grid">
+          <button class="btn secondary" onclick="chooseScenario('turns')">Nombre de tours connu</button>
+          <button class="btn secondary" onclick="chooseScenario('semantic')">Fin sur signal de contenu</button>
+          <button class="btn secondary" onclick="chooseScenario('summary')">Veux un vrai résumé</button>
+          <button class="btn secondary" onclick="chooseScenario('state')">Veux que l'agent se souvienne</button>
+          <button class="btn secondary" onclick="chooseScenario('human')">Veux superviser une action</button>
+          <button class="btn secondary" onclick="chooseScenario('role')">Veux un rôle précis</button>
+          <button class="btn secondary" onclick="chooseScenario('cost')">Veux maîtriser le coût</button>
+          <button class="btn secondary" onclick="chooseScenario('local')">Veux tourner en local</button>
+        </div>
+        <pre id="scenario-out" class="code" style="display:none"></pre>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button><button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button></div>
+    </section>
+
+    <section id="flashcards" class="section">
+      <h1>Flashcards</h1>
+      <details open><summary>ConversableAgent</summary><p>Classe intégrée d'AutoGen qui unifie différents types d'agents dans la même abstraction, pour construire des conversations multi-agents. <span class="source">⏱ 0:43</span></p></details>
+      <details><summary>Agent (définition)</summary><p>Entité qui agit au nom de l'intention humaine : envoie/reçoit des messages, performe des actions, génère des replies, interagit avec d'autres agents. <span class="source">⏱ 0:32</span></p></details>
+      <details><summary>Capacités intégrées</summary><p>Config LLM (replies), exécution de code, exécution de fonctions/outils, human-in-the-loop, vérification d'arrêt. Composants activables/désactivables. <span class="source">⏱ 0:55</span></p></details>
+      <details><summary>human_input_mode</summary><p>NEVER = n'seek jamais d'input humain ; ALWAYS = demande un humain avant de générer seul. <span class="source">⏱ 2:19</span></p></details>
+      <details><summary>generate_reply</summary><p>Prend une message list ({content, role}). N'altère PAS l'état interne : chaque appel est frais. <span class="source">⏱ 2:57</span></p></details>
+      <details><summary>Sans état vs état</summary><p>generate_reply isolé = pas de mémoire. initiate_chat (conversation) = historique conservé, séries de tâches possibles. <span class="source">⏱ 3:50</span></p></details>
+      <details><summary>system_message</summary><p>Personnalise le rôle/comportement. Sans lui : system message vide → assistant générique. <span class="source">⏱ 4:48</span></p></details>
+      <details><summary>initiate_chat</summary><p>Appelé depuis un agent : recipient, message initial, max_turns. Ex. Joe → Cassie, max_turns=2. <span class="source">⏱ 5:42</span></p></details>
+      <details><summary>chat_history</summary><p>Inspecté via pprint après la conversation : tous les messages échangés (Joe, Cassie, Joe, Cassie…). <span class="source">⏱ 7:14</span></p></details>
+      <details><summary>cost</summary><p>chat_result.cost : modèle, prompt tokens, completion tokens, total. Ex. 219 + 97 = 316 tokens (gpt-3.5-turbo). <span class="source">⏱ 7:32</span></p></details>
+      <details><summary>summary LAST</summary><p>Par défaut, résumé = dernier message de la conversation. <span class="source">⏱ 8:08</span></p></details>
+      <details><summary>summary REFLECTION</summary><p>summary_method="reflection" + prompt : après la conversation, le LLM réfléchit et produit un vrai résumé. <span class="source">⏱ 8:17</span></p></details>
+      <details><summary>is_termination_msg</summary><p>Fonction booléenne(message) → true/false. Plus flexible que max_turns quand le nombre de tours est inconnu. <span class="source">⏱ 9:30</span></p></details>
+      <details><summary>« I got go »</summary><p>Signal de fin dans le contenu ; la condition vérifie sa présence ; l'agent qui le reçoit en premier arrête de répondre. <span class="source">⏱ 9:50</span></p></details>
+      <details><summary>Continuation & mémoire</summary><p>Cassie redemande « la dernière blague » → Joe se souvient. Démarrer, continuer, se souvenir : mélange des agents en conversation. <span class="source">⏱ 11:17</span></p></details>
+      <details><summary>Suite annoncée</summary><p>Tool using, reflection, planning, code execution, etc. <span class="source">⏱ 12:28</span></p></details>
+      <details><summary>Extension locale</summary><p>Remplacer config_list par base_url localhost:11434/v1 + api_key "ollama" + modèle local (ex. llama3.2). Gratuit, privé, latence réduite. <span class="source">Base Ollama</span></p></details>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Examen final →</button></div>
+    </section>
+
+    <section id="final" class="section">
+      <h1>Examen final</h1>
+      <p class="lead">12 questions. Seuil 9/12 pour débloquer le certificat.</p>
+      <div class="quiz" data-module="final" id="final-quiz">
+        <div class="q" data-answer="1"><p class="q-text">1. ConversableAgent sert à...</p><label class="q-option"><input type="radio" name="fi-q0" value="0"> entraîner un modèle</label><label class="q-option"><input type="radio" name="fi-q0" value="1"> unifier les types d'agents pour des conversations multi-agents</label><label class="q-option"><input type="radio" name="fi-q0" value="2"> stocker des vecteurs</label><div class="explain">Classe intégrée d'AutoGen.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">2. human_input_mode="NEVER"...</p><label class="q-option"><input type="radio" name="fi-q1" value="0"> n'seek jamais d'input humain</label><label class="q-option"><input type="radio" name="fi-q1" value="1"> demande toujours un humain</label><label class="q-option"><input type="radio" name="fi-q1" value="2"> désactive le LLM</label><div class="explain">ALWAYS = demande un humain avant de générer seul.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">3. generate_reply avec « repeat the joke »...</p><label class="q-option"><input type="radio" name="fi-q2" value="0"> répète la blague</label><label class="q-option"><input type="radio" name="fi-q2" value="1"> erreur</label><label class="q-option"><input type="radio" name="fi-q2" value="2"> génère une nouvelle reply sans mémoire</label><div class="explain">L'appel n'altère pas l'état interne.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">4. Pour conserver l'état et enchaîner des tâches, on utilise...</p><label class="q-option"><input type="radio" name="fi-q3" value="0"> generate_reply répété</label><label class="q-option"><input type="radio" name="fi-q3" value="1"> une conversation (initiate_chat)</label><label class="q-option"><input type="radio" name="fi-q3" value="2"> pprint</label><div class="explain">La conversation garde l'historique.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">5. Sans system_message, l'agent...</p><label class="q-option"><input type="radio" name="fi-q4" value="0"> a un system message vide → assistant générique</label><label class="q-option"><input type="radio" name="fi-q4" value="1"> ne répond pas</label><label class="q-option"><input type="radio" name="fi-q4" value="2"> demande un humain</label><div class="explain">Le system_message personnalise le rôle.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">6. max_turns=2 signifie...</p><label class="q-option"><input type="radio" name="fi-q5" value="0"> deux messages par agent</label><label class="q-option"><input type="radio" name="fi-q5" value="1"> deux secondes</label><label class="q-option"><input type="radio" name="fi-q5" value="2"> deux tours puis fin</label><div class="explain">Après les échanges, la conversation s'arrête.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">7. chat_result.cost dans l'exemple = total tokens...</p><label class="q-option"><input type="radio" name="fi-q6" value="0"> 97</label><label class="q-option"><input type="radio" name="fi-q6" value="1"> 316</label><label class="q-option"><input type="radio" name="fi-q6" value="2"> 219</label><div class="explain">219 prompt + 97 completion.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">8. Par défaut, summary renvoie...</p><label class="q-option"><input type="radio" name="fi-q7" value="0"> le dernier message</label><label class="q-option"><input type="radio" name="fi-q7" value="1"> un résumé LLM</label><label class="q-option"><input type="radio" name="fi-q7" value="2"> le coût</label><div class="explain">REFLECTION + prompt pour un vrai résumé.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">9. is_termination_msg est...</p><label class="q-option"><input type="radio" name="fi-q8" value="0"> un nombre</label><label class="q-option"><input type="radio" name="fi-q8" value="1"> un string</label><label class="q-option"><input type="radio" name="fi-q8" value="2"> une fonction booléenne(message)</label><div class="explain">True si le message impose la fin.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">10. Quand « I got go » apparaît, qui arrête de répondre ?</p><label class="q-option"><input type="radio" name="fi-q9" value="0"> l'auteur du message</label><label class="q-option"><input type="radio" name="fi-q9" value="1"> l'agent qui le reçoit en premier</label><label class="q-option"><input type="radio" name="fi-q9" value="2"> personne</label><div class="explain">Chaque agent vérifie la condition sur le message reçu.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">11. En continuation, Cassie redemande la dernière blague : Joe...</p><label class="q-option"><input type="radio" name="fi-q10" value="0"> se souvient (état préservé)</label><label class="q-option"><input type="radio" name="fi-q10" value="1"> invente</label><label class="q-option"><input type="radio" name="fi-q10" value="2"> erreur</label><div class="explain">Démarrer, continuer, se souvenir.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">12. Pour tourner en local via Ollama, on change...</p><label class="q-option"><input type="radio" name="fi-q11" value="0"> le system_message</label><label class="q-option"><input type="radio" name="fi-q11" value="1"> max_turns</label><label class="q-option"><input type="radio" name="fi-q11" value="2"> la config_list (base_url localhost:11434/v1, modèle local)</label><div class="explain">Extension basée sur la ressource Ollama.</div></div>
+        <button class="btn" onclick="submitFinal(this)">Soumettre l'examen</button>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('final')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('resources')">Voir certificat →</button></div>
+    </section>
+
+    <section id="resources" class="section">
+      <h1>Certificat, checklist & ressources</h1>
+      <div class="card info no-print">
+        <h3>Nom pour le certificat</h3>
+        <input id="cert-name" placeholder="Prénom / pseudo" />
+        <div class="toolbar">
+          <button class="btn" onclick="generateCert()">Générer le certificat</button>
+          <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+          <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+          <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="certificate" class="certificate">
+        <span class="badge">🤖</span>
+        <h2>Certificat de maîtrise</h2>
+        <p>Décerné à</p>
+        <h3 id="cert-name-out">Apprenant</h3>
+        <p>pour avoir complété la masterclass</p>
+        <p class="highlight">AutoGen ConversableAgent — Multi-Agent Chat, Termination, Summary, État</p>
+        <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+      </div>
+
+      <h2>Checklist de l'architecte multi-agents</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Je sais instancier un ConversableAgent (llm_config, human_input_mode).</label>
+        <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Je distingue generate_reply (sans état) et initiate_chat (avec état).</label>
+        <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Je personnalise un rôle via system_message (+ instruction de carry-over).</label>
+        <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Je lance un chat à deux agents avec recipient + max_turns.</label>
+        <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> J'inspecte chat_history, cost et summary.</label>
+        <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Je choisis LAST vs REFLECTION selon le besoin de résumé.</label>
+        <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> J'écris une is_termination_msg booléenne et je l'applique aux deux agents.</label>
+        <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Je sais continuer une conversation et vérifier la mémoire.</label>
+        <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> Je peux brancher un modèle local (Ollama) via base_url.</label>
+        <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Je connais les patterns suivants (tool using, reflection, planning, code exec).</label>
+      </div>
+      <p class="muted small">Checklist : <span id="check-progress">0/10</span></p>
+
+      <h2>Ressources</h2>
+      <div class="resources">
+        <ul>
+          <li><strong>Transcript source</strong> : leçon AutoGen « ConversableAgent », chat à deux stand-up comedians (Cassie & Joe), GPT-3.5 Turbo.</li>
+          <li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur d'AutoManus (backed by Character VC), ex-MIT business analytics puis Google et Walmart. Il enseigne à construire avec l'IA, un vrai projet à la fois. Formules : Q&amp;A live bimensuel (20 $/mois) et session 1 h sur mesure (200 $).</li>
+          <li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend (Kimi K2 + LangChain), yt-supabase-tips-kanban, yt-kimi-k2-claude.</li>
+          <li><strong>Ollama</strong> : mini-cours (Paulo) couvrant CLI, REST API (localhost:11434), Python library, Modelfile, RAG (LangChain + Chroma + nomic-embed-text) et une « AI Recruiter Agency » multi-agents via Swarm — le compagnon naturel pour faire tourner tes agents AutoGen en local, gratuitement et en privé.</li>
+        </ul>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn secondary" onclick="prevFrom('resources')">← Revenir à l'examen</button>
+        <button class="btn" onclick="showSection('home')">Retour accueil</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+var KEY = "autogen-conversable-agent-v1";
+var STATE = { theme:"dark", visited:{}, quizScores:{}, diagnostic:null, finalScore:0, finalTotal:12, finalPassed:false, sourcesHidden:false, checklist:{} };
+function $(s,r){ return (r||document).querySelector(s); }
+function $$(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
+function saveState(){ try{ localStorage.setItem(KEY, JSON.stringify(STATE)); }catch(e){} }
+function loadState(){ try{ var raw=localStorage.getItem(KEY); if(!raw) return; var d=JSON.parse(raw);
+  STATE.theme=d.theme||"dark"; STATE.visited=d.visited||{}; STATE.quizScores=d.quizScores||{}; STATE.diagnostic=d.diagnostic||null;
+  STATE.finalScore=d.finalScore||0; STATE.finalTotal=d.finalTotal||12; STATE.finalPassed=!!d.finalPassed; STATE.sourcesHidden=!!d.sourcesHidden; STATE.checklist=d.checklist||{};
+}catch(e){} }
+function getSectionIds(){ return $$(".section").map(function(s){ return s.id; }); }
+function showSection(id){
+  var sections=$$(".section"); for(var i=0;i<sections.length;i++) sections[i].classList.toggle("active", sections[i].id===id);
+  var buttons=$$("#nav button"); for(var j=0;j<buttons.length;j++){ var t=buttons[j].getAttribute("data-target"); buttons[j].classList.toggle("active", t===id); buttons[j].classList.toggle("completed", !!STATE.visited[t]); }
+  STATE.visited[id]=true; saveState(); updateProgress(); initModule(id);
+  var sb=$("#sidebar"); if(sb) sb.classList.remove("mobile-open");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function nextFrom(id){ var ids=getSectionIds(); for(var i=0;i<ids.length;i++) if(ids[i]===id && i<ids.length-1){ showSection(ids[i+1]); return; } }
+function prevFrom(id){ var ids=getSectionIds(); for(var i=0;i<ids.length;i++) if(ids[i]===id && i>0){ showSection(ids[i-1]); return; } }
+function updateProgress(){ var ids=getSectionIds(); var done=0; for(var i=0;i<ids.length;i++) if(STATE.visited[ids[i]]) done++;
+  var pct=Math.round(done/ids.length*100); var b=$("#progressBar"); if(b) b.style.width=pct+"%"; var t=$("#progressText"); if(t) t.textContent=pct+"%"; }
+function updateScore(){ var c=0,t=0,keys=Object.keys(STATE.quizScores); for(var i=0;i<keys.length;i++){ c+=STATE.quizScores[keys[i]].correct||0; t+=STATE.quizScores[keys[i]].total||0; }
+  var el=$("#scoreDisplay"); if(el) el.textContent="Score "+c+"/"+t+(STATE.finalPassed?" • validé":""); }
+function toggleTheme(){ STATE.theme=STATE.theme==="dark"?"light":"dark"; document.body.setAttribute("data-theme",STATE.theme); saveState(); }
+function toggleSources(){ STATE.sourcesHidden=!STATE.sourcesHidden; document.body.classList.toggle("hide-sources",STATE.sourcesHidden); saveState(); }
+function toggleMobileNav(){ var s=$("#sidebar"); if(s) s.classList.toggle("mobile-open"); }
+function checkQuiz(btn){
+  var box=btn.closest(".quiz"); var moduleId=box.getAttribute("data-module"); var qs=$$(".q",box); var correct=0;
+  for(var i=0;i<qs.length;i++){ var q=qs[i]; var sel=q.querySelector("input:checked"); var ex=q.querySelector(".explain"); var opts=$$(".q-option",q);
+    q.classList.remove("correct","incorrect"); for(var j=0;j<opts.length;j++) opts[j].classList.remove("correct","incorrect");
+    if(ex) ex.style.display="block"; if(!sel){ q.classList.add("incorrect"); continue; }
+    var ans=parseInt(q.getAttribute("data-answer"),10); var val=parseInt(sel.value,10); var chosen=sel.closest(".q-option");
+    if(val===ans){ q.classList.add("correct"); if(chosen) chosen.classList.add("correct"); correct++; }
+    else { q.classList.add("incorrect"); if(chosen) chosen.classList.add("incorrect"); if(opts[ans]) opts[ans].classList.add("correct"); }
+  }
+  var result=box.querySelector(".result"); if(result) result.textContent="Résultat : "+correct+"/"+qs.length;
+  STATE.quizScores[moduleId]={correct:correct,total:qs.length}; saveState(); updateScore(); return {correct:correct,total:qs.length};
+}
+var DIAG_TEXT={
+  debutant:"Commence par la notion d'agent et le premier ConversableAgent. Comprends bien generate_reply (sans état) avant de passer au chat à deux agents.",
+  builder:"Va directement au cas comédiens (initiate_chat, max_turns), puis inspecte historique/coût/résumé. Termine par is_termination_msg et la continuation.",
+  architect:"Concentre-toi sur termination sémantique, summary REFLECTION, préservation d'état et patterns/anti-patterns. L'examen valide ton contrôle du flux."
+};
+function validateDiagnostic(){
+  var level=document.querySelector("input[name='diag-level']:checked"); var goal=document.querySelector("input[name='diag-goal']:checked"); var time=document.querySelector("input[name='diag-time']:checked");
+  if(!level||!goal||!time){ alert("Répondez aux trois questions."); return; }
+  STATE.diagnostic={level:level.value,goal:goal.value,time:time.value}; saveState();
+  var rec=$("#diag-rec"); var next=$("#diag-next");
+  if(rec){ rec.style.display="block"; rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.debutant)+"</p>"; }
+  if(next) next.style.display="inline-flex";
+}
+function restoreDiagnostic(){ if(!STATE.diagnostic) return; var rec=$("#diag-rec"); var next=$("#diag-next");
+  if(rec){ rec.style.display="block"; rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"; }
+  if(next) next.style.display="inline-flex";
+}
+
+/* ---- Démo sans état vs avec état ---- */
+var JOKES=[
+  "Why did the scarecrow win the award? Because he was outstanding in his field.",
+  "Why did the math book look sad? Because it had too many problems."
+];
+var statelessIdx=0;
+function statelessCall(promptText){
+  var log=$("#stateless-log"); if(!log) return;
+  var joke=JOKES[statelessIdx % JOKES.length]; statelessIdx++;
+  var div=document.createElement("div"); div.className="chat-msg sys visible";
+  div.innerHTML="<span class='who'>generate_reply — role:user</span>« "+promptText+" » → reply : "+joke+
+    (promptText.indexOf("repeat")!==-1 ? " <em>(appel frais : l'agent ne se souvient pas d'avoir déjà répondu)</em>" : "");
+  log.appendChild(div);
+}
+function resetStateless(){ statelessIdx=0; var l=$("#stateless-log"); if(l) l.innerHTML=""; }
+var STATEFUL=[
+  {who:"Joe (initiate_chat)",cls:"joe",text:"I'm Joe. Cassie, let's keep the jokes rolling."},
+  {who:"Cassie",cls:"cassie",text:"Hey Joe, great to meet another comedy enthusiast. Why did the math book look sad? Because it had too many problems."},
+  {who:"Joe",cls:"joe",text:"Well Cassie, at least now we know why the math book was always so negative."},
+  {who:"Cassie",cls:"cassie",text:"Aha, exactly. It just couldn't subtract the sadness from its pages."}
+];
+var statefulIdx=0;
+function statefulStep(){ var log=$("#stateful-log"); if(!log||statefulIdx>=STATEFUL.length) return;
+  var s=STATEFUL[statefulIdx]; var div=document.createElement("div"); div.className="chat-msg "+s.cls;
+  div.innerHTML="<span class='who'>"+s.who+"</span>"+s.text; log.appendChild(div);
+  requestAnimationFrame(function(){ div.classList.add("visible"); }); statefulIdx++;
+  if(statefulIdx>=STATEFUL.length){ var note=document.createElement("div"); note.className="chat-msg sys visible"; note.innerHTML="<span class='who'>NOTE</span>Historique conservé : chaque message s'appuie sur le précédent (état présent, contrairement à generate_reply isolé)."; log.appendChild(note); }
+}
+function resetStateful(){ statefulIdx=0; var l=$("#stateful-log"); if(l) l.innerHTML=""; }
+
+/* ---- Simulateur conversation comédiens (max_turns=2) ---- */
+var CHAT=[
+  {who:"SYSTEM",cls:"sys",text:"joe.initiate_chat(recipient=cassie, message=…, max_turns=2)"},
+  {who:"Joe",cls:"joe",text:"I'm Joe. Cassie, let's keep the jokes rolling."},
+  {who:"Cassie",cls:"cassie",text:"Hey Joe, great to meet another comedy enthusiast. Let's dive in with some jokes. Why did the math book look sad? Because it had too many problems."},
+  {who:"Joe",cls:"joe",text:"Well, Cassie, at least now we know why the math book was always so negative."},
+  {who:"Cassie",cls:"cassie",text:"Aha, exactly. It just couldn't subtract the sadness from its pages. [proposes another joke]"},
+  {who:"SYSTEM",cls:"stop",text:"max_turns atteint (2 tours) → la conversation s'arrête."}
+];
+var chatIdx=0;
+function resetChat(){ chatIdx=0; var l=$("#chat-log"); if(l) l.innerHTML=""; var st=$("#chat-status"); if(st) st.textContent="Clique « Message suivant » pour dérouler l'échange Joe ↔ Cassie (max_turns=2)."; var b=$("#chat-next"); if(b){ b.disabled=false; b.textContent="Message suivant →"; } }
+function nextChatStep(){ var l=$("#chat-log"); if(!l||chatIdx>=CHAT.length) return; var s=CHAT[chatIdx];
+  var div=document.createElement("div"); div.className="chat-msg "+s.cls; div.innerHTML="<span class='who'>"+s.who+"</span>"+s.text; l.appendChild(div);
+  requestAnimationFrame(function(){ div.classList.add("visible"); }); chatIdx++;
+  var st=$("#chat-status"); if(st) st.textContent="Étape "+chatIdx+"/"+CHAT.length;
+  if(chatIdx>=CHAT.length){ var b=$("#chat-next"); if(b) b.disabled=true; if(st) st.textContent="✅ Conversation terminée (max_turns=2). Inspecte chat_history / cost / summary au module suivant."; }
+}
+
+/* ---- Comparateur de résumé ---- */
+var SUMMARIES={
+  LAST:"summary (défaut = LAST) → dernier message de la conversation :\n\n« Aha, exactly. It just couldn't subtract the sadness from its pages. [another joke] »\n\n→ Ce n'est qu'un message, pas une synthèse.",
+  REFLECTION:"summary_method=\"reflection\" + prompt « Summarize the conversation » → le LLM réfléchit après la conversation :\n\n« The conversation was focused on sharing jokes and puns between Joe and Cassie. They playfully exchanged math and scarecrow related jokes to keep the laughs flowing. »\n\n→ Un vrai résumé. (Note : par défaut, le caching régénère les mêmes messages pour la même entrée.)"
+};
+function showSummary(mode){ var out=$("#summary-out"); if(out) out.textContent=SUMMARIES[mode]||""; }
+
+/* ---- Calculateur de tokens ---- */
+function computeCost(){ var p=parseInt($("#cost-prompt").value||"0",10); var c=parseInt($("#cost-completion").value||"0",10); var total=p+c;
+  var fill=$("#cost-fill"); var label=$("#cost-label"); var note=$("#cost-note");
+  var pct=Math.min(100, Math.round(total/400*100)); if(fill) fill.style.width=pct+"%"; if(label) label.textContent=total+" tokens";
+  if(note) note.textContent = total===316 ? "Exactement l'exemple du transcript : 219 prompt + 97 completion = 316 tokens (gpt-3.5-turbo). Le coût en dollars dépend du tarif du modèle." : "Total = "+p+" + "+c+" = "+total+" tokens. Compare à l'exemple du transcript (316). Le coût dépend du tarif du modèle.";
+}
+
+/* ---- Playground termination ---- */
+function evalTermination(){ var v=($("#term-input").value||"").toLowerCase(); var out=$("#term-result"); if(!out) return;
+  if(v.indexOf("i got go")!==-1){ out.innerHTML="<div class='term-result term-stop'>🛑 is_termination_msg → TRUE. « I got go » détecté : l'agent qui reçoit ce message arrête de répondre. La conversation se termine.</div>"; }
+  else if(!v.trim()){ out.innerHTML="<div class='term-result term-go'>Écris un message pour évaluer la condition.</div>"; }
+  else { out.innerHTML="<div class='term-result term-go'>▶ is_termination_msg → FALSE. Pas de « I got go » : l'agent continue de répondre (jusqu'à max_turns ou un futur signal).</div>"; }
+}
+function resetTermination(){ var i=$("#term-input"); if(i) i.value=""; var o=$("#term-result"); if(o) o.innerHTML=""; }
+
+/* ---- Scénarios ---- */
+function chooseScenario(key){ var texts={
+  turns:"Besoin : le nombre de tours est connu à l'avance.\n→ max_turns=N. Simple, prévisible, borne le coût. Ex. du transcript : max_turns=2.",
+  semantic:"Besoin : la fin dépend du contenu, pas d'un compteur.\n→ is_termination_msg = fonction booléenne qui cherche un signal (ex. « I got go »). Donnée à chaque agent ; celui qui reçoit le signal arrête.",
+  summary:"Besoin : un vrai résumé de l'échange, pas juste le dernier message.\n→ summary_method=\"reflection\" + llm_config + prompt « Summarize the conversation ». Le LLM réfléchit après la conversation.",
+  state:"Besoin : que l'agent se souvienne d'un tour à l'autre / en continuation.\n→ utilise initiate_chat (conversation), pas generate_reply isolé. La conversation conserve chat_history ; en continuation, Joe se souvient de la dernière blague.",
+  human:"Besoin : superviser une action sensible.\n→ human_input_mode=\"ALWAYS\" (ou un mode intermédiaire) sur l'agent concerné ; NEVER pour les agents autonomes de type comédien.",
+  role:"Besoin : donner un rôle précis à un agent.\n→ system_message (nom + rôle + instructions de carry-over). Sans lui : system message vide → assistant générique.",
+  cost:"Besoin : maîtriser la dépense.\n→ inspecte chat_result.cost (prompt/completion/total tokens). Évite un max_turns trop grand ; préfère une termination sémantique.",
+  local:"Besoin : tourner gratuitement et en privé.\n→ extension Ollama : config_list avec base_url http://localhost:11434/v1, api_key \"ollama\", modèle local (ex. llama3.2). Le reste du code AutoGen est inchangé."
+}; var out=$("#scenario-out"); if(out){ out.style.display="block"; out.textContent=texts[key]||""; } }
+
+/* ---- Examen / certificat / checklist / export ---- */
+function submitFinal(btn){ var res=checkQuiz(btn); STATE.finalScore=res.correct; STATE.finalTotal=res.total; STATE.finalPassed=res.correct>=9; saveState(); updateScore();
+  var result=$("#exam-result"); if(result){ var advice=STATE.finalPassed?"Tu contrôles le flux multi-agents : état, termination, résumé, coût, et l'extension locale.":"Revois generate_reply vs initiate_chat, is_termination_msg, et summary LAST vs REFLECTION.";
+    result.innerHTML="<strong>Résultat : "+res.correct+"/"+res.total+"</strong><br>"+(STATE.finalPassed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+advice+"</span>"; }
+  var go=$("#go-cert"); if(go) go.style.display=STATE.finalPassed?"inline-flex":"none";
+}
+function generateCert(){ if(!STATE.finalPassed){ alert("Atteins au moins 9/12 à l'examen final."); return; }
+  var ni=$("#cert-name"); var name=ni?ni.value.trim():""; if(!name) name="Apprenant";
+  var block=$("#certificate"); if(!block) return; block.classList.add("show");
+  $("#cert-name-out").textContent=name; $("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+  $("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal; $("#cert-level").textContent=STATE.finalPassed?"Maîtrise validée":"En progression";
+  block.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function toggleCheck(id){ var el=document.getElementById(id); if(!el) return; STATE.checklist[id]=el.checked; saveState(); updateChecklistProgress(); }
+function updateChecklistProgress(){ var boxes=$$(".checklist input[type=checkbox]"); var done=0; for(var i=0;i<boxes.length;i++) if(boxes[i].checked) done++;
+  var el=$("#check-progress"); if(el) el.textContent=done+"/"+boxes.length; }
+function exportJSON(){ var data={ cours:"AutoGen ConversableAgent Masterclass", date:new Date().toISOString(), profil:STATE.diagnostic, progression:STATE.visited, quiz:STATE.quizScores,
+  examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.finalPassed}, checklist:STATE.checklist,
+  ressources:["Transcript AutoGen (leçon ConversableAgent)","Sean Chen seanchen.io","GitHub ShenSeanChen","Ollama (modèles locaux, Swarm)"] };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="rapport-autogen-agents.json"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+}
+function resetCourse(){ if(!confirm("Réinitialiser toute la progression ?")) return; try{ localStorage.removeItem(KEY); }catch(e){} location.reload(); }
+function initModule(id){
+  if(id==="diagnostic") restoreDiagnostic();
+  if(id==="stateless"){ resetStateless(); resetStateful(); }
+  if(id==="comedy") resetChat();
+  if(id==="inspect") showSummary("LAST");
+  if(id==="termination") resetTermination();
+  if(id==="resources"){ var ni=$("#cert-name"); if(ni&&STATE.certName) ni.value=STATE.certName;
+    var keys=Object.keys(STATE.checklist); for(var i=0;i<keys.length;i++){ var el=document.getElementById(keys[i]); if(el) el.checked=STATE.checklist[keys[i]]; }
+    updateChecklistProgress(); if(STATE.finalPassed){ var block=$("#certificate"); if(block) block.classList.add("show"); var go=$("#go-cert"); if(go) go.style.display="inline-flex"; } }
+}
+function init(){ loadState(); document.body.setAttribute("data-theme",STATE.theme); document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+  var buttons=$$("#nav button"); for(var i=0;i<buttons.length;i++) buttons[i].addEventListener("click", function(){ showSection(this.getAttribute("data-target")); });
+  showSection("home"); updateScore(); updateChecklistProgress();
+}
+window.showSection=showSection; window.nextFrom=nextFrom; window.prevFrom=prevFrom;
+window.toggleTheme=toggleTheme; window.toggleSources=toggleSources; window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic; window.checkQuiz=checkQuiz;
+window.statelessCall=statelessCall; window.resetStateless=resetStateless; window.statefulStep=statefulStep; window.resetStateful=resetStateful;
+window.nextChatStep=nextChatStep; window.resetChat=resetChat; window.showSummary=showSummary; window.computeCost=computeCost;
+window.evalTermination=evalTermination; window.resetTermination=resetTermination; window.chooseScenario=chooseScenario;
+window.submitFinal=submitFinal; window.generateCert=generateCert; window.toggleCheck=toggleCheck; window.exportJSON=exportJSON; window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded", init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture RAG Efficace — Schéma interactif & Simulation en direct</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">SCHÉMA INTERACTIF & SIMULATION EN DIRECT</div>
+    <h1>Architecture RAG <span class="accent">efficace</span></h1>
+    <p class="subhead">Rappel élevé. Précision élevée. Faible latence. Coût réduit. Testez l'architecture en direct avec notre sandbox ou cliquez sur une étape pour en voir le détail.</p>
+
+    <div class="legend" id="legend">
+      <button data-layer="ingestion" class="active"><span class="sw" style="background:#9D8CFF"></span>1 · Ingestion</button>
+      <button data-layer="query"><span class="sw" style="background:#F2A93B"></span>2 · Compréhension</button>
+      <button data-layer="context"><span class="sw" style="background:#38D39F"></span>3 · Contexte</button>
+      <button data-layer="generation"><span class="sw" style="background:#4EA8F2"></span>4 · Génération</button>
+    </div>
+  </header>
+
+  <section class="sandbox-container">
+    <div class="sandbox-header">
+      <div class="sandbox-title">
+        Live Sandbox & Simulation en direct
+        <span>Interactif</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--text-dim);">
+        Simulez le parcours complet d'une requête RAG en temps réel
+      </div>
+    </div>
+
+    <div class="sandbox-controls">
+      <div class="input-group">
+        <label for="userQueryInput">QUESTION DE TEST :</label>
+        <div class="query-input-wrapper">
+          <input type="text" id="userQueryInput" class="query-input" value="Comment configurer pgvector et optimiser HNSW ?" placeholder="Tapez votre question...">
+          <button class="preset-btn" onclick="setQuery('Comment configurer pgvector et optimiser HNSW ?')">pgvector</button>
+          <button class="preset-btn" onclick="setQuery('Qu est-ce que le Reranking cross-encoder ?')">Reranker</button>
+          <button class="preset-btn" onclick="setQuery('Quelle taille de chunk choisir pour un PDF technique ?')">Chunks</button>
+        </div>
+      </div>
+      <button id="runSimBtn" class="run-sim-btn" onclick="startSimulation()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Lancer la simulation
+      </button>
+    </div>
+
+    <div class="params-row">
+      <div class="param-item">
+        <span>Top-K :</span>
+        <select id="paramTopK">
+          <option value="3">3 fragments</option>
+          <option value="5" selected>5 fragments</option>
+          <option value="10">10 fragments</option>
+        </select>
+      </div>
+      <div class="param-item">
+        <span>Taille chunk :</span>
+        <select id="paramChunkSize">
+          <option value="250">250 tokens (Précis)</option>
+          <option value="500" selected>500 tokens (Équilibré)</option>
+          <option value="1000">1000 tokens (Large)</option>
+        </select>
+      </div>
+      <div class="param-item">
+        <span>Cross-Encoder Reranker :</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="paramRerank" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+      <div class="param-item" style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--context);">
+        État : <span id="simStatusText">Prêt</span>
+      </div>
+    </div>
+
+    <!-- Live Execution Console -->
+    <div class="sim-console" id="simConsole">
+      <div class="sim-console-header">
+        <span>EXÉCUTION EN TEMPS RÉEL DU PIPELINE RAG</span>
+        <span id="simTimer" style="color:var(--ingestion)">0.0s</span>
+      </div>
+      <div class="sim-steps-grid">
+        <div class="sim-step-card" id="simCard1" style="--active-color:#9D8CFF; --active-glow:rgba(157,140,255,0.4); --active-soft:#2A2450;">
+          <div class="sim-step-num">ÉTAPE 01</div>
+          <div class="sim-step-title">Ingestion & Indexation</div>
+          <div class="sim-step-status" id="simStatus1">En attente...</div>
+        </div>
+        <div class="sim-step-card" id="simCard2" style="--active-color:#F2A93B; --active-glow:rgba(242,169,59,0.4); --active-soft:#3A2A14;">
+          <div class="sim-step-num">ÉTAPE 02</div>
+          <div class="sim-step-title">Compréhension Requête</div>
+          <div class="sim-step-status" id="simStatus2">En attente...</div>
+        </div>
+        <div class="sim-step-card" id="simCard3" style="--active-color:#38D39F; --active-glow:rgba(56,211,159,0.4); --active-soft:#123328;">
+          <div class="sim-step-num">ÉTAPE 03</div>
+          <div class="sim-step-title">Récupération & Rerank</div>
+          <div class="sim-step-status" id="simStatus3">En attente...</div>
+        </div>
+        <div class="sim-step-card" id="simCard4" style="--active-color:#4EA8F2; --active-glow:rgba(78,168,242,0.4); --active-soft:#122E44;">
+          <div class="sim-step-num">ÉTAPE 04</div>
+          <div class="sim-step-title">Génération LLM</div>
+          <div class="sim-step-status" id="simStatus4">En attente...</div>
+        </div>
+      </div>
+
+      <div class="sim-final-output" id="simFinalOutput"></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <!-- ============ PIPELINE ============ -->
+    <div class="pipeline" id="pipeline"></div>
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="card">
+        <h3>Pourquoi l'efficacité compte</h3>
+        <div class="why-item"><div class="n">1</div><div><b>Latence élevée</b> — une récupération lente ralentit les réponses.</div></div>
+        <div class="why-item"><div class="n">2</div><div><b>Coûts plus élevés</b> — plus d'appels API, plus de dépenses.</div></div>
+        <div class="why-item"><div class="n">3</div><div><b>Précision faible</b> — un contexte non pertinent entraîne des hallucinations.</div></div>
+        <div class="why-item"><div class="n">4</div><div><b>Rappel faible</b> — des informations manquantes donnent des réponses incomplètes.</div></div>
+        <div class="why-item"><div class="n">5</div><div><b>Maintenance difficile</b> — doublons et données non structurées.</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Stack technique (exemple)</h3>
+        <div class="stack-item"><span class="dot" style="background:#9D8CFF"></span>Embedding — text-embedding-3</div>
+        <div class="stack-item"><span class="dot" style="background:#F2A93B"></span>Base vectorielle — pgvector</div>
+        <div class="stack-item"><span class="dot" style="background:#38D39F"></span>Reranker — cross-encoder</div>
+        <div class="stack-item"><span class="dot" style="background:#4EA8F2"></span>LLM — classe GPT-4</div>
+      </div>
+
+      <div class="card outcome-card">
+        <h3 style="--_:0">Résultat obtenu</h3>
+        <ul>
+          <li>Réponses précises avec citations</li>
+          <li>Latence réduite, meilleure expérience</li>
+          <li>Moins de tokens, coût réduit</li>
+          <li>Base de connaissances évolutive</li>
+          <li>Meilleures réponses, à grande échelle</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ============ DEEP DIVE: CHAPITRE 6 ============ -->
+  <section class="deepdive">
+    <div class="deepdive-head">
+      <div class="deepdive-kicker">POUR ALLER PLUS LOIN</div>
+      <h2>Les fondations théoriques du RAG</h2>
+      <p>Synthèse, en français et avec des mots différents des miens habituels, des notions abordées dans le chapitre consacré au RAG et aux agents de l'ouvrage <i>AI Engineering</i> de Chip Huyen (O'Reilly, 2025). Chaque point ci-dessous éclaire une décision de conception présente dans le schéma ci-dessus.</p>
+      <p class="src">Synthèse pédagogique inspirée du chapitre « RAG and Agents » — les idées appartiennent à l'autrice, la formulation est propre à cette page.</p>
+    </div>
+
+    <div class="accordion" id="accordion"></div>
+  </section>
+
+  <p class="foot-note">flux de données animé — pgvector · HNSW · cross-encoder reranking</p>
+</div>
+
+<script>
+const ICONS = {
+  doc: '<path d="M4 2h9l5 5v15H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 2v5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  fingerprint: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.5"/>',
+  tag: '<path d="M3 12l8-8h8v8l-8 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="15" cy="9" r="1.4" fill="currentColor"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  network: '<circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="5" cy="16" r="2" fill="currentColor"/><circle cx="19" cy="16" r="2" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/><path d="M12 7l-6 8M12 7l6 8M7 17h10" stroke="currentColor" stroke-width="1.3"/>',
+  search: '<circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  pencil: '<path d="M4 20l1-4.5L15 5l4 4L9 19.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M13 7l4 4" stroke="currentColor" stroke-width="1.5"/>',
+  abc: '<text x="2" y="17" font-size="13" font-weight="700" fill="currentColor" font-family="Arial">ABC</text>',
+  sync: '<path d="M4 12a8 8 0 0 1 13.5-5.8M20 12a8 8 0 0 1-13.5 5.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+  chain: '<rect x="2" y="8" width="9" height="8" rx="4" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-30 6.5 12)"/><rect x="13" y="8" width="9" height="8" rx="4" fill="none" stroke="currentColor" stroke-width="1.6" transform="rotate(-30 17.5 12)"/>',
+  filter: '<path d="M3 4h18l-7 8v6l-4 2v-8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  trophy: '<path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 6H4a3 3 0 0 0 3 5M17 6h3a3 3 0 0 1-3 5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 14v3M9 20h6M10 17h4v3h-4z" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  quote: '<path d="M4 8c0-2.5 2-4 4.5-4v2c-1.4 0-2.5 1-2.5 2.4V9h2.5v6H4zM13 8c0-2.5 2-4 4.5-4v2c-1.4 0-2.5 1-2.5 2.4V9h2.5v6H13z" fill="currentColor"/>',
+  bubble: '<path d="M4 5h16v11H9l-4 4V5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  spark: '<path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z" fill="currentColor"/>',
+  file: '<path d="M6 2h8l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 2v4h4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.4"/>'
+};
+
+const LAYERS = [
+  {
+    id:'ingestion',
+    num:'COUCHE 01',
+    title:"Ingestion",
+    color:'#9D8CFF',
+    soft:'#2A2450',
+    icon:'grid',
+    desc:"Construire une base de connaissances propre et structurée",
+    steps:[
+      {icon:'fingerprint', label:'Déduplication par checksum', detail:"Chaque document reçoit une empreinte unique : les doublons sont détectés avant d'atteindre l'index vectoriel, évitant de payer deux fois pour la même information."},
+      {icon:'doc', label:'Extraction de texte (page / section)', detail:"Le contenu des PDF, Word et autres formats est extrait en conservant la structure — page par page, section par section — pour préserver le contexte d'origine."},
+      {icon:'tag', label:'Enrichissement des métadonnées', detail:"Chaque fragment est associé à sa source, sa date de mise à jour et son type de document, ce qui permettra un filtrage précis au moment de la recherche."},
+      {icon:'grid', label:'Découpage adapté aux tokens', detail:"Le texte est segmenté en blocs de taille optimale pour l'embedding, ni trop petits (perte de sens) ni trop grands (bruit inutile)."},
+      {icon:'network', label:'Génération des embeddings', detail:"Chaque fragment est converti en vecteur (text-embedding-3-small, 1024 dimensions) puis stocké dans PostgreSQL + pgvector avec un index HNSW pour une recherche rapide et persistante."}
+    ]
+  },
+  {
+    id:'query',
+    num:'COUCHE 02',
+    title:"Compréhension de la requête",
+    color:'#F2A93B',
+    soft:'#3A2A14',
+    icon:'search',
+    desc:"Comprendre et élargir l'intention de l'utilisateur",
+    steps:[
+      {icon:'search', label:'Génération multi-requêtes', detail:"La question de l'utilisateur est reformulée en plusieurs variantes pour couvrir différentes façons d'exprimer le même besoin d'information."},
+      {icon:'pencil', label:'Réécriture de la requête', detail:"La requête brute est clarifiée et complétée — fautes corrigées, ambiguïtés levées — avant d'être envoyée au moteur de recherche vectorielle."},
+      {icon:'abc', label:'Expansion des acronymes', detail:"Les sigles et abréviations métier sont développés automatiquement pour que la recherche ne rate pas un document qui utilise la forme longue, ou l'inverse."},
+      {icon:'sync', label:'Normalisation des synonymes du domaine', detail:"Le vocabulaire spécifique au domaine est harmonisé (ex. « churn » ↔ « attrition ») pour maximiser la correspondance avec les documents indexés."}
+    ]
+  },
+  {
+    id:'context',
+    num:'COUCHE 03',
+    title:"Optimisation du contexte",
+    color:'#38D39F',
+    soft:'#123328',
+    icon:'filter',
+    desc:"Récupérer le bon contexte, efficacement",
+    steps:[
+      {icon:'search', label:'Recherche vectorielle à haut rappel (Top-K)', detail:"Les K fragments les plus proches sémantiquement sont récupérés en priorité, en maximisant le rappel avant tout filtrage plus fin."},
+      {icon:'chain', label:'Rattachement des chunks voisins', detail:"Les fragments adjacents dans le document d'origine sont rattachés au résultat pour restaurer le contexte perdu lors du découpage initial."},
+      {icon:'filter', label:'Filtrage des métadonnées & enrichissement des citations', detail:"Les résultats sont filtrés par source, date ou type de document, puis enrichis des informations nécessaires pour citer précisément l'origine."},
+      {icon:'trophy', label:'Reranking (cross-encoder)', detail:"Un modèle cross-encoder réévalue finement chaque candidat retenu pour ne garder que les passages réellement pertinents, améliorant la précision sans sacrifier le rappel."}
+    ]
+  },
+  {
+    id:'generation',
+    num:'COUCHE 04',
+    title:"Génération",
+    color:'#4EA8F2',
+    soft:'#122E44',
+    icon:'bubble',
+    desc:"Générer des réponses précises et ancrées dans les sources",
+    steps:[
+      {icon:'file', label:'Augmentation du contexte', detail:"Les passages sélectionnés sont assemblés dans le prompt final, organisés pour donner au modèle le meilleur contexte possible."},
+      {icon:'spark', label:'LLM (classe GPT-4)', detail:"Un modèle de langage de pointe génère la réponse en s'appuyant exclusivement sur le contexte fourni, plutôt que sur ses connaissances générales."},
+      {icon:'bubble', label:'Réponse ancrée dans les sources', detail:"La réponse produite reste strictement fondée sur les documents récupérés, réduisant fortement le risque d'hallucination."},
+      {icon:'quote', label:'Citations', detail:"Chaque affirmation de la réponse est reliée à sa source d'origine, permettant à l'utilisateur de vérifier l'information en un clic."}
+    ]
+  }
+];
+
+const pipeline = document.getElementById('pipeline');
+
+LAYERS.forEach((layer, li) => {
+  const stage = document.createElement('div');
+  stage.className = 'stage';
+  stage.id = `stage-${layer.id}`;
+  stage.style.setProperty('--badge-color', layer.color);
+  stage.style.setProperty('--badge-soft', layer.soft);
+  stage.style.setProperty('--badge-glow', layer.color + '44');
+
+  const stepsHtml = layer.steps.map((s, i) => `
+    <button class="step" data-layer="${layer.id}" data-idx="${i}"
+      style="--step-color:${layer.color}; --step-soft:${layer.soft}">
+      <span class="arrow-idx">${String(i+1).padStart(2,'0')}</span>
+      <span class="ic"><svg viewBox="0 0 24 24">${ICONS[s.icon]}</svg></span>
+      <span class="label">${s.label}</span>
+    </button>
+  `).join('');
+
+  stage.innerHTML = `
+    <div class="stage-head">
+      <div>
+        <div class="stage-num" style="color:${layer.color}">${layer.num}</div>
+        <div class="stage-title">${layer.title}</div>
+        <div class="stage-desc">${layer.desc}</div>
+      </div>
+      <div class="stage-badge" style="--badge-color:${layer.color}; --badge-soft:${layer.soft}">
+        <svg viewBox="0 0 24 24">${ICONS[layer.icon]}</svg>
+      </div>
+    </div>
+    <div class="steps">${stepsHtml}</div>
+    <div class="detail" style="--step-color:${layer.color}"></div>
+  `;
+
+  pipeline.appendChild(stage);
+
+  if (li < LAYERS.length - 1) {
+    const conn = document.createElement('div');
+    conn.className = 'v-connector';
+    conn.style.setProperty('--flow-color', LAYERS[li+1].color);
+    conn.style.animationDelay = (li*0.4)+'s';
+    pipeline.appendChild(conn);
+  }
+});
+
+// Interactivity: click a step to reveal detail text within its stage
+pipeline.addEventListener('click', (e) => {
+  const btn = e.target.closest('.step');
+  if (!btn) return;
+  const layerId = btn.dataset.layer;
+  const idx = +btn.dataset.idx;
+  const layer = LAYERS.find(l => l.id === layerId);
+  const stage = btn.closest('.stage');
+  const detail = stage.querySelector('.detail');
+  const allSteps = stage.querySelectorAll('.step');
+
+  const alreadySelected = btn.classList.contains('selected');
+  allSteps.forEach(s => s.classList.remove('selected'));
+
+  if (alreadySelected) {
+    detail.classList.remove('show');
+    detail.innerHTML = '';
+    return;
+  }
+
+  btn.classList.add('selected');
+  const s = layer.steps[idx];
+  detail.innerHTML = `<b>${s.label}.</b> ${s.detail}`;
+  detail.classList.add('show');
+});
+
+// Legend scroll-to + highlight active layer while scrolling
+const legendBtns = document.querySelectorAll('.legend button');
+const stageEls = document.querySelectorAll('.stage');
+
+legendBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.layer;
+    const idx = LAYERS.findIndex(l => l.id === id);
+    stageEls[idx].scrollIntoView({behavior:'smooth', block:'center'});
+  });
+});
+
+// ================= LIVE SANDBOX SIMULATION ENGINE =================
+function setQuery(text) {
+  document.getElementById('userQueryInput').value = text;
+}
+
+async function startSimulation() {
+  const query = document.getElementById('userQueryInput').value.trim() || "Question RAG par défaut";
+  const topK = document.getElementById('paramTopK').value;
+  const chunkSize = document.getElementById('paramChunkSize').value;
+  const useRerank = document.getElementById('paramRerank').checked;
+
+  const btn = document.getElementById('runSimBtn');
+  const consoleBox = document.getElementById('simConsole');
+  const statusText = document.getElementById('simStatusText');
+  const finalOut = document.getElementById('simFinalOutput');
+  const timerEl = document.getElementById('simTimer');
+
+  btn.disabled = true;
+  consoleBox.classList.add('active');
+  finalOut.classList.remove('show');
+  finalOut.innerHTML = '';
+  statusText.textContent = "Simulation en cours...";
+  statusText.style.color = "var(--query)";
+
+  // Reset cards
+  for(let i=1; i<=4; i++) {
+    document.getElementById(`simCard${i}`).className = "sim-step-card";
+    document.getElementById(`stage-${LAYERS[i-1].id}`).classList.remove('highlight-stage');
+    document.getElementById(`simStatus${i}`).textContent = "En attente...";
+  }
+
+  let startTime = performance.now();
+  let timerInterval = setInterval(() => {
+    let elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+    timerEl.textContent = `${elapsed}s`;
+  }, 100);
+
+  // Helper delay
+  const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+  try {
+    // STAGE 1: Ingestion & Checksum
+    activateStageSimulation(1, `Vérification checksums & découpage chunks (${chunkSize} tokens)...`);
+    await wait(600);
+    updateStageStatus(1, `✓ 12 400 chunks indexés dans pgvector (HNSW active).`);
+
+    // STAGE 2: Query Understanding
+    activateStageSimulation(2, `Analyse sémantique & multi-requêtes...`);
+    await wait(600);
+    updateStageStatus(2, `✓ Requête reformulée & acronymes développés.`);
+
+    // STAGE 3: Context & Reranking
+    activateStageSimulation(3, `Récupération Top-${topK} + Reranking (${useRerank ? 'Cross-Encoder actif' : 'Désactivé'})...`);
+    await wait(700);
+    updateStageStatus(3, `✓ ${topK} fragments filtrés (score pertinence > 0.89).`);
+
+    // STAGE 4: Generation
+    activateStageSimulation(4, `Assemblage prompt & génération LLM...`);
+    await wait(800);
+    updateStageStatus(4, `✓ Réponse ancrée générée avec succès.`);
+
+    clearInterval(timerInterval);
+    let totalTime = ((performance.now() - startTime) / 1000).toFixed(2);
+    timerEl.textContent = `${totalTime}s (Terminé)`;
+    statusText.textContent = "Terminé avec succès";
+    statusText.style.color = "var(--context)";
+
+    // Display formatted final output
+    finalOut.innerHTML = `
+      <div style="font-weight:700; color:var(--generation); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Résultat synthétisé (${totalTime}s | Top-${topK} | Chunk: ${chunkSize}t | Rerank: ${useRerank ? 'Oui' : 'Non'}) :
+      </div>
+      <p style="color:var(--text); margin-bottom:8px;">Pour configurer efficacement <b>pgvector</b> avec un index <b>HNSW</b> garantissant une recherche vectorielle ultrarapide à haut rappel, créez votre colonne de type <code>vector(1024)</code> puis construisez l'index avec <code>CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);</code>.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11.5px; font-family:'JetBrains Mono',monospace; color:var(--text-dim);">
+        <span style="background:rgba(56,211,159,0.1); border:1px solid rgba(56,211,159,0.3); padding:2px 6px; border-radius:4px; color:var(--context);">Source [1]: docs_pgvector_v0.5.pdf (p. 14)</span>
+        <span style="background:rgba(78,168,242,0.1); border:1px solid rgba(78,168,242,0.3); padding:2px 6px; border-radius:4px; color:var(--generation);">Source [2]: architecture_best_practices.md</span>
+      </div>
+    `;
+    finalOut.classList.add('show');
+
+  } catch(err) {
+    console.error(err);
+    statusText.textContent = "Erreur de simulation";
+    statusText.style.color = "#f87171";
+  } finally {
+    clearInterval(timerInterval);
+    btn.disabled = false;
+  }
+}
+
+function activateStageSimulation(num, statusMsg) {
+  // Mark previous completed if > 1
+  if (num > 1) {
+    const prevCard = document.getElementById(`simCard${num-1}`);
+    prevCard.classList.remove('active');
+    prevCard.classList.add('completed');
+    document.getElementById(`stage-${LAYERS[num-2].id}`).classList.remove('highlight-stage');
+  }
+
+  const card = document.getElementById(`simCard${num}`);
+  card.classList.add('active');
+  document.getElementById(`simStatus${num}`).textContent = statusMsg;
+
+  const stageEl = document.getElementById(`stage-${LAYERS[num-1].id}`);
+  stageEl.classList.add('highlight-stage');
+  stageEl.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function updateStageStatus(num, statusMsg) {
+  document.getElementById(`simStatus${num}`).textContent = statusMsg;
+}
+
+// ================= DEEP DIVE : CHAPITRE 6 =================
+const DEEPDIVE = [
+  {
+    color:'#9D8CFF',
+    title:"Pourquoi le RAG garde son intérêt face aux contextes géants",
+    body:`<p>On pourrait croire qu'un modèle capable d'avaler des centaines de milliers de tokens rend le RAG inutile. Ce n'est pas le cas. D'abord, quelle que soit la taille de la fenêtre de contexte, le volume de données d'une organisation continue de croître — on efface rarement, on ajoute sans cesse. Ensuite, un modèle qui <i>peut</i> lire un contexte long ne l'exploite pas forcément bien : plus le contexte s'allonge, plus le risque que le modèle s'appuie sur le mauvais passage augmente, et chaque token supplémentaire coûte en argent et en latence.</p>
+    <p>Le RAG répond à هذا problème autrement : au lieu de servir le même contexte massif à chaque requête, il construit un contexte <b>propre à chaque question</b>, en ne sélectionnant que ce qui est réellement pertinent. C'est l'équivalent, pour un modèle de fondation, de ce que l'ingénierie des variables (feature engineering) était pour le machine learning classique.</p>
+    <p>Nuance importante : en dessous d'un certain volume de connaissances, le RAG peut devenir superflu. Anthropic a par exemple indiqué qu'en deçà d'environ 200 000 tokens — grossièrement l'équivalent de 500 pages — on peut se permettre de placer toute la base de connaissances directement dans le prompt, sans passer par une étape de récupération. Au-delà, le RAG redevient nécessaire.</p>`,
+    tags:['contexte spécifique à la requête','coût par token','fenêtre de contexte','seuil ~200K tokens']
+  },
+  {
+    color:'#9D8CFF',
+    title:"L'anatomie d'un système RAG",
+    body:`<p>Un système RAG repose sur deux briques qui coopèrent : un <b>retriever</b> (moteur de récupération) chargé d'aller chercher, dans une mémoire externe — base de données interne, historique de conversation, ou le web — les informations les plus pertinentes pour la question posée ; et un <b>générateur</b>, le modèle de langage, qui rédige la réponse en s'appuyant sur ce qui vient d'être récupéré.</p>
+    <p>La qualité de l'ensemble dépend presque entièrement de la qualité du retriever : si les bons documents ne remontent pas, aucun modèle de génération, aussi puissant soit-il, ne peut compenser ce manque.</p>`,
+    tags:['retriever','générateur','mémoire externe']
+  },
+  {
+    color:'#F2A93B',
+    title:"Deux familles de moteurs de recherche",
+    body:`<p>La récupération d'information ne date pas du RAG — c'est un champ qui a plus d'un siècle. Deux grandes approches s'affrontent aujourd'hui. La <b>recherche par termes</b> (lexicale) compare les mots-clés de la requête à ceux des documents, via un index inversé ; des algorithmes comme <b>TF‑IDF</b> ou son évolution <b>BM25</b> pondèrent chaque terme selon sa fréquence et sa rareté. La <b>recherche par embeddings</b> (sémantique) transforme requête et documents en vecteurs, puis cherche les vecteurs les plus proches dans un espace à haute dimension — c'est le rôle des bases vectorielles et de la recherche du plus proche voisin, le plus souvent approximative (ANN) via des structures comme <b>HNSW</b>, l'IVF, la quantification de produit ou le hachage sensible à la localité (LSH).</p>
+    <p>Le tableau ci-dessous résume l'arbitrage habituel entre les deux approches.</p>
+    <table class="deepdive-table">
+      <tr><th></th><th>Recherche par termes</th><th>Recherche par embeddings</th></tr>
+      <tr><td><b>Vitesse</b></td><td>Généralement plus rapide</td><td>Plus lente : embedding de la requête + recherche vectorielle</td></tr>
+      <tr><td><b>Performance</b></td><td>Solide dès la mise en route</td><td>Peut la dépasser une fois affinée, mais peut perdre des mots-clés précis</td></tr>
+      <tr><td><b>Coût</b></td><td>Beaucoup moins coûteux</td><td>Génération, stockage et requêtes vectorielles ont un coût réel</td></tr>
+    </table>`,
+    tags:['TF-IDF','BM25','Elasticsearch','HNSW','FAISS','ScaNN','IVF','LSH']
+  },
+  {
+    color:'#F2A93B',
+    title:"Mesurer la qualité d'un retriever",
+    body:`<p>Deux métriques reviennent souvent dans les cadres d'évaluation du RAG. La <b>précision du contexte</b> mesure la proportion, parmi les passages récupérés, de ceux qui sont réellement utiles à la question. Le <b>rappel du contexte</b> mesure, à l'inverse, la proportion des passages réellement pertinents qui ont bien été récupérés. Ces deux métriques se calculent sur un jeu de requêtes de test associées aux documents qu'on attend de voir remonter.</p>
+    <p>Quand la recherche s'appuie sur des embeddings, il faut en plus évaluer la qualité des embeddings eux-mêmes, indépendamment du reste du pipeline — des benchmarks comme ANN-Benchmarks ou BEIR servent justement à comparer les algorithmes de recherche approchée sur le rappel, la vitesse de requête, le temps de construction de l'index et sa taille. Le benchmark MTEB, lui, évalue spécifiquement la qualité des embeddings sur une grande variété de tâches.</p>
+    <p>Quand l'ordre d'apparition des documents compte vraiment — par exemple pour savoir si le document le plus pertinent arrive bien en tête — des métriques de classement comme le <b>NDCG</b>, le <b>MAP</b> ou le <b>MRR</b> viennent compléter précision et rappel.</p>`,
+    tags:['précision du contexte','rappel du contexte','ANN-Benchmarks','BEIR','MTEB','NDCG · MAP · MRR']
+  },
+  {
+    color:'#38D39F',
+    title:"Combiner les moteurs plutôt que choisir un camp",
+    body:`<p>Combiner recherche par termes et recherche par embeddings porte un nom : la <b>recherche hybride</b>. En pratique, un système de production ne se limite presque jamais à un seul algorithme. Une approche courante enchaîne les deux mondes : une première passe, rapide et peu coûteuse (par exemple lexicale), réduit un large ensemble de documents à une poignée de candidats ; une seconde passe, plus coûteuse mais plus précise, les réordonne — c'est le <b>reranking</b>.</p>
+    <p>Les algorithmes peuvent aussi tourner en parallèle, comme un ensemble, puis voir leurs classements fusionnés grâce à des méthodes comme la <b>fusion de rangs réciproques</b> (reciprocal rank fusion, RRF), qui combine plusieurs listes ordonnées en une seule sans avoir besoin de comparer directement leurs scores bruts.</p>`,
+    tags:['recherche hybride','reranking','ensemble','reciprocal rank fusion']
+  },
+  {
+    color:'#38D39F',
+    title:"Le découpage des documents, un art plus qu'une science",
+    body:`<p>La façon dont un document est fragmenté conditionne directement ce que le retriever pourra retrouver. On peut couper en blocs de longueur fixe, en nombre fixe de tokens (en s'alignant sur le tokeniseur du modèle générateur), ou de façon récursive — en subdivisant en unités de plus en plus petites jusqu'à respecter une taille cible. Certains formats de documents se prêtent à des découpages sur mesure, calés sur leur structure naturelle.</p>
+    <p>Un chevauchement entre fragments consécutifs évite qu'une information ne soit coupée exactement à la frontière entre deux blocs. Le compromis est le suivant : des fragments trop petits perdent le contexte nécessaire pour être compris isolément et multiplient le nombre d'appels ; des fragments trop grands introduisent du bruit et risquent de dépasser la fenêtre de contexte du générateur. Il n'existe pas de taille universelle — le bon réglage se trouve par expérimentation.</p>`,
+    tags:['taille de bloc','chevauchement','tokenisation']
+  },
+  {
+    color:'#4EA8F2',
+    title:"Redonner du contexte à chaque fragment avant de l'indexer",
+    body:`<p>Un fragment isolé perd souvent l'information nécessaire pour être compris seul — il peut mentionner « cette entreprise » ou « ce trimestre » sans préciser lesquels. La technique dite de <b>récupération contextuelle</b>, popularisée par Anthropic, consiste à faire générer, pour chaque fragment, un court résumé qui le replace dans le document entier, avant de le transformer en embedding. On peut aller plus loin en enrichissant chaque fragment avec des métadonnées extraites automatiquement, ou avec les questions auxquelles il permet de répondre — une aide précieuse, par exemple, pour un assistant de support client.</p>`,
+    tags:['récupération contextuelle','métadonnées','Anthropic']
+  },
+  {
+    color:'#4EA8F2',
+    title:"Choisir une solution de recherche : la checklist pratique",
+    body:`<p>Avant d'adopter une base vectorielle ou un moteur de recherche, quelques questions concrètes permettent de trancher : quels mécanismes de recherche sont supportés — lexicale, sémantique, hybride ? Quels modèles d'embedding et quels algorithmes de recherche approchée sont pris en charge si c'est une base vectorielle ? Quelle est sa capacité à monter en charge, aussi bien en volume de données qu'en trafic de requêtes ? Combien de temps prend l'indexation, et peut-on ajouter ou supprimer des données en masse rapidement ? Quelle est la latence de requête selon l'algorithme choisi ? Et, pour une solution gérée, la facturation se fait-elle au volume de documents ou au volume de requêtes ?</p>
+    <p>Ces questions s'ajoutent — sans les remplacer — aux exigences plus classiques d'une base de données en entreprise : contrôle d'accès, conformité, séparation entre plan de données et plan de contrôle.</p>`,
+    tags:['scalabilité','latence de requête','coût','conformité']
+  },
+  {
+    color:'#4EA8F2',
+    title:"Le RAG appliqué aux données tabulaires",
+    body:`<p>Toutes les questions ne trouvent pas leur réponse dans du texte : beaucoup nécessitent d'interroger des tables de données structurées — un tableau de ventes, par exemple. Le mécanisme diffère alors complètement du RAG classique. Le système doit d'abord traduire la question en requête <b>SQL</b> (une forme d'analyse sémantique), exécuter cette requête sur la base, puis rédiger une réponse en langage naturel à partir du résultat obtenu.</p>
+    <p>Quand un grand nombre de tables sont disponibles et que leurs schémas ne tiennent pas tous dans le contexte du modèle, une étape intermédiaire devient nécessaire pour d'abord identifier quelles tables sont pertinentes pour la question posée, avant même de générer le SQL.</p>`,
+    tags:['texte vers SQL','données structurées','analyse sémantique']
+  },
+  {
+    color:'#4EA8F2',
+    title:"Le RAG multimodal",
+    body:`<p>Quand le générateur sait traiter plusieurs modalités, le contexte récupéré peut mêler texte et images plutôt que se limiter à l'écrit. Si les images disposent de métadonnées — titres, tags, légendes — on peut les retrouver comme n'importe quel document texte. Pour une récupération fondée sur le contenu visuel lui-même, il faut un modèle d'embedding multimodal, capable de projeter texte et images dans un même espace vectoriel — <b>CLIP</b> en est l'exemple le plus connu.</p>`,
+    tags:['CLIP','embeddings multimodaux']
+  }
+];
+
+const accordion = document.getElementById('accordion');
+DEEPDIVE.forEach((item, i) => {
+  const el = document.createElement('div');
+  el.className = 'acc-item';
+  el.style.setProperty('--acc-color', item.color);
+  el.innerHTML = `
+    <button class="acc-head">
+      <span class="n">${String(i+1).padStart(2,'0')}</span>
+      <span class="t">${item.title}</span>
+      <span class="plus"></span>
+    </button>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        ${item.body}
+        <div class="tag-row">${item.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>
+  `;
+  accordion.appendChild(el);
+});
+
+accordion.addEventListener('click', (e) => {
+  const head = e.target.closest('.acc-head');
+  if (!head) return;
+  const item = head.closest('.acc-item');
+  const body = item.querySelector('.acc-body');
+  const isOpen = item.classList.contains('open');
+
+  if (isOpen) {
+    body.style.maxHeight = null;
+    item.classList.remove('open');
+  } else {
+    item.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }
+});
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = [...stageEls].indexOf(entry.target);
+      if(idx !== -1) {
+        const id = LAYERS[idx].id;
+        legendBtns.forEach(b => b.classList.toggle('active', b.dataset.layer === id));
+      }
+    }
+  });
+}, {threshold:0.5});
+
+stageEls.forEach(el => io.observe(el));
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

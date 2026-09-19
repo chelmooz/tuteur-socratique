@@ -1,0 +1,71 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les 7 couches du génie des systèmes d’IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #f59e0b;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #fde68a;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Infographie • édition septembre 2026</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Couches"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Vue d’ensemble"><span class="pill">Introduction</span><h1>Les 7 couches du génie des systèmes d’IA</h1><p class="muted">Une carte pour passer d’un modèle de fondation à un système agentique fiable : invite, contexte, harnais, boucle, graphe et ontologie.</p><img src="7-couches-du-genie-des-systemes-ia.jpg" alt="Infographie des sept couches du génie des systèmes d’IA"><p><strong>Idée directrice :</strong> un bon agent ne compense pas un mauvais système. Chaque couche répond à une question différente et fournit les fondations de la suivante.</p></section>
+<section class="card module" data-title="1 Fondation"><span class="pill">Couche 1</span><h2>Modèle de fondation — Que peut faire le modèle ?</h2><p>Commencez par les capacités apprises et les limites connues : raisonnement, suivi d’instructions, vision, contexte, outils et risques d’hallucination.</p><div class="grid"><div><h3>Capacités</h3><p>Ce que le modèle sait faire avec ses paramètres.</p></div><div><h3>Limites</h3><p>Ce qui exige preuves, outils, garde-fous ou intervention humaine.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle est la première question à poser ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Quelles sont les capacités et les limites du modèle ?</button><button class="choice" data-correct="false" onclick="answer(this,false)">Quel framework installer en premier ?</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="2 Invite"><span class="pill">Couche 2</span><h2>Ingénierie de l’invite — Que devrait-il faire ?</h2><p>Une invite fiable spécifie la tâche, les contraintes, les exemples et le format attendu. Elle transforme une capacité générale en comportement observable.</p><pre id="prompt">Tâche : classer le ticket.
+Règles : ne rien inventer ; citer la preuve ; demander une précision si elle manque.
+Exemples : {"ticket":"...","classe":"facturation"}
+Format : JSON {"classe": string, "preuve": string, "confiance": number}</pre><button class="btn primary copy" onclick="copyText('prompt')">Copier le patron</button><div class="quiz"><h3>Quiz</h3><p>Que faut-il ajouter pour rendre la sortie testable ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Un format explicite et des contraintes vérifiables</button><button class="choice" data-correct="false" onclick="answer(this,false)">Plus de texte décoratif sans règle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="3 Contexte"><span class="pill">Couche 3</span><h2>Ingénierie du contexte — De quoi a-t-il besoin de savoir ?</h2><p>Sélectionnez les preuves pertinentes, la mémoire et les résultats d’outils. La fenêtre de contexte doit être alimentée par un contexte utile, traçable et proportionné.</p><div class="diagram"><svg viewBox="0 0 850 160"><g fill="#15384a" stroke="#67e8e0" stroke-width="2"><rect x="30" y="55" width="150" height="50" rx="10"/><rect x="250" y="20" width="140" height="42" rx="10"/><rect x="250" y="68" width="140" height="42" rx="10"/><rect x="250" y="116" width="140" height="42" rx="10"/><rect x="520" y="55" width="220" height="50" rx="10"/></g><g fill="#effbff" text-anchor="middle" font-size="14"><text x="105" y="85">Question</text><text x="320" y="47">Preuves</text><text x="320" y="95">Mémoire</text><text x="320" y="143">Outils</text><text x="630" y="85">Fenêtre de contexte</text></g><g class="flow" stroke="#b9ed83" stroke-width="3"><path d="M180 80h60M390 41l120 25M390 89h120M390 137l120-25" fill="none"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Quel contexte est préférable ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Le minimum pertinent, avec provenance et résultats d’outils utiles</button><button class="choice" data-correct="false" onclick="answer(this,false)">Tout le corpus sans sélection</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="4 Harnais"><span class="pill">Couche 4</span><h2>Ingénierie du harnais — Comment agir en sécurité ?</h2><p>Le harnais est l’environnement d’exécution : outils, permissions, état et journaux. Il définit ce que l’agent peut réellement faire et ce qui est traçable.</p><div class="grid"><div><h3>Outils</h3><p>Interfaces typées, timeouts et validation des arguments.</p></div><div><h3>Permissions</h3><p>Principe du moindre privilège, sandbox et approbation pour les actions sensibles.</p></div><div><h3>État & logs</h3><p>Checkpoints, erreurs, entrées/sorties et audit reconstructible.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle couche encadre les permissions et les journaux ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">L’invite uniquement</button><button class="choice" data-correct="true" onclick="answer(this,true)">Le harnais d’exécution</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="5 Boucle"><span class="pill">Couche 5</span><h2>Ingénierie de boucle — Comment vérifier et s’affiner ?</h2><p>Un agent agit, évalue, puis réessaie si nécessaire. La boucle doit avoir des critères de réussite, des limites d’arrêt et une stratégie d’échec.</p><pre id="loop">while iteration &lt; MAX_ITERATIONS:
+    action = agent.act(state)
+    observation = harness.execute(action)
+    verdict = evaluator.check(observation)
+    if verdict.ok:
+        break
+    state = refine(state, verdict.gaps)</pre><button class="btn primary copy" onclick="copyText('loop')">Copier le pattern</button><div class="quiz"><h3>Quiz</h3><p>Pourquoi une limite d’itérations est-elle indispensable ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Éviter les boucles infinies et les coûts incontrôlés</button><button class="choice" data-correct="false" onclick="answer(this,false)">Empêcher toute amélioration</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="6 Graphe"><span class="pill">Couche 6</span><h2>Ingénierie de graphe — Comment coordonner le travail ?</h2><p>Connectez les étapes via des branches et des dépendances. Le graphe rend visibles les parcours, les parallélismes, les jonctions et les conditions.</p><div class="diagram"><svg viewBox="0 0 850 170"><g fill="#15384a" stroke="#67e8e0" stroke-width="2"><circle cx="90" cy="85" r="32"/><circle cx="280" cy="45" r="32"/><circle cx="280" cy="125" r="32"/><circle cx="500" cy="85" r="32"/><rect x="650" y="60" width="130" height="50" rx="10"/></g><g fill="#effbff" text-anchor="middle" font-size="14"><text x="90" y="90">Départ</text><text x="280" y="50">1</text><text x="280" y="130">2</text><text x="500" y="90">3</text><text x="715" y="90">Résultat</text></g><g class="flow" stroke="#b9ed83" stroke-width="3"><path d="M120 75l125-25M120 95l125 25M312 55l155 25M312 115l155-25M532 85h115" fill="none"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Quel est l’intérêt d’un graphe explicite ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Rendre les branches, dépendances et états inspectables</button><button class="choice" data-correct="false" onclick="answer(this,false)">Cacher toute la logique dans un prompt</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="7 Ontologie"><span class="pill">Couche 7</span><h2>Ingénierie de l’ontologie — Que signifient les concepts ?</h2><p>Définissez les entités partagées, leurs relations et leurs contraintes. Une ontologie commune évite que chaque agent interprète différemment « client », « commande » ou « incident ».</p><pre id="ontology">Client --passe--> Commande
+Contrainte : un client peut passer plusieurs commandes.
+Commande --contient--> LigneCommande
+Identifiant : Client.id et Commande.id sont uniques.</pre><button class="btn primary copy" onclick="copyText('ontology')">Copier le modèle</button><div class="quiz"><h3>Quiz</h3><p>Que formalise une ontologie ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Les entités, relations et contraintes partagées</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement la couleur de l’interface</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Diagnostic"><span class="pill">Atelier</span><h2>Diagnostiquer un agent couche par couche</h2><p>Utilisez cette checklist avant d’ajouter de nouveaux agents ou outils. Corrigez la couche la plus basse qui explique le symptôme.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Fondation : capacités et limites du modèle documentées.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Invite : tâche, règles, exemples et format explicites.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Contexte : preuves, mémoire et outils sélectionnés.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Harnais : outils typés, permissions minimales, état et logs.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Boucle : évaluation, retry et condition d’arrêt.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Graphe : branches, dépendances et coordination explicites.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ontologie : concepts, relations et contraintes partagés.</label><button class="btn primary" onclick="finish()">Valider le diagnostic</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

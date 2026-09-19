@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : Les fondamentaux du logiciel à l'ère IA | Specs-to-code, grill-me, TDD, modules profonds</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🧭 <span>Fondamentaux</span> du logiciel à l'ère IA</div>
+      <div class="muted small">Specs-to-code • grill-me • Langage ubiquitaire • TDD • Modules profonds • Stratégie</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les citations ⏱">⏱</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="myth">1. Le mythe specs-to-code</button>
+      <button data-target="fundamentals">2. Complexité &amp; entropie</button>
+      <button data-target="align">3. FM1 : concept de design</button>
+      <button data-target="language">4. FM2 : langage ubiquitaire</button>
+      <button data-target="feedback">5. FM3 : feedback &amp; TDD</button>
+      <button data-target="architecture">6. FM4 : modules profonds</button>
+      <button data-target="strategic">7. FM5 : stratège vs tacticien</button>
+      <button data-target="build">🛠️ Cas pratique : stack de skills</button>
+      <button data-target="scenarios">🎬 Scénarios</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="antipatterns">🚫 Anti-patterns</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat &amp; ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>Les fondamentaux du logiciel comptent plus que jamais</h1>
+      <p class="lead">
+        Message réconfortant pour ceux qui craignent que leurs compétences ne valent plus rien : <strong>les fondamentaux du logiciel
+        comptent davantage que jamais</strong>. Ce cours décortique le mythe du <em>specs-to-code</em>, les cinq failure modes du codage
+        avec IA, et les cinq skills qui les corrigent — <strong>grill-me</strong>, <strong>ubiquitous language</strong>,
+        <strong>TDD</strong>, <strong>improve-codebase-architecture</strong>, <strong>write-PRD</strong> — tous ressuscités de vieux
+        livres : Ousterhout, The Pragmatic Programmer, Frederick P. Brooks, le DDD, Kent Beck. <span class="source">⏱ 0:22</span>
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 1000 260" role="img" aria-label="Boucle stratège / tacticien">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          <rect x="20" y="40" width="190" height="80" rx="12" class="node green"/><text x="115" y="70" text-anchor="middle">TOI — stratège</text><text x="115" y="90" text-anchor="middle" class="sub">design, interfaces, cartes</text><text x="115" y="106" text-anchor="middle" class="sub">de modules</text>
+          <path class="dash green" d="M210 80 L300 80" marker-end="url(#arr)"/>
+          <rect x="300" y="30" width="250" height="100" rx="12" class="node pulse"/><text x="425" y="56" text-anchor="middle">Design concept partagé</text><text x="425" y="76" text-anchor="middle" class="sub">grill-me • langage ubiquitaire</text><text x="425" y="94" text-anchor="middle" class="sub">PRD (modules + interfaces)</text><text x="425" y="112" text-anchor="middle" class="sub">= théorie invisible du produit</text>
+          <path class="dash" d="M550 80 L640 80" marker-end="url(#arr)"/>
+          <rect x="640" y="40" width="190" height="80" rx="12" class="node purple"/><text x="735" y="70" text-anchor="middle">IA — tacticien</text><text x="735" y="90" text-anchor="middle" class="sub">sergent au sol :</text><text x="735" y="106" text-anchor="middle" class="sub">écrit le code</text>
+          <path class="dash yellow" d="M735 120 L735 190 L425 190 L425 130" marker-end="url(#arr)"/>
+          <text x="580" y="210" text-anchor="middle" class="sub">Feedback loops : types statiques, tests, navigateur — la vitesse de feedback est ta limite de vitesse</text>
+          <path class="dash cyan" d="M300 100 L240 140 L240 190 L425 190" marker-end="url(#arr)"/>
+          <text x="150" y="210" text-anchor="middle" class="sub">Modules profonds = boîtes grises :</text>
+          <text x="150" y="226" text-anchor="middle" class="sub">interface conçue, impl déléguée</text>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Thèse</h3><p>Le code n'est pas cheap : le mauvais code n'a jamais été aussi cher, car un codebase difficile à changer t'empêche de récolter les bénéfices de l'IA. <span class="source">⏱ 3:55</span></p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Chaque failure mode du codage IA se corrige avec un concept classique + un skill réutilisable : concept de design, langage ubiquitaire, feedback loops, modules profonds, programmation stratégique.</p></div>
+        <div class="card good"><h3>Cas pratique</h3><p>Un builder applique la stack complète (grill-me → ubiq. language → PRD → TDD → architecture → revue stratégique) sur une feature, avec console et code de référence.</p></div>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('myth')">Aller au mythe specs-to-code</button>
+        <button class="btn secondary" onclick="showSection('build')">Voir le cas pratique</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour adapter ton parcours.</p>
+      <div class="quiz">
+        <div class="q"><p class="q-text">1. Ton niveau ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : je découvre le codage avec IA.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="dev"> Développeur : j'utilise Claude Code / Copilot au quotidien.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="lead"> Lead / archi : je veux outiller mon équipe.</label>
+        </div>
+        <div class="q"><p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre pourquoi specs-to-code échoue.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="skills"> Adopter les 5 skills (grill-me, ubiq, TDD, archi, PRD).</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="design"> Reprendre le contrôle du design (modules, interfaces).</label>
+        </div>
+        <div class="q"><p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 15 min.</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 45-60 min (cas pratique complet).</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="myth" class="section">
+      <h1>Le mythe du specs-to-code</h1>
+      <p class="lead">
+        Le mouvement specs-to-code promet : écris une spécification, l'IA la transforme en code ; si ça ne va pas, modifie la spec —
+        jamais le code — et relance le compilateur. <span class="source">⏱ 1:08</span>
+      </p>
+      <div class="grid">
+        <div class="card bad"><h3>Ce que j'observe</h3><p>Premier run : du code. Deuxième : du pire code. Troisième : encore pire. À force de relancer le compilateur sans regarder le code… <strong>du garbage</strong>. <span class="source">⏱ 1:42</span></p></div>
+        <div class="card warn"><h3>Verdict</h3><p>« Ignorer le code et le laisser se gérer seul » n'est que du <em>vibe coding</em> sous un autre nom. La vraie question n'est pas « comment réparer le compilateur » mais « comment expliquer à un LLM, en anglais, à quoi ressemble un bon codebase ». <span class="source">⏱ 2:12</span></p></div>
+      </div>
+
+      <h2>Cas pratique 1 — Le compilateur à entropie</h2>
+      <p class="muted small">Relance le compilateur depuis la spec, avec ou sans investissement de design à chaque passe. Observe la qualité du codebase : c'est l'entropie logicielle en direct.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" onclick="runCompiler()">Relancer le compilateur</button>
+          <label style="display:flex;align-items:center;gap:.4rem;margin:0"><input type="checkbox" id="comp-design" style="width:auto" checked> Investir dans le design à chaque passe (refactor + revue d'interfaces)</label>
+          <button class="btn secondary" onclick="resetCompiler()">Reset</button>
+        </div>
+        <div class="meter"><div class="meter-fill mf-good" id="comp-fill"></div></div>
+        <p class="muted small" id="comp-label">Qualité du codebase : 70 % (code initial généré)</p>
+        <div class="console" id="comp-console"></div>
+        <p class="muted small" id="comp-note">Sans investissement de design, chaque passe ajoute du code qui ne pense qu'à son changement : le système dérive vers le désastre.</p>
+      </div>
+
+      <div class="quiz" data-module="myth">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. En specs-to-code pur, relancer le compilateur produit…</p>
+          <label class="q-option"><input type="radio" name="my-q0" value="0"> du code de qualité constante</label>
+          <label class="q-option"><input type="radio" name="my-q0" value="1"> du code progressivement pire, jusqu'au garbage</label>
+          <label class="q-option"><input type="radio" name="my-q0" value="2"> uniquement des tests</label>
+          <div class="explain">C'est l'entropie : chaque passe qui ne pense qu'à son changement dégrade le tout. <span class="source">⏱ 1:42</span></div>
+        </div>
+        <div class="q" data-answer="0"><p class="q-text">2. « Ignorer le code et le laisser se gérer » équivaut à…</p>
+          <label class="q-option"><input type="radio" name="my-q1" value="0"> du vibe coding sous un autre nom</label>
+          <label class="q-option"><input type="radio" name="my-q1" value="1"> de l'ingénierie logicielle mature</label>
+          <label class="q-option"><input type="radio" name="my-q1" value="2"> du TDD</label>
+          <div class="explain">Le code reste l'actif central : c'est lui qu'il faut garder compréhensible. <span class="source">⏱ 2:12</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('myth')">← Précédent</button><button class="btn" onclick="nextFrom('myth')">Complexité &amp; entropie →</button></div>
+    </section>
+
+    <section id="fundamentals" class="section">
+      <h1>Complexité, entropie, et le vrai coût du code</h1>
+      <div class="grid">
+        <div class="card info"><h3>Complexité (Ousterhout)</h3><p>« Tout ce qui, dans la structure d'un système logiciel, le rend difficile à comprendre et à modifier. » Un mauvais codebase = un codebase <strong>difficile à changer</strong> ; un bon = facile à changer. <span class="source">⏱ 2:36</span></p></div>
+        <div class="card warn"><h3>Entropie (Pragmatic Programmer)</h3><p>Les systèmes tendent vers le désastre. Chaque changement pensé isolément, sans le design du système entier, fait empirer le codebase — exactement ce que produit le specs-to-code. <span class="source">⏱ 3:11</span></p></div>
+        <div class="card bad"><h3>« Code is cheap » : faux</h3><p>Le mauvais code n'a jamais été aussi cher : un codebase dur à changer t'empêche de récolter les bénéfices de l'IA… alors que l'IA excelle sur un bon codebase. <span class="source">⏱ 3:55</span></p></div>
+        <div class="card good"><h3>Thèse</h3><p>Les bons codebases comptent plus que jamais → les fondamentaux du logiciel comptent plus que jamais. <span class="source">⏱ 4:20</span></p></div>
+      </div>
+      <div class="card purple"><h3>Corollaire pratique</h3><p>Avant d'accuser l'IA, mesure la facilité de changement de ton codebase : c'est le plafond de tout ce que l'IA pourra y produire de bon.</p></div>
+
+      <div class="quiz" data-module="fundamentals">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2"><p class="q-text">1. Un bon codebase, c'est un codebase…</p>
+          <label class="q-option"><input type="radio" name="fu-q0" value="0"> sans aucun bug</label>
+          <label class="q-option"><input type="radio" name="fu-q0" value="1"> écrit sans IA</label>
+          <label class="q-option"><input type="radio" name="fu-q0" value="2"> facile à modifier sans introduire de bugs</label>
+          <div class="explain">Définition opérationnelle d'Ousterhout : la modifiabilité. <span class="source">⏱ 2:55</span></div>
+        </div>
+        <div class="q" data-answer="1"><p class="q-text">2. Pourquoi le mauvais code est-il « le plus cher de tous les temps » ?</p>
+          <label class="q-option"><input type="radio" name="fu-q1" value="0"> Parce que les salaires ont augmenté</label>
+          <label class="q-option"><input type="radio" name="fu-q1" value="1"> Parce qu'il bloque l'accès aux gains de productivité de l'IA</label>
+          <label class="q-option"><input type="radio" name="fu-q1" value="2"> Parce que les tests coûtent cher</label>
+          <div class="explain">L'IA performe très bien sur un bon codebase ; un mauvais codebase annule ce levier. <span class="source">⏱ 4:02</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('fundamentals')">← Précédent</button><button class="btn" onclick="nextFrom('fundamentals')">FM1 : concept de design →</button></div>
+    </section>
+
+    <section id="align" class="section">
+      <h1>Failure mode 1 : « l'IA n'a pas fait ce que je voulais »</h1>
+      <p class="lead">
+        Personne ne sait exactement ce qu'il veut — ni toi, ni l'IA : il y a une barrière de communication. Parler à l'IA, c'est sa
+        phase de <strong>recueil de besoin</strong>. <span class="source">⏱ 4:51</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Design concept (Brooks)</h3><p>Quand plusieurs personnes conçoivent ensemble, une idée éphémère flotte entre elles : la <em>théorie invisible</em> de ce qu'on construit. Ce n'est pas un asset, pas un fichier markdown. <span class="source">⏱ 5:15</span></p></div>
+        <div class="card good"><h3>Skill : grill-me</h3><p>« Interviewe-moi implacablement sur chaque aspect de ce plan jusqu'à ce qu'on atteigne une compréhension partagée. Descends chaque branche de l'arbre de design, en résolvant les dépendances une par une. » ~13 000 stars : viral. <span class="source">⏱ 5:44</span></p></div>
+        <div class="card purple"><h3>Effet</h3><p>40, 60, parfois 100 questions avant satisfaction. L'IA devient un adversaire qui ping des idées ; la conversation générée devient un PRD — ou directement des issues pour ton agent AFK. <span class="source">⏱ 6:17</span></p></div>
+        <div class="card warn"><h3>vs plan mode</h3><p>Le plan mode de Claude Code est trop pressé de créer un asset : il veut produire un plan et démarrer. Atteindre d'abord un design concept partagé est plus sain. <span class="source">⏱ 6:53</span></p></div>
+      </div>
+
+      <h2>Cas pratique 2 — Session grill-me simulée</h2>
+      <p class="muted small">Feature : « ajouter un panier e-commerce ». Réponds aux questions de l'IA branche par branche ; la compréhension partagée monte. À 100 %, le design concept existe → PRD / issues.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" id="grill-btn" onclick="grillNext()">Question suivante →</button>
+          <button class="btn secondary" onclick="resetGrill()">Reset</button>
+        </div>
+        <div class="meter"><div class="meter-fill mf-good" id="grill-fill"></div></div>
+        <p class="muted small" id="grill-label">Compréhension partagée : 0 %</p>
+        <div id="grill-log"></div>
+        <div id="grill-out" style="display:none" class="card good"><h3>Design concept partagé ✅</h3><p>Artifact généré : PRD (ou issues si petit changement) → passé à l'agent AFK. En pratique : 40 à 100 questions ; ici 8 branches pour la démo. <span class="source">⏱ 6:29</span></p></div>
+      </div>
+
+      <div class="quiz" data-module="align">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="0"><p class="q-text">1. Le design concept, c'est…</p>
+          <label class="q-option"><input type="radio" name="al-q0" value="0"> l'idée invisible et partagée de ce qu'on construit — pas un asset</label>
+          <label class="q-option"><input type="radio" name="al-q0" value="1"> le fichier de spec markdown</label>
+          <label class="q-option"><input type="radio" name="al-q0" value="2"> le diagramme UML final</label>
+          <div class="explain">C'est la théorie flottante entre concepteurs ; l'aligner précède tout artifact. <span class="source">⏱ 5:24</span></div>
+        </div>
+        <div class="q" data-answer="2"><p class="q-text">2. grill-me transforme l'IA en…</p>
+          <label class="q-option"><input type="radio" name="al-q1" value="0"> compilateur</label>
+          <label class="q-option"><input type="radio" name="al-q1" value="1"> générateur de specs</label>
+          <label class="q-option"><input type="radio" name="al-q1" value="2"> adversaire d'interview qui cherche la compréhension partagée</label>
+          <div class="explain">Des dizaines de questions, branches descendues une par une. <span class="source">⏱ 6:29</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('align')">← Précédent</button><button class="btn" onclick="nextFrom('align')">FM2 : langage ubiquitaire →</button></div>
+    </section>
+
+    <section id="language" class="section">
+      <h1>Failure mode 2 : « l'IA est beaucoup trop verbeuse »</h1>
+      <p class="lead">
+        Vous parlez presque à contre-sens. Comme avec un expert du domaine (ex. microchips) : sans langage partagé, chacun traduit dans
+        son propre jargon et le code final ne reflète ni l'un ni l'autre. <span class="source">⏱ 7:26</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Langage ubiquitaire (DDD)</h3><p>Conversations entre devs, expressions du code et échanges avec l'expert dérivent <strong>du même modèle du domaine</strong>. Concrètement : un markdown de termes alignés, utilisés partout. <span class="source">⏱ 8:16</span></p></div>
+        <div class="card good"><h3>Skill : ubiquitous-language</h3><p>Scanne le codebase, extrait la terminologie, produit un markdown de tables de termes. Tu le lis, tu le gardes ouvert pendant le grilling et le planning. <span class="source">⏱ 9:02</span></p></div>
+        <div class="card purple"><h3>Effet observé</h3><p>Dans les thinking traces : planification améliorée, pensée <strong>moins verbeuse</strong>, implémentation alignée avec le plan. « Un powerhouse. » <span class="source">⏱ 9:19</span></p></div>
+      </div>
+
+      <h2>Cas pratique 3 — Chargement du langage ubiquitaire</h2>
+      <p class="muted small">Compare la réponse de l'IA sans et avec <code>ubiquitous-language.md</code> chargé : même sens, verbosité mesurée.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" id="ubi-btn" onclick="toggleUbiq()">Charger ubiquitous-language.md</button>
+        </div>
+        <div class="meter"><div class="meter-fill mf-bad" id="ubi-fill" style="width:92%"></div></div>
+        <p class="muted small" id="ubi-label">Verbosité de la réponse IA : 92</p>
+        <div class="ubi-panel" id="ubi-text"></div>
+        <div id="ubi-terms" style="display:none">
+          <p class="muted small">Extrait du fichier de termes :</p>
+          <div class="code">| Terme FR | Terme code | Définition                          |
+|----------|------------|-------------------------------------|
+| Panier   | Cart       | Contenant de LineItems en cours     |
+| Ligne    | LineItem   | Article + quantité + prix unitaire  |
+| Total    | Money      | Somme des LineItems − Promotions    |
+| Remise   | Promotion  | Règle réduisant le Total            |</div>
+        </div>
+      </div>
+
+      <div class="quiz" data-module="language">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. Le langage ubiquitaire dérive…</p>
+          <label class="q-option"><input type="radio" name="la-q0" value="0"> du dictionnaire officiel de l'entreprise</label>
+          <label class="q-option"><input type="radio" name="la-q0" value="1"> du modèle du domaine partagé (code, devs, expert, IA)</label>
+          <label class="q-option"><input type="radio" name="la-q0" value="2"> des commentaires de code</label>
+          <div class="explain">Une seule source de vérité terminologique. <span class="source">⏱ 8:30</span></div>
+        </div>
+        <div class="q" data-answer="0"><p class="q-text">2. Charger ce fichier pendant le planning…</p>
+          <label class="q-option"><input type="radio" name="la-q1" value="0"> rend la pensée de l'IA moins verbeuse et l'implémentation plus alignée</label>
+          <label class="q-option"><input type="radio" name="la-q1" value="1"> ralentit tout sans bénéfice</label>
+          <label class="q-option"><input type="radio" name="la-q1" value="2"> remplace les tests</label>
+          <div class="explain">Observé dans les thinking traces. <span class="source">⏱ 9:28</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('language')">← Précédent</button><button class="btn" onclick="nextFrom('language')">FM3 : feedback &amp; TDD →</button></div>
+    </section>
+
+    <section id="feedback" class="section">
+      <h1>Failure mode 3 : « c'est la bonne chose, mais ça ne marche pas »</h1>
+      <div class="grid">
+        <div class="card info"><h3>Feedback loops</h3><p>Types statiques (TypeScript, sinon « c'est fou »), accès au navigateur pour le front-end, tests automatisés. <span class="source">⏱ 9:58</span></p></div>
+        <div class="card warn"><h3>Le LLM les utilise mal</h3><p>Il fait trop à la fois : énormément de code, puis « ah, je devrais peut-être type-checker ». <span class="source">⏱ 10:23</span></p></div>
+        <div class="card bad"><h3>Outrunning your headlights</h3><p>Pragmatic Programmer : <strong>la vitesse de feedback est ta limite de vitesse</strong>. Tester en avançant, petits pas délibérés. <span class="source">⏱ 10:48</span></p></div>
+        <div class="card good"><h3>Skill : TDD</h3><p>Test d'abord → le faire passer → refactorer en pensant au design. Le TDD force l'IA aux petits pas. <span class="source">⏱ 11:12</span></p></div>
+      </div>
+      <p class="lead">Tester reste difficile : taille de l'unité, quoi mocker, quels comportements tester — décisions interdépendantes. Mais un bon codebase est un codebase <strong>facile à tester</strong> : meilleur codebase → meilleurs feedback loops → meilleur code de l'IA. <span class="source">⏱ 11:32</span></p>
+
+      <h2>Cas pratique 4 — Limite de vitesse &amp; TDD</h2>
+      <p class="muted small">Règle : taille du pas ≤ vitesse de feedback. Active le mode TDD pour forcer les petits pas et compare bugs livrés vs features livrées.</p>
+      <div class="simulator">
+        <div class="slider-row"><label for="tdd-step">Taille du pas (changements/pas)</label><input id="tdd-step" type="range" min="1" max="10" value="6" oninput="updateTdd()"><output id="tdd-ostep">6</output></div>
+        <div class="slider-row"><label for="tdd-fb">Vitesse de feedback (types+tests+navigateur)</label><input id="tdd-fb" type="range" min="1" max="10" value="4" oninput="updateTdd()"><output id="tdd-ofb">4</output></div>
+        <label style="display:flex;align-items:center;gap:.4rem"><input type="checkbox" id="tdd-mode" style="width:auto" onchange="updateTdd()"> Mode TDD (force pas ≤ 2 : rouge → vert → refactor)</label>
+        <div class="toolbar no-print">
+          <button class="btn" onclick="tddStep()">Avancer d'un pas</button>
+          <button class="btn secondary" onclick="resetTdd()">Reset</button>
+        </div>
+        <div class="console" id="tdd-console"></div>
+        <p class="muted small" id="tdd-stats">Livré : 0 • Bugs : 0</p>
+      </div>
+
+      <div class="quiz" data-module="feedback">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2"><p class="q-text">1. « La vitesse de feedback est ta limite de vitesse » implique…</p>
+          <label class="q-option"><input type="radio" name="fe-q0" value="0"> d'écrire tout le code puis de tester</label>
+          <label class="q-option"><input type="radio" name="fe-q0" value="1"> de désactiver les tests pour aller vite</label>
+          <label class="q-option"><input type="radio" name="fe-q0" value="2"> de tester en avançant, par petits pas délibérés</label>
+          <div class="explain">Ne pas dépasser ses phares : le feedback borne la taille des pas. <span class="source">⏱ 10:56</span></div>
+        </div>
+        <div class="q" data-answer="0"><p class="q-text">2. Le TDD est précieux avec un LLM parce qu'il…</p>
+          <label class="q-option"><input type="radio" name="fe-q1" value="0"> force les petits pas : test, vert, refactor</label>
+          <label class="q-option"><input type="radio" name="fe-q1" value="1"> supprime le besoin de types</label>
+          <label class="q-option"><input type="radio" name="fe-q1" value="2"> remplace la revue de code</label>
+          <div class="explain">C'est le régulateur de vitesse de l'agent. <span class="source">⏱ 11:12</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('feedback')">← Précédent</button><button class="btn" onclick="nextFrom('feedback')">FM4 : modules profonds →</button></div>
+    </section>
+
+    <section id="architecture" class="section">
+      <h1>Failure mode 4 : le codebase que l'IA ne comprend pas</h1>
+      <div class="grid">
+        <div class="card info"><h3>Module profond (Ousterhout)</h3><p>Beaucoup de fonctionnalité cachée derrière une interface simple. Tu peux regarder dedans, mais tu n'as pas besoin : l'interface suffit. <span class="source">⏱ 12:46</span></p></div>
+        <div class="card bad"><h3>Module shallow</h3><p>Peu de fonctionnalité, interface complexe. Un codebase plein de shallow modules = une nuée de petits blobs que l'IA doit traverser : elle explore mal, ne comprend pas, rate les dépendances. <span class="source">⏱ 13:07</span></p></div>
+        <div class="card good"><h3>Codebase à modules profonds</h3><p>Même code, mais structuré en frontières avec interfaces soignées au sommet. L'interface : tu la conçois. L'implémentation : tu peux la laisser à l'IA. <span class="source">⏱ 13:58</span></p></div>
+        <div class="card purple"><h3>Skill : improve-codebase-architecture</h3><p>Explorer le codebase, repérer le code relié, l'enrouler dans un module profond. Testable : on teste à l'interface. Un codebase qui récompense le TDD. <span class="source">⏱ 14:21</span></p></div>
+      </div>
+
+      <h2>Cas pratique 5 — Shallow → profond</h2>
+      <p class="muted small">Visualise la même fonctionnalité en blobs shallow (spaghetti) puis refactorée en modules profonds (frontières + interfaces). Mesure la charge d'exploration.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn secondary" id="arch-shallow" onclick="setArch('shallow')">Vue shallow (générée par défaut par l'IA)</button>
+          <button class="btn" id="arch-deep" onclick="setArch('deep')">Refactorer en modules profonds</button>
+        </div>
+        <canvas id="arch-canvas" width="640" height="340"></canvas>
+        <p class="muted small" id="arch-metrics"></p>
+      </div>
+
+      <div class="quiz" data-module="architecture">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. Un module profond, c'est…</p>
+          <label class="q-option"><input type="radio" name="ar-q0" value="0"> beaucoup d'interfaces, peu de code</label>
+          <label class="q-option"><input type="radio" name="ar-q0" value="1"> beaucoup de fonctionnalité derrière une interface simple</label>
+          <label class="q-option"><input type="radio" name="ar-q0" value="2"> un fichier de 10 000 lignes sans interface</label>
+          <div class="explain">La complexité est cachée ; l'interface suffit à l'usage. <span class="source">⏱ 12:59</span></div>
+        </div>
+        <div class="q" data-answer="0"><p class="q-text">2. Pourquoi les modules profonds aident-ils l'IA ?</p>
+          <label class="q-option"><input type="radio" name="ar-q1" value="0"> Elle explore peu : l'interface suffit, les frontières rendent le code testable et compréhensible</label>
+          <label class="q-option"><input type="radio" name="ar-q1" value="1"> Ils réduisent la taille du modèle</label>
+          <label class="q-option"><input type="radio" name="ar-q1" value="2"> Ils suppriment le besoin de tests</label>
+          <div class="explain">On teste à l'interface ; l'implémentation peut être déléguée. <span class="source">⏱ 14:50</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('architecture')">← Précédent</button><button class="btn" onclick="nextFrom('architecture')">FM5 : stratège vs tacticien →</button></div>
+    </section>
+
+    <section id="strategic" class="section">
+      <h1>Failure mode 5 : ton cerveau ne suit plus</h1>
+      <p class="lead">
+        Tu ships plus de code que jamais, mais plus fatigué que jamais : toi comme l'IA devez garder tout cela en tête. Les modules
+        profonds deviennent des <strong>boîtes grises</strong> : tu conçois l'interface, tu ne revues pas trop l'implémentation (sauf
+        critique, ex. finance), tu vérifies par les tests depuis l'extérieur. <span class="source">⏱ 15:04</span>
+      </p>
+      <div class="grid">
+        <div class="card good"><h3>Tip 5</h3><p><strong>Conçois l'interface, délègue l'implémentation.</strong> Cela sauve le cerveau : le module est vérifié de l'extérieur. <span class="source">⏱ 16:16</span></p></div>
+        <div class="card info"><h3>Carte des modules</h3><p>La carte des modules fait partie du langage ubiquitaire et du planning : le skill write-PRD précise les modules touchés et comment leurs interfaces changent. <span class="source">⏱ 16:27</span></p></div>
+        <div class="card purple"><h3>Kent Beck</h3><p>« Investis chaque jour dans le design du système. » Le specs-to-code ne fait pas cela : il <em>désinvestit</em> du design. <span class="source">⏱ 16:52</span></p></div>
+        <div class="card warn"><h3>Stratège vs tacticien</h3><p>L'IA = excellent programmeur au sol, tacticien, sergent qui fait les changements. Au-dessus, il faut un stratège : toi. Cela exige les fondamentaux du logiciel. <span class="source">⏱ 17:23</span></p></div>
+      </div>
+      <div class="card pink"><h3>Message final</h3><p>Le code n'est pas cheap. Le code est important. <span class="source">⏱ 17:16</span></p></div>
+
+      <div class="quiz" data-module="strategic">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2"><p class="q-text">1. Traiter un module non critique en « boîte grise » signifie…</p>
+          <label class="q-option"><input type="radio" name="st-q0" value="0"> ne jamais le tester</label>
+          <label class="q-option"><input type="radio" name="st-q0" value="1"> le supprimer</label>
+          <label class="q-option"><input type="radio" name="st-q0" value="2"> concevoir son interface et le vérifier par tests depuis l'extérieur</label>
+          <div class="explain">L'implémentation est déléguée ; la frontière reste sous contrôle. <span class="source">⏱ 15:42</span></div>
+        </div>
+        <div class="q" data-answer="1"><p class="q-text">2. Dans la métaphore militaire, l'IA est…</p>
+          <label class="q-option"><input type="radio" name="st-q1" value="0"> le général stratège</label>
+          <label class="q-option"><input type="radio" name="st-q1" value="1"> le sergent tacticien au sol</label>
+          <label class="q-option"><input type="radio" name="st-q1" value="2"> l'intendance</label>
+          <div class="explain">Et toi, le niveau stratégique : design, interfaces, carte des modules. <span class="source">⏱ 17:23</span></div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('strategic')">← Précédent</button><button class="btn" onclick="nextFrom('strategic')">Cas pratique →</button></div>
+    </section>
+
+    <section id="build" class="section">
+      <h1>Cas pratique : construire avec la stack de skills</h1>
+      <p class="lead">
+        Applique la stack complète à une feature réelle (« ajouter un panier e-commerce »). Clique « Étape suivante » : chaque skill
+        s'exécute, produit son artifact, et le suivant s'appuie dessus. C'est ainsi qu'on investit dans le design au lieu d'en désinvestir.
+      </p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" id="build-next" onclick="nextBuildStep()">Étape suivante →</button>
+          <button class="btn secondary" onclick="resetBuild()">Réinitialiser</button>
+        </div>
+        <p class="muted small" id="build-status">Cliquez sur « Étape suivante » pour dérouler la stack.</p>
+        <div class="console" id="build-console"></div>
+      </div>
+
+      <h2>Code de référence des skills</h2>
+      <details open><summary>grill-me (SKILL.md)</summary><div class="code">---
+name: grill-me
+description: Interview the user relentlessly about every aspect of this plan
+  until reaching a shared understanding. Walk down each branch of the design
+  tree, resolving dependencies between decisions one by one.
+---
+Interview me relentlessly about every aspect of this plan until we reach a
+shared understanding. Walk down each branch of the design tree, resolving
+dependencies between decisions one by one.</div></details>
+      <details><summary>ubiquitous-language.md (extrait généré)</summary><div class="code">| Terme métier | Terme code   | Définition                                  |
+|--------------|--------------|---------------------------------------------|
+| Panier       | Cart         | Contenant de LineItems en cours de commande |
+| Ligne        | LineItem     | Article + quantité + prix unitaire          |
+| Total        | Money        | Somme des LineItems moins Promotions        |
+| Remise       | Promotion    | Règle réduisant le Total                    |
+
+Règle : ces termes sont utilisés tels quels dans le code, les commits,
+les PRD, les tests et les conversations avec l'IA.</div></details>
+      <details><summary>write-PRD (extrait : modules + interfaces)</summary><div class="code"># PRD — Panier e-commerce
+Modules touchés :
+- CartService   : add(item): LineItem ; remove(id): void ; total(): Money
+- PricingEngine : apply(cart, promos): Money   (interface stable, impl déléguée)
+- CartStorage   : persist(cart): void ; restore(uid): Cart
+Interfaces modifiées : CartService.total() passe de number à Money.
+Hors périmètre : checkout, paiement.</div></details>
+      <details><summary>Boucle TDD (pas petits)</summary><div class="code"># RED
+test("total() somme les LineItems et applique les Promotions", ...)  # échoue
+# GREEN
+implémentation minimale dans PricingEngine                          # passe
+# REFACTOR
+extraire la règle de remise dans Promotion.apply(); design revu</div></details>
+      <details><summary>Module profond (TypeScript)</summary><div class="code">// PricingEngine : beaucoup de fonctionnalité, interface minuscule.
+export interface PricingEngine {
+  apply(cart: Cart, promotions: Promotion[]): Money;
+}
+// 400 lignes de règles internes cachées derrière cette interface.
+// Tests : uniquement via apply(). Boîte grise validée de l'extérieur.</div></details>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('build')">← Précédent</button><button class="btn" onclick="nextFrom('build')">Scénarios →</button></div>
+    </section>
+
+    <section id="scenarios" class="section">
+      <h1>Scénarios : quel skill pour quel failure mode ?</h1>
+      <div class="simulator">
+        <div class="grid">
+          <button class="btn secondary" onclick="chooseScenario('wrong')">L'IA a construit à côté</button>
+          <button class="btn secondary" onclick="chooseScenario('verbose')">L'IA est trop verbeuse</button>
+          <button class="btn secondary" onclick="chooseScenario('broken')">Ça ne marche pas</button>
+          <button class="btn secondary" onclick="chooseScenario('huge')">800 lignes puis type-check</button>
+          <button class="btn secondary" onclick="chooseScenario('flaky')">Tests fragiles, mocks flous</button>
+          <button class="btn secondary" onclick="chooseScenario('lost')">L'IA ne comprend pas mon code</button>
+          <button class="btn secondary" onclick="chooseScenario('tired')">Cerveau saturé, revue impossible</button>
+          <button class="btn secondary" onclick="chooseScenario('prd')">PRD vague, agent AFK perdu</button>
+          <button class="btn secondary" onclick="chooseScenario('decay')">Le codebase pourrit à chaque passe</button>
+          <button class="btn secondary" onclick="chooseScenario('specs')">On veut faire du specs-to-code</button>
+          <button class="btn secondary" onclick="chooseScenario('blind')">Front-end : l'IA avance à l'aveugle</button>
+          <button class="btn secondary" onclick="chooseScenario('finance')">Module critique (finance)</button>
+        </div>
+        <pre id="scenario-out" class="code" style="display:none"></pre>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button><button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button></div>
+    </section>
+
+    <section id="flashcards" class="section">
+      <h1>Flashcards</h1>
+      <details open><summary>Thèse du talk</summary><p>Les fondamentaux du logiciel comptent plus que jamais : l'IA excelle sur un bon codebase et s'effondre sur un mauvais. <span class="source">⏱ 0:30</span></p></details>
+      <details><summary>Specs-to-code</summary><p>Écrire une spec, générer le code, corriger la spec (jamais le code), relancer le compilateur. Produit du code décroissant jusqu'au garbage. <span class="source">⏱ 1:08</span></p></details>
+      <details><summary>Complexité (Ousterhout)</summary><p>Tout ce qui, dans la structure, rend le système difficile à comprendre et à modifier. <span class="source">⏱ 2:46</span></p></details>
+      <details><summary>Entropie logicielle</summary><p>Chaque changement pensé isolément dégrade le système ; le design global doit être entretenu. <span class="source">⏱ 3:11</span></p></details>
+      <details><summary>Code is not cheap</summary><p>Le mauvais code n'a jamais été aussi cher : il bloque les gains de l'IA. <span class="source">⏱ 3:55</span></p></details>
+      <details><summary>Design concept (Brooks)</summary><p>L'idée invisible et partagée de ce qu'on construit ; ni asset, ni fichier. <span class="source">⏱ 5:24</span></p></details>
+      <details><summary>grill-me</summary><p>Interview implacable jusqu'à compréhension partagée ; branches de l'arbre de design résolues une par une. <span class="source">⏱ 5:53</span></p></details>
+      <details><summary>Langage ubiquitaire (DDD)</summary><p>Termes communs dérivés du modèle du domaine, utilisés dans le code, les conversations et avec l'IA. <span class="source">⏱ 8:30</span></p></details>
+      <details><summary>Feedback loops</summary><p>Types statiques, accès navigateur, tests automatisés : les capteurs de l'agent. <span class="source">⏱ 9:58</span></p></details>
+      <details><summary>Limite de vitesse</summary><p>La vitesse de feedback est ta limite de vitesse : petits pas testés en avançant. <span class="source">⏱ 10:56</span></p></details>
+      <details><summary>TDD</summary><p>Rouge → vert → refactor : force l'IA aux petits pas et pense au design au refactor. <span class="source">⏱ 11:12</span></p></details>
+      <details><summary>Module profond</summary><p>Beaucoup de fonctionnalité derrière une interface simple ; la complexité est cachée. <span class="source">⏱ 12:59</span></p></details>
+      <details><summary>Module shallow</summary><p>Peu de fonctionnalité, interface complexe : spaghetti difficile à explorer pour l'IA. <span class="source">⏱ 13:07</span></p></details>
+      <details><summary>improve-codebase-architecture</summary><p>Explorer, repérer le code relié, l'enrouler en module profond ; tester à l'interface. <span class="source">⏱ 14:21</span></p></details>
+      <details><summary>Boîte grise</summary><p>Module non critique : interface conçue par toi, implémentation déléguée, vérification par tests externes. <span class="source">⏱ 15:42</span></p></details>
+      <details><summary>write-PRD</summary><p>PRD précis sur les modules touchés et la modification de leurs interfaces. <span class="source">⏱ 16:43</span></p></details>
+      <details><summary>Kent Beck</summary><p>Investir chaque jour dans le design du système ; specs-to-code = désinvestir. <span class="source">⏱ 16:52</span></p></details>
+      <details><summary>Stratège vs tacticien</summary><p>IA = sergent au sol ; toi = stratège qui tient la carte des modules et des interfaces. <span class="source">⏱ 17:23</span></p></details>
+      <details><summary>Ressources skills</summary><p>Repo GitHub mattpocock/skills ; newsletter et cours sur aihero.dev (« Claude Code for Real Engineers »). <span class="source">⏱ 17:46</span></p></details>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Anti-patterns →</button></div>
+    </section>
+
+    <section id="antipatterns" class="section">
+      <h1>Anti-patterns du codage avec IA</h1>
+      <div class="grid">
+        <div class="card bad"><h3>Relancer le compilateur sans lire le code</h3><p>Entropie garantie : chaque passe empire la précédente jusqu'au garbage.</p></div>
+        <div class="card bad"><h3>Plan mode pressé</h3><p>Créer un asset-plan avant d'avoir un design concept partagé : l'IA part confiante dans la mauvaise direction.</p></div>
+        <div class="card bad"><h3>Énorme PR puis type-check</h3><p>Outrunning your headlights : le feedback arrive trop tard pour borner le pas.</p></div>
+        <div class="card bad"><h3>Prolifération de modules shallow</h3><p>L'IA adore en créer : spaghetti inexplorable, compréhension impossible, tests impossibles.</p></div>
+        <div class="card bad"><h3>Zéro types, zéro tests, zéro navigateur</h3><p>Agent aveugle et sourd : aucune boucle de feedback, donc aucune limite de vitesse.</p></div>
+        <div class="card bad"><h3>Tout revoir en détail</h3><p>Sans boîtes grises, le cerveau sature : réserve la revue d'implémentation aux modules critiques.</p></div>
+        <div class="card bad"><h3>Jargon non aligné</h3><p>Sans langage ubiquitaire : verbosité, contresens, implémentation décalée du plan.</p></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('antipatterns')">← Précédent</button><button class="btn" onclick="nextFrom('antipatterns')">Examen final →</button></div>
+    </section>
+
+    <section id="final" class="section">
+      <h1>Examen final</h1>
+      <p class="lead">10 questions. Seuil 8/10 pour le certificat.</p>
+      <div class="quiz" data-module="final" id="final-quiz">
+        <div class="q" data-answer="1"><p class="q-text">1. Le specs-to-code pur (spec → code → spec → compilateur…) produit…</p><label class="q-option"><input type="radio" name="fi-q0" value="0"> un code stable</label><label class="q-option"><input type="radio" name="fi-q0" value="1"> un code décroissant jusqu'au garbage</label><label class="q-option"><input type="radio" name="fi-q0" value="2"> uniquement des specs</label><div class="explain">Observation directe : worse code, then even worse, then garbage. <span class="source">⏱ 1:50</span></div></div>
+        <div class="q" data-answer="0"><p class="q-text">2. La complexité selon Ousterhout…</p><label class="q-option"><input type="radio" name="fi-q1" value="0"> rend le système difficile à comprendre et modifier</label><label class="q-option"><input type="radio" name="fi-q1" value="1"> se mesure en lignes de code</label><label class="q-option"><input type="radio" name="fi-q1" value="2"> disparaît avec l'IA</label><div class="explain">Structure qui freine compréhension et modification. <span class="source">⏱ 2:46</span></div></div>
+        <div class="q" data-answer="2"><p class="q-text">3. L'entropie logicielle décrit…</p><label class="q-option"><input type="radio" name="fi-q2" value="0"> la lenteur des builds</label><label class="q-option"><input type="radio" name="fi-q2" value="1"> la taille des modèles</label><label class="q-option"><input type="radio" name="fi-q2" value="2"> la dégradation à chaque changement pensé isolément</label><div class="explain">Pragmatic Programmer : penser au design du système entier. <span class="source">⏱ 3:17</span></div></div>
+        <div class="q" data-answer="1"><p class="q-text">4. « Code is cheap » est faux car…</p><label class="q-option"><input type="radio" name="fi-q3" value="0"> le code coûte cher en salaires</label><label class="q-option"><input type="radio" name="fi-q3" value="1"> le mauvais code bloque les gains de l'IA : il n'a jamais été aussi cher</label><label class="q-option"><input type="radio" name="fi-q3" value="2"> les LLMs sont payants</label><div class="explain">L'IA excelle sur un bon codebase. <span class="source">⏱ 4:02</span></div></div>
+        <div class="q" data-answer="0"><p class="q-text">5. Le design concept (Brooks) est…</p><label class="q-option"><input type="radio" name="fi-q4" value="0"> une idée invisible partagée, pas un asset</label><label class="q-option"><input type="radio" name="fi-q4" value="1"> un fichier markdown obligatoire</label><label class="q-option"><input type="radio" name="fi-q4" value="2"> le plan du plan mode</label><div class="explain">La théorie flottante de ce qu'on construit. <span class="source">⏱ 5:32</span></div></div>
+        <div class="q" data-answer="2"><p class="q-text">6. grill-me sert à…</p><label class="q-option"><input type="radio" name="fi-q5" value="0"> générer du code plus vite</label><label class="q-option"><input type="radio" name="fi-q5" value="1"> compiler les specs</label><label class="q-option"><input type="radio" name="fi-q5" value="2"> atteindre un design concept partagé avant tout artifact</label><div class="explain">Interview implacable, branches résolues une par une. <span class="source">⏱ 5:53</span></div></div>
+        <div class="q" data-answer="1"><p class="q-text">7. Le langage ubiquitaire (DDD)…</p><label class="q-option"><input type="radio" name="fi-q6" value="0"> est un glossaire RH</label><label class="q-option"><input type="radio" name="fi-q6" value="1"> dérive du modèle du domaine et s'utilise dans le code, les échanges et avec l'IA</label><label class="q-option"><input type="radio" name="fi-q6" value="2"> remplace le typage</label><div class="explain">Une seule source terminologique. <span class="source">⏱ 8:30</span></div></div>
+        <div class="q" data-answer="0"><p class="q-text">8. « Rate of feedback is your speed limit » implique…</p><label class="q-option"><input type="radio" name="fi-q7" value="0"> petits pas testés en avançant (TDD)</label><label class="q-option"><input type="radio" name="fi-q7" value="1"> gros batches puis tests</label><label class="q-option"><input type="radio" name="fi-q7" value="2"> désactiver le type-check</label><div class="explain">Ne pas dépasser ses phares. <span class="source">⏱ 10:56</span></div></div>
+        <div class="q" data-answer="2"><p class="q-text">9. Un module profond…</p><label class="q-option"><input type="radio" name="fi-q8" value="0"> expose tout son code</label><label class="q-option"><input type="radio" name="fi-q8" value="1"> a une interface complexe</label><label class="q-option"><input type="radio" name="fi-q8" value="2"> cache beaucoup de fonctionnalité derrière une interface simple</label><div class="explain">Testable à l'interface ; récompense le TDD. <span class="source">⏱ 12:59</span></div></div>
+        <div class="q" data-answer="1"><p class="q-text">10. « Design the interface, delegate the implementation » permet…</p><label class="q-option"><input type="radio" name="fi-q9" value="0"> de ne plus tester</label><label class="q-option"><input type="radio" name="fi-q9" value="1"> des boîtes grises vérifiées de l'extérieur, qui préservent le cerveau</label><label class="q-option"><input type="radio" name="fi-q9" value="2"> de supprimer les modules critiques</label><div class="explain">Sauf modules critiques (finance) : revue d'implémentation conservée. <span class="source">⏱ 15:47</span></div></div>
+        <button class="btn" onclick="submitFinal(this)">Soumettre l'examen</button>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('final')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('resources')">Certificat →</button></div>
+    </section>
+
+    <section id="resources" class="section">
+      <h1>Certificat, checklist &amp; ressources</h1>
+      <div class="card info no-print">
+        <h3>Nom pour le certificat</h3>
+        <input id="cert-name" placeholder="Prénom / pseudo" />
+        <div class="toolbar">
+          <button class="btn" onclick="generateCert()">Générer le certificat</button>
+          <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+          <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+          <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="certificate" class="certificate">
+        <span class="badge">🧭</span>
+        <h2>Certificat de maîtrise</h2>
+        <p>Décerné à</p>
+        <h3 id="cert-name-out">Apprenant</h3>
+        <p>pour avoir complété la masterclass</p>
+        <p class="highlight">Fondamentaux du logiciel à l'ère IA — grill-me, langage ubiquitaire, TDD, modules profonds, stratégie</p>
+        <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span></p>
+      </div>
+
+      <h2>Checklist du stratège</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Je lance grill-me avant tout plan / artifact.</label>
+        <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Je maintiens ubiquitous-language.md et je le garde ouvert en planning.</label>
+        <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Mes PRD précisent modules touchés et changements d'interfaces.</label>
+        <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Types statiques + tests + accès navigateur actifs pour l'agent.</label>
+        <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> TDD : rouge → vert → refactor, pas petits.</label>
+        <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Je passe improve-codebase-architecture régulièrement (shallow → profond).</label>
+        <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Je teste aux interfaces, pas aux entrailles.</label>
+        <label><input type="checkbox" id="c8" onchange="toggleCheck('c8')"> Boîtes grises définies (non critique) vs modules revus (critique).</label>
+        <label><input type="checkbox" id="c9" onchange="toggleCheck('c9')"> J'investis chaque jour dans le design (Kent Beck).</label>
+        <label><input type="checkbox" id="c10" onchange="toggleCheck('c10')"> Je me positionne stratège : carte des modules + interfaces, impl déléguée.</label>
+      </div>
+      <p class="muted small">Checklist : <span id="check-progress">0/10</span></p>
+
+      <h2>Ressources</h2>
+      <div class="resources">
+        <ul>
+          <li><strong>Source du talk</strong> : Matt Pocock (aihero.dev) — « Software fundamentals matter more than ever » ; skills sur GitHub <em>mattpocock/skills</em> ; cours « Claude Code for Real Engineers » ; newsletter aihero.dev. <span class="source">⏱ 17:46</span></li>
+          <li><strong>Livres cités</strong> : <em>A Philosophy of Software Design</em> (John Ousterhout) ; <em>The Pragmatic Programmer</em> ; <em>The Design of Design</em> (Frederick P. Brooks) ; <em>Domain-Driven Design</em> (langage ubiquitaire) ; Kent Beck (design quotidien).</li>
+          <li><strong>Sean Chen / seanchen.io</strong> : builder bilingue, fondateur d'AutoManus (Character VC), ex-MIT / Google / Walmart ; Q&amp;A live bimensuel (20 $/mois), session 1h sur mesure (200 $).</li>
+          <li><strong>GitHub ShenSeanChen</strong> : yt-DeepResearch-Backend (Kimi K2 + LangChain), launch-mvp-stripe-nextjs-supabase, yt-kimi-k2-claude, yt-supabase-tips-kanban.</li>
+          <li><strong>Extension locale</strong> : ta base Ollama (Llama 3.2, nomic-embed-text, Chroma, Swarm) permet d'expérimenter ces skills sur des agents locaux gratuits avant de les déployer sur des modèles frontier.</li>
+        </ul>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn secondary" onclick="prevFrom('resources')">← Examen</button>
+        <button class="btn" onclick="showSection('home')">Retour accueil</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+var KEY="fundamentals-ai-age-course-v1";
+var STATE={theme:"dark",visited:{},quizScores:{},diagnostic:null,finalScore:0,finalTotal:10,finalPassed:false,sourcesHidden:false,checklist:{}};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}}
+function loadState(){try{var r=localStorage.getItem(KEY);if(!r)return;var d=JSON.parse(r);
+STATE.theme=d.theme||"dark";STATE.visited=d.visited||{};STATE.quizScores=d.quizScores||{};STATE.diagnostic=d.diagnostic||null;
+STATE.finalScore=d.finalScore||0;STATE.finalTotal=d.finalTotal||10;STATE.finalPassed=!!d.finalPassed;STATE.sourcesHidden=!!d.sourcesHidden;STATE.checklist=d.checklist||{};}catch(e){}}
+function getSectionIds(){return $$(".section").map(function(s){return s.id})}
+function showSection(id){
+$$(".section").forEach(function(s){s.classList.toggle("active",s.id===id)});
+$$("#nav button").forEach(function(b){var t=b.getAttribute("data-target");b.classList.toggle("active",t===id);b.classList.toggle("completed",!!STATE.visited[t])});
+STATE.visited[id]=true;saveState();updateProgress();initModule(id);
+var sb=$("#sidebar");if(sb)sb.classList.remove("mobile-open");
+window.scrollTo({top:0,behavior:"smooth"});}
+function nextFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>-1&&i<ids.length-1)showSection(ids[i+1]);}
+function prevFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>0)showSection(ids[i-1]);}
+function updateProgress(){var ids=getSectionIds();var d=0;for(var i=0;i<ids.length;i++)if(STATE.visited[ids[i]])d++;
+var p=Math.round(d/ids.length*100);var b=$("#progressBar");if(b)b.style.width=p+"%";var t=$("#progressText");if(t)t.textContent=p+"%";}
+function updateScore(){var c=0,t=0,k=Object.keys(STATE.quizScores);for(var i=0;i<k.length;i++){c+=STATE.quizScores[k[i]].correct||0;t+=STATE.quizScores[k[i]].total||0}
+var el=$("#scoreDisplay");if(el)el.textContent="Score "+c+"/"+t+(STATE.finalPassed?" • validé":"");}
+function toggleTheme(){STATE.theme=STATE.theme==="dark"?"light":"dark";document.body.setAttribute("data-theme",STATE.theme);saveState()}
+function toggleSources(){STATE.sourcesHidden=!STATE.sourcesHidden;document.body.classList.toggle("hide-sources",STATE.sourcesHidden);saveState()}
+function toggleMobileNav(){var s=$("#sidebar");if(s)s.classList.toggle("mobile-open")}
+function checkQuiz(btn){
+var box=btn.closest(".quiz");var moduleId=box.getAttribute("data-module");var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+var result=box.querySelector(".result");if(result)result.textContent="Résultat : "+correct+"/"+qs.length;
+STATE.quizScores[moduleId]={correct:correct,total:qs.length};saveState();updateScore();return{correct:correct,total:qs.length}}
+var DIAG_TEXT={
+novice:"Commence par le mythe specs-to-code puis les fondamentaux : complexité et entropie expliquent tout le reste. Fais le compilateur à entropie.",
+dev:"Va direct aux failure modes 1-3 (grill-me, langage ubiquitaire, TDD) puis au cas pratique : ce sont les skills qui changent ta journée.",
+lead:"Concentre-toi sur modules profonds, boîtes grises et programmation stratégique : c'est là que se joue l'organisation de l'équipe. L'examen valide le tout."};
+function validateDiagnostic(){
+var level=document.querySelector("input[name='diag-level']:checked");var goal=document.querySelector("input[name='diag-goal']:checked");var time=document.querySelector("input[name='diag-time']:checked");
+if(!level||!goal||!time){alert("Répondez aux trois questions.");return}
+STATE.diagnostic={level:level.value,goal:goal.value,time:time.value};saveState();
+var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.dev)+"</p>"}
+if(next)next.style.display="inline-flex"}
+function restoreDiagnostic(){if(!STATE.diagnostic)return;var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"}
+if(next)next.style.display="inline-flex"}
+
+/* ---------- Sim 1 : compilateur à entropie ---------- */
+var comp={q:70,runs:0};
+function resetCompiler(){comp={q:70,runs:0};var c=$("#comp-console");if(c)c.innerHTML="";
+var f=$("#comp-fill");if(f)f.style.width="70%";var l=$("#comp-label");if(l)l.textContent="Qualité du codebase : 70 % (code initial généré)";
+var n=$("#comp-note");if(n)n.textContent="Sans investissement de design, chaque passe ajoute du code qui ne pense qu'à son changement : le système dérive vers le désastre.";}
+function runCompiler(){
+var design=$("#comp-design")&&$("#comp-design").checked;
+comp.runs++;
+if(design){comp.q=Math.min(95,comp.q*0.995+5);}else{comp.q=Math.max(3,comp.q*0.78-2);}
+var q=Math.round(comp.q);
+var f=$("#comp-fill");if(f){f.style.width=q+"%";f.className="meter-fill "+(q>=55?"mf-good":"mf-bad");}
+var l=$("#comp-label");if(l)l.textContent="Qualité du codebase : "+q+" % après "+comp.runs+" passe(s)";
+var diff=design?Math.round(40+comp.runs*5):Math.round(120+comp.runs*90);
+var c=$("#comp-console");if(c){
+c.innerHTML+="<span class='cmd'>Passe "+comp.runs+" — compilateur relancé depuis la spec"+(design?" + investissement design":"")+"</span>\n"+
+(design?"<span class='ok'>  refactor + revue d'interfaces : qualité "+q+" %, diff +"+diff+" lignes maîtrisé</span>\n":"<span class='warn'>  aucun regard sur le code : qualité "+q+" %, diff +"+diff+" lignes (rework cumulé)</span>\n")+
+"  complexité structurelle : "+(100-q)+"\n\n";
+c.scrollTop=c.scrollHeight;}
+var n=$("#comp-note");
+if(n){if(!design&&comp.runs>=4)n.textContent="« I kept running the compiler… and I would just end up with garbage. » ⏱ 1:58 — le specs-to-code pur est du vibe coding.";
+else if(design)n.textContent="Avec investissement de design (refactor + revue d'interfaces), la qualité se stabilise : c'est l'investissement quotidien de Kent Beck. ⏱ 16:52";}}
+
+/* ---------- Sim 2 : grill-me ---------- */
+var GRILL_Q=[
+{b:"scope",q:"Quel problème utilisateur ce plan résout-il, exactement — et quel non-problème exclut-il ?"},
+{b:"modèle de données",q:"Quelles entités du domaine sont touchées : Panier, Commande, ou les deux ?"},
+{b:"cas limites",q:"Que se passe-t-il si un article passe en rupture de stock pendant le checkout ?"},
+{b:"permissions",q:"Qui voit le prix remisé : tous les visiteurs ou seulement les membres ?"},
+{b:"flux de données",q:"Quelle est la source de vérité du Total : recalcul serveur ou cache ?"},
+{b:"erreurs",q:"En cas d'échec du service de Promotions : fallback silencieux ou erreur explicite ?"},
+{b:"persistance",q:"Faut-il restaurer le Panier d'une session anonyme après connexion ?"},
+{b:"critères de fin",q:"Quels tests d'acceptation prouveront que c'est fini ?"}];
+var grillIdx=0;
+function resetGrill(){grillIdx=0;var l=$("#grill-log");if(l)l.innerHTML="";var f=$("#grill-fill");if(f)f.style.width="0%";
+var lb=$("#grill-label");if(lb)lb.textContent="Compréhension partagée : 0 %";var o=$("#grill-out");if(o)o.style.display="none";
+var b=$("#grill-btn");if(b){b.disabled=false;b.textContent="Question suivante →"}}
+function grillNext(){
+if(grillIdx>=GRILL_Q.length)return;
+var item=GRILL_Q[grillIdx];var l=$("#grill-log");if(!l)return;
+var div=document.createElement("div");div.className="grill-q";
+div.innerHTML="<span class='who'>IA — branche : "+item.b+" ("+(grillIdx+1)+"/"+GRILL_Q.length+")</span>"+item.q+"<br><span class='muted small'>→ réponse : décision tranchée, dépendances résolues.</span>";
+l.appendChild(div);requestAnimationFrame(function(){div.classList.add("visible")});
+grillIdx++;
+var pct=Math.round(grillIdx/GRILL_Q.length*100);
+var f=$("#grill-fill");if(f)f.style.width=pct+"%";
+var lb=$("#grill-label");if(lb)lb.textContent="Compréhension partagée : "+pct+" %";
+if(grillIdx>=GRILL_Q.length){var o=$("#grill-out");if(o)o.style.display="block";var b=$("#grill-btn");if(b){b.disabled=true;b.textContent="Design concept atteint ✅"}}}
+
+/* ---------- Sim 3 : langage ubiquitaire ---------- */
+var ubiqOn=false;
+var UBIQ_VERBOSE="« Donc en gros le système va prendre les choses que l'utilisateur a mises dans son petit panier virtuel, et puis il va additionner les prix de chaque chose une par une, et ensuite il va enlever les éventuelles réductions qu'on aurait pu configurer quelque part, pour finalement dire combien ça coûte au total à peu près… »";
+var UBIQ_TERM="« CartService.total() : somme des LineItem.price, moins Promotion applicables ; retourne un Money. »";
+function toggleUbiq(){ubiqOn=!ubiqOn;
+var b=$("#ubi-btn");if(b)b.textContent=ubiqOn?"Décharger ubiquitous-language.md":"Charger ubiquitous-language.md";
+var f=$("#ubi-fill");if(f){f.style.width=ubiqOn?"18%":"92%";f.className="meter-fill "+(ubiqOn?"mf-good":"mf-bad");}
+var l=$("#ubi-label");if(l)l.textContent="Verbosité de la réponse IA : "+(ubiqOn?18:92);
+var t=$("#ubi-text");if(t){t.textContent=ubiqOn?UBIQ_TERM:UBIQ_VERBOSE;t.classList.toggle("term",ubiqOn);}
+var terms=$("#ubi-terms");if(terms)terms.style.display=ubiqOn?"block":"none";}
+
+/* ---------- Sim 4 : TDD / limite de vitesse ---------- */
+var tdd={ship:0,bug:0};
+function updateTdd(){
+var s=parseInt($("#tdd-step").value,10);var fb=parseInt($("#tdd-fb").value,10);
+var mode=$("#tdd-mode").checked;
+var eff=mode?Math.min(s,2):s;
+$("#tdd-ostep").textContent=eff+(mode?" (TDD)":"");$("#tdd-ofb").textContent=fb;
+var st=$("#tdd-stats");if(st)st.textContent="Livré : "+tdd.ship+" • Bugs : "+tdd.bug+" • limite de vitesse = "+fb;}
+function resetTdd(){tdd={ship:0,bug:0};var c=$("#tdd-console");if(c)c.innerHTML="";updateTdd();}
+function tddStep(){
+var s=parseInt($("#tdd-step").value,10);var fb=parseInt($("#tdd-fb").value,10);
+var mode=$("#tdd-mode").checked;var eff=mode?Math.min(s,2):s;
+var c=$("#tdd-console");if(!c)return;
+if(eff>fb){tdd.bug++;
+c.innerHTML+="<span class='warn'>⚠️ Pas "+eff+" > feedback "+fb+" : outrunning your headlights → bug introduit, rework ("+ (eff-fb) +" cran(s) au-dessus de la limite)</span>\n";}
+else{tdd.ship++;
+c.innerHTML+="<span class='ok'>✅ Pas "+eff+" ≤ feedback "+fb+" : rouge → vert → refactor livré proprement</span>\n";}
+c.scrollTop=c.scrollHeight;updateTdd();}
+
+/* ---------- Sim 5 : shallow vs deep ---------- */
+var archMode="shallow";
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function setArch(m){archMode=m;drawArch();
+var bs=$("#arch-shallow"),bd=$("#arch-deep");
+if(bs)bs.className="btn"+(m==="shallow"?"":" secondary");
+if(bd)bd.className="btn"+(m==="deep"?"":" secondary");}
+function drawArch(){
+var cv=$("#arch-canvas");if(!cv)return;var ctx=cv.getContext("2d");var W=cv.width,H=cv.height;
+ctx.clearRect(0,0,W,H);
+var rng=mulberry32(archMode==="shallow"?11:77);
+var met=$("#arch-metrics");
+if(archMode==="shallow"){
+var pts=[];for(var i=0;i<14;i++)pts.push({x:40+rng()*(W-80),y:30+rng()*(H-60)});
+ctx.strokeStyle="rgba(239,68,68,.45)";ctx.lineWidth=1;
+for(var a=0;a<pts.length;a++){for(var k=1;k<=2;k++){var b2=(a+k*3)%pts.length;ctx.beginPath();ctx.moveTo(pts[a].x,pts[a].y);ctx.lineTo(pts[b2].x,pts[b2].y);ctx.stroke();}}
+for(var p=0;p<pts.length;p++){ctx.fillStyle="rgba(239,68,68,.75)";ctx.beginPath();ctx.arc(pts[p].x,pts[p].y,9,0,Math.PI*2);ctx.fill();}
+if(met)met.innerHTML="<strong>Shallow :</strong> 14 interfaces à connaître • 28 liens à traverser • exploration IA profonde et fragile • tests impossibles sans mocker partout. ⏱ 13:18";
+}else{
+var boxes=[{x:40,y:40,w:250,h:110,n:"CartService"},{x:350,y:40,w:250,h:110,n:"PricingEngine"},{x:40,y:190,w:250,h:110,n:"CartStorage"},{x:350,y:190,w:250,h:110,n:"PromotionRules"}];
+ctx.strokeStyle="rgba(34,211,238,.6)";ctx.lineWidth=1.5;
+ctx.beginPath();ctx.moveTo(290,95);ctx.lineTo(350,95);ctx.stroke();
+ctx.beginPath();ctx.moveTo(165,150);ctx.lineTo(165,190);ctx.stroke();
+ctx.beginPath();ctx.moveTo(475,150);ctx.lineTo(475,190);ctx.stroke();
+for(var q=0;q<boxes.length;q++){var bx=boxes[q];
+ctx.fillStyle="rgba(96,165,250,.12)";ctx.strokeStyle="rgba(96,165,250,.8)";ctx.lineWidth=2;
+ctx.beginPath();ctx.rect(bx.x,bx.y,bx.w,bx.h);ctx.fill();ctx.stroke();
+ctx.fillStyle="rgba(34,197,94,.85)";ctx.fillRect(bx.x,bx.y,bx.w,16);
+ctx.fillStyle="#071224";ctx.font="bold 11px system-ui";ctx.fillText("interface : "+bx.n, bx.x+6, bx.y+12);
+ctx.fillStyle="rgba(148,163,184,.8)";ctx.font="11px system-ui";ctx.fillText("implémentation cachée (boîte grise)", bx.x+8, bx.y+bx.h-10);}
+if(met)met.innerHTML="<strong>Profond :</strong> 4 interfaces simples • 3 liens • l'IA lit les interfaces, pas les entrailles • tests à la frontière → TDD récompensé. ⏱ 14:50";}}
+
+/* ---------- Cas pratique : build ---------- */
+var BUILD_STEPS=[
+{who:"ÉTAPE 1 — grill-me (design concept)",code:"skill: grill-me\n« Interviewe-moi implacablement sur chaque aspect de ce plan jusqu'à\ncompréhension partagée ; descends chaque branche de l'arbre de design. »",out:"→ 27 questions ; branches résolues : scope, données, erreurs, permissions, persistance ; compréhension partagée ✅"},
+{who:"ÉTAPE 2 — ubiquitous-language",code:"skill: ubiquitous-language\nscan du codebase → tables markdown de termes (Panier/Cart, Ligne/LineItem,\nTotal/Money, Remise/Promotion)",out:"→ ubiquitous-language.md créé (12 termes) ; verbosité du thinking ↓ ; plan aligné"},
+{who:"ÉTAPE 3 — write-PRD",code:"PRD.md :\nmodules touchés = CartService, PricingEngine, CartStorage\ninterfaces modifiées = CartService.total(): number → Money",out:"→ PRD précis sur modules + interfaces ; issues générées pour l'agent AFK"},
+{who:"ÉTAPE 4 — TDD (feedback loops)",code:"RED   : test total() somme LineItems − Promotions  → échoue\nGREEN : implémentation minimale PricingEngine       → passe\nREFACTOR : extraire Promotion.apply() ; design revu",out:"→ 9 tests verts, 0 régression ; pas ≤ limite de feedback"},
+{who:"ÉTAPE 5 — improve-codebase-architecture",code:"repérer le code relié (règles de prix éparpillées) →\nl'enrouler dans un module profond PricingEngine\ninterface : apply(cart, promos): Money",out:"→ 400 lignes cachées derrière 1 méthode ; testable à l'interface"},
+{who:"ÉTAPE 6 — revue stratégique (boîtes grises)",code:"boîtes grises : PricingEngine, CartStorage (tests externes suffisent)\nrevue d'implémentation conservée : Checkout (critique finance)",out:"→ cerveau préservé ; interfaces vérifiées ; design investi chaque jour (Kent Beck)"}];
+var buildIdx=0;
+function resetBuild(){buildIdx=0;var c=$("#build-console");if(c)c.innerHTML="";var s=$("#build-status");if(s)s.textContent="Cliquez sur « Étape suivante » pour dérouler la stack.";var b=$("#build-next");if(b){b.disabled=false;b.textContent="Étape suivante →"}}
+function nextBuildStep(){
+var c=$("#build-console");if(!c||buildIdx>=BUILD_STEPS.length)return;
+var st=BUILD_STEPS[buildIdx];
+c.innerHTML+="<span class='cmd'>"+st.who+"</span>\n"+st.code+"\n<span class='ok'>"+st.out+"</span>\n\n";
+c.scrollTop=c.scrollHeight;buildIdx++;
+var s=$("#build-status");if(s)s.textContent="Étape "+buildIdx+"/"+BUILD_STEPS.length+" exécutée.";
+if(buildIdx>=BUILD_STEPS.length){var b=$("#build-next");if(b)b.disabled=true;
+if(s)s.textContent="✅ Stack complète appliquée : design concept → langage → PRD → TDD → architecture → stratégie. Le code reste l'actif central."}}
+
+/* ---------- Scénarios ---------- */
+function chooseScenario(key){var texts={
+wrong:"Failure mode : l'IA n'a pas fait ce que je voulais.\nSkill : grill-me (concept de design, Brooks).\nInterview implacable jusqu'à compréhension partagée ; la conversation devient PRD ou issues.\nLivre : The Design of Design.",
+verbose:"Failure mode : l'IA trop verbeuse, à contre-sens.\nSkill : ubiquitous-language (DDD).\nMarkdown de termes dérivés du modèle du domaine, utilisé dans code/plan/conversations.\nEffet : thinking moins verbeux, implémentation alignée.",
+broken:"Failure mode : la bonne chose mais ça ne marche pas.\nSkill : feedback loops — types statiques, accès navigateur, tests automatisés.\nSans capteurs, l'agent avance à l'aveugle.",
+huge:"Failure mode : 800 lignes puis « je devrais type-check ».\nPrincipe : rate of feedback is your speed limit (Pragmatic Programmer).\nSkill : TDD — rouge → vert → refactor, petits pas délibérés.",
+flaky:"Failure mode : tests fragiles, on ne sait quoi mocker.\nCause : modules shallow, décisions de test interdépendantes.\nSkill : improve-codebase-architecture → modules profonds ; on teste à l'interface.",
+lost:"Failure mode : l'IA ne comprend pas ton code existant.\nCause : nuée de shallow blobs, exploration impossible.\nSkill : improve-codebase-architecture : enrouler le code relié en modules profonds avec interfaces soignées.",
+tired:"Failure mode : cerveau saturé, revue impossible.\nSkill : boîtes grises — design the interface, delegate the implementation.\nModules non critiques vérifiés par tests externes ; revue d'implémentation réservée au critique.",
+prd:"Failure mode : PRD vague, agent AFK perdu.\nSkill : write-PRD — préciser modules touchés et modifications d'interfaces.\nLa carte des modules fait partie du langage ubiquitaire et du planning.",
+decay:"Failure mode : le codebase pourrit à chaque passe IA.\nCause : entropie (Pragmatic Programmer) — changements pensés isolément.\nRemède : investir chaque jour dans le design (Kent Beck) ; refactor + revue d'interfaces à chaque passe.",
+specs:"Volonté de faire du specs-to-code.\nAvertissement : c'est désinvestir du design ; le compilateur relancé produit du garbage.\nLe code n'est pas cheap : garde-le lisible, c'est ton actif.",
+blind:"Front-end : l'IA avance à l'aveugle.\nFeedback loops obligatoires : TypeScript + accès navigateur + tests.\nLa vitesse de feedback borne la taille des pas.",
+finance:"Module critique (finance, paiements).\nPas de boîte grise : revue d'implémentation conservée.\nMais garde une interface simple et des tests à la frontière : le reste peut rester délégué."};
+var out=$("#scenario-out");if(out){out.style.display="block";out.textContent=texts[key]||""}}
+
+/* ---------- Examen / certificat ---------- */
+function submitFinal(btn){var res=checkQuiz(btn);STATE.finalScore=res.correct;STATE.finalTotal=res.total;STATE.finalPassed=res.correct>=8;saveState();updateScore();
+var result=$("#exam-result");
+if(result){var advice=STATE.finalPassed?"Tu sais pourquoi specs-to-code échoue et comment outiller le design : grill-me, langage ubiquitaire, TDD, modules profonds, stratégie.","Revois : entropie/complexité (section 2), les 5 skills (sections 3-7) et le cas pratique.";
+result.innerHTML="<strong>Résultat : "+res.correct+"/"+res.total+"</strong><br>"+(STATE.finalPassed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+advice+"</span>"}
+var go=$("#go-cert");if(go)go.style.display=STATE.finalPassed?"inline-flex":"none"}
+function generateCert(){if(!STATE.finalPassed){alert("Atteins au moins 8/10 à l'examen final.");return}
+var ni=$("#cert-name");var name=ni&&ni.value.trim()?ni.value.trim():"Apprenant";
+var b=$("#certificate");if(!b)return;b.classList.add("show");
+$("#cert-name-out").textContent=name;$("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+$("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal;
+b.scrollIntoView({behavior:"smooth",block:"center"})}
+function toggleCheck(id){var el=document.getElementById(id);if(!el)return;STATE.checklist[id]=el.checked;saveState();updateChecklistProgress()}
+function updateChecklistProgress(){var b=$$(".checklist input[type=checkbox]");var d=0;for(var i=0;i<b.length;i++)if(b[i].checked)d++;var el=$("#check-progress");if(el)el.textContent=d+"/"+b.length}
+function exportJSON(){var data={cours:"Fondamentaux du logiciel à l'ère IA",date:new Date().toISOString(),profil:STATE.diagnostic,progression:STATE.visited,quiz:STATE.quizScores,examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.finalPassed},checklist:STATE.checklist};
+var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="rapport-fondamentaux-ia.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}
+function resetCourse(){if(!confirm("Réinitialiser toute la progression ?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+function initModule(id){
+if(id==="diagnostic")restoreDiagnostic();
+if(id==="myth")resetCompiler();
+if(id==="align")resetGrill();
+if(id==="language"){ubiqOn=false;toggleUbiq();toggleUbiq();ubiqOn=false;var f=$("#ubi-fill");if(f){f.style.width="92%";f.className="meter-fill mf-bad"}var l=$("#ubi-label");if(l)l.textContent="Verbosité de la réponse IA : 92";var t=$("#ubi-text");if(t){t.textContent=UBIQ_VERBOSE;t.classList.remove("term")}var terms=$("#ubi-terms");if(terms)terms.style.display="none";var b=$("#ubi-btn");if(b)b.textContent="Charger ubiquitous-language.md";}
+if(id==="feedback"){resetTdd();}
+if(id==="architecture"){setArch("shallow");}
+if(id==="build"){resetBuild();}
+if(id==="resources"){var ni=$("#cert-name");if(ni&&STATE.certName)ni.value=STATE.certName;
+var k=Object.keys(STATE.checklist);for(var i=0;i<k.length;i++){var el=document.getElementById(k[i]);if(el)el.checked=STATE.checklist[k[i]]}
+updateChecklistProgress();if(STATE.finalPassed){var b=$("#certificate");if(b)b.classList.add("show");var g=$("#go-cert");if(g)g.style.display="inline-flex"}}}
+function init(){loadState();document.body.setAttribute("data-theme",STATE.theme);document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+var buttons=$$("#nav button");for(var i=0;i<buttons.length;i++)buttons[i].addEventListener("click",function(){showSection(this.getAttribute("data-target"))});
+showSection("home");updateScore();updateChecklistProgress();}
+window.showSection=showSection;window.nextFrom=nextFrom;window.prevFrom=prevFrom;
+window.toggleTheme=toggleTheme;window.toggleSources=toggleSources;window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic;window.checkQuiz=checkQuiz;
+window.runCompiler=runCompiler;window.resetCompiler=resetCompiler;
+window.grillNext=grillNext;window.resetGrill=resetGrill;
+window.toggleUbiq=toggleUbiq;
+window.updateTdd=updateTdd;window.tddStep=tddStep;window.resetTdd=resetTdd;
+window.setArch=setArch;
+window.nextBuildStep=nextBuildStep;window.resetBuild=resetBuild;
+window.chooseScenario=chooseScenario;
+window.submitFinal=submitFinal;window.generateCert=generateCert;window.toggleCheck=toggleCheck;window.exportJSON=exportJSON;window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Métriques d'Évaluation de RAG</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Passer en mode sombre" title="Mode sombre / clair">
+  <span class="theme-icon" aria-hidden="true">🌙</span>
+</button>
+
+<div class="wrap">
+  <header>
+    <h1><span class="hl hl-purple">Métriques d'Évaluation de RAG</span></h1>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.6"><path d="M12 2v20M4 6l16 12M20 6L4 18M2 12h20"></path></svg>
+      ML<br>Tut
+    </div>
+  </header>
+
+  <div class="metrics-grid">
+
+    <!-- 1 : Précision du Contexte -->
+    <section class="mcard">
+      <h2><span class="num">1.</span> <span class="hl hl-purple">Précision du Contexte</span></h2>
+      <p class="desc">Mesure la part du contexte récupéré qui est pertinent.</p>
+      <div class="formula">
+        Précision =
+        <span class="frac"><span class="num-l">Segments Pertinents Récupérés</span><span class="den-l">Total des Segments Récupérés</span></span>
+      </div>
+
+      <div class="widget">
+        <div class="row">
+          <label for="p1-rel">Segments pertinents récupérés</label>
+          <input type="number" id="p1-rel" min="0" max="6" value="2">
+        </div>
+        <div class="row">
+          <label for="p1-tot">Total des segments récupérés</label>
+          <input type="number" id="p1-tot" min="1" max="6" value="3">
+        </div>
+        <div class="diagram" id="p1-diagram"></div>
+        <p class="result-line">Précision = <span class="val" id="p1-result">–</span></p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 2 : Rappel du Contexte -->
+    <section class="mcard">
+      <h2><span class="num">2.</span> <span class="hl hl-green">Rappel du Contexte</span></h2>
+      <p class="desc">Mesure si le récupérateur a trouvé toutes les informations pertinentes.</p>
+      <div class="formula">
+        Rappel =
+        <span class="frac"><span class="num-l">Segments Pertinents Récupérés</span><span class="den-l">Tous les Segments Pertinents</span></span>
+      </div>
+
+      <div class="widget">
+        <div class="row">
+          <label for="p2-tot">Tous les segments pertinents (existants)</label>
+          <input type="number" id="p2-tot" min="1" max="6" value="3">
+        </div>
+        <div class="row">
+          <label for="p2-rel">... dont récupérés</label>
+          <input type="number" id="p2-rel" min="0" max="6" value="2">
+        </div>
+        <div class="diagram" id="p2-diagram"></div>
+        <p class="result-line">Rappel = <span class="val" id="p2-result">–</span></p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 3 : Pertinence du Contexte -->
+    <section class="mcard">
+      <h2><span class="num">3.</span> <span class="hl hl-yellow">Pertinence du Contexte</span></h2>
+      <p class="desc">Vérifie à quel point les documents récupérés sont pertinents par rapport à la requête.</p>
+      <div class="widget">
+        <p class="row" style="margin-bottom:8px;">Cliquez sur un document pour basculer sa pertinence :</p>
+        <div class="diagram" id="p3-diagram"></div>
+        <p class="result-line"><span class="val" id="p3-result">–</span> documents jugés pertinents</p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 4 : Fidélité -->
+    <section class="mcard">
+      <h2><span class="num">4.</span> <span class="hl hl-pink">Fidélité</span></h2>
+      <p class="desc">Vérifie si la réponse est étayée par le contexte récupéré.</p>
+      <div class="widget">
+        <div class="row">
+          <span>La réponse est-elle fondée sur le contexte ?</span>
+          <div class="toggle-btns" data-group="p4">
+            <button class="toggle-btn active" data-value="oui" type="button">Oui</button>
+            <button class="toggle-btn" data-value="non" type="button">Non</button>
+          </div>
+        </div>
+        <div class="diagram" id="p4-diagram"></div>
+        <p class="result-line" id="p4-result">Pas d'hallucinations.</p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 5 : Pertinence de la Réponse -->
+    <section class="mcard">
+      <h2><span class="num">5.</span> <span class="hl hl-purple">Pertinence de la Réponse</span></h2>
+      <p class="desc">Mesure à quel point la réponse répond à la question de l'utilisateur.</p>
+      <div class="diagram" id="p5-diagram"></div>
+      <div class="widget">
+        <div class="row">
+          <label for="p5-range" style="flex:0 0 auto;">Correspondance question ↔ réponse</label>
+          <input type="range" id="p5-range" min="0" max="100" value="50">
+        </div>
+        <p class="result-line">Pertinence : <span class="val" id="p5-result">Moyenne (50%)</span></p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 6 : Exactitude de la Réponse -->
+    <section class="mcard">
+      <h2><span class="num">6.</span> <span class="hl hl-yellow">Exactitude de la Réponse</span></h2>
+      <p class="desc">Vérifie l'exactitude factuelle par rapport à la vérité terrain ou aux références.</p>
+      <div class="widget">
+        <div class="row">
+          <span>Réponse générée = référence ?</span>
+          <div class="toggle-btns" data-group="p6">
+            <button class="toggle-btn active" data-value="oui" type="button">Oui</button>
+            <button class="toggle-btn" data-value="non" type="button">Non</button>
+          </div>
+        </div>
+        <div class="diagram" id="p6-diagram"></div>
+        <p class="result-line" id="p6-result">Réponse correcte.</p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 7 : Hit@k -->
+    <section class="mcard">
+      <h2><span class="num">7.</span> <span class="hl hl-pink">Taux de Réussite (Hit@k)</span></h2>
+      <p class="desc">Mesure si au moins un document pertinent apparaît dans les top-k résultats.</p>
+      <div class="formula">
+        <span class="brace">{</span>
+        <span class="cases">
+          <span>1,&nbsp; si doc pertinent trouvé dans top-k</span>
+          <span>0,&nbsp; sinon</span>
+        </span>
+      </div>
+      <div class="widget">
+        <div class="row">
+          <label for="p7-range" style="flex:0 0 auto;">k =</label>
+          <input type="range" id="p7-range" min="1" max="5" value="1">
+          <span class="val" id="p7-kval">1</span>
+        </div>
+        <div class="diagram" id="p7-diagram"></div>
+        <p class="result-line">Hit@k = <span class="val" id="p7-result">0</span></p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 8 : MRR -->
+    <section class="mcard">
+      <h2><span class="num">8.</span> <span class="hl hl-green">Rang Réciproque Moyen (MRR)</span></h2>
+      <p class="desc">Mesure la rapidité d'apparition du premier document pertinent.</p>
+      <div class="formula">
+        MRR =
+        <span class="frac"><span class="num-l">1</span><span class="den-l">N</span></span>
+        <span class="sumsym"><span class="lim">N</span>&Sigma;<span class="lim">i=1</span></span>
+        <span class="frac"><span class="num-l">1</span><span class="den-l">rang<sub>i</sub></span></span>
+      </div>
+      <p class="desc" style="font-size:.8rem;">rang<sub>i</sub> = rang du 1<sup>er</sup> document pertinent pour la requête i. N = nombre total de requêtes.</p>
+      <div class="widget">
+        <div class="row">
+          <label for="p8-range" style="flex:0 0 auto;">Rang du 1er document pertinent</label>
+          <input type="range" id="p8-range" min="1" max="10" value="1">
+          <span class="val" id="p8-rangval">1</span>
+        </div>
+        <p class="result-line">1 / rang = <span class="val" id="p8-result">1</span></p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+    <!-- 9 : Évaluation Humaine -->
+    <section class="mcard">
+      <h2><span class="num">9.</span> <span class="hl hl-teal">Évaluation Humaine</span></h2>
+      <p class="desc">Jugement humain de l'utilité, de l'exactitude et du fondement.</p>
+      <div class="diagram" id="p9-diagram"></div>
+      <div class="widget">
+        <p class="row" style="margin-bottom:2px;">Critères validés :</p>
+        <div class="checklist" id="p9-checklist">
+          <label><input type="checkbox" value="Exactitude" checked> Exactitude</label>
+          <label><input type="checkbox" value="Utilité" checked> Utilité</label>
+          <label><input type="checkbox" value="Fondement"> Fondement</label>
+          <label><input type="checkbox" value="Exhaustivité"> Exhaustivité</label>
+        </div>
+        <p class="result-line"><span class="val" id="p9-result">2</span> / 4 critères validés</p>
+      </div>
+      <p class="caption">Plus c'est élevé, mieux c'est.</p>
+    </section>
+
+  </div>
+
+  <footer>Inspiré du sketchnote original — crédit original : ML Tut</footer>
+</div>
+
+<div id="tip" role="status" hidden>
+  <div class="tip-title"></div>
+  <div class="tip-body"></div>
+</div>
+
+<script>
+(function(){
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function svgRoot(viewBox){ return el('svg', {viewBox: viewBox, class:'diagram-svg'}); }
+
+  function docIcon(x, y, color){
+    var g = el('g', {transform:'translate('+x+','+y+')'});
+    g.appendChild(el('path', {d:'M2,2 H20 L26,8 V34 H2 Z', class:'box '+(color||''), 'stroke-linejoin':'round'}));
+    g.appendChild(el('path', {d:'M20,2 V8 H26', class:'arrow'}));
+    return g;
+  }
+  function checkIcon(x,y){
+    var g = el('g', {transform:'translate('+x+','+y+')'});
+    g.appendChild(el('path', {d:'M0,5 L4,9 L11,0', stroke:'var(--green-ink)', 'stroke-width':2.4, fill:'none', 'stroke-linecap':'round', 'stroke-linejoin':'round'}));
+    return g;
+  }
+  function crossIcon(x,y){
+    var g = el('g', {transform:'translate('+x+','+y+')'});
+    g.appendChild(el('path', {d:'M0,0 L10,10 M10,0 L0,10', stroke:'var(--red-ink)', 'stroke-width':2.4, 'stroke-linecap':'round'}));
+    return g;
+  }
+  function arrowPath(x1,y1,x2,y2,markerId){
+    return el('path', {d:'M'+x1+','+y1+' L'+x2+','+y2, class:'arrow', 'marker-end':'url(#'+markerId+')'});
+  }
+  function textEl(x,y,txt,anchor,cls){
+    var t = el('text', {x:x, y:y, 'text-anchor':anchor||'middle'});
+    if (cls) t.setAttribute('class', cls);
+    t.textContent = txt;
+    return t;
+  }
+  function marker(id){
+    var defs = el('defs', {});
+    var m = el('marker', {id:id, viewBox:'0 0 10 10', refX:8, refY:5, markerWidth:6, markerHeight:6, orient:'auto-start-reverse'});
+    m.appendChild(el('path', {d:'M0,0 L10,5 L0,10 Z', fill:'var(--ink)'}));
+    defs.appendChild(m);
+    return defs;
+  }
+
+  /* ===== 1. Précision : documents -> check/cross ===== */
+  var p1Rel = document.getElementById('p1-rel');
+  var p1Tot = document.getElementById('p1-tot');
+  var p1Result = document.getElementById('p1-result');
+  var p1Diagram = document.getElementById('p1-diagram');
+  function renderP1(){
+    var rel = Math.min(parseInt(p1Rel.value)||0, parseInt(p1Tot.value)||1);
+    var tot = Math.max(parseInt(p1Tot.value)||1, 1);
+    if (rel > tot){ rel = tot; p1Rel.value = tot; }
+    var svg = svgRoot('0 0 '+(40+tot*44)+' 60');
+    svg.appendChild(marker('arr-p1'));
+    svg.appendChild(arrowPath(2,30,26,30,'arr-p1'));
+    svg.appendChild(docIcon(-6,10,'teal'));
+    for (var i=0;i<tot;i++){
+      var gx = 40 + i*44;
+      svg.appendChild(docIcon(gx,10, i<rel ? 'green':'yellow'));
+      if (i<rel) svg.appendChild(checkIcon(gx+8,32)); else svg.appendChild(crossIcon(gx+8,30));
+    }
+    p1Diagram.innerHTML = '';
+    p1Diagram.appendChild(svg);
+    p1Result.textContent = rel + ' / ' + tot + ' = ' + (tot? (rel/tot).toFixed(2) : '0.00');
+  }
+  p1Rel.addEventListener('input', renderP1);
+  p1Tot.addEventListener('input', renderP1);
+  renderP1();
+
+  /* ===== 2. Rappel : segments pertinents totaux -> récupérés ===== */
+  var p2Tot = document.getElementById('p2-tot');
+  var p2Rel = document.getElementById('p2-rel');
+  var p2Result = document.getElementById('p2-result');
+  var p2Diagram = document.getElementById('p2-diagram');
+  function renderP2(){
+    var tot = Math.max(parseInt(p2Tot.value)||1, 1);
+    var rel = Math.min(parseInt(p2Rel.value)||0, tot);
+    if (rel !== parseInt(p2Rel.value)) p2Rel.value = rel;
+    var svg = svgRoot('0 0 '+(40+tot*40+90)+' 70');
+    svg.appendChild(marker('arr-p2'));
+    var dash = el('rect', {x:0,y:2,width:tot*40+10,height:44,rx:8,class:'dashbox'});
+    svg.appendChild(dash);
+    svg.appendChild(textEl(5,60,'Tous les segments pertinents','start','small'));
+    for (var i=0;i<tot;i++){
+      svg.appendChild(el('rect', {x:8+i*40, y:10, width:28, height:28, rx:5, class:'box '+(i<rel?'green':'')}));
+    }
+    var ax = tot*40+18;
+    svg.appendChild(arrowPath(ax,26,ax+30,26,'arr-p2'));
+    for (var j=0;j<rel;j++){
+      svg.appendChild(el('rect', {x:ax+40+j*36, y:10, width:28, height:28, rx:5, class:'box green'}));
+    }
+    svg.appendChild(textEl(ax+40,60,'Récupérés','start','small'));
+    p2Diagram.innerHTML = '';
+    p2Diagram.appendChild(svg);
+    p2Result.textContent = rel + ' / ' + tot + ' = ' + (tot? (rel/tot).toFixed(2) : '0.00');
+  }
+  p2Tot.addEventListener('input', renderP2);
+  p2Rel.addEventListener('input', renderP2);
+  renderP2();
+
+  /* ===== 3. Pertinence du Contexte : documents cliquables ===== */
+  var p3State = [true, true, false];
+  var p3Diagram = document.getElementById('p3-diagram');
+  var p3Result = document.getElementById('p3-result');
+  function renderP3(){
+    var svg = svgRoot('0 0 220 60');
+    svg.appendChild(marker('arr-p3'));
+    svg.appendChild(el('rect', {x:0,y:14,width:44,height:30,rx:6,class:'box purple'}));
+    svg.appendChild(textEl(22,33,'Requête','middle','small'));
+    svg.appendChild(arrowPath(48,29,66,29,'arr-p3'));
+    p3State.forEach(function(rel, i){
+      var gx = 76 + i*48;
+      var g = docIcon(gx, 4, rel?'green':'yellow');
+      g.setAttribute('class', (g.getAttribute('class')||'') + ' doc-toggle');
+      g.setAttribute('data-idx', i);
+      g.setAttribute('tabindex', '0');
+      g.setAttribute('role', 'button');
+      svg.appendChild(g);
+      if (rel) svg.appendChild(checkIcon(gx+7,34)); else svg.appendChild(crossIcon(gx+7,32));
+    });
+    p3Diagram.innerHTML = '';
+    p3Diagram.appendChild(svg);
+    svg.querySelectorAll('.doc-toggle').forEach(function(node){
+      node.addEventListener('click', function(){
+        var i = parseInt(node.getAttribute('data-idx'));
+        p3State[i] = !p3State[i];
+        renderP3();
+      });
+      node.addEventListener('keydown', function(e){
+        if (e.key==='Enter' || e.key===' '){ e.preventDefault(); node.dispatchEvent(new Event('click')); }
+      });
+    });
+    p3Result.textContent = p3State.filter(Boolean).length;
+  }
+  renderP3();
+
+  /* ===== 4. Fidélité : réponse <-> contexte ===== */
+  var p4Diagram = document.getElementById('p4-diagram');
+  var p4Result = document.getElementById('p4-result');
+  var p4Grounded = true;
+  function renderP4(){
+    var svg = svgRoot('0 0 220 50');
+    svg.appendChild(marker('arr-p4a'));
+    svg.appendChild(marker('arr-p4b'));
+    svg.appendChild(el('rect', {x:0,y:10,width:80,height:30,rx:8,class:'box teal'}));
+    svg.appendChild(textEl(40,29,'Réponse','middle','small'));
+    var line = el('path', {d:'M84,25 L136,25', class:'arrow', 'marker-end':'url(#arr-p4a)', 'marker-start':'url(#arr-p4b)'});
+    if (!p4Grounded){ line.setAttribute('stroke', 'var(--red-ink)'); line.setAttribute('stroke-dasharray','3 3'); }
+    svg.appendChild(line);
+    svg.appendChild(el('rect', {x:140,y:10,width:80,height:30,rx:8,class:'box '+(p4Grounded?'green':'pink')}));
+    svg.appendChild(textEl(180,24,'Contexte','middle','small'));
+    svg.appendChild(textEl(180,36,'Récupéré','middle','small'));
+    p4Diagram.innerHTML = '';
+    p4Diagram.appendChild(svg);
+    p4Result.textContent = p4Grounded ? "Pas d'hallucinations." : 'Hallucination possible.';
+  }
+  document.querySelectorAll('[data-group="p4"] .toggle-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-group="p4"] .toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      p4Grounded = btn.getAttribute('data-value') === 'oui';
+      renderP4();
+    });
+  });
+  renderP4();
+
+  /* ===== 5. Pertinence de la réponse ===== */
+  var p5Diagram = document.getElementById('p5-diagram');
+  function renderP5Static(){
+    var svg = svgRoot('0 0 200 50');
+    svg.appendChild(marker('arr-p5'));
+    svg.appendChild(el('rect', {x:0,y:10,width:80,height:30,rx:8,class:'box purple'}));
+    svg.appendChild(textEl(40,29,'Question','middle','small'));
+    svg.appendChild(arrowPath(84,25,116,25,'arr-p5'));
+    svg.appendChild(el('rect', {x:120,y:10,width:80,height:30,rx:8,class:'box pink'}));
+    svg.appendChild(textEl(160,29,'Réponse','middle','small'));
+    p5Diagram.innerHTML = '';
+    p5Diagram.appendChild(svg);
+  }
+  renderP5Static();
+  var p5Range = document.getElementById('p5-range');
+  var p5Result = document.getElementById('p5-result');
+  function renderP5(){
+    var v = parseInt(p5Range.value);
+    var label = v < 34 ? 'Faible' : (v < 67 ? 'Moyenne' : 'Élevée');
+    p5Result.textContent = label + ' (' + v + '%)';
+  }
+  p5Range.addEventListener('input', renderP5);
+  renderP5();
+
+  /* ===== 6. Exactitude : référence <-> réponse générée ===== */
+  var p6Diagram = document.getElementById('p6-diagram');
+  var p6Result = document.getElementById('p6-result');
+  var p6Correct = true;
+  function renderP6(){
+    var svg = svgRoot('0 0 230 60');
+    svg.appendChild(marker('arr-p6a'));
+    svg.appendChild(marker('arr-p6b'));
+    svg.appendChild(el('rect', {x:0,y:10,width:90,height:36,rx:8,class:'box yellow'}));
+    svg.appendChild(textEl(45,26,'Référence','middle','small'));
+    svg.appendChild(textEl(45,40,'(Vérité terrain)','middle','small'));
+    var line = el('path', {d:'M94,28 L146,28', class:'arrow', 'marker-end':'url(#arr-p6a)', 'marker-start':'url(#arr-p6b)'});
+    if (!p6Correct){ line.setAttribute('stroke','var(--red-ink)'); line.setAttribute('stroke-dasharray','3 3'); }
+    svg.appendChild(line);
+    svg.appendChild(el('rect', {x:150,y:10,width:80,height:36,rx:8,class:'box '+(p6Correct?'teal':'pink')}));
+    svg.appendChild(textEl(190,26,'Réponse','middle','small'));
+    svg.appendChild(textEl(190,40,'Générée','middle','small'));
+    p6Diagram.innerHTML = '';
+    p6Diagram.appendChild(svg);
+    p6Result.textContent = p6Correct ? 'Réponse correcte.' : 'Écart factuel détecté.';
+  }
+  document.querySelectorAll('[data-group="p6"] .toggle-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-group="p6"] .toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      p6Correct = btn.getAttribute('data-value') === 'oui';
+      renderP6();
+    });
+  });
+  renderP6();
+
+  /* ===== 7. Hit@k ===== */
+  var relevantPos = 2; /* position pertinente fixe (2ème, comme dans l'exemple original) */
+  var p7Range = document.getElementById('p7-range');
+  var p7KVal = document.getElementById('p7-kval');
+  var p7Result = document.getElementById('p7-result');
+  var p7Diagram = document.getElementById('p7-diagram');
+  var labels7 = ['1er','2ème','3ème','4ème','5ème'];
+  function renderP7(){
+    var k = parseInt(p7Range.value);
+    p7KVal.textContent = k;
+    var svg = svgRoot('0 0 260 70');
+    svg.appendChild(el('rect', {x:4, y:2, width:k*48-6, height:34, rx:8, class:'dashbox'}));
+    for (var i=0;i<5;i++){
+      var gx = 8 + i*48;
+      var isRel = (i+1) === relevantPos;
+      var inTopK = (i+1) <= k;
+      svg.appendChild(el('rect', {x:gx, y:8, width:38, height:22, rx:5, class:'box '+(isRel && inTopK ? 'green':'')}));
+      svg.appendChild(textEl(gx+19,23,labels7[i],'middle','small'));
+      if (isRel){ svg.appendChild(textEl(gx+19,46,'pertinent','middle','small')); }
+    }
+    p7Diagram.innerHTML = '';
+    p7Diagram.appendChild(svg);
+    p7Result.textContent = (relevantPos <= k) ? '1' : '0';
+  }
+  p7Range.addEventListener('input', renderP7);
+  renderP7();
+
+  /* ===== 8. MRR ===== */
+  var p8Range = document.getElementById('p8-range');
+  var p8RangVal = document.getElementById('p8-rangval');
+  var p8Result = document.getElementById('p8-result');
+  function renderP8(){
+    var r = parseInt(p8Range.value);
+    p8RangVal.textContent = r;
+    p8Result.textContent = (1/r).toFixed(2);
+  }
+  p8Range.addEventListener('input', renderP8);
+  renderP8();
+
+  /* ===== 9. Évaluation humaine ===== */
+  function personIcon(){
+    var svg = svgRoot('0 0 90 90');
+    svg.appendChild(el('circle', {cx:45, cy:28, r:16, class:'box teal'}));
+    svg.appendChild(el('path', {d:'M15,84 C15,58 75,58 75,84 Z', class:'box teal'}));
+    return svg;
+  }
+  document.getElementById('p9-diagram').appendChild(personIcon());
+  var p9Boxes = document.querySelectorAll('#p9-checklist input');
+  var p9Result = document.getElementById('p9-result');
+  function renderP9(){
+    var n = 0;
+    p9Boxes.forEach(function(b){ if (b.checked) n++; });
+    p9Result.textContent = n;
+  }
+  p9Boxes.forEach(function(b){ b.addEventListener('change', renderP9); });
+  renderP9();
+
+  /* ===== theme toggle ===== */
+  var themeToggle = document.getElementById('theme-toggle');
+  var themeIcon = themeToggle.querySelector('.theme-icon');
+  function applyIcon(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', isDark ? 'Passer en mode clair' : 'Passer en mode sombre');
+  }
+  applyIcon();
+  themeToggle.addEventListener('click', function(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark){
+      document.documentElement.removeAttribute('data-theme');
+      try{ localStorage.setItem('theme','light'); }catch(e){}
+    } else {
+      document.documentElement.setAttribute('data-theme','dark');
+      try{ localStorage.setItem('theme','dark'); }catch(e){}
+    }
+    applyIcon();
+  });
+})();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

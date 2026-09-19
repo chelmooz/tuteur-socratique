@@ -1,0 +1,64 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les 7 étapes pour implémenter l’IA agentique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Cadre opérationnel d’entreprise • IA agentique</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Principe"><span class="pill">Vue d’ensemble</span><h1>Les 7 étapes pour implémenter l’IA agentique</h1><p class="muted">Faire passer l’IA générative de la conversation à l’action industrielle : workflow, outils, mémoire, sécurité, qualité et résilience.</p><p><strong>Principe directeur :</strong> un LLM formule des hypothèses de texte ; une IA agentique est un système coordonné d’exécution qui ajoute APIs, mémoire persistante, garde-fous et supervision humaine.</p><div class="diagram"><svg viewBox="0 0 900 180"><g fill="#33415e" stroke="#86e7ff" stroke-width="2"><circle cx="450" cy="90" r="58"/><rect x="20" y="65" width="130" height="50" rx="10"/><rect x="190" y="65" width="130" height="50" rx="10"/><rect x="580" y="65" width="130" height="50" rx="10"/><rect x="750" y="65" width="130" height="50" rx="10"/></g><g fill="#f3f8ff" text-anchor="middle" font-size="14"><text x="450" y="95">Moteur agentique</text><text x="85" y="95">LLM</text><text x="255" y="95">Outils</text><text x="645" y="95">Garde-fous</text><text x="815" y="95">HITL</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M150 90h130M320 90h70M510 90h70M710 90h40"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Qu’est-ce qui distingue principalement l’IA agentique d’un simple LLM ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Un système coordonné avec outils, mémoire, garde-fous et supervision</button><button class="choice" data-correct="false" onclick="answer(this,false)">Un prompt plus long uniquement</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="1-3 Cadrer"><span class="pill">Phase I</span><h2>Étapes 1 à 3 — cadrage, décomposition et outillage</h2><div class="grid"><div><h3>01 — Bon cas d’usage</h3><p>Partir d’un workflow métier chronophage et non déterministe, avec KPIs de précision, latence et ROI.</p></div><div><h3>02 — Tâches atomiques</h3><p>Cartographier planification → RAG → action → validation avec états et contrats JSON stricts.</p></div><div><h3>03 — Outils métier</h3><p>Connecter CRM, ERP, SQL, webhooks et APIs ; appliquer le moindre privilège et auditer chaque paramètre.</p></div></div><pre id="workflow">Workflow explicite :
+1. Planification
+2. Recherche documentaire (RAG)
+3. Action par outil
+4. Validation humaine si impact élevé</pre><button class="btn primary copy" onclick="copyText('workflow')">Copier le workflow</button><div class="quiz"><h3>Quiz</h3><p>Pourquoi découper le workflow en tâches atomiques ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour éviter la boîte noire et formaliser chaque transition</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour confier toute la logique à un seul prompt</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="4 Mémoire"><span class="pill">Étape 4</span><h2>Ajouter mémoire et contexte dynamique</h2><p>La mémoire courte suit la session, les variables d’état et les résumés incrémentaux. La mémoire longue conserve historique vectoriel, préférences et retours passés.</p><div class="grid"><div><h3>Injection contextuelle</h3><p>Ajouter les référentiels et procédures internes actualisés.</p></div><div><h3>Hygiène du contexte</h3><p>Purger les données superflues pour éviter la dérive cognitive.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel est le risque d’un contexte non nettoyé ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">La dérive cognitive et la dilution des informations utiles</button><button class="choice" data-correct="false" onclick="answer(this,false)">Une meilleure précision garantie</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="5 Sécurité"><span class="pill">Étape 5</span><h2>Construire les garde-fous et la gouvernance</h2><div class="grid"><div><h3>RBAC</h3><p>Vérifier les permissions selon le rôle de l’utilisateur.</p></div><div><h3>PII & secrets</h3><p>Masquer automatiquement données personnelles et tokens.</p></div><div><h3>Coupe-circuit financier</h3><p>Plafonner tokens et coût par requête.</p></div><div><h3>Audit</h3><p>Journaliser les décisions dans des traces immuables.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle parade protège contre les paramètres d’API invalides ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Validation stricte par schéma JSON/Pydantic avant l’appel</button><button class="choice" data-correct="false" onclick="answer(this,false)">Exécuter le texte libre directement</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="6 Qualité"><span class="pill">Étape 6</span><h2>Mesurer évaluation et observabilité</h2><div class="grid"><div><h3>Métriques système</h3><p>Latence p95, coûts, erreurs d’API et taux de retry.</p></div><div><h3>Qualité</h3><p>Complétude, pertinence, faithfulness et tests automatisés.</p></div><div><h3>Traces distribuées</h3><p>Chaque étape, argument et réponse doit être reconstructible.</p></div><div><h3>Feedback métier</h3><p>Les corrections d’experts alimentent l’amélioration continue.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Pourquoi tracer les arguments d’outils ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour auditer, déboguer et mesurer les décisions de l’agent</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour remplacer tous les tests</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="7 Production"><span class="pill">Étape 7</span><h2>Déployer un workflow résilient</h2><p>Traiter l’agent comme un service hautement disponible : machine d’état finie, files asynchrones, retry exponentiel, modèle de secours, alertes et bascule humaine.</p><pre id="risk">Boucle infinie → max_steps + timeout
+Prompt injection → séparation system/utilisateur + sanitisation
+Hallucination d’API → schéma JSON/Pydantic + validation
+Erreur critique → route de repli vers opérateur</pre><button class="btn primary copy" onclick="copyText('risk')">Copier la matrice</button><div class="quiz"><h3>Quiz</h3><p>Quel mécanisme limite une boucle agentique infinie ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Un plafond max_steps et un timeout</button><button class="choice" data-correct="false" onclick="answer(this,false)">Une confiance aveugle dans le modèle</button><div class="feedback"></div></section>
+<section class="card module" data-title="Pré-prod"><span class="pill">Core stack</span><h2>Checklist de conformité pré-production</h2><p>La pile fondamentale réunit LLM, outils métier, mémoire RAG, orchestration, garde-fous, évaluation, observabilité et humain HITL.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Schémas typés et validation JSON.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Route de repli vers un opérateur.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Coupe-circuit budgétaire par requête et session.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Journalisation immuable des contextes et arguments.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Tests de non-régression et alertes de dérive.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Validation humaine des actions clés.</label><button class="btn primary" onclick="finish()">Valider la pré-production</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

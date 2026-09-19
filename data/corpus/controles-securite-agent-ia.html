@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>12 contrôles de sécurité pour agents IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<header>
+  <div class="kicker">SYSTÈME DE SÉCURITÉ — AGENT IA</div>
+  <h1>12 contrôles de sécurité<br>dont chaque <span>agent IA</span> a besoin</h1>
+  <p class="lede">Une carte interactive des quatre piliers de sécurité à mettre en place autour d'un agent IA en production. Cliquez sur un pilier pour déployer ses contrôles.</p>
+</header>
+
+<main>
+  <div class="stage">
+    <svg id="diagram" viewBox="0 0 1000 820" role="img" aria-label="Diagramme interactif des 12 contrôles de sécurité pour agents IA, organisés en 4 piliers autour d'un agent central."></svg>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="panel-empty" id="panelEmpty">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M12 2 L20 6 V12 C20 17 16.5 20.5 12 22 C7.5 20.5 4 17 4 12 V6 Z"/>
+        <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>Sélectionnez un pilier dans le<br>diagramme pour afficher<br>ses contrôles de sécurité.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Astuce&nbsp;: la navigation au clavier fonctionne aussi — <kbd style="font-family:'JetBrains Mono',monospace;background:#161B26;padding:2px 6px;border-radius:4px;border:1px solid var(--line);">Tab</kbd> pour circuler entre les piliers, <kbd style="font-family:'JetBrains Mono',monospace;background:#161B26;padding:2px 6px;border-radius:4px;border:1px solid var(--line);">Entrée</kbd> pour ouvrir.
+</footer>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const XHTMLNS = "http://www.w3.org/1999/xhtml";
+const CX = 500, CY = 400;
+const R_CAT = 190, R_SUB = 355;
+
+const DATA = [
+  {
+    id:1, color:"var(--c1)", hex:"#4C8DFF", angle:225,
+    title:"Contrôle d'accès & gestion des identités",
+    controls:[
+      { title:"Identité & authentification", bullets:["ID unique (clés API, OAuth)","Validation multifacteur / par jeton"] },
+      { title:"Accès au moindre privilège", bullets:["Accès basé sur les rôles (RBAC)","Autorisations limitées dans le temps"] },
+      { title:"Autorisation des appels d'outil", bullets:["Contrôle de liste d'autorisation API","Couche de validation de requête"] },
+    ]
+  },
+  {
+    id:2, color:"var(--c2)", hex:"#34D399", angle:315,
+    title:"Cadre d'exécution sécurisé",
+    controls:[
+      { title:"Exécution en bac à sable", bullets:["Isolation Docker / VM","Pas d'accès direct au SE"] },
+      { title:"Surveillance humaine dans la boucle", bullets:["Flux de travail d'approbation","Intervention basée sur le risque"] },
+      { title:"Contrôle de communication de l'agent", bullets:["Messagerie chiffrée","Filtrage basé sur les politiques"] },
+    ]
+  },
+  {
+    id:3, color:"var(--c3)", hex:"#FF8A4C", angle:135,
+    title:"Sécurité des données & contrôle de la mémoire",
+    controls:[
+      { title:"Isolation de la mémoire", bullets:["Stockage au niveau de la session","Séparation de la base de données vectorielles"] },
+      { title:"Protection des données et de la sortie", bullets:["Masquage des PII (RGPD)","Règles de filtrage de sortie"] },
+      { title:"Défense contre l'injection de prompt", bullets:["Désinfection des entrées","Garde-fous LLM"] },
+    ]
+  },
+  {
+    id:4, color:"var(--c4)", hex:"#B983FF", angle:45,
+    title:"Surveillance, audit & gouvernance",
+    controls:[
+      { title:"Surveillance continue", bullets:["Suivi des journaux + métriques","Intégration SIEM"] },
+      { title:"Pistes d'audit", bullets:["Journaux horodatés","Suivi de la conformité"] },
+      { title:"Gouvernance du cycle de vie", bullets:["Gestion des versions du modèle","Révisions d'accès"] },
+    ]
+  },
+];
+
+function polar(cx, cy, r, deg){
+  const rad = deg * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+function el(tag, attrs, ns){
+  const e = document.createElementNS(ns || SVGNS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function foreign(x, y, w, h, className, html){
+  const fo = el("foreignObject", { x:x-w/2, y:y-h/2, width:w, height:h });
+  const div = document.createElementNS(XHTMLNS, "div");
+  div.setAttribute("class", className);
+  div.innerHTML = html;
+  fo.appendChild(div);
+  return fo;
+}
+
+const svg = document.getElementById("diagram");
+let activeCat = null;
+
+// defs: glow filter
+const defs = el("defs", {});
+const filter = el("filter", { id:"glow", x:"-60%", y:"-60%", width:"220%", height:"220%" });
+filter.appendChild(el("feGaussianBlur", { stdDeviation:6, result:"blur" }));
+const merge = el("feMerge", {});
+merge.appendChild(el("feMergeNode", { in:"blur" }));
+merge.appendChild(el("feMergeNode", { in:"SourceGraphic" }));
+filter.appendChild(merge);
+defs.appendChild(filter);
+svg.appendChild(defs);
+
+// background hex texture (subtle radial guides)
+const guides = el("g", { opacity:"0.5" });
+[R_CAT, R_SUB].forEach(r=>{
+  guides.appendChild(el("circle", { cx:CX, cy:CY, r, fill:"none", stroke:"var(--line)", "stroke-width":1, "stroke-dasharray":"1 8" }));
+});
+svg.appendChild(guides);
+
+// spokes: center -> category
+const spokesGroup = el("g", { id:"spokes" });
+const flowGroup = el("g", { id:"flows" });
+DATA.forEach(cat=>{
+  const p = polar(CX, CY, R_CAT, cat.angle);
+  spokesGroup.appendChild(el("line", { class:"spoke", x1:CX, y1:CY, x2:p.x, y2:p.y }));
+  flowGroup.appendChild(el("line", { class:"spoke-flow", x1:CX, y1:CY, x2:p.x, y2:p.y, stroke:cat.hex }));
+});
+svg.appendChild(spokesGroup);
+svg.appendChild(flowGroup);
+
+// branches (category -> sub), created empty, filled per category
+const branchesGroup = el("g", { id:"branches" });
+svg.appendChild(branchesGroup);
+
+// sub nodes group
+const subsGroup = el("g", { id:"subs" });
+svg.appendChild(subsGroup);
+
+// center node
+const centerGroup = el("g", { class:"core-pulse" });
+centerGroup.appendChild(el("circle", { cx:CX, cy:CY, r:60 }));
+centerGroup.appendChild(el("circle", { cx:CX, cy:CY, r:60 }));
+svg.appendChild(centerGroup);
+
+const centerNode = el("g", { class:"node", tabindex:"-1", "aria-hidden":"true" });
+centerNode.appendChild(el("circle", { cx:CX, cy:CY, r:58, fill:"#0D1017", stroke:"var(--amber)", "stroke-width":1.5 }));
+centerNode.appendChild(el("path", {
+  d:`M ${CX} ${CY-28} l 20 8 v 14 c 0 14 -9 24 -20 28 c -11 -4 -20 -14 -20 -28 v -14 z`,
+  fill:"none", stroke:"var(--amber)", "stroke-width":1.6, opacity:0.9
+}));
+centerNode.appendChild(foreign(CX, CY+34, 100, 30, "center-label", "AGENT IA"));
+svg.appendChild(centerNode);
+
+// category nodes
+const catNodes = {};
+DATA.forEach(cat=>{
+  const p = polar(CX, CY, R_CAT, cat.angle);
+  const g = el("g", { class:"node cat-node", tabindex:"0", role:"button",
+    "aria-pressed":"false", "aria-label":cat.title, "data-cat":cat.id });
+  g.appendChild(el("circle", { class:"halo", cx:p.x, cy:p.y, r:44, fill:cat.hex, opacity:0.18, filter:"url(#glow)" }));
+  g.appendChild(el("circle", { class:"plate", cx:p.x, cy:p.y, r:36, fill:"#0D1017", stroke:cat.hex }));
+  const catNumText = el("text", { x:p.x, y:p.y+2, "text-anchor":"middle", "font-family":"'JetBrains Mono',monospace",
+    "font-weight":700, "font-size":18, fill:cat.hex });
+  catNumText.textContent = cat.id;
+  g.appendChild(catNumText);
+  g.appendChild(foreign(p.x, p.y+64, 168, 46, "sub-label", `<span style="color:${cat.hex}">${cat.title}</span>`));
+  g.addEventListener("click", ()=>selectCategory(cat.id));
+  g.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selectCategory(cat.id); }});
+  svg.appendChild(g);
+  catNodes[cat.id] = { g, p };
+});
+
+// legend
+const legend = document.getElementById("legend");
+DATA.forEach(cat=>{
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.setAttribute("data-cat", cat.id);
+  btn.setAttribute("aria-pressed", "false");
+  btn.innerHTML = `<span class="dot" style="background:${cat.hex}"></span>${cat.id}. ${cat.title}`;
+  btn.addEventListener("click", ()=>selectCategory(cat.id));
+  legend.appendChild(btn);
+});
+
+function clearSubs(){
+  branchesGroup.innerHTML = "";
+  subsGroup.innerHTML = "";
+}
+
+function selectCategory(id){
+  if(activeCat === id){ deselectAll(); return; }
+  activeCat = id;
+  clearSubs();
+
+  DATA.forEach(cat=>{
+    const { g } = catNodes[cat.id];
+    g.classList.toggle("active", cat.id === id);
+    g.classList.toggle("dim", cat.id !== id);
+    g.setAttribute("aria-pressed", cat.id === id ? "true" : "false");
+  });
+  document.querySelectorAll(".legend button").forEach(b=>{
+    b.setAttribute("aria-pressed", Number(b.dataset.cat) === id ? "true" : "false");
+  });
+
+  const cat = DATA.find(c=>c.id===id);
+  const catPos = polar(CX, CY, R_CAT, cat.angle);
+  const spread = 24;
+  const offsets = [-spread, 0, spread];
+
+  cat.controls.forEach((ctrl, i)=>{
+    const angle = cat.angle + offsets[i];
+    const p = polar(CX, CY, R_SUB, angle);
+
+    const branch = el("path", { class:"branch", d:`M ${catPos.x} ${catPos.y} Q ${(catPos.x+p.x)/2} ${(catPos.y+p.y)/2} ${p.x} ${p.y}`, stroke:cat.hex });
+    branchesGroup.appendChild(branch);
+    requestAnimationFrame(()=> setTimeout(()=>branch.classList.add("show"), i*90));
+
+    const sg = el("g", { class:"node sub-node", tabindex:"0", role:"button",
+      "aria-label":ctrl.title, "data-idx":i, style:`opacity:0; transition:opacity .35s ease ${i*0.1+0.15}s;` });
+    sg.appendChild(el("circle", { class:"halo", cx:p.x, cy:p.y, r:32, fill:cat.hex, opacity:0.2, filter:"url(#glow)" }));
+    sg.appendChild(el("circle", { class:"plate", cx:p.x, cy:p.y, r:26, fill:"#12161F", stroke:cat.hex }));
+    sg.appendChild(el("circle", { class:"ping", cx:p.x, cy:p.y, r:26 }));
+    const numText = el("text", { x:p.x, y:p.y+5, "text-anchor":"middle", "font-family":"'JetBrains Mono',monospace",
+      "font-weight":600, "font-size":13, fill:cat.hex });
+    numText.textContent = i+1;
+    sg.appendChild(numText);
+    const align = Math.cos(angle*Math.PI/180) >= 0 ? "start" : "end";
+    const labelX = p.x + (align==="start" ? 34 : -34);
+    sg.appendChild(foreign(labelX + (align==="start"?54:-54), p.y, 128, 44, "sub-label", `<span style="font-size:11.5px">${ctrl.title}</span>`));
+    sg.addEventListener("click", ()=>focusControl(i));
+    sg.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); focusControl(i); }});
+    subsGroup.appendChild(sg);
+    requestAnimationFrame(()=> setTimeout(()=>{ sg.style.opacity = 1; }, i*90));
+  });
+
+  renderPanel(cat);
+}
+
+function deselectAll(){
+  activeCat = null;
+  clearSubs();
+  DATA.forEach(cat=>{
+    const { g } = catNodes[cat.id];
+    g.classList.remove("active","dim");
+    g.setAttribute("aria-pressed","false");
+  });
+  document.querySelectorAll(".legend button").forEach(b=>b.setAttribute("aria-pressed","false"));
+  document.getElementById("panel").innerHTML = document.getElementById("panelEmptyTemplate")?.innerHTML || "";
+  renderEmptyPanel();
+}
+
+function renderEmptyPanel(){
+  const panel = document.getElementById("panel");
+  panel.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "panel-empty";
+  div.innerHTML = `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+      <path d="M12 2 L20 6 V12 C20 17 16.5 20.5 12 22 C7.5 20.5 4 17 4 12 V6 Z"/>
+      <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>Sélectionnez un pilier dans le<br>diagramme pour afficher<br>ses contrôles de sécurité.</div>`;
+  panel.appendChild(div);
+}
+
+function renderPanel(cat){
+  const panel = document.getElementById("panel");
+  panel.innerHTML = "";
+
+  const head = document.createElement("div");
+  head.className = "panel-head";
+  head.innerHTML = `<div>
+      <div class="num" style="color:${cat.hex}">PILIER 0${cat.id}</div>
+      <h2>${cat.title}</h2>
+    </div>`;
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.setAttribute("aria-label", "Fermer");
+  closeBtn.innerHTML = "&times;";
+  closeBtn.addEventListener("click", deselectAll);
+  head.appendChild(closeBtn);
+  panel.appendChild(head);
+
+  cat.controls.forEach((ctrl, i)=>{
+    const card = document.createElement("div");
+    card.className = "control-card";
+    card.style.borderLeftColor = cat.hex;
+    card.style.color = cat.hex;
+    card.dataset.idx = i;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `Mettre en évidence « ${ctrl.title} » dans le diagramme`);
+    card.innerHTML = `<h3 style="color:${cat.hex}">${i+1}. ${ctrl.title}</h3>
+      <ul>${ctrl.bullets.map(b=>`<li>${b}</li>`).join("")}</ul>`;
+    card.addEventListener("click", ()=>focusControl(i, { scrollDiagram:true }));
+    card.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); focusControl(i, { scrollDiagram:true }); }});
+    panel.appendChild(card);
+  });
+}
+
+function focusControl(i, opts={}){
+  document.querySelectorAll(".sub-node").forEach(n=>n.classList.remove("active","pinged"));
+  const subs = document.querySelectorAll(".sub-node");
+  if(subs[i]){
+    subs[i].classList.add("active");
+    if(opts.scrollDiagram){
+      // relance l'animation de repérage
+      void subs[i].offsetWidth;
+      subs[i].classList.add("pinged");
+      document.querySelector(".stage").scrollIntoView({ behavior:"smooth", block:"center" });
+    }
+  }
+  document.querySelectorAll(".control-card").forEach(c=>c.classList.remove("active"));
+  const cards = document.querySelectorAll(".control-card");
+  if(cards[i]){
+    cards[i].classList.add("active");
+    if(!opts.scrollDiagram){
+      cards[i].scrollIntoView({ behavior:"smooth", block:"nearest" });
+    }
+  }
+}
+
+centerNode.style.cursor = "pointer";
+centerNode.addEventListener("click", deselectAll);
+
+renderEmptyPanel();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

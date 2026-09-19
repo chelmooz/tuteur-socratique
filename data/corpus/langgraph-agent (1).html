@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Construire un Agent d'IA de Recherche Approfondie avec LangGraph</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Passer en mode sombre" title="Mode sombre / clair">
+  <span class="theme-icon" aria-hidden="true">🌙</span>
+</button>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <h1>Construire un Agent d'IA de <span class="accent">Recherche Approfondie</span><span class="sub">avec LangGraph</span></h1>
+    </div>
+    <div class="sticky">Demander,<br>Rechercher,<br>Analyser,<br>Itérer,<br>Obtenir des réponses !</div>
+  </header>
+
+  <main class="grid">
+
+    <!-- 1 -->
+    <section class="card">
+      <div class="card-head"><span class="num">1</span><h2>Que construisons-nous ?</h2></div>
+      <p>Un Agent d'IA de Recherche Approfondie qui peut :</p>
+      <ul class="arrow-list">
+        <li>Comprendre la question de recherche</li>
+        <li>Créer un plan de recherche</li>
+        <li>Générer des requêtes de recherche</li>
+        <li>Effectuer une recherche sur le web (Tavily)</li>
+        <li>Analyser les résultats</li>
+        <li>Décider si plus de recherches sont nécessaires</li>
+        <li>Générer la réponse finale</li>
+      </ul>
+      <div class="callout green">Au lieu d'un seul appel LLM, nous construisons un flux de recherche complet.</div>
+      <div class="note-pin">Un agent, c'est un LLM + un environnement (ici : le web) + un jeu d'outils (ici : Tavily) + une boucle qui décide seule si elle doit continuer ou s'arrêter.</div>
+    </section>
+
+    <!-- 2 -->
+    <section class="card">
+      <div class="card-head"><span class="num">2</span><h2>Exemple de Question</h2></div>
+      <div class="quote">« Quels frameworks d'agents d'IA sont les meilleurs pour les applications de production en 2026 ? »</div>
+      <p><strong>Choses à rechercher :</strong></p>
+      <ul class="plain">
+        <li>Disponibilité pour la production</li>
+        <li>Gestion d'état et persistance</li>
+        <li>Appel d'outils et orchestration</li>
+        <li>Support multi-agents</li>
+        <li>Observabilité et débogage</li>
+        <li>Déploiement et évolutivité</li>
+        <li>Expérience développeur et écosystème</li>
+      </ul>
+    </section>
+
+    <!-- 3 : diagramme interactif -->
+    <section class="card">
+      <div class="card-head"><span class="num">3</span><h2>Architecture (Flux LangGraph)</h2></div>
+      <svg class="diagram-svg" viewBox="0 0 400 630" role="img" aria-label="Diagramme du flux LangGraph, cliquez sur une étape pour en savoir plus">
+        <defs>
+          <marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2E2A25"></path>
+          </marker>
+        </defs>
+
+        <!-- flèches -->
+        <g>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,46 L200,62"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,98 L200,112"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,148 L200,162"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,214 L200,228"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,264 L200,278"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M200,314 L200,334"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M115,374 C95,400 95,420 95,444"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M285,374 C290,400 290,420 290,444"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M95,496 L95,506"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M95,542 L95,552"></path>
+          <path class="arrow loop" marker-end="url(#arrow-head)" d="M95,588 C30,560 30,405 118,378"></path>
+          <path class="arrow" marker-end="url(#arrow-head)" d="M290,480 L290,494"></path>
+          <text class="flow-label" x="74" y="404">Oui</text>
+          <text class="flow-label" x="296" y="404">Non</text>
+          <text class="flow-label" x="14" y="482">nouvelle</text>
+          <text class="flow-label" x="14" y="494">itération</text>
+        </g>
+
+        <!-- noeuds -->
+        <g class="node" tabindex="0" role="button" data-color="blue"
+           data-title="Requête Utilisateur"
+           data-desc="Le point de départ : la question de recherche posée en langage naturel.">
+          <rect x="100" y="10" width="200" height="36" rx="10"></rect>
+          <text x="200" y="33" text-anchor="middle">Requête Utilisateur</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="pink"
+           data-title="Analyser la Requête"
+           data-desc="L'agent interprète l'intention et les besoins réels derrière la question.">
+          <rect x="100" y="62" width="200" height="36" rx="10"></rect>
+          <text x="200" y="85" text-anchor="middle">Analyser la Requête</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="yellow"
+           data-title="Créer un Plan de Recherche"
+           data-desc="Décomposition de la question en étapes de recherche à mener.">
+          <rect x="85" y="112" width="230" height="36" rx="10"></rect>
+          <text x="200" y="135" text-anchor="middle" style="font-size:11.5px">Créer un Plan de Recherche</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="purple"
+           data-title="Générer des Requêtes de Recherche"
+           data-desc="Le plan est transformé en requêtes de recherche concrètes et précises.">
+          <rect x="70" y="162" width="260" height="52" rx="10"></rect>
+          <text x="200" y="184" text-anchor="middle" style="font-size:11.5px">Générer des Requêtes</text>
+          <text x="200" y="199" text-anchor="middle" class="small">(recherche initiale)</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="green"
+           data-title="Recherche Web Tavily"
+           data-desc="Chaque requête est envoyée à l'API Tavily pour trouver des sources pertinentes.">
+          <rect x="100" y="228" width="200" height="36" rx="10"></rect>
+          <text x="200" y="251" text-anchor="middle">Recherche Web Tavily</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="pink"
+           data-title="Analyser les Résultats"
+           data-desc="Les résultats de recherche sont lus et évalués pour leur pertinence.">
+          <rect x="100" y="278" width="200" height="36" rx="10"></rect>
+          <text x="200" y="301" text-anchor="middle">Analyser les Résultats</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="blue"
+           data-title="Besoin de plus de recherche ?"
+           data-desc="L'agent juge si l'information réunie suffit pour répondre, ou s'il manque des éléments.">
+          <polygon points="200,334 285,374 200,414 115,374"></polygon>
+          <text x="200" y="370" text-anchor="middle" style="font-size:11px">Besoin de plus</text>
+          <text x="200" y="386" text-anchor="middle" style="font-size:11px">de recherche ?</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="purple"
+           data-title="Générer de Nouvelles Requêtes"
+           data-desc="De nouvelles requêtes ciblent précisément les informations manquantes.">
+          <rect x="13" y="444" width="164" height="52" rx="10"></rect>
+          <text x="95" y="466" text-anchor="middle" style="font-size:11px">Générer des</text>
+          <text x="95" y="481" text-anchor="middle" style="font-size:9.5px" class="small">(nouvelles requêtes)</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="green"
+           data-title="Recherche Web Tavily"
+           data-desc="Nouvelle recherche Tavily sur ces requêtes complémentaires.">
+          <rect x="18" y="506" width="154" height="36" rx="10"></rect>
+          <text x="95" y="529" text-anchor="middle" style="font-size:10.5px">Tavily Web Search</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="pink"
+           data-title="Analyser les Résultats"
+           data-desc="Les nouveaux résultats sont intégrés à la compréhension globale.">
+          <rect x="18" y="552" width="154" height="36" rx="10"></rect>
+          <text x="95" y="575" text-anchor="middle" style="font-size:10.5px">Analyser Résultats</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="yellow"
+           data-title="Rédiger la Réponse Finale"
+           data-desc="Une fois l'information suffisante, l'agent rédige une réponse complète et sourcée.">
+          <rect x="200" y="444" width="180" height="36" rx="10"></rect>
+          <text x="290" y="467" text-anchor="middle" style="font-size:11px">Rédiger la Réponse</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="blue"
+           data-title="FIN"
+           data-desc="Fin du flux : la réponse finale est renvoyée à l'utilisateur.">
+          <rect x="245" y="494" width="90" height="36" rx="18"></rect>
+          <text x="290" y="517" text-anchor="middle">FIN</text>
+        </g>
+
+        <circle class="flow-dot d3" r="5"></circle>
+      </svg>
+    </section>
+
+    <!-- 4 -->
+    <section class="card">
+      <div class="card-head"><span class="num">4</span><h2>Créer un Environnement Virtuel</h2></div>
+      <ol class="steps">
+        <li>Créer un dossier de projet
+          <div class="codeblock">mkdir deep-research-agent
+cd deep-research-agent</div>
+        </li>
+        <li>Créer un environnement virtuel
+          <div class="codeblock">python -m venv .venv</div>
+        </li>
+        <li>L'activer
+          <div class="activate-grid">
+            <div><strong>macOS / Linux :</strong><br>source .venv/bin/activate</div>
+            <div><strong>Windows :</strong><br>.venv\Scripts\activate</div>
+          </div>
+        </li>
+      </ol>
+      <div class="callout green ok">Vous devriez voir (.venv) dans votre terminal.</div>
+    </section>
+
+    <!-- 5 -->
+    <section class="card">
+      <div class="card-head"><span class="num">5</span><h2>Installer les Dépendances</h2></div>
+      <p>Nous avons besoin de :</p>
+      <ul class="plain">
+        <li>LangGraph</li>
+        <li>Intégration LangChain's OpenAI</li>
+        <li>python-dotenv</li>
+        <li>Client Python Tavily</li>
+      </ul>
+      <div class="codeblock">python -m pip install \
+  langgraph langchain-openai \
+  python-dotenv tavily-python</div>
+    </section>
+
+    <!-- 6 -->
+    <section class="card">
+      <div class="card-head"><span class="num">6</span><h2>Configurer les Clés API</h2></div>
+      <ol class="steps">
+        <li>Créer un fichier .env</li>
+        <li>Ajouter vos clés API :
+          <div class="env-file">
+            <svg viewBox="0 0 40 48" aria-hidden="true">
+              <path d="M4,2 H28 L36,10 V46 H4 Z" fill="#F1ECDD" stroke="#2E2A25" stroke-width="2"></path>
+              <path d="M28,2 V10 H36" fill="none" stroke="#2E2A25" stroke-width="2"></path>
+              <text x="20" y="30" text-anchor="middle" font-family="ui-monospace,monospace" font-size="8" fill="#2E2A25">.env</text>
+            </svg>
+            <div class="codeblock" style="flex:1; margin:0;">OPENAI_API_KEY=votre_clé_openai
+TAVILY_API_KEY=votre_clé_tavily</div>
+          </div>
+        </li>
+      </ol>
+      <ul class="plain">
+        <li>Chargez-les en utilisant <code>load_dotenv()</code></li>
+        <li>Ne validez pas votre fichier .env sur GitHub.</li>
+        <li>Ajoutez .env à votre fichier .gitignore.</li>
+      </ul>
+      <div class="callout warn">Gardez vos clés API privées !</div>
+    </section>
+
+    <!-- 7 -->
+    <section class="card">
+      <div class="card-head"><span class="num">7</span><h2>Structure du Projet</h2></div>
+      <div class="filetree">deep-research-agent/
+├── .venv/
+├── .env
+├── .gitignore
+├── state.py
+├── nodes.py
+├── graph.py
+└── main.py</div>
+      <div class="note-pin">Chaque fichier a un rôle spécifique dans notre agent LangGraph.</div>
+    </section>
+
+    <!-- 8 : diagramme interactif large -->
+    <section class="card wide">
+      <div class="card-head"><span class="num">8</span><h2>Étapes Suivantes (Flux Complet)</h2></div>
+      <svg class="diagram-svg" viewBox="0 0 940 290" role="img" aria-label="Diagramme récapitulatif du flux complet, cliquez sur une étape pour en savoir plus">
+        <defs>
+          <marker id="arrow-head8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2E2A25"></path>
+          </marker>
+        </defs>
+
+        <g>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M188,47 L213,47"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M368,47 L393,47"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M548,47 L573,47"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M728,47 L753,47"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M880,74 C880,125 70,125 70,170"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M188,197 L213,197"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M368,197 L393,197"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M548,197 L573,197"></path>
+          <path class="arrow" marker-end="url(#arrow-head8)" d="M728,197 L753,197"></path>
+          <path class="arrow loop" marker-end="url(#arrow-head8)" d="M650.5,224 C650.5,270 110.5,270 110.5,224"></path>
+          <text class="flow-label" x="380" y="266" text-anchor="middle">si oui, on recommence la recherche</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="blue"
+           data-title="État"
+           data-desc="L'état partagé qui conserve la question, le plan et les résultats tout au long du flux.">
+          <rect x="33" y="20" width="155" height="54" rx="10"></rect>
+          <text x="110.5" y="52" text-anchor="middle">État</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="purple"
+           data-title="LLM"
+           data-desc="Le modèle de langage qui raisonne à chaque étape du graphe.">
+          <rect x="213" y="20" width="155" height="54" rx="10"></rect>
+          <text x="290.5" y="52" text-anchor="middle">LLM</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="pink"
+           data-title="Analyser la Requête"
+           data-desc="Comprendre ce que l'utilisateur recherche réellement.">
+          <rect x="393" y="20" width="155" height="54" rx="10"></rect>
+          <text x="470.5" y="47" text-anchor="middle" style="font-size:11.5px">Analyser la</text>
+          <text x="470.5" y="62" text-anchor="middle" style="font-size:11.5px">Requête</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="yellow"
+           data-title="Créer le Plan"
+           data-desc="Établir les étapes de recherche à suivre.">
+          <rect x="573" y="20" width="155" height="54" rx="10"></rect>
+          <text x="650.5" y="52" text-anchor="middle">Créer le Plan</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="purple"
+           data-title="Générer les Requêtes"
+           data-desc="Transformer le plan en requêtes de recherche concrètes.">
+          <rect x="753" y="20" width="155" height="54" rx="10"></rect>
+          <text x="830.5" y="47" text-anchor="middle" style="font-size:11.5px">Générer les</text>
+          <text x="830.5" y="62" text-anchor="middle" style="font-size:11.5px">Requêtes</text>
+        </g>
+
+        <g class="node" tabindex="0" role="button" data-color="green"
+           data-title="Recherche (Tavily)"
+           data-desc="Interroger le web via l'API Tavily.">
+          <rect x="33" y="170" width="155" height="54" rx="10"></rect>
+          <text x="110.5" y="192" text-anchor="middle" style="font-size:11.5px">Recherche</text>
+          <text x="110.5" y="207" text-anchor="middle" class="small">(Tavily)</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="pink"
+           data-title="Analyser les Résultats"
+           data-desc="Évaluer la pertinence et la qualité des sources trouvées.">
+          <rect x="213" y="170" width="155" height="54" rx="10"></rect>
+          <text x="290.5" y="192" text-anchor="middle" style="font-size:11.5px">Analyser les</text>
+          <text x="290.5" y="207" text-anchor="middle" style="font-size:11.5px">Résultats</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="yellow"
+           data-title="Décision (besoin de plus ?)"
+           data-desc="Décider si l'information réunie suffit pour répondre.">
+          <rect x="393" y="170" width="155" height="54" rx="10"></rect>
+          <text x="470.5" y="192" text-anchor="middle" style="font-size:11px">Décision</text>
+          <text x="470.5" y="207" text-anchor="middle" class="small">(besoin de plus ?)</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="orange"
+           data-title="Boucle (si oui)"
+           data-desc="S'il manque des éléments, le graphe boucle vers de nouvelles recherches.">
+          <rect x="573" y="170" width="155" height="54" rx="10"></rect>
+          <text x="650.5" y="192" text-anchor="middle" style="font-size:11.5px">Boucle</text>
+          <text x="650.5" y="207" text-anchor="middle" class="small">(si oui)</text>
+        </g>
+        <g class="node" tabindex="0" role="button" data-color="blue"
+           data-title="Réponse Finale"
+           data-desc="Sinon, l'agent rédige et renvoie la réponse complète.">
+          <rect x="753" y="170" width="155" height="54" rx="10"></rect>
+          <text x="830.5" y="192" text-anchor="middle" style="font-size:11.5px">Réponse</text>
+          <text x="830.5" y="207" text-anchor="middle" style="font-size:11.5px">Finale</text>
+        </g>
+
+        <circle class="flow-dot d8" r="5"></circle>
+      </svg>
+      <p class="caption">Ceci nous donne un flux de <span class="u">Recherche Approfondie</span> complet !</p>
+    </section>
+
+  </main>
+
+  <footer>Cliquez ou appuyez sur une étape des diagrammes 3 et 8 pour afficher son détail.</footer>
+</div>
+
+<div id="tip" role="status" hidden>
+  <div class="tip-title"></div>
+  <div class="tip-body"></div>
+</div>
+
+<script>
+(function(){
+  var themeToggle = document.getElementById('theme-toggle');
+  var themeIcon = themeToggle.querySelector('.theme-icon');
+
+  function applyIcon(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', isDark ? 'Passer en mode clair' : 'Passer en mode sombre');
+  }
+  applyIcon();
+
+  themeToggle.addEventListener('click', function(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark){
+      document.documentElement.removeAttribute('data-theme');
+      try{ localStorage.setItem('theme', 'light'); }catch(e){}
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      try{ localStorage.setItem('theme', 'dark'); }catch(e){}
+    }
+    applyIcon();
+  });
+})();
+
+(function(){
+  var tip = document.getElementById('tip');
+
+  function showTip(node){
+    var title = node.getAttribute('data-title') || '';
+    var desc = node.getAttribute('data-desc') || '';
+    tip.querySelector('.tip-title').textContent = title;
+    tip.querySelector('.tip-body').textContent = desc;
+    tip.hidden = false;
+
+    var r = node.getBoundingClientRect();
+    var tr = tip.getBoundingClientRect();
+    var left = r.left + r.width/2 - tr.width/2;
+    var top = r.bottom + 10;
+    var maxLeft = window.innerWidth - tr.width - 8;
+    if (left < 8) left = 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (top + tr.height > window.innerHeight - 8) top = r.top - tr.height - 10;
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+
+  function hideTip(){ tip.hidden = true; }
+
+  document.querySelectorAll('.node').forEach(function(node){
+    node.addEventListener('click', function(e){ e.stopPropagation(); showTip(node); });
+    node.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); showTip(node); }
+    });
+  });
+
+  document.addEventListener('click', function(e){
+    if (!tip.hidden && !e.target.closest('#tip')) hideTip();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') hideTip();
+  });
+})();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

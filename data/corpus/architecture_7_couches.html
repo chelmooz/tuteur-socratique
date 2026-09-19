@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les 7 Couches du Génie des Systèmes d'IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow-line">GÉNIE DES SYSTÈMES D'IA</div>
+        <h1>Les 7 couches, du modèle nu au système en production</h1>
+        <p class="lede">Un modèle de fondation ne devient un système fiable qu'en traversant sept strates d'ingénierie — chacune répond à une question précise, de « que peut-il faire » à « que signifient les concepts ».</p>
+      </div>
+      <div class="hero-figure">
+        <!-- Illustration isométrique de la tour à 7 couches -->
+        <svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gAccent" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#6ee7d8"/>
+              <stop offset="1" stop-color="#3fae9e"/>
+            </linearGradient>
+          </defs>
+          <g font-family="IBM Plex Mono, monospace" font-size="9" fill="#0b1220">
+            <!-- layers bottom to top, isometric slabs -->
+            <g transform="translate(20,220)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#6ee7d8" stroke-width="1"/><text x="12" y="17" fill="#6ee7d8">01 · FONDATION</text></g>
+            <g transform="translate(20,190)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#e9eef6" stroke-opacity="0.25" stroke-width="1"/><text x="12" y="17" fill="#cdd7e6">02 · INVITE</text></g>
+            <g transform="translate(20,160)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#e9eef6" stroke-opacity="0.25" stroke-width="1"/><text x="12" y="17" fill="#cdd7e6">03 · CONTEXTE</text></g>
+            <g transform="translate(20,130)"><rect width="160" height="26" rx="2" fill="#1a2438" stroke="#f0a868" stroke-width="1"/><text x="12" y="17" fill="#f0a868">04 · HARNAIS</text></g>
+            <g transform="translate(20,100)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#e9eef6" stroke-opacity="0.25" stroke-width="1"/><text x="12" y="17" fill="#cdd7e6">05 · BOUCLE</text></g>
+            <g transform="translate(20,70)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#e9eef6" stroke-opacity="0.25" stroke-width="1"/><text x="12" y="17" fill="#cdd7e6">06 · GRAPHE</text></g>
+            <g transform="translate(20,40)"><rect width="160" height="26" rx="2" fill="#16233a" stroke="#6ee7d8" stroke-width="1"/><text x="6" y="17" fill="#6ee7d8">07 · ONTOLOGIE</text></g>
+          </g>
+          <!-- connecting arrow rising through the stack -->
+          <line x1="100" y1="246" x2="100" y2="40" stroke="#6ee7d8" stroke-width="1" stroke-dasharray="2 4" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= VUE D'ENSEMBLE ================= -->
+  <section class="intro-panel">
+    <div class="wrap">
+      <h2 class="section-title">Vue d'ensemble</h2>
+      <p class="section-sub">Chaque couche s'appuie sur celle du dessous. Un défaut à la couche 04 (harnais) ne se corrige pas en ajoutant du prompt à la couche 02 — la faille reste architecturale.</p>
+      <div class="diagram-frame">
+        <div class="mermaid">
+flowchart BT
+  L1["01 · Modèle de fondation<br/>Que peut-il faire ?"]
+  L2["02 · Invite<br/>Que devrait-il faire ?"]
+  L3["03 · Contexte<br/>De quoi a-t-il besoin ?"]
+  L4["04 · Harnais<br/>Comment agir sans risque ?"]
+  L5["05 · Boucle<br/>Comment se corrige-t-il ?"]
+  L6["06 · Graphe<br/>Comment est-ce coordonné ?"]
+  L7["07 · Ontologie<br/>Que signifient les concepts ?"]
+  L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
+        </div>
+      </div>
+      <p class="diagram-caption">flux ascendant — chaque couche conditionne la suivante</p>
+    </div>
+  </section>
+
+  <!-- ================= COUCHES ================= -->
+  <section>
+    <div class="wrap">
+
+      <div class="layer">
+        <div><div class="layer-num">01</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><rect x="18" y="18" width="28" height="28" rx="3"/><path d="M26 18V10M38 18V10M26 54v-8M38 54v-8M18 26h-8M18 38h-8M54 26h-8M54 38h-8"/><circle cx="32" cy="32" r="5"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Le Modèle de Fondation</h3>
+          <p class="question">Que peut faire le modèle ?</p>
+          <p>C'est le socle probabiliste de l'application. Le système démarre avec des capacités apprises (compréhension du langage, raisonnement général) et des limites connues (hallucinations, fenêtre de contexte limitée, absence de données privées).</p>
+          <p class="book"><strong>Apport du livre (Chip Huyen) :</strong> le choix du modèle dépend du compromis entre latence, coût et contrôle — API propriétaire vs modèle open-weight hébergé. À cette étape, on ne modifie pas les poids du modèle.</p>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">02</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><path d="M10 14h44v26H26l-8 8v-8H10z" stroke-linejoin="round"/><path d="M20 24h4M28 24h16M20 32h24" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie de l'Invite</h3>
+          <p class="question">Que devrait-il faire ?</p>
+          <p>Spécifier la tâche, imposer des contraintes de comportement, fournir des exemples démonstratifs (few-shot) et exiger un format de sortie précis.</p>
+          <p class="book"><strong>Apport du livre :</strong> séparer clairement le prompt système (rôle et consignes permanentes) du prompt utilisateur. Pour des réponses exploitables par un programme, on applique des contraintes de schéma (JSON Schema, masquage de grammaire).</p>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">03</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><rect x="12" y="14" width="24" height="30" rx="2"/><path d="M18 22h12M18 28h12M18 34h8"/><circle cx="42" cy="38" r="8"/><path d="M48 44l6 6"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie du Contexte</h3>
+          <p class="question">De quoi a-t-il besoin de savoir ?</p>
+          <p>Injecter dynamiquement dans la fenêtre de contexte les preuves factuelles pertinentes, l'historique de conversation (mémoire) et les retours d'outils.</p>
+          <p class="book"><strong>Apport du livre :</strong> c'est le domaine du RAG. Il combine l'indexation par segments (chunking), la recherche hybride (BM25 + vecteurs) et le reranking pour ne fournir au modèle que les faits exacts nécessaires.</p>
+          <div class="mini-diagram">
+            <div class="diagram-frame">
+              <div class="mermaid">
+flowchart LR
+  Q["Requête"] --> C["Découpage en segments"]
+  C --> H["Recherche hybride<br/>BM25 + vecteurs"]
+  H --> R["Reranking"]
+  R --> P["Prompt enrichi"]
+  P --> M["Modèle"]
+              </div>
+            </div>
+            <p class="diagram-caption">pipeline RAG — couche 03</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">04</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#f0a868" stroke-width="2.2"><path d="M32 8l20 8v14c0 14-9 22-20 26-11-4-20-12-20-26V16z" stroke-linejoin="round"/><circle cx="32" cy="30" r="6"/><path d="M32 36v6"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie du Harnais</h3>
+          <p class="question">Comment peut-il agir en toute sécurité ?</p>
+          <p>Construire l'environnement d'exécution (runtime) : registres d'outils, contrôle des permissions, suivi de l'état, journalisation.</p>
+          <p class="book"><strong>Apport du livre :</strong> le harnais intègre les garde-fous d'entrée et de sortie. En entrée, il anonymise les PII et filtre les injections de prompt. En sortie, il valide le format et isole le code généré dans des bacs à sable étanches.</p>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">05</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><path d="M46 20a18 18 0 1 0 4 12" stroke-linecap="round"/><path d="M50 10v10h-10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie de Boucle</h3>
+          <p class="question">Comment se vérifie-t-il et s'affine-t-il ?</p>
+          <p>Permettre au système d'agir, d'évaluer le résultat, puis de réessayer ou corriger sa trajectoire dans des limites d'arrêt claires (itérations, budget de jetons).</p>
+          <p class="book"><strong>Apport du livre :</strong> le pattern agentique ReAct (Thought → Action → Observation). Le modèle inspecte le retour d'outil et, en cas d'erreur, ajuste son instruction et retente l'opération.</p>
+          <div class="mini-diagram">
+            <div class="diagram-frame">
+              <div class="mermaid">
+flowchart TD
+  T["Pensée"] --> A["Action / appel d'outil"]
+  A --> O["Observation"]
+  O -->|erreur détectée| T
+  O -->|résultat validé| F["Réponse finale"]
+              </div>
+            </div>
+            <p class="diagram-caption">boucle ReAct — couche 05</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">06</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><circle cx="14" cy="32" r="5"/><circle cx="34" cy="14" r="5"/><circle cx="34" cy="50" r="5"/><circle cx="52" cy="32" r="5"/><path d="M18 30l12-13M18 34l12 13M39 17l9 12M39 47l9-12"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie de Graphe</h3>
+          <p class="question">Comment le travail est-il coordonné ?</p>
+          <p>Connecter les étapes du système en graphe orienté : branches conditionnelles, exécutions parallèles, dépendances d'étapes.</p>
+          <p class="book"><strong>Apport du livre :</strong> l'orchestration de pipelines (LangGraph, Haystack) permet de composer des flux où des sous-agents spécialisés travaillent en parallèle avant de fusionner leurs résultats.</p>
+          <div class="mini-diagram">
+            <div class="diagram-frame">
+              <div class="mermaid">
+flowchart LR
+  S["Départ"] --> B1["Analyse du PDF"]
+  S --> B2["Requête SQL"]
+  B1 --> M["Fusion des résultats"]
+  B2 --> M
+  M --> Fn["Bilan validé"]
+              </div>
+            </div>
+            <p class="diagram-caption">branches parallèles — couche 06</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div><div class="layer-num">07</div>
+          <div class="layer-icon">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#6ee7d8" stroke-width="2.2"><rect x="8" y="26" width="16" height="12" rx="2"/><rect x="40" y="10" width="16" height="12" rx="2"/><rect x="40" y="42" width="16" height="12" rx="2"/><path d="M24 32h8M32 32V16h8M32 32v16h8"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3>Ingénierie de l'Ontologie</h3>
+          <p class="question">Que signifient les concepts ?</p>
+          <p>Définir le modèle de domaine : entités partagées, relations, contraintes métier strictes que le système doit respecter.</p>
+          <p class="book"><strong>Apport du livre :</strong> aligner le langage du système sur le monde réel et les bases de données d'entreprise — ex. un client peut passer plusieurs commandes, mais une commande annulée ne peut plus être modifiée.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= EXERCICES ================= -->
+  <section class="intro-panel">
+    <div class="wrap">
+      <h2 class="section-title">Exercices pratiques</h2>
+      <p class="section-sub">Trois mises en situation, du diagnostic de panne à l'écriture d'un prompt système complet.</p>
+
+      <div class="ex-block">
+        <h4>Diagnostic de panne d'architecture <span class="ex-tag">Exercice 1</span></h4>
+        <p style="font-size:14.5px;color:#cdd7e6;">Un assistant de support client génère une requête SQL correcte pour chercher les factures d'un utilisateur. Il tente cependant d'exécuter directement une commande <code>DROP TABLE users;</code> reçue dans le texte d'un e-mail client qu'il analysait.</p>
+        <ul>
+          <li>Quelle couche de l'architecture a manqué à son devoir de filtrage ?</li>
+          <li>Quelle couche aurait dû restreindre les droits d'écriture de l'outil SQL ?</li>
+        </ul>
+        <div class="mini-diagram">
+          <div class="diagram-frame">
+            <div class="mermaid">
+flowchart LR
+  E["E-mail client<br/>(instruction cachée)"] --> Ag["Agent de support"]
+  Ag -->|sans couche 04| Drop["DROP TABLE users;"]
+  Ag -->|avec couches 04 + 07| RO["Rôle SQL lecture seule<br/>→ requête rejetée"]
+            </div>
+          </div>
+          <p class="diagram-caption">deux issues possibles selon la présence du harnais</p>
+        </div>
+      </div>
+
+      <div class="ex-block">
+        <h4>Agent d'analyse financière <span class="ex-tag">Exercice 2</span></h4>
+        <p style="font-size:14.5px;color:#cdd7e6;">Concevoir un agent qui lit un rapport PDF, en extrait le chiffre d'affaires, le compare aux prévisions internes en SQL, puis génère un bilan validé. Associez chaque étape à sa couche (01 à 07) :</p>
+        <div class="match-grid">
+          <div class="match-item"><b>A</b>Structure JSON exacte attendue pour le rapport</div>
+          <div class="match-item"><b>B</b>Graphe qui lance l'analyse PDF et la requête SQL en parallèle</div>
+          <div class="match-item"><b>C</b>Retry automatique (max 3 essais) si l'extraction échoue</div>
+          <div class="match-item"><b>D</b>Règle métier : marge brute = (Revenu − Coût) / Revenu</div>
+          <div class="match-item"><b>E</b>Récupération des 5 passages les plus pertinents du PDF</div>
+        </div>
+      </div>
+
+      <div class="ex-block">
+        <h4>Écriture d'un prompt système <span class="ex-tag">Exercice 3</span></h4>
+        <p style="font-size:14.5px;color:#cdd7e6;">Écrivez un prompt système d'un agent de réservation illustrant le respect des couches 02 (invite), 04 (harnais/permissions) et 07 (ontologie).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CORRIGÉS ================= -->
+  <section>
+    <div class="wrap">
+      <h2 class="section-title">Corrigés</h2>
+      <p class="section-sub">Dépliez chaque exercice pour voir la solution.</p>
+
+      <details class="solution">
+        <summary>▸ Corrigé — Exercice 1</summary>
+        <p><strong style="color:#f0a868;">Couche 04 (harnais / guardrails) :</strong> elle a failli car elle n'a pas filtré l'injection de prompt indirecte présente dans l'e-mail, et n'a pas validé la requête avant exécution.</p>
+        <p><strong style="color:#6ee7d8;">Couche 04 + Couche 07 :</strong> le harnais aurait dû attribuer un rôle SQL en lecture seule à l'agent pour empêcher tout ordre de suppression (DROP).</p>
+      </details>
+
+      <details class="solution">
+        <summary>▸ Corrigé — Exercice 2</summary>
+        <p><strong>A → 02</strong> — spécification du format de sortie structuré.</p>
+        <p><strong>B → 06</strong> — coordination des branches d'exécution et des dépendances.</p>
+        <p><strong>C → 05</strong> — boucle d'évaluation, de retry et limite d'arrêt.</p>
+        <p><strong>D → 07</strong> — définition des concepts et règles métier.</p>
+        <p><strong>E → 03</strong> — sélection des preuves pertinentes via RAG.</p>
+      </details>
+
+      <details class="solution">
+        <summary>▸ Corrigé — Exercice 3 (exemple de solution)</summary>
+<pre class="code-block"><span class="rem">[PROMPT SYSTEME]</span>
+<span class="kw">Rôle (01/02)</span> : Tu es l'assistant de réservation de l'Hôtel X.
+<span class="kw">Format (02)</span> : Réponds toujours en JSON au format {"action": string, "params": dict}.
+
+<span class="kw">Ontologie & Règles Métier (07)</span> :
+- Une réservation nécessite obligatoirement : un client_id, une date_debut, et une date_fin.
+- La date_fin doit être strictement après la date_debut.
+
+<span class="warn">Permissions & Sécurité (04)</span> :
+- Tu as uniquement la permission de consulter la disponibilité (check_availability)
+  et créer une réservation temporaire (create_booking).
+- Tu ne dois JAMAIS demander ou enregistrer de numéro de carte bancaire dans le chat.</pre>
+      </details>
+    </div>
+  </section>
+
+  <footer>Cours — Génie des systèmes d'IA · 7 couches, du modèle à la production</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#16233a',
+      primaryTextColor: '#e9eef6',
+      primaryBorderColor: '#6ee7d8',
+      lineColor: '#6ee7d8',
+      secondaryColor: '#111b2e',
+      tertiaryColor: '#0b1220',
+      fontFamily: 'IBM Plex Mono, monospace',
+      fontSize: '13px'
+    },
+    flowchart: { curve: 'basis', htmlLabels: true }
+  });
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

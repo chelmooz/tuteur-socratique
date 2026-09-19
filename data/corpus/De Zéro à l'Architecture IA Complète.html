@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass : L'Écosystème IA Complet | LLM, RAG, LangChain, LangGraph, MCP</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">🧠 <span>Masterclass</span> Écosystème IA</div>
+      <div class="muted small">LLM • Embeddings • RAG • LangChain • LangGraph • MCP</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="controls no-print">
+      <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les citations ⏱">⏱</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">🌓</button>
+      <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar">
+    <nav id="nav" aria-label="Navigation du cours">
+      <button data-target="home">🏠 Accueil</button>
+      <button data-target="diagnostic">🎯 Diagnostic</button>
+      <button data-target="llm">1. LLM & Fenêtres de contexte</button>
+      <button data-target="embeddings">2. Embeddings & Bases Vectorielles</button>
+      <button data-target="langchain">3. LangChain & Agents</button>
+      <button data-target="prompts">4. Prompt Engineering</button>
+      <button data-target="rag">5. RAG (Retrieval Augmented Gen)</button>
+      <button data-target="langgraph">6. LangGraph (Workflows)</button>
+      <button data-target="mcp">7. MCP (Model Context Protocol)</button>
+      <button data-target="build">🛠️ Cas Pratique : TechCorp</button>
+      <button data-target="scenarios">🎬 Scénarios</button>
+      <button data-target="flashcards">🃏 Flashcards</button>
+      <button data-target="final">✅ Examen final</button>
+      <button data-target="resources">🏆 Certificat & ressources</button>
+    </nav>
+  </aside>
+
+  <main id="content">
+
+    <section id="home" class="section active">
+      <h1>De Zéro à l'Architecture IA Complète</h1>
+      <p class="lead">
+        Prompt engineering, tokens, embeddings, RAG, Vector DB, agents, LangChain, LangGraph, MCP... Si vous vous sentez perdu face à cette explosion de termes, cette masterclass est votre point d'entrée unique. À travers le cas concret de l'entreprise fictive <strong>TechCorp</strong> (et ses 500 Go de documents internes), nous allons construire pas à pas un système IA complet, de l'appel API basique à l'agent autonome connecté à des bases de données via MCP. <span class="source">⏱ 0:00</span>
+      </p>
+
+      <div class="schema-wrap">
+        <svg class="schema" viewBox="0 0 1000 320" role="img" aria-label="Stack IA TechCorp">
+          <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"/></marker></defs>
+          
+          <rect x="20" y="20" width="180" height="60" class="node cyan"/><text x="110" y="45" text-anchor="middle">1. LLM & Context</text><text x="110" y="65" text-anchor="middle" class="sub">Tokens, Limites</text>
+          <path class="dash cyan" d="M200 50 L250 50" marker-end="url(#arr)"/>
+          
+          <rect x="250" y="20" width="180" height="60" class="node purple"/><text x="340" y="45" text-anchor="middle">2. Embeddings</text><text x="340" y="65" text-anchor="middle" class="sub">Sens > Valeur (1536d)</text>
+          <path class="dash purple" d="M430 50 L480 50" marker-end="url(#arr)"/>
+          
+          <rect x="480" y="20" width="180" height="60" class="node green"/><text x="570" y="45" text-anchor="middle">3. Vector DB</text><text x="570" y="65" text-anchor="middle" class="sub">Chroma, Pinecone</text>
+          <path class="dash green" d="M660 50 L710 50" marker-end="url(#arr)"/>
+          
+          <rect x="710" y="20" width="270" height="60" class="node yellow"/><text x="845" y="45" text-anchor="middle">4. RAG</text><text x="845" y="65" text-anchor="middle" class="sub">Retrieval + Augmentation + Gen</text>
+
+          <rect x="20" y="130" width="300" height="70" class="node"/><text x="170" y="155" text-anchor="middle">5. LangChain</text><text x="170" y="175" text-anchor="middle" class="sub">Abstraction, Chaînes, Mémoire, Outils</text>
+          <path class="dash" d="M320 165 L380 165" marker-end="url(#arr)"/>
+
+          <rect x="380" y="130" width="300" height="70" class="node pink"/><text x="530" y="155" text-anchor="middle">6. LangGraph</text><text x="530" y="175" text-anchor="middle" class="sub">StateGraph, Nœuds, Arêtes, Boucles</text>
+          <path class="dash pink" d="M680 165 L740 165" marker-end="url(#arr)"/>
+
+          <rect x="740" y="130" width="240" height="70" class="node red"/><text x="860" y="155" text-anchor="middle">7. MCP</text><text x="860" y="175" text-anchor="middle" class="sub">USB universel pour Agents</text>
+
+          <rect x="250" y="240" width="500" height="60" rx="30" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 6"/>
+          <text x="500" y="275" text-anchor="middle" fill="var(--accent)" font-weight="800" font-size="16">Agent TechCorp : Répond, Raisonne, Agit sur les APIs</text>
+          <path class="dash" d="M500 200 L500 240" marker-end="url(#arr)"/>
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div class="card info"><h3>Objectif</h3><p>Comprendre et assembler chaque brique de l'IA moderne pour transformer 500 Go de données brutes en un agent conversationnel autonome et précis.</p></div>
+        <div class="card warn"><h3>Méthode</h3><p>Un fil rouge unique (TechCorp), 7 concepts fondamentaux, 6 simulateurs interactifs, et un cas pratique de construction (Builder) étape par étape.</p></div>
+        <div class="card good"><h3>Livrable</h3><p>Maîtriser le vocabulaire, l'architecture et les compromis (Chunking, Latence, Coût, Routage) pour concevoir vos propres systèmes.</p></div>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+        <button class="btn secondary" onclick="showSection('llm')">Aller au cours</button>
+      </div>
+    </section>
+
+    <section id="diagnostic" class="section">
+      <h1>Diagnostic initial</h1>
+      <p class="lead">Trois questions pour adapter ton parcours.</p>
+      <div class="quiz">
+        <div class="q"><p class="q-text">1. Ton niveau actuel ?</p>
+          <label class="q-option"><input type="radio" name="diag-level" value="novice"> Novice : Je découvre les LLMs et le RAG.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="dev"> Développeur : J'ai déjà fait des appels API OpenAI.</label>
+          <label class="q-option"><input type="radio" name="diag-level" value="archi"> Architecte : Je veux maîtriser LangGraph et MCP.</label>
+        </div>
+        <div class="q"><p class="q-text">2. Ton objectif ?</p>
+          <label class="q-option"><input type="radio" name="diag-goal" value="culture"> Comprendre le jargon (Tokens, Embeddings, RAG).</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="build"> Construire un chatbot RAG sur mes données.</label>
+          <label class="q-option"><input type="radio" name="diag-goal" value="agent"> Créer des agents multi-étapes connectés à mes APIs.</label>
+        </div>
+        <div class="q"><p class="q-text">3. Ton temps ?</p>
+          <label class="q-option"><input type="radio" name="diag-time" value="express"> Express 20 min (Concepts clés).</label>
+          <label class="q-option"><input type="radio" name="diag-time" value="atelier"> Atelier 60 min (Simulateurs + Builder).</label>
+        </div>
+        <button class="btn" onclick="validateDiagnostic()">Valider</button>
+        <div class="result" id="diag-rec" style="display:none"></div>
+        <div class="toolbar"><button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button></div>
+      </div>
+    </section>
+
+    <section id="llm" class="section">
+      <h1>1. LLM & Fenêtres de Contexte</h1>
+      <p class="lead">
+        Les LLMs (GPT-4, Claude, Gemini) sont des cerveaux statiques entraînés sur des trilliards de tokens. Mais les 500 Go de données privées de TechCorp n'en font pas partie. Pour que le LLM réponde sur TechCorp, il faut lui injecter des données dans sa <strong>mémoire à court terme</strong> : la <strong>fenêtre de contexte</strong>. <span class="source">⏱ 0:40</span>
+      </p>
+      
+      <div class="grid">
+        <div class="card info"><h3>Tokens & Limites</h3><p>1 token ≈ 3/4 de mot. Les limites varient : 2k-4k (Nano/Flash) à 1M (Gemini 2.5 Pro). Mais 1M tokens ne représentent "que" 50 documents métiers denses. <span class="source">⏱ 1:58</span></p></div>
+        <div class="card warn"><h3>Le problème du "Bruit"</h3><p>Sally a 14 pommes (rouges). Bob a 2 pommes (vertes, acides). Combien de pommes au total ? Le LLM doit ignorer le bruit (couleur, goût) pour calculer 14+2=16. Trop de contexte = perte de précision. <span class="source">⏱ 3:52</span></p></div>
+        <div class="card good"><h3>Choix du modèle</h3><p>Réécriture de roman entier → 1M tokens. Chatbot support rapide → Nano/Flash (faible latence). <span class="source">⏱ 3:26</span></p></div>
+      </div>
+
+      <h2>Simulateur : Saturation de la fenêtre de contexte</h2>
+      <p class="muted small">Ajoute des documents au contexte. Observe comment le "bruit" dégrade la capacité du LLM à trouver l'information critique (la politique de remboursement).</p>
+      <div class="simulator">
+        <div class="slider-row"><label for="ctx-docs">Documents injectés (Bruit)</label><input id="ctx-docs" type="range" min="0" max="100" value="10" oninput="updateContext()"><output id="ctx-odocs">10</output></div>
+        <div class="meter"><div class="meter-fill mf-info" id="ctx-fill" style="width:10%"></div></div>
+        <p class="muted small" id="ctx-label">Tokens utilisés : ~15k / 128k | Précision de la réponse : 95%</p>
+        <div class="console" id="ctx-console">[LLM] Question: "Quelle est la politique de remboursement ?"
+[LLM] Réponse: "La politique standard est de 30 jours..."</div>
+      </div>
+
+      <div class="quiz" data-module="llm">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. Pourquoi ne peut-on pas simplement copier-coller les 500 Go de TechCorp dans le prompt ?</p>
+          <label class="q-option"><input type="radio" name="llm-q0" value="0"> C'est illégal</label>
+          <label class="q-option"><input type="radio" name="llm-q0" value="1"> La fenêtre de contexte est limitée et le bruit dégrade le raisonnement</label>
+          <label class="q-option"><input type="radio" name="llm-q0" value="2"> Les LLMs ne supportent pas le format PDF</label>
+          <div class="explain">Même avec 1M de tokens, 500 Go dépassent la limite, et le "bruit" noie l'information pertinente.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('llm')">← Précédent</button><button class="btn" onclick="nextFrom('llm')">Embeddings →</button></div>
+    </section>
+
+    <section id="embeddings" class="section">
+      <h1>2. Embeddings & Bases Vectorielles</h1>
+      <p class="lead">
+        Pour contourner la limite de la fenêtre de contexte, on ne donne au LLM <strong>que les documents pertinents</strong>. Mais comment trouver "vacation policy" quand le document dit "staff time off guidelines" ? Une base SQL avec <code>LIKE '%vacation%'</code> échouera. La solution : <strong>rechercher par le sens, pas par la valeur</strong>. <span class="source">⏱ 4:56</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Embeddings</h3><p>Un modèle d'embedding transforme le texte en vecteur (ex: 1536 nombres). "Vacation" et "Holiday" auront des coordonnées mathématiques très proches. <span class="source">⏱ 5:02</span></p></div>
+        <div class="card good"><h3>Vector DB</h3><p>ChromaDB, Pinecone... Elles stockent ces vecteurs et permettent une recherche par similarité cosinus en quelques millisecondes. <span class="source">⏱ 26:42</span></p></div>
+        <div class="card warn"><h3>Chunking & Overlap</h3><p>On ne vectorise pas un livre entier. On le découpe en chunks (ex: 500 caractères). L'<strong>overlap</strong> (chevauchement de 100 chars) évite de couper une phrase en plein milieu d'une idée. <span class="source">⏱ 31:02</span></p></div>
+      </div>
+
+      <h2>Simulateur : Espace Sémantique 2D</h2>
+      <p class="muted small">Visualise comment les mots sont projetés dans l'espace vectoriel. Clique sur une requête pour voir la recherche sémantique.</p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn secondary" onclick="searchEmbed('vacation')">Requête: "Vacation"</button>
+          <button class="btn secondary" onclick="searchEmbed('laptop')">Requête: "Laptop"</button>
+          <button class="btn secondary" onclick="searchEmbed('florida')">Requête: "Florida"</button>
+          <button class="btn" onclick="resetEmbed()">Reset</button>
+        </div>
+        <canvas id="embed-canvas" width="800" height="300" style="width:100%;height:300px"></canvas>
+        <p class="muted small" id="embed-result"></p>
+      </div>
+
+      <div class="quiz" data-module="embeddings">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="2"><p class="q-text">1. À quoi sert le "Chunk Overlap" ?</p>
+          <label class="q-option"><input type="radio" name="emb-q0" value="0"> À réduire la taille de la base de données</label>
+          <label class="q-option"><input type="radio" name="emb-q0" value="1"> À chiffrer les données sensibles</label>
+          <label class="q-option"><input type="radio" name="emb-q0" value="2"> À préserver le contexte sémantique entre deux morceaux de texte découpés</label>
+          <div class="explain">Sans overlap, une règle importante pourrait être coupée en deux chunks inutilisables.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('embeddings')">← Précédent</button><button class="btn" onclick="nextFrom('embeddings')">LangChain →</button></div>
+    </section>
+
+    <section id="langchain" class="section">
+      <h1>3. LangChain & Agents</h1>
+      <p class="lead">
+        Connecter OpenAI, ChromaDB, gérer la mémoire du chat, parser les réponses JSON... Écrire ce "glue code" à la main est un cauchemar. <strong>LangChain</strong> est la couche d'abstraction qui standardise tout cela. <span class="source">⏱ 6:01</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>LLM vs Agent</h3><p><strong>LLM</strong> : Cerveau statique (répond au prompt). <strong>Agent</strong> : Autonomie, mémoire, et <strong>outils</strong> (Tools) pour décider comment exécuter la tâche. <span class="source">⏱ 6:58</span></p></div>
+        <div class="card good"><h3>Abstraction</h3><p>Changer d'<code>ChatOpenAI</code> à <code>ChatAnthropic</code> prend 1 ligne. Les <strong>Prompt Templates</strong> et <strong>Output Parsers</strong> structurent les entrées/sorties. <span class="source">⏱ 14:40</span></p></div>
+        <div class="card purple"><h3>LCEL (LangChain Expression Language)</h3><p>Compose des chaînes avec l'opérateur pipe <code>|</code> : <code>prompt | llm | parser</code>. <span class="source">⏱ 17:07</span></p></div>
+      </div>
+
+      <div class="quiz" data-module="langchain">
+        <h3>Quiz express</h3>
+        <div class="q" data-answer="1"><p class="q-text">1. Quelle est la différence fondamentale entre un LLM et un Agent ?</p>
+          <label class="q-option"><input type="radio" name="lc-q0" value="0"> L'Agent est plus intelligent</label>
+          <label class="q-option"><input type="radio" name="lc-q0" value="1"> L'Agent possède des outils (Tools) et une autonomie pour exécuter des actions</label>
+          <label class="q-option"><input type="radio" name="lc-q0" value="2"> Le LLM ne peut pas faire de RAG</label>
+          <div class="explain">L'agent peut appeler des APIs, chercher sur le web, ou requêter une base de données de manière autonome.</div>
+        </div>
+        <button class="btn" onclick="checkQuiz(this)">Vérifier</button>
+        <div class="result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('langchain')">← Précédent</button><button class="btn" onclick="nextFrom('langchain')">Prompt Engineering →</button></div>
+    </section>
+
+    <section id="prompts" class="section">
+      <h1>4. Prompt Engineering</h1>
+      <p class="lead">
+        La qualité de la sortie dépend de la qualité de l'entrée. "Quelle est la politique ?" donnera un essai générique. "Quelle est la politique de télétravail pour les employés internationaux en 3 puces ?" donnera une réponse exploitable. <span class="source">⏱ 17:57</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Zero-shot</h3><p>Aucun exemple. On se fie aux connaissances brutes du modèle. Rapide, mais peu de contrôle sur le format. <span class="source">⏱ 19:15</span></p></div>
+        <div class="card good"><h3>Few-shot</h3><p>On fournit 1 à 3 exemples de paires (Question/Réponse) dans le prompt. Le LLM "apprend" le ton et le format attendu (In-context learning). <span class="source">⏱ 19:46</span></p></div>
+        <div class="card purple"><h3>Chain of Thought (CoT)</h3><p>"Pensons étape par étape". On force le modèle à décomposer son raisonnement avant de conclure. Crucial pour les tâches logiques ou mathématiques. <span class="source">⏱ 20:19</span></p></div>
+      </div>
+
+      <h2>Simulateur : Comparateur de Prompts</h2>
+      <div class="simulator">
+        <label>Tâche : Analyser la conformité GDPR d'un document.</label>
+        <div class="toolbar no-print">
+          <button class="btn secondary" onclick="runPrompt('zero')">Zero-shot</button>
+          <button class="btn secondary" onclick="runPrompt('few')">Few-shot</button>
+          <button class="btn" onclick="runPrompt('cot')">Chain of Thought</button>
+        </div>
+        <div class="console" id="prompt-console">Sélectionne une technique pour voir la réponse simulée du LLM.</div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('prompts')">← Précédent</button><button class="btn" onclick="nextFrom('prompts')">RAG →</button></div>
+    </section>
+
+    <section id="rag" class="section">
+      <h1>5. RAG (Retrieval Augmented Generation)</h1>
+      <p class="lead">
+        Le RAG est l'architecture qui unit tout : il permet au LLM de répondre sur des données privées, à jour, sans avoir à le ré-entraîner (fine-tuning). <span class="source">⏱ 35:14</span>
+      </p>
+      <div class="grid">
+        <div class="card cyan"><h3>1. Retrieval</h3><p>La question est transformée en embedding. Recherche sémantique dans la Vector DB pour extraire les Top-K chunks pertinents. <span class="source">⏱ 35:40</span></p></div>
+        <div class="card yellow"><h3>2. Augmentation</h3><p>Les chunks récupérés sont injectés dans le prompt (Contexte). Le LLM reçoit maintenant la "vérité terrain" de TechCorp. <span class="source">⏱ 36:18</span></p></div>
+        <div class="card green"><h3>3. Generation</h3><p>Le LLM synthétise une réponse en se basant <strong>uniquement</strong> sur le contexte fourni, réduisant les hallucinations. <span class="source">⏱ 36:58</span></p></div>
+      </div>
+
+      <h2>Simulateur : Pipeline RAG</h2>
+      <div class="simulator">
+        <label for="rag-q">Question de l'employé :</label>
+        <input type="text" id="rag-q" value="Puis-je emporter mon laptop en Floride ?" />
+        <div class="toolbar no-print"><button class="btn" onclick="runRAG()">Exécuter le Pipeline RAG</button></div>
+        <div class="console" id="rag-console"></div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('rag')">← Précédent</button><button class="btn" onclick="nextFrom('rag')">LangGraph →</button></div>
+    </section>
+
+    <section id="langgraph" class="section">
+      <h1>6. LangGraph (Workflows Étatiques)</h1>
+      <p class="lead">
+        LangChain suffit pour des chaînes linéaires (A → B → C). Mais si le workflow de TechCorp nécessite des <strong>boucles</strong>, des <strong>conditions</strong> (ex: si score GDPR &lt; 75%, refaire une recherche) et une <strong>mémoire d'état</strong> partagée, il faut <strong>LangGraph</strong>. <span class="source">⏱ 41:39</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>Nœuds & Arêtes</h3><p><strong>Nœud</strong> = Fonction Python (ex: `search_docs`). <strong>Arête</strong> = Flux de données. <strong>Arête conditionnelle</strong> = Routeur dynamique basé sur l'état. <span class="source">⏱ 43:15</span></p></div>
+        <div class="card good"><h3>StateGraph</h3><p>Un dictionnaire partagé (ex: `{"docs": [], "score": 0}`) qui traverse les nœuds. Chaque nœud lit et met à jour l'état. <span class="source">⏱ 44:10</span></p></div>
+      </div>
+
+      <h2>Simulateur : Graphe de Conformité GDPR</h2>
+      <p class="muted small">Lance le workflow. Observe comment l'arête conditionnelle crée une boucle si le score est insuffisant.</p>
+      <div class="simulator">
+        <div class="toolbar no-print"><button class="btn" onclick="runLangGraph()">Démarrer le Workflow</button><button class="btn secondary" onclick="resetLG()">Reset</button></div>
+        <div class="lg-graph" id="lg-graph">
+          <div class="lg-node" id="lg-n1">1. Gather Docs</div>
+          <div class="lg-edge" id="lg-e1"></div>
+          <div class="lg-node" id="lg-n2">2. Extract Content</div>
+          <div class="lg-edge" id="lg-e2"></div>
+          <div class="lg-node" id="lg-n3">3. Evaluate GDPR</div>
+          <div class="lg-edge" id="lg-e3"></div>
+          <div class="lg-cond">
+            <div class="lg-branch">
+              <div class="muted small">Score &lt; 75%</div>
+              <div class="lg-node warn" id="lg-n4">4. Cross-ref Local Laws</div>
+              <div class="lg-edge" id="lg-e4"></div>
+              <div class="lg-node" id="lg-n1-loop" style="border-style:dashed;opacity:0.5">Loop to 1</div>
+            </div>
+            <div class="lg-branch">
+              <div class="muted small">Score ≥ 75%</div>
+              <div class="lg-node green" id="lg-n5">5. Generate Report</div>
+            </div>
+          </div>
+        </div>
+        <div class="console" id="lg-console" style="margin-top:1rem"></div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('langgraph')">← Précédent</button><button class="btn" onclick="nextFrom('langgraph')">MCP →</button></div>
+    </section>
+
+    <section id="mcp" class="section">
+      <h1>7. MCP (Model Context Protocol)</h1>
+      <p class="lead">
+        L'agent TechCorp doit maintenant accéder à la base de données clients (SQL), au système de tickets (Jira), et à l'inventaire. Écrire des connecteurs API personnalisés pour chaque outil est long et rigide. <strong>MCP</strong> (créé par Anthropic) est le <strong>"port USB universel"</strong> pour les agents IA. <span class="source">⏱ 48:51</span>
+      </p>
+      <div class="grid">
+        <div class="card info"><h3>API vs MCP</h3><p>Une API expose des endpoints (le dev doit coder l'appel). Un <strong>Serveur MCP</strong> expose des <strong>outils auto-descriptifs</strong>. L'Agent lit la description et décide seul quand et comment l'appeler. <span class="source">⏱ 49:31</span></p></div>
+        <div class="card good"><h3>Plug & Play</h3><p>La communauté crée des serveurs MCP (GitHub, Slack, PostgreSQL). Vous les "branchez" à votre agent LangGraph sans écrire de code d'intégration. <span class="source">⏱ 51:26</span></p></div>
+      </div>
+
+      <h2>Simulateur : Connexion MCP (USB)</h2>
+      <p class="muted small">Clique sur les ports pour "brancher" les serveurs MCP à l'Agent TechCorp.</p>
+      <div class="simulator">
+        <div class="mcp-board" id="mcp-board">
+          <div class="mcp-port" onclick="plugMCP(this, 'SQL')"><span class="icon">🗄️</span>Customer DB<span class="status">Disconnected</span></div>
+          <div class="mcp-port" onclick="plugMCP(this, 'Jira')"><span class="icon">🎫</span>Support Tickets<span class="status">Disconnected</span></div>
+          <div class="mcp-port" onclick="plugMCP(this, 'Stripe')"><span class="icon">💳</span>Billing API<span class="status">Disconnected</span></div>
+          <div class="mcp-port" onclick="plugMCP(this, 'GitHub')"><span class="icon">🐙</span>Code Repos<span class="status">Disconnected</span></div>
+        </div>
+        <div class="console" id="mcp-console" style="margin-top:1rem">[Agent] En attente de connexion aux serveurs MCP...</div>
+      </div>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('mcp')">← Précédent</button><button class="btn" onclick="nextFrom('mcp')">Cas Pratique →</button></div>
+    </section>
+
+    <section id="build" class="section">
+      <h1>🛠️ Cas Pratique : Construire l'Agent TechCorp</h1>
+      <p class="lead">
+        Assemble tout. Clique sur "Étape suivante" pour voir l'évolution du système TechCorp, de l'appel API brut à l'Agent autonome multi-outils via MCP.
+      </p>
+      <div class="simulator">
+        <div class="toolbar no-print">
+          <button class="btn" id="build-next" onclick="nextBuildStep()">Étape suivante →</button>
+          <button class="btn secondary" onclick="resetBuild()">Réinitialiser</button>
+        </div>
+        <p class="muted small" id="build-status">Cliquez pour démarrer la construction.</p>
+        <div class="console" id="build-console"></div>
+      </div>
+
+      <h2>Code de référence (Python / LangChain)</h2>
+      <details><summary>Étape 2 : LangChain & Prompt Template</summary><div class="code">from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+prompt = ChatPromptTemplate.from_template("Réponds en tant qu'expert RH : {question}")
+chain = prompt | llm
+chain.invoke({"question": "Politique de télétravail ?"})</div></details>
+      <details><summary>Étape 4 : RAG avec ChromaDB</summary><div class="code">from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
+
+vectorstore = Chroma(embedding_function=OpenAIEmbeddings())
+# ... (ingestion des chunks) ...
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+docs = retriever.invoke("Politique laptop Floride")</div></details>
+      <details><summary>Étape 6 : LangGraph (State & Nodes)</summary><div class="code">from langgraph.graph import StateGraph, END
+from typing import TypedDict
+
+class State(TypedDict):
+    query: str
+    docs: list
+    score: int
+
+graph = StateGraph(State)
+graph.add_node("retrieve", retrieve_node)
+graph.add_node("grade", grade_node)
+graph.add_conditional_edges("grade", route_by_score)
+graph.compile()</div></details>
+      <details><summary>Étape 7 : Intégration MCP</summary><div class="code">from langchain_mcp_adapters.client import MultiServerMCPClient
+
+async with MultiServerMCPClient({"customer_db": {"url": "..."}}) as client:
+    agent = create_react_agent(llm, client.get_tools())
+    await agent.ainvoke({"messages": [("user", "Statut commande 1234 ?")]})</div></details>
+
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('build')">← Précédent</button><button class="btn" onclick="nextFrom('build')">Scénarios →</button></div>
+    </section>
+
+    <section id="scenarios" class="section">
+      <h1>Scénarios : Quelle brique pour quel besoin ?</h1>
+      <div class="simulator">
+        <div class="grid">
+          <button class="btn secondary" onclick="chooseScenario('context')">Le LLM oublie le début du document</button>
+          <button class="btn secondary" onclick="chooseScenario('semantic')">SQL LIKE '%vacation%' échoue</button>
+          <button class="btn secondary" onclick="chooseScenario('hallucination')">Le LLM invente des politiques RH</button>
+          <button class="btn secondary" onclick="chooseScenario('format')">La sortie JSON du LLM est cassée</button>
+          <button class="btn secondary" onclick="chooseScenario('logic')">Le LLM se trompe dans les calculs de congés</button>
+          <button class="btn secondary" onclick="chooseScenario('workflow')">Besoin de boucles et validations humaines</button>
+          <button class="btn secondary" onclick="chooseScenario('api')">Connecter l'agent à 15 APIs différentes</button>
+          <button class="btn secondary" onclick="chooseScenario('cost')">Les tokens de sortie coûtent trop cher</button>
+        </div>
+        <pre id="scenario-out" class="code" style="display:none"></pre>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button><button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button></div>
+    </section>
+
+    <section id="flashcards" class="section">
+      <h1>Flashcards</h1>
+      <details open><summary>Token</summary><p>Unité de base du LLM (≈ 3/4 de mot en anglais). Détermine le coût et la limite de la fenêtre de contexte.</p></details>
+      <details><summary>Fenêtre de Contexte</summary><p>Mémoire à court terme du LLM. Limitée (2k à 1M tokens). Trop de bruit dégrade le raisonnement.</p></details>
+      <details><summary>Embeddings</summary><p>Transformation du texte en vecteurs mathématiques (ex: 1536 dimensions) capturant le sens sémantique.</p></details>
+      <details><summary>Vector DB</summary><p>Base de données (Chroma, Pinecone) optimisée pour la recherche par similarité cosinus entre vecteurs.</p></details>
+      <details><summary>Chunking & Overlap</summary><p>Découpage du texte en morceaux. L'overlap (chevauchement) préserve le contexte sémantique entre les chunks.</p></details>
+      <details><summary>LangChain</summary><p>Couche d'abstraction pour orchestrer LLMs, Prompts, Mémoire et Outils sans réinventer la roue.</p></details>
+      <details><summary>Agent</summary><p>LLM doté d'autonomie, de mémoire et d'outils (Tools) pour exécuter des tâches complexes de manière dynamique.</p></details>
+      <details><summary>Few-shot Prompting</summary><p>Fournir des exemples (Q/R) dans le prompt pour guider le format et le ton de la réponse du LLM.</p></details>
+      <details><summary>Chain of Thought (CoT)</summary><p>Forcer le LLM à décomposer son raisonnement étape par étape avant de conclure. Améliore la logique.</p></details>
+      <details><summary>RAG</summary><p>Retrieval Augmented Generation : Injecter des documents pertinents (via Vector DB) dans le prompt pour ancrer la réponse et éviter les hallucinations.</p></details>
+      <details><summary>LangGraph</summary><p>Framework pour créer des workflows IA étatiques (StateGraph) avec boucles, conditions et routage dynamique.</p></details>
+      <details><summary>MCP (Model Context Protocol)</summary><p>Standard "USB" permettant aux Agents de se connecter à des outils/APIs externes via des serveurs auto-descriptifs.</p></details>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button><button class="btn" onclick="nextFrom('flashcards')">Examen →</button></div>
+    </section>
+
+    <section id="final" class="section">
+      <h1>Examen final</h1>
+      <p class="lead">10 questions. Seuil 8/10 pour le certificat.</p>
+      <div class="quiz" data-module="final" id="final-quiz">
+        <div class="q" data-answer="1"><p class="q-text">1. Pourquoi le "bruit" dans la fenêtre de contexte est-il problématique ?</p><label class="q-option"><input type="radio" name="fi-q0" value="0"> Il augmente le coût des tokens d'entrée</label><label class="q-option"><input type="radio" name="fi-q0" value="1"> Il dégrade la capacité du LLM à extraire l'information pertinente et à raisonner</label><label class="q-option"><input type="radio" name="fi-q0" value="2"> Il viole les règles du RGPD</label><div class="explain">L'analogie des pommes de Sally et Bob montre que l'information non pertinente distrait le modèle.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">2. Quel est l'avantage principal d'une Base Vectorielle sur une base SQL ?</p><label class="q-option"><input type="radio" name="fi-q1" value="0"> Elle permet la recherche sémantique (par le sens) plutôt que par mots-clés exacts</label><label class="q-option"><input type="radio" name="fi-q1" value="1"> Elle est moins chère à héberger</label><label class="q-option"><input type="radio" name="fi-q1" value="2"> Elle ne nécessite pas d'embeddings</label><div class="explain">"Vacation" et "Time off" sont sémantiquement proches, mais lexicalement différents.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">3. À quoi sert le "Chunk Overlap" ?</p><label class="q-option"><input type="radio" name="fi-q2" value="0"> À dupliquer les données pour la redondance</label><label class="q-option"><input type="radio" name="fi-q2" value="1"> À chiffrer les chunks sensibles</label><label class="q-option"><input type="radio" name="fi-q2" value="2"> À éviter de couper le contexte sémantique au milieu d'une phrase</label><div class="explain">Un overlap de 10-20% assure la continuité des idées.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">4. Dans LangChain, que fait l'opérateur pipe `|` (LCEL) ?</p><label class="q-option"><input type="radio" name="fi-q3" value="0"> Il compare deux modèles</label><label class="q-option"><input type="radio" name="fi-q3" value="1"> Il compose des chaînes (ex: prompt | llm | parser)</label><label class="q-option"><input type="radio" name="fi-q3" value="2"> Il sépare les chunks</label><div class="explain">LCEL permet un enchaînement déclaratif et asynchrone des composants.</div></div>
+        <div class="q" data-answer="0"><p class="q-text">5. Le "Few-shot prompting" consiste à...</p><label class="q-option"><input type="radio" name="fi-q4" value="0"> Fournir des exemples de paires (Question/Réponse) dans le prompt</label><label class="q-option"><input type="radio" name="fi-q4" value="1"> Entraîner le modèle sur quelques epochs</label><label class="q-option"><input type="radio" name="fi-q4" value="2"> Limiter la réponse à quelques mots</label><div class="explain">C'est de l'apprentissage in-context (In-context learning).</div></div>
+        <div class="q" data-answer="2"><p class="q-text">6. Quelle est la séquence correcte du RAG ?</p><label class="q-option"><input type="radio" name="fi-q5" value="0"> Generation → Retrieval → Augmentation</label><label class="q-option"><input type="radio" name="fi-q5" value="1"> Augmentation → Retrieval → Generation</label><label class="q-option"><input type="radio" name="fi-q5" value="2"> Retrieval → Augmentation → Generation</label><div class="explain">On cherche (R), on injecte dans le prompt (A), puis le LLM répond (G).</div></div>
+        <div class="q" data-answer="1"><p class="q-text">7. Pourquoi utiliser LangGraph plutôt que LangChain pur ?</p><label class="q-option"><input type="radio" name="fi-q6" value="0"> LangGraph est plus rapide</label><label class="q-option"><input type="radio" name="fi-q6" value="1"> Pour gérer des workflows cycliques, des états partagés et des routes conditionnelles</label><label class="q-option"><input type="radio" name="fi-q6" value="2"> LangGraph remplace les LLMs</label><div class="explain">LangChain est linéaire, LangGraph est un graphe d'état (StateGraph).</div></div>
+        <div class="q" data-answer="0"><p class="q-text">8. Qu'est-ce que le MCP (Model Context Protocol) ?</p><label class="q-option"><input type="radio" name="fi-q7" value="0"> Un standard "USB" pour connecter les Agents à des outils externes auto-descriptifs</label><label class="q-option"><input type="radio" name="fi-q7" value="1"> Un nouveau modèle de langage de Meta</label><label class="q-option"><input type="radio" name="fi-q7" value="2"> Une base de données vectorielle</label><div class="explain">MCP déporte la complexité d'intégration API du développeur vers l'Agent.</div></div>
+        <div class="q" data-answer="2"><p class="q-text">9. Dans un graphe LangGraph, qu'est-ce qu'un "Nœud" ?</p><label class="q-option"><input type="radio" name="fi-q8" value="0"> Une base de données</label><label class="q-option"><input type="radio" name="fi-q8" value="1"> Un modèle de langage</label><label class="q-option"><input type="radio" name="fi-q8" value="2"> Une fonction Python qui lit et met à jour l'État (State)</label><div class="explain">Les nœuds sont les unités de calcul du workflow.</div></div>
+        <div class="q" data-answer="1"><p class="q-text">10. Comment le RAG réduit-il les hallucinations ?</p><label class="q-option"><input type="radio" name="fi-q9" value="0"> En utilisant un modèle plus gros</label><label class="q-option"><input type="radio" name="fi-q9" value="1"> En forçant le LLM à baser sa réponse sur des documents sourcés et injectés dans le contexte</label><label class="q-option"><input type="radio" name="fi-q9" value="2"> En supprimant la fenêtre de contexte</label><div class="explain">Le LLM agit comme un synthétiseur de faits fournis, pas comme une base de connaissances.</div></div>
+        <button class="btn" onclick="submitFinal(this)">Soumettre l'examen</button>
+        <div class="result" id="exam-result" aria-live="polite"></div>
+      </div>
+      <div class="toolbar no-print"><button class="btn secondary" onclick="prevFrom('final')">← Précédent</button><button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('resources')">Certificat →</button></div>
+    </section>
+
+    <section id="resources" class="section">
+      <h1>Certificat & ressources</h1>
+      <div class="card info no-print">
+        <h3>Nom pour le certificat</h3>
+        <input id="cert-name" placeholder="Prénom / pseudo" />
+        <div class="toolbar">
+          <button class="btn" onclick="generateCert()">Générer le certificat</button>
+          <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+          <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+          <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="certificate" class="certificate">
+        <span class="badge">🧠</span>
+        <h2>Certificat de Maîtrise</h2>
+        <p>Décerné à</p>
+        <h3 id="cert-name-out">Apprenant</h3>
+        <p>pour avoir complété la masterclass</p>
+        <p class="highlight">Architecture IA Moderne : LLM, RAG, LangChain, LangGraph & MCP</p>
+        <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span></p>
+      </div>
+
+      <h2>Checklist de l'Architecte IA</h2>
+      <div class="card checklist">
+        <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Je comprends les limites des Tokens et le problème du bruit contextuel.</label>
+        <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Je sais vectoriser des données et configurer le Chunking/Overlap.</label>
+        <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> J'utilise LangChain pour abstraire les providers et parser les sorties.</label>
+        <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Je maîtrise le Few-shot et le Chain of Thought pour guider le LLM.</label>
+        <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> J'ai implémenté un pipeline RAG (Retrieval + Augmentation + Gen).</label>
+        <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> J'utilise LangGraph pour les workflows complexes (boucles, routing).</label>
+        <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Je connecte mes agents à des APIs via des serveurs MCP.</label>
+      </div>
+      <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+      <h2>Ressources</h2>
+      <div class="resources">
+        <ul>
+          <li><strong>Sean Chen / seanchen.io</strong> : Builder bilingue, fondateur d'AutoManus (Character VC). Il enseigne à construire avec l'IA, un vrai projet à la fois. Formules : Q&A live bimensuel (20 $/mois) et session 1h sur mesure (200 $).</li>
+          <li><strong>GitHub ShenSeanChen</strong> : launch-mvp-stripe-nextjs-supabase, yt-react-nextjs-tips, yt-DeepResearch-Backend (Kimi K2 + LangChain), yt-supabase-tips-kanban.</li>
+          <li><strong>Documentation Officielle</strong> : LangChain (python.langchain.com), LangGraph (langchain-ai.github.io/langgraph), MCP (modelcontextprotocol.io).</li>
+          <li><strong>Outils</strong> : ChromaDB (Vector Store local), Ollama (LLMs locaux), FastMCP (Framework Python pour serveurs MCP).</li>
+        </ul>
+      </div>
+
+      <div class="toolbar no-print">
+        <button class="btn secondary" onclick="prevFrom('resources')">← Revenir à l'examen</button>
+        <button class="btn" onclick="showSection('home')">Retour accueil</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+var KEY="ai-ecosystem-masterclass-v1";
+var STATE={theme:"dark",visited:{},quizScores:{},diagnostic:null,finalScore:0,finalTotal:10,finalPassed:false,sourcesHidden:false,checklist:{}};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function saveState(){try{localStorage.setItem(KEY,JSON.stringify(STATE))}catch(e){}}
+function loadState(){try{var r=localStorage.getItem(KEY);if(!r)return;var d=JSON.parse(r);
+STATE.theme=d.theme||"dark";STATE.visited=d.visited||{};STATE.quizScores=d.quizScores||{};STATE.diagnostic=d.diagnostic||null;
+STATE.finalScore=d.finalScore||0;STATE.finalTotal=d.finalTotal||10;STATE.finalPassed=!!d.finalPassed;STATE.sourcesHidden=!!d.sourcesHidden;STATE.checklist=d.checklist||{};}catch(e){}}
+function getSectionIds(){return $$(".section").map(function(s){return s.id})}
+function showSection(id){
+var ids=getSectionIds();if(ids.indexOf(id)===-1)return;
+$$(".section").forEach(function(s){s.classList.toggle("active",s.id===id)});
+$$("#nav button").forEach(function(b){var t=b.getAttribute("data-target");b.classList.toggle("active",t===id);b.classList.toggle("completed",!!STATE.visited[t])});
+STATE.visited[id]=true;saveState();updateProgress();initModule(id);
+var sb=$("#sidebar");if(sb)sb.classList.remove("mobile-open");
+window.scrollTo({top:0,behavior:"smooth"});}
+function nextFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>-1&&i<ids.length-1)showSection(ids[i+1]);}
+function prevFrom(id){var ids=getSectionIds();var i=ids.indexOf(id);if(i>0)showSection(ids[i-1]);}
+function updateProgress(){var ids=getSectionIds();var d=0;for(var i=0;i<ids.length;i++)if(STATE.visited[ids[i]])d++;
+var p=Math.round(d/ids.length*100);var b=$("#progressBar");if(b)b.style.width=p+"%";var t=$("#progressText");if(t)t.textContent=p+"%";}
+function updateScore(){var c=0,t=0,k=Object.keys(STATE.quizScores);for(var i=0;i<k.length;i++){c+=STATE.quizScores[k[i]].correct||0;t+=STATE.quizScores[k[i]].total||0}
+var el=$("#scoreDisplay");if(el)el.textContent="Score "+c+"/"+t+(STATE.finalPassed?" • validé":"");}
+function toggleTheme(){STATE.theme=STATE.theme==="dark"?"light":"dark";document.body.setAttribute("data-theme",STATE.theme);saveState()}
+function toggleSources(){STATE.sourcesHidden=!STATE.sourcesHidden;document.body.classList.toggle("hide-sources",STATE.sourcesHidden);saveState()}
+function toggleMobileNav(){var s=$("#sidebar");if(s)s.classList.toggle("mobile-open")}
+function checkQuiz(btn){
+var box=btn.closest(".quiz");var moduleId=box.getAttribute("data-module");var qs=$$(".q",box);var correct=0;
+for(var i=0;i<qs.length;i++){var q=qs[i];var sel=q.querySelector("input:checked");var ex=q.querySelector(".explain");var opts=$$(".q-option",q);
+q.classList.remove("correct","incorrect");for(var j=0;j<opts.length;j++)opts[j].classList.remove("correct","incorrect");
+if(ex)ex.style.display="block";if(!sel){q.classList.add("incorrect");continue}
+var ans=parseInt(q.getAttribute("data-answer"),10);var val=parseInt(sel.value,10);var chosen=sel.closest(".q-option");
+if(val===ans){q.classList.add("correct");if(chosen)chosen.classList.add("correct");correct++}
+else{q.classList.add("incorrect");if(chosen)chosen.classList.add("incorrect");if(opts[ans])opts[ans].classList.add("correct")}}
+var result=box.querySelector(".result");if(result)result.textContent="Résultat : "+correct+"/"+qs.length;
+STATE.quizScores[moduleId]={correct:correct,total:qs.length};saveState();updateScore();return{correct:correct,total:qs.length}}
+var DIAG_TEXT={
+novice:"Commencez par les sections 1 (LLM) et 2 (Embeddings). Le simulateur RAG vous aidera à visualiser le pipeline complet.",
+dev:"Foncez sur LangChain, RAG et le Cas Pratique (Builder). Vous avez les bases, passons à l'orchestration.",
+archi:"Concentrez-vous sur LangGraph (Workflows) et MCP (Intégrations). Ce sont les clés des systèmes de production modernes."};
+function validateDiagnostic(){
+var level=document.querySelector("input[name='diag-level']:checked");var goal=document.querySelector("input[name='diag-goal']:checked");var time=document.querySelector("input[name='diag-time']:checked");
+if(!level||!goal||!time){alert("Répondez aux trois questions.");return}
+STATE.diagnostic={level:level.value,goal:goal.value,time:time.value};saveState();
+var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours recommandé</h3><p><span class='pill'>Niveau : "+level.value+"</span><span class='pill'>Objectif : "+goal.value+"</span><span class='pill'>Mode : "+time.value+"</span></p><p>"+(DIAG_TEXT[level.value]||DIAG_TEXT.dev)+"</p>"}
+if(next)next.style.display="inline-flex"}
+function restoreDiagnostic(){if(!STATE.diagnostic)return;var rec=$("#diag-rec");var next=$("#diag-next");
+if(rec){rec.style.display="block";rec.innerHTML="<h3>Parcours enregistré</h3><p><span class='pill'>Niveau : "+STATE.diagnostic.level+"</span><span class='pill'>Objectif : "+STATE.diagnostic.goal+"</span><span class='pill'>Mode : "+STATE.diagnostic.time+"</span></p><p>"+(DIAG_TEXT[STATE.diagnostic.level]||"")+"</p>"}
+if(next)next.style.display="inline-flex"}
+
+/* ---------- Sim 1: Context Window ---------- */
+function updateContext(){
+  let docs = parseInt($("#ctx-docs").value);
+  $("#ctx-odocs").textContent = docs;
+  let tokens = docs * 1500;
+  let pct = Math.min(100, (tokens / 128000) * 100);
+  let fill = $("#ctx-fill");
+  fill.style.width = pct + "%";
+  fill.className = "meter-fill " + (pct > 80 ? "mf-bad" : "mf-info");
+  
+  let precision = Math.max(20, 95 - (docs * 0.8));
+  let consoleEl = $("#ctx-console");
+  let noise = docs > 50 ? "\n<span class='warn'>[WARN] Lost in the middle: Le LLM ignore les documents du milieu de contexte.</span>" : "";
+  let resp = docs > 80 ? "<span class='err'>[LLM] Réponse: Je ne suis pas sûr... (Hallucination probable due au bruit)</span>" : "<span class='ok'>[LLM] Réponse: La politique standard est de 30 jours...</span>";
+  
+  $("#ctx-label").textContent = "Tokens utilisés : ~" + tokens + " / 128k | Précision de la réponse : " + precision.toFixed(0) + "%";
+  consoleEl.innerHTML = "[LLM] Question: \"Quelle est la politique de remboursement ?\"\n" + resp + noise;
+}
+
+/* ---------- Sim 2: Embeddings ---------- */
+var embedWords = [
+  {w: "Vacation", x: 200, y: 100, c: "green"},
+  {w: "Holiday", x: 240, y: 120, c: "green"},
+  {w: "Time Off", x: 180, y: 140, c: "green"},
+  {w: "Laptop", x: 600, y: 200, c: "cyan"},
+  {w: "Computer", x: 640, y: 180, c: "cyan"},
+  {w: "Florida", x: 400, y: 250, c: "yellow"}
+];
+function drawEmbed(highlight) {
+  let cv = $("#embed-canvas"); if(!cv) return;
+  let ctx = cv.getContext("2d");
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "12px system-ui";
+  ctx.fillText("Espace Sémantique 2D (Projection)", 10, 20);
+  
+  embedWords.forEach(w => {
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, 8, 0, Math.PI*2);
+    ctx.fillStyle = highlight === w.w ? "#22c55e" : (w.c === "green" ? "rgba(34,197,94,.6)" : w.c === "cyan" ? "rgba(34,211,238,.6)" : "rgba(245,158,11,.6)");
+    ctx.fill();
+    ctx.fillStyle = "#e5e7eb";
+    ctx.fillText(w.w, w.x + 12, w.y + 4);
+  });
+
+  if(highlight) {
+    let target = embedWords.find(w => w.w === highlight);
+    if(target) {
+      ctx.strokeStyle = "rgba(34,197,94,.4)"; ctx.lineWidth = 2;
+      embedWords.forEach(w => {
+        if(w.c === target.c && w.w !== target.w) {
+          ctx.beginPath(); ctx.moveTo(target.x, target.y); ctx.lineTo(w.x, w.y); ctx.stroke();
+        }
+      });
+    }
+  }
+}
+function searchEmbed(w) {
+  drawEmbed(w);
+  let res = $("#embed-result");
+  if(w === "vacation") res.innerHTML = "<span class='ok'>✅ Match sémantique trouvé : 'Time Off Guidelines' (Score: 0.92)</span>";
+  else if(w === "laptop") res.innerHTML = "<span class='ok'>✅ Match sémantique trouvé : 'IT Equipment Policy' (Score: 0.88)</span>";
+  else if(w === "florida") res.innerHTML = "<span class='warn'>⚠️ Match faible : 'Florida' (Score: 0.45) - Le mot existe mais le contexte policy est absent.</span>";
+}
+function resetEmbed() { drawEmbed(null); $("#embed-result").textContent = ""; }
+
+/* ---------- Sim 3: Prompts ---------- */
+function runPrompt(type) {
+  let c = $("#prompt-console");
+  if(type === "zero") c.innerHTML = "<span class='cmd'>[Zero-Shot]</span>\n<span class='dim'>Prompt: \"Analyse la conformité GDPR.\"</span>\n<span class='warn'>[LLM] Le GDPR est un règlement européen... (Réponse générique, pas d'analyse du document spécifique).</span>";
+  else if(type === "few") c.innerHTML = "<span class='cmd'>[Few-Shot]</span>\n<span class='dim'>Prompt: \"Exemple: Doc A -> Non Conforme (Art 17). Doc B -> Conforme.\\nAnalyse ce doc.\"</span>\n<span class='ok'>[LLM] Statut: Non Conforme. Raison: Absence de clause de droit à l'oubli.</span>";
+  else if(type === "cot") c.innerHTML = "<span class='cmd'>[Chain of Thought]</span>\n<span class='dim'>Prompt: \"Pensons étape par étape. 1. Identifier les données. 2. Vérifier la base légale...\"</span>\n<span class='ok'>[LLM] Étape 1: Le doc collecte des emails.\\nÉtape 2: Aucune base légale explicite n'est mentionnée.\\nConclusion: Non Conforme (Risque élevé).</span>";
+}
+
+/* ---------- Sim 4: RAG ---------- */
+function runRAG() {
+  let q = $("#rag-q").value;
+  let c = $("#rag-console");
+  c.innerHTML = "<span class='cmd'>[1. Retrieval]</span>\n  Embedding de la requête... (1536 dims)\n  Recherche dans ChromaDB (k=3)...\n  <span class='ok'>→ Trouvé: 'IT_Policy_v2.pdf' (Chunk 42, Score: 0.89)</span>\n\n<span class='cmd'>[2. Augmentation]</span>\n  Injection du contexte dans le Prompt Template:\n  <span class='dim'>\"Context: Les employés peuvent emporter leur laptop hors de l'État, mais pas hors du pays sans approbation...\"</span>\n\n<span class='cmd'>[3. Generation]</span>\n  Appel à GPT-4o...\n  <span class='ok'>✅ Réponse: \"Oui, vous pouvez emporter votre laptop en Floride, car c'est un voyage domestique. Aucune approbation spéciale n'est requise.\"</span>";
+}
+
+/* ---------- Sim 5: LangGraph ---------- */
+var lgStep = 0;
+function resetLG() {
+  lgStep = 0;
+  $$(".lg-node, .lg-edge").forEach(el => el.classList.remove("active"));
+  $("#lg-console").innerHTML = "";
+}
+function runLangGraph() {
+  resetLG();
+  let c = $("#lg-console");
+  let steps = [
+    {id: "lg-n1", log: "[Node 1] Gathering docs... Found 3 policies."},
+    {id: "lg-e1", log: ""},
+    {id: "lg-n2", log: "[Node 2] Extracting content..."},
+    {id: "lg-e2", log: ""},
+    {id: "lg-n3", log: "[Node 3] Evaluating GDPR... Score: 60/100"},
+    {id: "lg-e3", log: "<span class='warn'>[Conditional Edge] Score < 75% → Routing to Node 4</span>"},
+    {id: "lg-n4", log: "[Node 4] Cross-referencing local EU laws..."},
+    {id: "lg-e4", log: "<span class='warn'>[Loop] State updated. Re-evaluating...</span>"},
+    {id: "lg-n1-loop", log: ""},
+    {id: "lg-n1", log: "[Node 1] Gathering ADDITIONAL docs..."},
+    {id: "lg-e1", log: ""},
+    {id: "lg-n2", log: "[Node 2] Extracting..."},
+    {id: "lg-e2", log: ""},
+    {id: "lg-n3", log: "[Node 3] Evaluating... Score: 85/100"},
+    {id: "lg-e3", log: "<span class='ok'>[Conditional Edge] Score ≥ 75% → Routing to Node 5</span>"},
+    {id: "lg-n5", log: "<span class='ok'>[Node 5] Generating Final Compliance Report ✅</span>"}
+  ];
+  
+  let i = 0;
+  let interval = setInterval(() => {
+    if(i >= steps.length) { clearInterval(interval); return; }
+    let s = steps[i];
+    $$(".lg-node, .lg-edge").forEach(el => el.classList.remove("active"));
+    let el = $("#"+s.id); if(el) el.classList.add("active");
+    if(s.log) c.innerHTML += s.log + "\n";
+    c.scrollTop = c.scrollHeight;
+    i++;
+  }, 600);
+}
+
+/* ---------- Sim 6: MCP ---------- */
+function plugMCP(el, name) {
+  el.classList.toggle("plugged");
+  let c = $("#mcp-console");
+  let plugged = $$(".mcp-port.plugged").length;
+  if(el.classList.contains("plugged")) {
+    c.innerHTML += "<span class='ok'>[MCP] Serveur '" + name + "' connecté. Outils auto-descriptifs chargés par l'Agent.</span>\n";
+  } else {
+    c.innerHTML += "<span class='warn'>[MCP] Serveur '" + name + "' déconnecté.</span>\n";
+  }
+  if(plugged === 4) c.innerHTML += "\n<span class='ok'>✅ Agent TechCorp pleinement opérationnel. Prêt à traiter les requêtes multi-domaines.</span>";
+  c.scrollTop = c.scrollHeight;
+}
+
+/* ---------- Cas Pratique : Build ---------- */
+var BUILD_STEPS = [
+  {who:"ÉTAPE 1 — Appel API Brut (OpenAI SDK)",code:"import openai\nresponse = openai.chat.completions.create(\n  model=\"gpt-4o\", messages=[{\"role\":\"user\", \"content\":\"Politique RH ?\"}])",out:"→ Réponse générique (Hallucinations sur les données TechCorp). Pas de mémoire."},
+  {who:"ÉTAPE 2 — LangChain (Abstraction & Templates)",code:"from langchain_openai import ChatOpenAI\nchain = prompt | ChatOpenAI() | parser",out:"→ Code réduit de 70%. Support multi-modèles (OpenAI/Anthropic). Output structuré."},
+  {who:"ÉTAPE 3 — Prompt Engineering (Few-Shot)",code:"prompt = \"\"\"Exemple: Q: Congés ? R: 25 jours.\\nQ: {question}\"\"\"",out:"→ Le LLM adopte le ton et le format exact du service RH de TechCorp."},
+  {who:"ÉTAPE 4 — RAG (Vector DB + Retrieval)",code:"retriever = Chroma.from_documents(docs, embeddings).as_retriever()\ncontext = retriever.invoke(query)",out:"→ Injection des 500 Go de docs TechCorp. Fin des hallucinations. Réponses sourcées."},
+  {who:"ÉTAPE 5 — LangGraph (Workflow & State)",code:"graph.add_conditional_edges(\"grade\", route_by_score)",out:"→ Boucle de validation : si le LLM hallucine, le graphe relance la recherche automatiquement."},
+  {who:"ÉTAPE 6 — MCP (Connexions APIs)",code:"client = MultiServerMCPClient({\"sql\": {...}, \"jira\": {...}})",out:"→ L'Agent peut maintenant vérifier le solde de congés réel de l'employé dans la base SQL."},
+  {who:"ÉTAPE 7 — Agent Autonome Final",code:"agent = create_react_agent(llm, mcp_tools)",out:"✅ Système TechCorp complet : Recherche sémantique, raisonnement multi-étapes, action sur APIs externes."}
+];
+var buildIdx = 0;
+function resetBuild() { buildIdx = 0; $("#build-console").innerHTML = ""; $("#build-status").textContent = "Cliquez pour démarrer."; $("#build-next").disabled = false; }
+function nextBuildStep() {
+  if(buildIdx >= BUILD_STEPS.length) return;
+  let st = BUILD_STEPS[buildIdx];
+  let c = $("#build-console");
+  c.innerHTML += "<span class='cmd'>" + st.who + "</span>\n" + st.code + "\n<span class='ok'>" + st.out + "</span>\n\n";
+  c.scrollTop = c.scrollHeight;
+  buildIdx++;
+  $("#build-status").textContent = "Étape " + buildIdx + "/" + BUILD_STEPS.length;
+  if(buildIdx >= BUILD_STEPS.length) $("#build-next").disabled = true;
+}
+
+/* ---------- Scénarios ---------- */
+function chooseScenario(key){var texts={
+context:"Problème : Le LLM oublie le début du document (Lost in the middle).\nSolution : RAG (Retrieval Augmented Generation).\nAu lieu de tout injecter, on ne récupère que les chunks pertinents via recherche sémantique.",
+semantic:"Problème : SQL LIKE '%vacation%' ne trouve pas 'time off'.\nSolution : Embeddings + Vector DB.\nRecherche par similarité cosinus dans l'espace vectoriel (le sens, pas les mots).",
+hallucination:"Problème : Le LLM invente des politiques RH.\nSolution : RAG + Prompt Engineering (Grounding).\nForcer le LLM à répondre 'Je ne sais pas' si la réponse n'est pas dans le contexte fourni.",
+format:"Problème : La sortie JSON du LLM est cassée.\nSolution : LangChain Output Parsers + Structured Output (Pydantic).\nForcer le modèle à respecter un schéma strict via Function Calling.",
+logic:"Problème : Le LLM se trompe dans les calculs de congés.\nSolution : Chain of Thought (CoT) + Outils (Tools).\nForcer le raisonnement étape par étape, ou déléguer le calcul à un outil Python/SQL.",
+workflow:"Problème : Besoin de boucles et validations humaines.\nSolution : LangGraph (StateGraph).\nCréer un graphe avec des nœuds, des arêtes conditionnelles et un état partagé.",
+api:"Problème : Connecter l'agent à 15 APIs différentes.\nSolution : MCP (Model Context Protocol).\nUtiliser des serveurs MCP auto-descriptifs pour que l'agent choisisse lui-même quel outil appeler.",
+cost:"Problème : Les tokens de sortie coûtent trop cher.\nSolution : Modèles Nano/Flash + Prompt concis + Caching sémantique.\nRéduire la verbosité et utiliser des modèles plus petits pour le routage/grading."};
+var out=$("#scenario-out");if(out){out.style.display="block";out.textContent=texts[key]||""}}
+
+/* ---------- Examen / Certificat ---------- */
+function submitFinal(btn){var res=checkQuiz(btn);STATE.finalScore=res.correct;STATE.finalTotal=res.total;STATE.finalPassed=res.correct>=8;saveState();updateScore();
+var result=$("#exam-result");
+if(result){var advice=STATE.finalPassed?"Tu maîtrises l'architecture IA moderne, du RAG basique aux Agents autonomes via MCP.":"Revois les concepts de Vector DB (Embeddings) et de LangGraph (State).";
+result.innerHTML="<strong>Résultat : "+res.correct+"/"+res.total+"</strong><br>"+(STATE.finalPassed?"✅ Réussite":"⚠️ À consolider")+"<br><span class='muted'>"+advice+"</span>"}
+var go=$("#go-cert");if(go)go.style.display=STATE.finalPassed?"inline-flex":"none"}
+function generateCert(){if(!STATE.finalPassed){alert("Atteignez 8/10 à l'examen final.");return}
+var ni=$("#cert-name");var name=ni&&ni.value.trim()?ni.value.trim():"Apprenant";
+var b=$("#certificate");if(!b)return;b.classList.add("show");
+$("#cert-name-out").textContent=name;$("#cert-date").textContent=new Date().toLocaleDateString("fr-FR");
+$("#cert-score").textContent=STATE.finalScore+"/"+STATE.finalTotal;
+b.scrollIntoView({behavior:"smooth",block:"center"})}
+function toggleCheck(id){var el=document.getElementById(id);if(!el)return;STATE.checklist[id]=el.checked;saveState();updateChecklistProgress()}
+function updateChecklistProgress(){var b=$$(".checklist input[type=checkbox]");var d=0;for(var i=0;i<b.length;i++)if(b[i].checked)d++;var el=$("#check-progress");if(el)el.textContent=d+"/"+b.length}
+function exportJSON(){var data={cours:"Masterclass Écosystème IA",date:new Date().toISOString(),profil:STATE.diagnostic,progression:STATE.visited,quiz:STATE.quizScores,examen:{score:STATE.finalScore,total:STATE.finalTotal,reussi:STATE.finalPassed},checklist:STATE.checklist};
+var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="rapport-ecosysteme-ia.json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href)}
+function resetCourse(){if(!confirm("Réinitialiser toute la progression ?"))return;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+function initModule(id){
+if(id==="diagnostic")restoreDiagnostic();
+if(id==="llm")updateContext();
+if(id==="embeddings")drawEmbed(null);
+if(id==="langgraph")resetLG();
+if(id==="build")resetBuild();
+if(id==="resources"){var ni=$("#cert-name");if(ni&&STATE.certName)ni.value=STATE.certName;
+var k=Object.keys(STATE.checklist);for(var i=0;i<k.length;i++){var el=document.getElementById(k[i]);if(el)el.checked=STATE.checklist[k[i]]}
+updateChecklistProgress();if(STATE.finalPassed){var b=$("#certificate");if(b)b.classList.add("show");var g=$("#go-cert");if(g)g.style.display="inline-flex"}}}
+function init(){loadState();document.body.setAttribute("data-theme",STATE.theme);document.body.classList.toggle("hide-sources",STATE.sourcesHidden);
+$$("nav button").forEach(b => b.addEventListener("click",function(){showSection(this.getAttribute("data-target"))}));
+showSection("home");updateScore();updateChecklistProgress();}
+window.showSection=showSection;window.nextFrom=nextFrom;window.prevFrom=prevFrom;window.toggleTheme=toggleTheme;window.toggleSources=toggleSources;window.toggleMobileNav=toggleMobileNav;
+window.validateDiagnostic=validateDiagnostic;window.checkQuiz=checkQuiz;window.updateContext=updateContext;window.searchEmbed=searchEmbed;window.resetEmbed=resetEmbed;window.runPrompt=runPrompt;window.runRAG=runRAG;window.runLangGraph=runLangGraph;window.resetLG=resetLG;window.plugMCP=plugMCP;window.nextBuildStep=nextBuildStep;window.resetBuild=resetBuild;window.chooseScenario=chooseScenario;window.submitFinal=submitFinal;window.generateCert=generateCert;window.toggleCheck=toggleCheck;window.exportJSON=exportJSON;window.resetCourse=resetCourse;
+document.addEventListener("DOMContentLoaded",init);
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

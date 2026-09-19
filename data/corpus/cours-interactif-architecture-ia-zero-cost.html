@@ -1,0 +1,57 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture IA à coût initial nul</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6ee7a0;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #c7f36b;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="current">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">AI Engineering • stack évolutif</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Carte"><span class="pill">Démarrer petit • évoluer sans reconstruire</span><h1>Architecture d’IA à coût initial nul</h1><p class="muted">Un chemin pratique : commencer localement avec des outils gratuits, puis migrer chaque couche lorsque le produit, le trafic ou la gouvernance l’exige.</p><div class="grid"><div class="concept"><b>Construire</b><p>Interface, API, orchestration, LLM local et connaissances.</p></div><div class="concept"><b>Exécuter</b><p>Outils Python, APIs, automatisation et webhooks.</p></div><div class="concept"><b>Stocker</b><p>SQLite et PostgreSQL avant les services managés.</p></div><div class="concept"><b>Mesurer</b><p>Traces, feedback, contrôles qualité, logs et observabilité.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel est le principe de cette architecture ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Commencer localement puis faire évoluer les couches nécessaires</button><button class="choice" data-correct="false" onclick="answer(this,false)">Reconstruire toute l’architecture à chaque étape</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Couches"><span class="pill">1–4 • Construire le noyau</span><h2>Interface, backend, orchestration et LLM</h2><div class="grid"><div class="concept"><b>Interface</b><p>Streamlit ou Gradio pour prototyper ; React ou Next.js pour une expérience plus riche.</p></div><div class="concept"><b>API/backend</b><p>FastAPI, Flask ou Node.js exposent les endpoints et la logique métier.</p></div><div class="concept"><b>Orchestration</b><p>LangChain, LlamaIndex, CrewAI ou LangGraph organisent prompts, outils, mémoire et workflows.</p></div><div class="concept"><b>LLM local</b><p>Ollama, LM Studio, Mistral ou Llama permettent de commencer sans coût API récurrent.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel composant expose la logique au front-end ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">L’API/backend</button><button class="choice" data-correct="false" onclick="answer(this,false)">La base vectorielle seule</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Connaissances"><span class="pill">5–7 • Données et outils</span><h2>Exécution, connaissances et stockage</h2><div class="grid"><div class="concept"><b>Outils</b><p>Python, APIs, automatisation et webhooks permettent d’agir au-delà du texte.</p></div><div class="concept"><b>Connaissances</b><p>Documents, embeddings, RAG et sources comme PDF, Excel ou pages web alimentent le contexte.</p></div><div class="concept"><b>Stockage</b><p>SQLite convient au démarrage ; PostgreSQL accompagne un produit multi-utilisateur et plus durable.</p></div></div><pre>Document → extraction → embedding → stockage → recherche → contexte → réponse</pre><div class="quiz"><h3>Quiz</h3><p>Quelle couche fournit les informations externes au modèle ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">La couche connaissances avec embeddings et RAG</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le routeur d’interface seul</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Mesurer"><span class="pill">8 • Fiabilité</span><h2>Évaluation et observabilité</h2><p>Avant de migrer vers une architecture plus chère, mesurez la qualité réelle. La carte propose traces, feedback, contrôles qualité, OpenTelemetry, LangSmith et logs.</p><div class="grid"><div class="concept"><b>Traces</b><p>Comprendre les étapes et appels d’outils d’une exécution.</p></div><div class="concept"><b>Feedback</b><p>Collecter les corrections et perceptions des utilisateurs.</p></div><div class="concept"><b>Qualité</b><p>Tests, critères de sortie et jeux de cas reproductibles.</p></div><div class="concept"><b>Logs</b><p>Conserver les événements utiles au diagnostic sans exposer de données sensibles.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Pourquoi mesurer avant de scaler ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour savoir quelle couche limite réellement qualité, coût ou latence</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour ajouter de la complexité sans information</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Échelle"><span class="pill">Migration graduelle</span><h2>Faire évoluer sans reconstruction</h2><table class="compare"><tr><th>Départ local</th><th>Évolution</th><th>Signal de migration</th></tr><tr><td>LLM local</td><td>Modèle hébergé ou hybride</td><td>Qualité, capacité ou disponibilité insuffisante</td></tr><tr><td>SQLite</td><td>Base managée</td><td>Concurrence, haute disponibilité ou gouvernance</td></tr><tr><td>Embeddings locaux</td><td>Base vectorielle scalable</td><td>Volume, latence ou recherche multi-tenant</td></tr><tr><td>Déploiement local</td><td>Docker, Kubernetes ou cloud</td><td>Trafic, résilience ou équipe d’exploitation</td></tr><tr><td>Logs basiques</td><td>Gouvernance et plateforme d’entreprise</td><td>Audit, conformité et contrôle des risques</td></tr></table><div class="quiz"><h3>Quiz</h3><p>Quand migrer vers une base managée ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Quand concurrence, disponibilité ou gouvernance le justifient</button><button class="choice" data-correct="false" onclick="answer(this,false)">Dès le premier prototype sans mesure</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Projets"><span class="pill">Applications</span><h2>Ce que vous pouvez construire</h2><div class="grid"><div class="concept"><b>Documents</b><p>Chatbot documentaire, analyste de CV, assistant de recherche.</p></div><div class="concept"><b>Support</b><p>Bot de support client, assistant e-mail, base de connaissances d’équipe.</p></div><div class="concept"><b>Productivité</b><p>Revue de code, notes de réunion, data analyst.</p></div><div class="concept"><b>Éducation et agents</b><p>Tuteur d’apprentissage IA et automatisation multi-agent.</p></div></div><p>Commencez par un cas d’usage étroit, définissez un jeu d’évaluation, puis ajoutez seulement les couches nécessaires.</p></section>
+<section class="card module" data-title="Checklist"><span class="pill">Passage à l’action</span><h2>Checklist de stack évolutif</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Le cas d’usage et le critère de réussite sont explicites.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Interface et backend ont des contrats séparés.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Orchestration, outils, mémoire et RAG sont modulaires.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Le LLM local est évalué avant toute migration hébergée.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Stockage, embeddings et déploiement ont un plan de montée en charge.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Traces, logs, feedback et contrôles qualité existent avant la production.</label><button class="btn primary" onclick="finish()">Valider mon plan d’architecture</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

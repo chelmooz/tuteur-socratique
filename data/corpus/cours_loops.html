@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours : Maîtriser les Loops (Boucles d'Agents Autonomes)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>🚀 Maîtriser les Loops</h1>
+            <p class="subtitle">Boucles d'Agents Autonomes : La transition entre l'assistance conversationnelle passive et les systèmes logiciels autonomes propulsés par l'IA.</p>
+        </header>
+
+        <!-- SECTION 1 -->
+        <section>
+            <h2>1. Introduction : Qu'est-ce qu'une Loop et pourquoi ça change tout ?</h2>
+            <h3>L'évolution des générations d'IA</h3>
+            <ul>
+                <li><strong>Première génération (Les Prompts simples) :</strong> On fournit un prompt, le modèle génère une réponse unique. Toute la valeur réside dans la qualité du prompt écrit par l'humain.</li>
+                <li><strong>Deuxième génération (Les Agents) :</strong> On crée des systèmes capables d'agir en fonction d'une demande, d'appeler des outils (APIs, CRM) et d'utiliser une mémoire pour effectuer des tâches complexes sous supervision.</li>
+                <li><strong>Troisième génération (Les Loops / Boucles autonomes) :</strong> On bâtit des systèmes auto-apprenants et autocorrectifs. L'IA reçoit un cadre, effectue des tâches, évalue elle-même ses résultats, se corrige et s'améliore au fil des exécutions sans intervention humaine constante.</li>
+            </ul>
+
+            <div class="callout">
+                <strong>🎯 Objectif fondamental :</strong> Le but d'une <em>loop</em> n'est plus seulement d'obtenir une réponse à un prompt, mais de concevoir un système interne complet qui tourne de manière autonome, s'auto-corrige et produit des résultats constants et de haute qualité sous supervision globale.
+            </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section>
+            <h2>2. Architecture et Briques d'une Loop</h2>
+            <h3>A. L'architecture récursive (Fiche 02 : Les 6 rôles du cycle)</h3>
+            <p>Une loop récursive efficace repose sur six rôles clés interconnectés formant un cycle continu où <em>"rien ne se perd et la loop ne s'arrête jamais"</em> :</p>
+
+            <!-- DIAGRAMME MERMAID -->
+            <div class="mermaid-container">
+                <div class="mermaid">
+                    graph TD
+                        P["01 • Planificateur (Stratégie)"] --> B["02 • Builder (Exécution)"]
+                        B --> V["03 • Vérificateur (Vérification)"]
+                        V --> M["04 • Mémoire (Expérience)"]
+                        M --> G["05 • Gestionnaire (Priorités)"]
+                        G --> C["06 • Contrôleur (Révision)"]
+                        C -.->|"Relance optimisée"| P
+                        
+                        classDef default fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#e2e8f0;
+                        classDef start fill:#0284c7,stroke:#bae6fd,stroke-width:2px,color:#fff;
+                        class P start;
+                </div>
+            </div>
+
+            <h3>Détail des 6 rôles du cycle :</h3>
+            <ul>
+                <li><strong>01 • Planificateur (Stratégie) :</strong> Découpe l'objectif global en un plan réaliste et définit le cap à suivre.</li>
+                <li><strong>02 • Builder / Constructeur (Exécution) :</strong> Applique le plan, rédige les éléments et appelle les outils nécessaires au bon moment (ex. Gmail, CRM, ERP).</li>
+                <li><strong>03 • Vérificateur (Vérification) :</strong> Contrôle le rendu produit pour s'assurer qu'il correspond aux attentes initiales.</li>
+                <li><strong>04 • Mémoire (Expérience) :</strong> Conserve la trace des réussites et des échecs pour permettre au système de s'auto-améliorer en continu.</li>
+                <li><strong>05 • Gestionnaire (Priorités) :</strong> Classe ce qu'il reste à faire et réoriente les opérations suivantes.</li>
+                <li><strong>06 • Contrôleur (Révision) :</strong> Analyse l'ensemble de la méthode et de la mémoire, puis transmet les apprentissages au planificateur pour relancer un cycle optimisé.</li>
+            </ul>
+
+            <h3>B. Les briques fondamentales d'une Loop fonctionnelle</h3>
+            <div class="grid-cards">
+                <div class="card"><strong>🔔 Déclencheur</strong><br><small>Heartbeat ou Hook (ex. tous les lundis à 9h ou nouveau ticket).</small></div>
+                <div class="card"><strong>🛠️ Compétences (Skills)</strong><br><small>Règles et templates réutilisés (rapports, chartes).</small></div>
+                <div class="card"><strong>👥 Agents (Sub-agents)</strong><br><small>Équipe spécialisée pour éviter les hallucinations.</small></div>
+                <div class="card"><strong>🔌 Connecteurs</strong><br><small>APIs externes et serveurs MCP (Gmail, Salesforce).</small></div>
+                <div class="card"><strong>💾 Mémoire d'État</strong><br><small>Fichiers .md ou bases de données de suivi.</small></div>
+            </div>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section>
+            <h2>3. Loop Ouverte vs Loop Fermée</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Caractéristique</th>
+                        <th>🌐 Loop Ouverte</th>
+                        <th>🔒 Loop Fermée</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Fonctionnement</strong></td>
+                        <td>Espace de recherche très large, processus vaste avec de nombreuses options (ex. agents de support).</td>
+                        <td>Processus strictement cadré, étapes définies à l'avance, évaluation claire.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recommandation</strong></td>
+                        <td>Pour des scénarios grand public à fort ROI.</td>
+                        <td><strong>Recommandée pour débuter</strong> (automatisations internes, reportings).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bilan</strong></td>
+                        <td>❌ Forte consommation de tokens, budget illimité requis.<br>✨ Plus de créativité.</td>
+                        <td>✅ Budget restreint, résultats prédictibles et contrôlés.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section>
+            <h2>4. Checklist : Faut-il créer une Loop ou simplement chatter ?</h2>
+            <p>Pour savoir si votre scénario est éligible à la création d'une loop, vérifiez ces 4 conditions :</p>
+            <ul>
+                <li><strong>1. La récurrence :</strong> La tâche se répète-t-elle plusieurs fois (tous les jours, toutes les semaines) ?</li>
+                <li><strong>2. L'évaluation binaire de l'échec :</strong> Êtes-vous capable d'identifier clairement et objectivement si le résultat est un succès ou un échec ?</li>
+                <li><strong>3. L'autonomie de bout en bout :</strong> La loop peut-elle s'exécuter entièrement sans ressaisie humaine ?</li>
+                <li><strong>4. L'absence de jugement humain subjectif :</strong> Après une phase de test (15-20 essais), le système produit-il des résultats satisfaisants sans retouche ?</li>
+            </ul>
+
+            <div class="callout" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.1);">
+                <strong>💡 Règle d'or :</strong> Si toutes ces conditions sont réunies, vous êtes face à un cas idéal pour une loop !
+            </div>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section>
+            <h2>5. Cas Pratiques : Implémentation sous Claude Cowork et Claude Code</h2>
+            
+            <h3>A. Cas 1 : Reporting Nike avec Claude Cowork (Loop simple)</h3>
+            <p><strong>🎯 Objectif :</strong> Mettre à jour automatiquement chaque lundi à 10h une présentation PowerPoint de performance e-commerce à partir de nouveaux fichiers Excel de données de vente, puis rédiger un brouillon de mail récapitulatif.</p>
+            <p><strong>⚙️ Fonctionnement :</strong> Sélection du dossier source dans Cowork &rarr; Planification de la tâche récurrente ("Chaque lundi à 10h...") &rarr; Analyse automatique par l'IA de la structure du PowerPoint &rarr; Génération du fichier actualisé et préparation du mail.</p>
+
+            <h3>B. Cas 2 : Automatisation Instagram pour Trade Republic (Système multi-agents)</h3>
+            <p><strong>🎯 Objectif :</strong> Créer une équipe d'agents autonomes qui réalisent chaque semaine une veille financière (IPO, tendances), rédigent la description d'un post Instagram et génèrent le visuel associé selon l'ADN de la marque.</p>
+            
+            <!-- ILLUSTRATION VECTORIELLE SVG (Architecture Multi-agents) -->
+            <div class="svg-illustration">
+                <svg width="100%" height="160" viewBox="0 0 700 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="40" width="130" height="80" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                    <text x="75" y="75" fill="#e2e8f0" font-size="12" font-weight="bold" text-anchor="middle">Instagram Manager</text>
+                    <text x="75" y="95" fill="#94a3b8" font-size="10" text-anchor="middle">Orchestrateur</text>
+
+                    <path d="M140 80 L190 80" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+                    <rect x="190" y="10" width="150" height="40" rx="6" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                    <text x="265" y="35" fill="#e2e8f0" font-size="11" text-anchor="middle">📊 Finance Scout (Perplexity)</text>
+
+                    <rect x="190" y="60" width="150" height="40" rx="6" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                    <text x="265" y="85" fill="#e2e8f0" font-size="11" text-anchor="middle">✍️ Copywriter (ADN Texte)</text>
+
+                    <rect x="190" y="110" width="150" height="40" rx="6" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+                    <text x="265" y="135" fill="#e2e8f0" font-size="11" text-anchor="middle">🎨 Visual Creator (Nano)</text>
+
+                    <path d="M340 30 L390 80 M340 80 L390 80 M340 130 L390 80" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4"/>
+
+                    <rect x="390" y="40" width="140" height="80" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                    <text x="460" y="75" fill="#10b981" font-size="12" font-weight="bold" text-anchor="middle">Post Instagram</text>
+                    <text x="460" y="95" fill="#94a3b8" font-size="10" text-anchor="middle">100% Automatisé</text>
+
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <ul>
+                <li>🎯 <strong>L'Orchestrateur (Instagram Manager) :</strong> Planifie et pilote le processus global.</li>
+                <li>📊 <strong>Agent 1 (Finance News Scout) :</strong> Interroge le serveur MCP Perplexity pour trouver les actualités financières récentes (3 derniers jours).</li>
+                <li>✍️ <strong>Agent 2 (Copywriter / ADN Texte) :</strong> Rédige la légende du post en respectant le style de Trade Republic.</li>
+                <li>🎨 <strong>Agent 3 (Instagram Visual Creator / ADN Visuel) :</strong> Génère l'image adéquate en s'appuyant sur la *skill* visuelle.</li>
+            </ul>
+        </section>
+
+        <!-- CONCLUSION -->
+        <section>
+            <h2>Conclusion</h2>
+            <p>En maîtrisant la structuration des rôles (planificateur, builder, vérificateur, mémoire) et le choix des bons outils (Claude Code, Codex, Cowork), vous multipliez votre productivité sur l'ensemble de vos tâches récurrentes et passez à l'ère de l'IA proactive.</p>
+        </section>
+
+        <footer>
+            <p>Cours sur les Boucles d'Agents Autonomes (Loops) — Généré pour l'apprentissage de l'IA avancée.</p>
+        </footer>
+    </div>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

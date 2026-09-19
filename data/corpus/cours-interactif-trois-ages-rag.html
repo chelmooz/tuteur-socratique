@@ -1,0 +1,67 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Les Trois Âges du RAG</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="current">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Classic • Graph • Agentic</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Pourquoi RAG"><span class="pill">Fondation</span><h1>Les Trois Âges du RAG</h1><p class="muted">Comment la récupération d’information est devenue un raisonnement : <strong>Classic retrieves</strong>, <strong>Graph connects</strong>, <strong>Agentic reasons</strong>.</p><p>Un LLM seul ressemble à un candidat sans documents : sa connaissance est figée dans ses poids, il ignore les informations récentes et peut inventer. Le RAG branche une mémoire externe consultable et vérifiable.</p><div class="diagram"><svg viewBox="0 0 900 180"><g fill="#334765" stroke="#75cfff" stroke-width="2"><rect x="30" y="60" width="180" height="55" rx="10"/><rect x="270" y="60" width="180" height="55" rx="10"/><rect x="510" y="60" width="180" height="55" rx="10"/><rect x="750" y="60" width="120" height="55" rx="10"/></g><g fill="#f2f7ff" text-anchor="middle" font-size="14"><text x="120" y="93">Question</text><text x="360" y="93">Mémoire externe</text><text x="600" y="93">Récupération</text><text x="810" y="93">Réponse sourcée</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M210 87h60M450 87h60M690 87h60"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Que fournit principalement le RAG à un LLM ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Une mémoire externe consultable avec des sources</button><button class="choice" data-correct="false" onclick="answer(this,false)">Une garantie que le modèle connaît tout</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Classic"><span class="pill" style="color:var(--blue)">Âge 1 • Retrieves</span><h2>Classic RAG — le bibliothécaire</h2><p>Le pipeline transforme la question en vecteur, interroge une base vectorielle, récupère les top-K chunks puis demande au LLM de répondre avec ce contexte.</p><pre id="classic">Question → embedding
+→ Vector DB → top-K chunks (similarité cosinus)
+→ prompt = question + chunks
+→ réponse sourcée</pre><button class="btn primary copy" onclick="copyText('classic')">Copier le pipeline</button><div class="grid"><div><h3>Force</h3><p>Rapide, simple, peu coûteux : excellent pour une question single-hop dans un document homogène.</p></div><div><h3>Faiblesse</h3><p>Fragile si la réponse est répartie dans plusieurs chunks ou si l’on demande une vue globale.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle question est idéale pour Classic RAG ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">« Quelle est la politique de retour ? » dans un document</button><button class="choice" data-correct="false" onclick="answer(this,false)">« Qui dirige l’entreprise où travaille Marie ? » en deux sauts</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Graph"><span class="pill" style="color:var(--green)">Âge 2 • Connects</span><h2>Graph RAG — le cartographe</h2><p>Le système extrait entités et relations, construit un graphe de connaissance puis récupère le voisinage ou la communauté pertinente.</p><pre id="graph">Marie ──works_at──► CompanyX
+CompanyX ──located_in──► Paris
+Question : ville de l’employeur de Marie ?
+Parcours : Marie → CompanyX → Paris (2 hops)</pre><button class="btn primary copy" onclick="copyText('graph')">Copier le mini-graphe</button><div class="grid"><div><h3>Local search</h3><p>Voisinage d’une entité pour une question précise.</p></div><div><h3>Global search</h3><p>Communautés et résumés pour comprendre les thèmes du corpus.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel problème Graph RAG résout-il mieux ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Relier plusieurs entités sur un parcours multi-hop</button><button class="choice" data-correct="false" onclick="answer(this,false)">Trouver une couleur dans une photo</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Agentic"><span class="pill" style="color:var(--violet)">Âge 3 • Reasons</span><h2>Agentic RAG — l’enquêteur</h2><p>L’agent planifie, route et combine Vector DB, Knowledge Graph, SQL, Web ou APIs. Il s’auto-évalue et recommence si la réponse est insuffisante.</p><pre id="agentic">Question hybride
+→ planifier des sous-requêtes
+→ router : SQL + Vector DB + Web
+→ agréger les résultats
+→ juger : sources suffisantes ?
+→ re-retrieve si nécessaire → réponse finale</pre><button class="btn primary copy" onclick="copyText('agentic')">Copier le flux agentique</button><div class="grid"><div><h3>Force</h3><p>Adaptatif, multi-hop, multi-source et auto-correctif.</p></div><div><h3>Coût</h3><p>Latence et tokens plus élevés, orchestration complexe et risque d’erreur cumulative du juge.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Que fait l’Agentic RAG si une source web est trop ancienne ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Il juge le résultat insuffisant et relance une recherche</button><button class="choice" data-correct="false" onclick="answer(this,false)">Il la cite toujours sans vérification</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Choisir"><span class="pill">Synthèse</span><h2>Choisir et combiner</h2><div class="grid"><div><h3 style="color:var(--blue)">Classic</h3><p><strong>Fait localisé dans un document ?</strong><br>Faible latence, vector DB, single-hop.</p></div><div><h3 style="color:var(--green)">Graph</h3><p><strong>Relations ou vue globale ?</strong><br>Entités, communautés, multi-hop.</p></div><div><h3 style="color:var(--violet)">Agentic</h3><p><strong>Tâche ouverte et sources hétérogènes ?</strong><br>Planification, outils, vérification.</p></div></div><p><strong>Point clé :</strong> Agentic RAG ne remplace pas Classic ou Graph ; il les pilote comme des outils à un niveau d’organisation supérieur.</p><div class="quiz"><h3>Quiz</h3><p>Quel choix est le plus juste pour comparer ventes SQL, étude PDF et actualité web ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Agentic RAG qui route vers SQL, Vector DB et Web</button><button class="choice" data-correct="false" onclick="answer(this,false)">Classic RAG sur une seule base vectorielle</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Exercices"><span class="pill">Atelier</span><h2>Passer de la théorie au benchmark</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Construire un Classic RAG sur 20 phrases avec top-3.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Documenter une question multi-hop qui échoue.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Extraire des triplets et répondre avec un graphe.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ajouter un juge : score &lt; 4 → re-retrieval.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Construire un routeur Vector DB / graphe / web.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Comparer précision, latence et coût sur les trois architectures.</label><button class="btn primary" onclick="finish()">Valider le benchmark</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optimiser l'inférence des LLM — Fiche technique interactive</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<header class="hero wrap">
+  <span class="kicker">Fiche technique · AI Engineering · Chap. 9</span>
+  <h1>Optimiser l'inférence<br><span class="grad">des LLM</span></h1>
+  <p class="lead">Huit techniques pour réduire la latence de génération token par token, organisées selon le goulot d'étranglement qu'elles ciblent : <b>calcul</b> ou <b>bande passante mémoire</b> — illustrées par 7 schémas d'architecture.</p>
+  <div class="legend">
+    <span class="lg m">🧊 Memory-bound</span>
+    <span class="lg c">⚡ Compute-bound</span>
+    <span class="lg s">🛰 Service</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= PHASES ================= -->
+  <section class="sec">
+    <div class="sec-head"><div><h2>Deux phases, deux goulots</h2>
+      <p class="note">L'inférence d'un modèle autorégressif se décompose en deux régimes computationnels opposés — et donc en deux stratégies d'optimisation distinctes.</p></div></div>
+
+    <div class="phase-grid">
+      <article class="phase compute reveal">
+        <span class="metric">TTFT · Time To First Token</span>
+        <span class="bound">⚡ Compute-bound</span>
+        <h3>Préremplissage — Prefill</h3>
+        <p>Les jetons du prompt sont traités <b>en parallèle, en une seule passe</b>. La vitesse dépend de la <b>puissance de calcul brute</b> du processeur.</p>
+      </article>
+      <article class="phase memory reveal">
+        <span class="metric">TPOT · Time Per Output Token</span>
+        <span class="bound">🧊 Memory-bound</span>
+        <h3>Décodage — Decode</h3>
+        <p>Les jetons sont générés <b>un par un</b>. À chaque étape, la totalité des poids du modèle doit transiter depuis la mémoire — <b>c'est ce transfert qui limite la vitesse</b>.</p>
+      </article>
+    </div>
+
+    <div class="pipeline reveal" aria-hidden="true">
+      <span class="pnode prompt">PROMPT</span><span class="parr">→</span>
+      <span class="pnode prefill">PREFILL · 1 passe</span><span class="parr">→</span>
+      <span class="tok" style="--i:0">jeton 1</span>
+      <span class="tok" style="--i:1">jeton 2</span>
+      <span class="tok" style="--i:2">jeton 3</span>
+      <span class="tok" style="--i:3">jeton 4</span>
+      <span class="tok" style="--i:4">…</span>
+      <span class="pseq">decode · séquentiel</span>
+    </div>
+
+    <figure class="diagram reveal">
+      <div class="mermaid">
+flowchart TD
+    subgraph P1["⚡ PHASE 1 — PREFILL · compute-bound · TTFT"]
+        IN["📥 Prompt — jetons 1…N"] --> PAR["Traitement parallèle<br/>(matmuls denses)"]
+        PAR --> KV0[("🧊 Cache KV initial<br/>K, V de chaque jeton")]
+    end
+    subgraph P2["🧊 PHASE 2 — DECODE · memory-bound · TPOT"]
+        KV0 --> S1["Étape t+1 : lire POIDS + KV<br/>→ jeton t+1"]
+        S1 --> KV1[("KV + 1 entrée")]
+        KV1 --> S2["Étape t+2 : lire POIDS + KV<br/>→ jeton t+2"]
+        S2 --> KV2[("KV + 1 entrée")]
+        KV2 --> EOS["… jusqu'au jeton &lt;eos&gt;"]
+    end
+    classDef cal fill:#2a2008,stroke:#fbbf24,color:#fde68a
+    classDef mem fill:#0c2431,stroke:#22d3ee,color:#a5f3fc
+    classDef store fill:#1a1030,stroke:#a78bfa,color:#ddd6fe
+    class IN,PAR cal
+    class S1,S2,EOS mem
+    class KV0,KV1,KV2 store
+      </div>
+      <figcaption><b>Schéma 1</b> — Le prefill peuple le cache KV en une passe parallèle ; chaque étape de decode relit tous les poids + le KV depuis la HBM (d'où le goulot mémoire).</figcaption>
+    </figure>
+
+    <p class="note" style="margin-top:14px">Chaque étape ajoutant sa propre latence, qui s'accumule sur toute la réponse, optimiser l'inférence revient à traiter les deux phases séparément : <b style="color:var(--amber)">soulager le calcul pendant le prefill</b>, <b style="color:var(--cyan)">soulager la bande passante mémoire pendant le decode</b>.</p>
+  </section>
+
+  <!-- ================= 8 LEVIERS ================= -->
+  <section class="sec">
+    <div class="sec-head">
+      <div><h2>Huit leviers d'optimisation</h2>
+      <p class="note">Filtrez par goulot d'étranglement ciblé. Les schémas intégrés illustrent le mécanisme de chaque technique clé.</p></div>
+      <div class="filters" role="group" aria-label="Filtrer les techniques">
+        <button class="fbtn on" data-f="tous">Tous</button>
+        <button class="fbtn" data-f="memoire">🧊 Mémoire</button>
+        <button class="fbtn" data-f="calcul">⚡ Calcul</button>
+        <button class="fbtn" data-f="service">🛰 Service</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid">
+
+      <article class="card memoire reveal">
+        <div class="card-top"><span class="opt-no">OPT · 01</span><span class="pill memoire">Mémoire</span></div>
+        <h3>Quantification</h3><p class="en">Quantization</p>
+        <p class="desc">Convertit les poids et activations d'un format de haute précision vers un format plus compact — de <code>FP32</code>/<code>FP16</code> (2 octets/paramètre) vers <code>INT8</code> (1 octet) ou <code>INT4</code>/<code>NF4</code> (0,5 octet).</p>
+        <p class="why"><b>Pourquoi ça marche :</b> en réduisant le volume de données à transférer de la mémoire GPU (HBM) vers les cœurs de calcul à chaque jeton, elle soulage directement le goulot du decode.</p>
+        <div class="stat"><b>14 Go → 3,5 Go</b><span>Empreinte mémoire d'un modèle 7B paramètres, de FP16 à INT4.</span></div>
+      </article>
+
+      <article class="card calcul reveal">
+        <div class="card-top"><span class="opt-no">OPT · 02</span><span class="pill calcul">Calcul</span></div>
+        <h3>Décodage spéculatif</h3><p class="en">Speculative Decoding</p>
+        <p class="desc">Un petit modèle brouillon propose rapidement K jetons candidats. Le grand modèle cible les valide <b>tous en une seule passe parallèle</b>, accepte la plus longue sous-séquence correcte et génère un jeton de plus.</p>
+        <figure class="diagram sm">
+          <div class="mermaid">
+flowchart LR
+    DM["🐭 Modèle brouillon<br/>petit · rapide"] -->|"K jetons candidats"| TM["🦁 Modèle cible<br/>vérification parallèle"]
+    TM -->|"j acceptés + 1 généré"| RES["✅ j+1 jetons<br/>en une passe"]
+    RES -->|"le contexte repart<br/>au brouillon"| DM
+    TM -.->|"exploite les FLOPs<br/>idle du decode"| TM
+    classDef cal fill:#2a2008,stroke:#fbbf24,color:#fde68a
+    classDef good fill:#0d2b1f,stroke:#34d399,color:#a7f3d0
+    class DM cal
+    class TM,RES good
+          </div>
+          <figcaption><b>Schéma 2</b> — Boucle draft → vérification parallèle → acceptation.</figcaption>
+        </figure>
+        <p class="why"><b>Pourquoi ça marche :</b> la vérification est compute-bound, pas memory-bound : elle exploite la capacité de calcul du GPU sous-utilisée pendant le decode classique.</p>
+        <div class="stat"><b>K jetons / passe</b><span>Plusieurs jetons validés par itération, sans perte de qualité.</span></div>
+      </article>
+
+      <article class="card memoire reveal">
+        <div class="card-top"><span class="opt-no">OPT · 03</span><span class="pill memoire">Mémoire</span></div>
+        <h3>Cache KV</h3><p class="en">Key-Value Cache</p>
+        <p class="desc">À chaque nouveau jeton, l'attention a besoin des vecteurs Clé et Valeur de tous les jetons précédents. Le cache KV les garde en mémoire GPU et n'ajoute que le nouveau jeton à chaque étape.</p>
+        <p class="why"><b>Le compromis :</b> sa taille croît linéairement avec la longueur de séquence et du batch — il devient vite un goulot mémoire à son tour.</p>
+        <div class="stat"><b>2·B·S·L·H·M</b><span>Octets requis — B batch · S séquence · L couches · H têtes · M précision.</span></div>
+      </article>
+
+      <article class="card memoire reveal">
+        <div class="card-top"><span class="opt-no">OPT · 04</span><span class="pill memoire">Mémoire</span></div>
+        <h3>PagedAttention</h3><p class="en">vLLM</p>
+        <p class="desc">S'inspire de la mémoire virtuelle des OS : au lieu de réserver un bloc contigu pour la taille maximale théorique du cache KV, elle le découpe en <b>pages allouées à la demande</b>, partageables entre requêtes.</p>
+        <figure class="diagram sm">
+          <div class="mermaid">
+flowchart TB
+    subgraph OLD["❌ Allocation contiguë classique"]
+        O1["Bloc réservé = longueur<br/>max théorique"] --> O2["Trous entre requêtes<br/>= fragmentation"]
+        O2 --> O3["60–80 % de mémoire<br/>gaspillée"]
+    end
+    subgraph NEW["✅ PagedAttention (vLLM)"]
+        N1["Cache KV découpé<br/>en pages fixes"] --> N2["Pages allouées à la demande<br/>+ partagées entre requêtes"]
+        N2 --> N3["Batchs beaucoup plus grands<br/>sur le même GPU"]
+    end
+    classDef bad fill:#2b0d12,stroke:#f87171,color:#fecaca
+    classDef good fill:#0d2b1f,stroke:#34d399,color:#a7f3d0
+    classDef box fill:#101a30,stroke:#334155,color:#e8eef9
+    class O2,O3 bad
+    class N3 good
+    class O1,N1,N2 box
+          </div>
+          <figcaption><b>Schéma 3</b> — Contigu (fragmenté) vs paginé (à la demande).</figcaption>
+        </figure>
+        <p class="why"><b>Pourquoi ça marche :</b> elle élimine la fragmentation massive de l'allocation contiguë → batchs bien plus grands sur le même GPU.</p>
+        <div class="stat"><b>60–80 %</b><span>Mémoire GPU gaspillée par l'allocation contiguë classique.</span></div>
+      </article>
+
+      <article class="card calcul reveal">
+        <div class="card-top"><span class="opt-no">OPT · 05</span><span class="pill calcul">Calcul</span></div>
+        <h3>FlashAttention</h3><p class="en">Fused CUDA kernel</p>
+        <p class="desc">L'attention standard écrit et relit sans cesse des matrices intermédiaires en HBM. FlashAttention <b>fusionne ces opérations en un seul noyau</b> et découpe les calculs en blocs traités dans la SRAM, bien plus rapide.</p>
+        <figure class="diagram sm">
+          <div class="mermaid">
+flowchart LR
+    subgraph STD["❌ Attention standard"]
+        H1[("HBM")] -->|"écrit matrices<br/>intermédiaires"| C1["cœurs de calcul"]
+        C1 -->|"relit depuis HBM"| H1
+    end
+    subgraph FA["✅ FlashAttention — noyau fusionné"]
+        H2[("HBM")] -->|"1 lecture Q, K, V"| SR["SRAM on-chip<br/>tiling par blocs"]
+        SR -->|"1 écriture résultat"| H2
+    end
+    classDef bad fill:#2b0d12,stroke:#f87171,color:#fecaca
+    classDef good fill:#0d2b1f,stroke:#34d399,color:#a7f3d0
+    classDef store fill:#1a1030,stroke:#a78bfa,color:#ddd6fe
+    class C1 bad
+    class SR good
+    class H1,H2 store
+          </div>
+          <figcaption><b>Schéma 4</b> — Allers-retours HBM vs noyau fusionné en SRAM.</figcaption>
+        </figure>
+        <p class="why"><b>Pourquoi ça marche :</b> le gain vient de l'architecture matérielle, pas d'une approximation — précision du résultat identique.</p>
+        <div class="stat"><b>×2 – ×4</b><span>Accélération du calcul d'attention, sans perte de précision.</span></div>
+      </article>
+
+      <article class="card service reveal">
+        <div class="card-top"><span class="opt-no">OPT · 06</span><span class="pill service">Service</span></div>
+        <h3>Batching continu</h3><p class="en">Continuous / In-Flight Batching</p>
+        <p class="desc">Dans un batch classique, une requête courte attend qu'une longue termine. Le batching continu (Orca) <b>renvoie chaque requête dès son jeton de fin</b> et insère immédiatement une nouvelle requête à sa place.</p>
+        <figure class="diagram sm">
+          <div class="mermaid">
+flowchart TD
+    subgraph ST["❌ Batch statique / dynamique"]
+        A1["req courte (10 jetons)"] --> W["⏳ attend la fin du batch"]
+        A2["req longue (1 000 jetons)"] --> W
+        W --> R["réponses rendues ensemble"]
+    end
+    subgraph CT["✅ Batch continu (Orca)"]
+        B1["req courte ✅ termine"] --> F["slot libéré immédiatement"]
+        F --> B3["nouvelle requête insérée"]
+        B2["req longue poursuit<br/>sans bloquer personne"]
+    end
+    classDef bad fill:#2b0d12,stroke:#f87171,color:#fecaca
+    classDef good fill:#0d2b1f,stroke:#34d399,color:#a7f3d0
+    classDef box fill:#101a30,stroke:#334155,color:#e8eef9
+    class W,R bad
+    class F,B3 good
+    class A1,A2,B1,B2 box
+          </div>
+          <figcaption><b>Schéma 5</b> — Le slot d'une requête finie est réattribué sans attendre.</figcaption>
+        </figure>
+        <p class="why"><b>Pourquoi ça marche :</b> le GPU reste occupé en continu, sans imposer l'attente des requêtes longues aux requêtes courtes.</p>
+        <div class="stat"><b>~100 %</b><span>Taux d'occupation GPU visé, sans temps d'attente artificiel.</span></div>
+      </article>
+
+      <article class="card memoire reveal">
+        <div class="card-top"><span class="opt-no">OPT · 07</span><span class="pill memoire">Mémoire</span></div>
+        <h3>Élagage de modèle</h3><p class="en">Model Pruning</p>
+        <p class="desc"><b>Non structuré</b> — met à zéro les poids les moins significatifs ; le modèle garde sa forme mais devient creux (sparse), et nécessite du matériel dédié pour convertir cette parcimonie en gain réel.<br><b>Structuré</b> — supprime têtes d'attention, canaux ou couches entières, réduisant directement les dimensions des matrices.</p>
+        <div class="stat"><b>−90 %</b><span>Réduction du nombre de paramètres possible dans certains cas non structurés.</span></div>
+      </article>
+
+      <article class="card memoire reveal">
+        <div class="card-top"><span class="opt-no">OPT · 08</span><span class="pill memoire">Mémoire</span></div>
+        <h3>Modèle plus petit &amp; adéquat</h3><p class="en">Right-Sized Model &amp; Distillation</p>
+        <p class="desc">Choisir un modèle de taille réduite mais entraîné de façon optimale (lois d'échelle Chinchilla) ou distillé depuis un plus grand (DistilBERT, Alpaca) — souvent suffisant pour égaler un modèle bien plus lourd sur une tâche ciblée.</p>
+        <p class="why"><b>Pourquoi ça marche :</b> moins de paramètres à charger à chaque jeton = moins de pression sur la bande passante mémoire, dès le départ.</p>
+        <div class="stat"><b>↓ paramètres</b><span>Débit d'inférence inversement proportionnel aux paramètres chargés par jeton.</span></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= CARTOGRAPHIE ================= -->
+  <section class="sec">
+    <div class="sec-head"><div><h2>Cartographie des leviers</h2>
+      <p class="note">Chaque technique attaque un goulot précis ; c'est leur combinaison qui fait baisser latence et coût.</p></div></div>
+    <figure class="diagram reveal">
+      <div class="mermaid">
+flowchart TB
+    subgraph MEMO["🧊 Soulager la bande passante mémoire (decode)"]
+        T1["OPT 01 · Quantification"]
+        T3["OPT 03 · Cache KV"]
+        T4["OPT 04 · PagedAttention"]
+        T7["OPT 07 · Pruning"]
+        T8["OPT 08 · Right-sizing / distillation"]
+    end
+    subgraph CALC["⚡ Soulager le calcul (prefill / attention)"]
+        T2["OPT 02 · Décodage spéculatif"]
+        T5["OPT 05 · FlashAttention"]
+    end
+    subgraph SERV["🛰 Organiser le service"]
+        T6["OPT 06 · Batching continu"]
+        T9["Découplage prefill / decode<br/>(voir Schéma 7)"]
+    end
+    MEMO --> LAT["⏱ Latence perçue ↓ · coût par jeton ↓"]
+    CALC --> LAT
+    SERV --> LAT
+    classDef mem fill:#0c2431,stroke:#22d3ee,color:#a5f3fc
+    classDef cal fill:#2a2008,stroke:#fbbf24,color:#fde68a
+    classDef svc fill:#0d2b1f,stroke:#34d399,color:#a7f3d0
+    classDef out fill:#1a1030,stroke:#a78bfa,color:#ddd6fe,stroke-width:2px
+    class T1,T3,T4,T7,T8 mem
+    class T2,T5 cal
+    class T6,T9 svc
+    class LAT out
+      </div>
+      <figcaption><b>Schéma 6</b> — Des huit leviers (et du découplage prefill/decode) aux deux goulots, puis à la latence perçue.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= STACK LATENCE ================= -->
+  <section class="sec">
+    <div class="sec-head"><div><h2>Ce qui façonne la latence globale</h2>
+      <p class="note">Aucune technique n'agit seule : la latence perçue résulte de l'interaction entre quatre couches, du silicium jusqu'à l'architecture du service.</p></div></div>
+
+    <ol class="layers">
+      <li class="layer reveal"><span class="idx">01</span><h3>MATÉRIEL</h3>
+        <div class="chips"><span class="chip">FLOP/s</span><span class="chip">Bande passante HBM / SRAM</span><span class="chip">GPU / TPU / LPU</span></div>
+        <p>Capacités brutes de calcul et vitesse du bus mémoire : le plafond physique de toute optimisation logicielle.</p></li>
+      <li class="layer reveal"><span class="idx">02</span><h3>TAILLE DU MODÈLE</h3>
+        <div class="chips"><span class="chip">Nb. paramètres</span><span class="chip">Dimension intrinsèque</span><span class="chip">Format FP16 / INT4…</span></div>
+        <p>Empreinte mémoire et nombre d'opérations requises par jeton généré.</p></li>
+      <li class="layer reveal"><span class="idx">03</span><h3>MOTEURS D'INFÉRENCE</h3>
+        <div class="chips"><span class="chip">Kernels (FlashAttn)</span><span class="chip">vLLM · PagedAttn</span><span class="chip">Compilateurs torch.compile</span></div>
+        <p>Frameworks et compilateurs qui exécutent l'attention sur la puce de manière efficace.</p></li>
+      <li class="layer reveal"><span class="idx">04</span><h3>STRATÉGIES DE SERVICE</h3>
+        <div class="chips"><span class="chip">Découplage Prefill / Decode</span><span class="chip">Batching continu</span><span class="chip">Prompt caching</span></div>
+        <p>Choix d'architecture système autour du modèle : allocation des ressources, ordonnancement, caches.</p></li>
+    </ol>
+
+    <h3 class="zoom">Zoom · Couche 04 — Découplage prefill / decode</h3>
+    <p class="note">Sur une même machine, prefill (compute-bound) et decode (memory-bound) <b style="color:var(--text)">se disputent les ressources</b> : un prefill entrant peut vider les cycles de calcul des decodes en cours et dégrader le TPOT de tout le monde. La solution : deux pools d'instances séparés, reliés par un lien rapide (NVLink / réseau haute bande passante) pour transférer l'état KV — et un <b style="color:var(--text)">ratio prefill : decode</b> réglé selon le trafic (DistServe, « Inference Without Interference »).</p>
+    <figure class="diagram reveal">
+      <div class="mermaid">
+flowchart LR
+    REQ["📥 Flux de requêtes"] --> GW["🧭 Ordonnanceur<br/>(inference gateway)"]
+    GW -->|"prompts complets"| PRE
+    subgraph PRE["⚡ Pool PREFILL · compute-bound · TTFT"]
+        direction TB
+        PA["instance GPU 1"] ~~~ PB["instance GPU 2"]
+    end
+    PRE -->|"état KV transféré<br/>lien haute bande passante"| DEC
+    subgraph DEC["🧊 Pool DECODE · memory-bound · TPOT"]
+        direction TB
+        DA["instance GPU 3"] ~~~ DB["instance GPU 4"] ~~~ DC["instance GPU 5"]
+    end
+    DEC -->|"tokens streamés"| OUT["📤 Réponse"]
+    RA["📑 Inputs longs · priorité TTFT<br/>ratio prefill : decode = 2:1 → 4:1"] -.->|"dimensionnement"| PRE
+    RB["💬 Inputs courts · priorité TPOT<br/>ratio prefill : decode = 1:2 → 1:1"] -.->|"dimensionnement"| DEC
+    classDef box fill:#101a30,stroke:#334155,color:#e8eef9
+    classDef cal fill:#2a2008,stroke:#fbbf24,color:#fde68a
+    classDef mem fill:#0c2431,stroke:#22d3ee,color:#a5f3fc
+    classDef ratio fill:#1a1030,stroke:#a78bfa,color:#ddd6fe
+    class REQ,GW,OUT box
+    class PA,PB cal
+    class DA,DB,DC mem
+    class RA,RB ratio
+      </div>
+      <figcaption><b>Schéma 7</b> — Prefill et decode sur des pools d'instances distincts : plus de contention croisée, et un ratio ajustable (2:1→4:1 pour prompts longs / objectif TTFT ; 1:2→1:1 pour prompts courts / objectif TPOT).</figcaption>
+    </figure>
+  </section>
+
+</main>
+
+<footer>
+  D'après <b>« AI Engineering: Building Applications with Foundation Models »</b>, Chip Huyen (O'Reilly, 2025) — Chapitre 9, <b>Inference Optimization</b>.<br>
+  Schémas réalisés en <b>Mermaid.js</b> · rendu côté client.
+</footer>
+
+<script>
+  // Filtres par goulot d'étranglement
+  const btns=document.querySelectorAll('.fbtn'), cards=document.querySelectorAll('#grid .card');
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    const f=b.dataset.f;
+    cards.forEach(c=>c.classList.toggle('hide', f!=='tous' && !c.classList.contains(f)));
+  }));
+
+  // Révélation au scroll
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+  }),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+<script type="module">
+  // Rendu Mermaid (thème sombre assorti), avec repli si hors ligne
+  const CDNS=['https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs',
+              'https://unpkg.com/mermaid@11/dist/mermaid.esm.min.mjs'];
+  let m=null;
+  for(const u of CDNS){ try{ const mod=await import(u); m=mod.default||mod; break; }catch(e){} }
+  if(m){
+    m.initialize({
+      startOnLoad:false, theme:'base', securityLevel:'loose',
+      flowchart:{curve:'basis',htmlLabels:true,useMaxWidth:true,padding:12},
+      themeVariables:{
+        fontFamily:'Inter, system-ui, sans-serif', fontSize:'13px',
+        lineColor:'#5c6f93', primaryColor:'#101a30', primaryTextColor:'#e8eef9',
+        primaryBorderColor:'#334155', clusterBkg:'#0b1220', clusterBorder:'#334155',
+        edgeLabelBackground:'#0b1220'
+      }
+    });
+    await m.run({querySelector:'.mermaid'});
+  }else{
+    document.querySelectorAll('.mermaid').forEach(el=>{
+      const d=document.createElement('div'); d.className='err';
+      d.textContent='⚠️ Schémas Mermaid non chargés (connexion requise). Placez mermaid.esm.min.mjs à côté du fichier et remplacez la 1re URL du tableau CDNS par "./mermaid.esm.min.mjs".';
+      el.replaceWith(d);
+    });
+  }
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

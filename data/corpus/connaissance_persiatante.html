@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours — La Connaissance Persistante (v2 enrichie)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<header class="hero"><div class="hero-in">
+  <span class="kick">Cours · Architecture de la mémoire des systèmes IA</span>
+  <h1>La Connaissance Persistante <span>— v2 enrichie</span></h1>
+  <p class="lead">Organiser des données <b>à jour, unifiées et multi-sources</b> pour qu'un agent s'en souvienne et les interroge intelligemment — complété par les mécanismes de mémoire, de retrieval et de gouvernance du livre <b>« AI Engineering »</b> de Chip Huyen (O'Reilly, 2025).</p>
+  <div class="chips">
+    <span class="chip">🕸 Graph</span>
+    <span class="chip">📄 Documents</span>
+    <span class="chip">🗄 Relationnel</span>
+    <span class="chip">⏱ Séries temporelles</span>
+    <span class="chip">🪣 Objets</span>
+    <span class="chip">📖 Sources : chap. 5, 6, 8, 9, 10</span>
+    <span class="chip">✏️ 3 exercices + quiz</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<nav class="toc"><h2>Sommaire</h2><ol>
+  <li><a href="#s1">Pourquoi une mémoire persistante ?</a></li>
+  <li><a href="#s2">Base de données Graph</a></li>
+  <li><a href="#s3">Documents &amp; Relationnel</a></li>
+  <li><a href="#s4">Séries temporelles &amp; Objets</a></li>
+  <li><a href="#s5">Quel stockage choisir ?</a></li>
+  <li><a href="#s6">Comparatif &amp; orchestration par l'agent</a></li>
+  <li><a href="#s7">Exercice 1 — assistant support</a></li>
+  <li><a href="#s8">🆕 Les trois mémoires de l'agent</a></li>
+  <li><a href="#s9">🆕 Écrire : gestion de la mémoire</a></li>
+  <li><a href="#s10">🆕 Relire : retrieval &amp; contexte</a></li>
+  <li><a href="#s11">🆕 Fraîcheur, dédoublonnage, gouvernance</a></li>
+  <li><a href="#s12">🆕 Mémoire ≠ cache</a></li>
+  <li><a href="#s13">🆕 Architecture de référence &amp; synthèse</a></li>
+  <li><a href="#s14">🆕 Exercices 2–3 &amp; quiz</a></li>
+</ol></nav>
+
+<!-- 1 -->
+<section class="card" id="s1">
+  <h2><span class="num">1</span>Pourquoi une mémoire persistante ?</h2>
+  <p class="sub">Cinq familles de stockage, un seul objectif : une mémoire fiable et interrogeable</p>
+  <p>Un agent qui ne se souvient de rien recommence chaque conversation à zéro. La connaissance persistante est l'ensemble des données que le système peut conserver et réinterroger dans le temps : documents internes, relations entre entités, historiques de transactions, logs d'événements, fichiers médias.</p>
+  <p>Le problème n'est pas de stocker — c'est de choisir le <b>bon type de stockage pour le bon type de donnée</b> : une base relationnelle gère mal les relations en réseau complexes, une base vectorielle ne fait pas de transactions ACID, un stockage d'objets ne sait pas requêter du texte.</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart TB
+    M[("🧠 Mémoire persistante unifiée")] --> G["🕸 Graph<br/>relations typées"]
+    M --> D["📄 Documents<br/>contenu libre / semi-structuré"]
+    M --> R["🗄 Relationnel<br/>tables + garanties ACID"]
+    M --> T["⏱ Séries temporelles<br/>événements horodatés"]
+    M --> O["🪣 Objets<br/>fichiers binaires"]
+    classDef root fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-width:2px
+    classDef fam fill:#f8fafc,stroke:#94a3b8,color:#1e293b
+    class M root
+    class G,D,R,T,O fam
+  </div><figcaption><b>Figure 1</b> — Les cinq familles de stockage d'une mémoire persistante polyglotte.</figcaption></figure>
+  <div class="key"><b>Principe clé :</b> une architecture robuste est <b>polyglotte</b> — plusieurs bases spécialisées derrière une couche d'orchestration (agent ou routeur) qui sait où chercher chaque type d'information. Trois qualités visées : <b>à jour</b> (état courant, pas un instantané figé), <b>unifiées</b> (reliables entre elles : un client, ses achats, ses documents), <b>multi-sources</b> (texte, structuré, temporel, binaire sans moule unique).</div>
+</section>
+
+<!-- 2 -->
+<section class="card" id="s2">
+  <h2><span class="num">2</span>Base de données Graph</h2>
+  <p class="sub">🕸 Graphe de connaissance (Knowledge Graph)</p>
+  <p>Modélise le monde comme des <b>entités (nœuds)</b> reliées par des <b>relations (arêtes) typées</b> : « Personne A → utilise → Projet X ». Format idéal quand la valeur de l'information réside dans les <b>connexions</b> plutôt que dans les données elles-mêmes.</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart LR
+    A(("👤 Alice")) -->|WORKS_WITH| B(("👤 Bob"))
+    A -->|USES| P["📦 Projet X"]
+    B -->|USES| P
+    A -->|AUTHOR_OF| D1["📄 Spec v2"]
+    D1 -->|CITES| D0["📄 Spec v1"]
+    B -->|REPORTED| I["🐞 Incident 42"]
+    I -->|CONCERNS| P
+    classDef pers fill:#e0f2fe,stroke:#0ea5e9,color:#0c4a6e
+    classDef obj fill:#f8fafc,stroke:#94a3b8,color:#1e293b
+    class A,B pers
+    class P,D1,D0,I obj
+  </div><figcaption><b>Figure 2</b> — Extrait d'un graphe : entités et relations typées.</figcaption></figure>
+  <h3>Cas d'usage</h3>
+  <ul>
+    <li>Détection de fraude (réseaux de transactions suspectes) ; recommandation (« qui a fait X a aussi fait Y »).</li>
+    <li><b>Mémoire d'agent conversationnel</b> : relier des faits mentionnés à travers plusieurs sessions.</li>
+    <li>Cartographie de dépendances techniques ou organisationnelles.</li>
+  </ul>
+  <div class="warn"><b>Limite :</b> excellentes pour les parcours de relations profonds, les bases graph sont moins adaptées aux agrégations massives de type analytique (sommes sur des millions de lignes).</div>
+</section>
+
+<!-- 3 -->
+<section class="card" id="s3">
+  <h2><span class="num">3</span>Banque de documents &amp; Base relationnelle</h2>
+  <p class="sub">📄 Contenu libre indexé · 🗄 tables, clés et transactions</p>
+  <p><b>📄 Banque de documents :</b> stocke du contenu semi-structuré ou libre (PDF, notes, pages wiki, objets JSON). Chaque document est une unité indépendante, souvent indexée pour la recherche plein texte ou <b>sémantique (embeddings)</b>. Cas d'usage : base de connaissance interne consultée par un système RAG, archivage de contrats/rapports/tickets, schéma variable d'un enregistrement à l'autre.</p>
+  <p><b>🗄 Base relationnelle :</b> tables liées par des clés, schéma strict, garanties transactionnelles (ACID). Colonne vertébrale des systèmes métier : clients, commandes, produits. Cas d'usage : transactions, facturation, inventaire, toute donnée où cohérence et intégrité sont critiques.</p>
+  <figure class="diagram"><div class="mermaid">
+erDiagram
+    CLIENT ||--o{ ACHAT : "passe"
+    PRODUIT ||--o{ ACHAT : "concerne"
+    CLIENT { string client_id PK string nom }
+    ACHAT { string achat_id PK date date_achat float montant }
+    PRODUIT { string produit_id PK string libelle }
+  </div><figcaption><b>Figure 3</b> — Schéma relationnel : Clients, Achats, Produits liés par clés.</figcaption></figure>
+</section>
+
+<!-- 4 -->
+<section class="card" id="s4">
+  <h2><span class="num">4</span>Séries temporelles &amp; Stockage d'objets</h2>
+  <p class="sub">⏱ Flux horodatés · 🪣 binaires volumineux</p>
+  <p><b>⏱ Séries temporelles :</b> données horodatées en flux continu (logs applicatifs, métriques système, capteurs IoT, événements utilisateur). Requêtes centrées sur <b>tendances et anomalies</b>. Cas d'usage : monitoring (CPU, latence, erreurs 404), historique de conversations horodaté pour reconstituer un contexte, détection d'anomalies et alerting.</p>
+  <p><b>🪣 Stockage d'objets :</b> fichiers binaires volumineux (images, audio, vidéo, exports) sans structure interne interrogeable ; accès par identifiant ou métadonnée, pas par contenu. Cas d'usage : pièces jointes, uploads, archivage à faible coût, source pour pipelines de traitement (OCR, transcription, vision).</p>
+  <div class="key"><b>À retenir :</b> les deux se complètent — les <b>métadonnées</b> d'un fichier (quand, par qui) vivent en série temporelle ou en base relationnelle, tandis que le <b>fichier lui-même</b> reste dans le stockage d'objets.</div>
+</section>
+
+<!-- 5 -->
+<section class="card" id="s5">
+  <h2><span class="num">5</span>Quel stockage choisir ?</h2>
+  <p class="sub">La question n'est pas « ma base préférée » mais « la nature de l'information et sa façon d'être interrogée »</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart TD
+    Q["📥 Nouvelle donnée"] --> Q1{"La valeur est-elle dans les<br/>relations / connexions ?"}
+    Q1 -->|Oui| G["🕸 Graph"]
+    Q1 -->|Non| Q2{"Texte libre ou semi-structuré<br/>recherché par contenu / sens ?"}
+    Q2 -->|Oui| D["📄 Banque de documents"]
+    Q2 -->|Non| Q3{"Transactions strictes,<br/>agrégats métier ?"}
+    Q3 -->|Oui| R["🗄 Relationnel"]
+    Q3 -->|Non| Q4{"Flux horodaté : tendances,<br/>anomalies dans le temps ?"}
+    Q4 -->|Oui| T["⏱ Séries temporelles"]
+    Q4 -->|Non| O["🪣 Stockage d'objets<br/>(binaire, accès par id)"]
+    classDef q fill:#fffbeb,stroke:#f59e0b,color:#78350f
+    classDef s fill:#f8fafc,stroke:#94a3b8,color:#1e293b
+    class Q1,Q2,Q3,Q4 q
+    class G,D,R,T,O s
+  </div><figcaption><b>Figure 4</b> — Arbre de décision du choix de famille de stockage.</figcaption></figure>
+</section>
+
+<!-- 6 -->
+<section class="card" id="s6">
+  <h2><span class="num">6</span>Comparatif &amp; orchestration par l'agent</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Type de stockage</th><th>Force principale</th><th>Exemple de requête</th></tr></thead>
+    <tbody>
+      <tr><td>🕸 Graph</td><td>Parcours de relations multi-sauts</td><td>« Quels projets relient A et B ? »</td></tr>
+      <tr><td>📄 Documents</td><td>Recherche sémantique / plein texte</td><td>« Que dit la politique sur les congés ? »</td></tr>
+      <tr><td>🗄 Relationnel</td><td>Cohérence transactionnelle, agrégats</td><td>« Chiffre d'affaires du mois dernier ? »</td></tr>
+      <tr><td>⏱ Séries temporelles</td><td>Tendances, anomalies dans le temps</td><td>« Pic d'erreurs 404 cette semaine ? »</td></tr>
+      <tr><td>🪣 Objets</td><td>Fichiers binaires volumineux</td><td>« Récupère la photo du contrat signé. »</td></tr>
+    </tbody>
+  </table></div>
+  <p>Dans un système agentique, c'est le <b>planificateur (LLM Planner)</b> qui décide vers quelle(s) source(s) router chaque sous-question, puis fusionne les résultats en une réponse cohérente.</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart LR
+    U["👤 Requête composite"] --> PL["🧠 LLM Planner"]
+    PL -->|sous-question| G["🕸 Graph"]
+    PL -->|sous-question| D["📄 Documents"]
+    PL -->|sous-question| R["🗄 Relationnel"]
+    PL -->|sous-question| T["⏱ Séries temp."]
+    PL -->|sous-question| O["🪣 Objets"]
+    G & D & R & T & O --> FU["🧬 Fusion des résultats"] --> RE["✅ Réponse unifiée"]
+    classDef pl fill:#e0f2fe,stroke:#0ea5e9,color:#0c4a6e,stroke-width:2px
+    classDef st fill:#f8fafc,stroke:#94a3b8,color:#1e293b
+    class PL,FU pl
+    class G,D,R,T,O st
+  </div><figcaption><b>Figure 5</b> — L'agent route la requête vers les bons stores puis unifie la réponse.</figcaption></figure>
+</section>
+
+<!-- 7 -->
+<section class="card" id="s7">
+  <h2><span class="num">✏️</span>Exercice 1 — Mémoire d'un assistant support client</h2>
+  <div class="exo">
+    <h4>Mise en situation</h4>
+    <p class="enonce">Votre assistant doit répondre à : « Le client Dupont a-t-il déjà signalé un bug similaire, quand, et peux-tu me montrer la capture d'écran qu'il avait jointe ? » Pour chaque partie de la demande, identifiez le type de stockage le plus adapté et justifiez.</p>
+    <details><summary>Corrigé</summary><div class="in">
+      <ul>
+        <li><b>« Bug similaire »</b> → recherche sémantique dans l'historique des tickets → <b>Banque de documents</b>, éventuellement reliée aux incidents connexes via une <b>Base Graph</b>.</li>
+        <li><b>« Quand »</b> → horodatage précis → <b>Séries temporelles</b>, ou un champ date en <b>Relationnel</b> si le volume d'événements reste modéré.</li>
+        <li><b>« Capture d'écran »</b> → binaire à récupérer tel quel → <b>Stockage d'objets</b>, référencé par un identifiant stocké dans le ticket (relationnel ou documents).</li>
+      </ul>
+      <p>L'agent orchestre ces trois appels puis assemble une réponse unique — le rôle du routeur multi-sources de la Figure 5.</p>
+    </div></details>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="card" id="s8">
+  <h2><span class="num">8</span>Les trois mémoires de l'agent</h2>
+  <p class="sub">🆕 Hiérarchie de l'information — livre, chap. 6 (« Memory »)</p>
+  <p>Avant de choisir des bases, il faut savoir <b>où vit l'information du point de vue du modèle</b>. Le livre distingue trois mécanismes de mémoire, comme chez l'humain :</p>
+  <ul>
+    <li><b>🧬 Connaissance interne</b> — les poids du modèle : ce qu'il a appris à l'entraînement. Disponible pour <b>toutes</b> les requêtes ; ne change que si le modèle est mis à jour (comme savoir respirer).</li>
+    <li><b>⚡ Mémoire court terme</b> — la <b>fenêtre de contexte</b> : messages précédents, contexte de la tâche. Accès rapide, capacité <b>limitée</b>, non persistante d'une tâche à l'autre (comme le nom d'une personne qu'on vient de rencontrer).</li>
+    <li><b>🗄 Mémoire long terme</b> — les <b>sources externes</b> accessibles par retrieval (vos cinq familles de stockage !). Persistante entre les tâches, et <b>supprimable sans réentraîner le modèle</b> (comme vos livres et notes).</li>
+  </ul>
+  <figure class="diagram"><div class="mermaid">
+flowchart TB
+    subgraph H["Hiérarchie de l'information"]
+      direction TB
+      I["🧬 Connaissance interne (poids)<br/>pour toutes les requêtes · modifiable par training/finetuning"]
+      S["⚡ Court terme = contexte<br/>rapide · limité · spécifique à la tâche"]
+      L["🗄 Long terme = stores externes<br/>graph · documents · relationnel · temporel · objets"]
+    end
+    S -->|"débordement (overflow)"| L
+    L -->|"retrieval par requête"| S
+    I -.->|"complète"| S
+    classDef i fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-width:2px
+    classDef s fill:#fffbeb,stroke:#f59e0b,color:#78350f,stroke-width:2px
+    classDef l fill:#f8fafc,stroke:#94a3b8,color:#1e293b,stroke-width:2px
+    class I i
+    class S s
+    class L l
+  </div><figcaption><b>Figure 6</b> — Les trois mémoires et leurs flux (d'après Figure 6-16 du livre).</figcaption></figure>
+  <div class="key"><b>Règle de placement (fréquence d'usage) :</b> information essentielle à <b>toutes</b> les tâches → connaissance interne (training/finetuning) ; information <b>rarement</b> nécessaire → long terme ; information <b>immédiate</b> → court terme.</div>
+  <div class="book"><b>Pourquoi le contexte seul ne suffit pas (chap. 5) :</b> même avec une fenêtre longue, le modèle utilise mal le milieu du contexte (<i>lost in the middle</i>), chaque jeton ajouté coûte argent et latence, et rien ne persiste entre sessions. D'où le retrieval : ne donner que l'information pertinente, à la bonne requête.</div>
+  <h3>Les quatre bénéfices d'une vraie mémoire (chap. 6)</h3>
+  <ul>
+    <li><b>Gérer le débordement</b> d'information au sein d'une session (ce qui dépasse le contexte part en long terme).</li>
+    <li><b>Persister entre sessions</b> : un coach IA inutile s'il oublie votre histoire à chaque fois ; personnalisation (ex. recommander des livres proches de ceux déjà aimés).</li>
+    <li><b>Renforcer la cohérence</b> : pouvoir se référer à ses réponses passées pour calibrer les suivantes.</li>
+    <li><b>Préserver l'intégrité structurelle</b> : le contexte texte est non structuré ; une mémoire dédiée garde tables, files d'actions, leads sous forme structurée.</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section class="card" id="s9">
+  <h2><span class="num">9</span>Écrire : gestion de la mémoire</h2>
+  <p class="sub">🆕 Ajouter, fusionner, remplacer, supprimer — livre, chap. 6</p>
+  <p>Un système de mémoire a deux fonctions : <b>gestion</b> (quoi stocker en court/long terme) et <b>récupération</b> (§10). La gestion se résume à deux opérations — <b>ajouter</b> et <b>supprimer</b>. Le long terme, peu coûteux à étendre, peut se passer de suppression ; le court terme, borné par la fenêtre de contexte, exige une <b>stratégie d'éviction</b>.</p>
+  <h3>Stratégies d'éviction et de consolidation</h3>
+  <ul>
+    <li><b>Seuil de débordement :</b> si 30 % du contexte est réservé au retrieval, le court terme plafonne à 70 % ; au-delà, l'excès part en long terme.</li>
+    <li><b>FIFO</b> (first in, first out) : simple, mais <b>risqué</b> — les premiers messages portent souvent le but de la conversation.</li>
+    <li><b>Résumé + compléments :</b> résumer la conversation, puis réinjecter les informations clés que le résumé a manquées (Bae et al., 2022).</li>
+    <li><b>Réflexion après chaque action</b> (Liu et al., 2023) : l'agent décide si l'information nouvelle doit être <b>insérée</b>, <b>fusionnée</b> avec la mémoire existante, ou <b>remplacer</b> une information périmée/contradictoire.</li>
+    <li><b>Contradictions :</b> garder la plus récente, ou laisser un juge (AI judge) trancher — selon le cas d'usage ; une contradiction conservée peut aussi offrir plusieurs perspectives.</li>
+  </ul>
+  <figure class="diagram"><div class="mermaid">
+flowchart TD
+    A["🛠 Action / observation nouvelle"] --> RF{"🪞 Réflexion :<br/>insérer · fusionner · remplacer ?"}
+    RF -->|insérer| ST[("⚡ Court terme (contexte)")]
+    RF -->|fusionner| ST
+    RF -->|remplacer info périmée| ST
+    ST -->|"seuil atteint (~70 %)"| OV{"Débordement"}
+    OV -->|"FIFO (simple, risqué)"| LT[("🗄 Long terme")]
+    OV -->|"résumé + infos clés manquantes"| LT
+    LT -.->|"retrieval par requête"| ST
+    classDef st fill:#fffbeb,stroke:#f59e0b,color:#78350f,stroke-width:2px
+    classDef lt fill:#f8fafc,stroke:#94a3b8,color:#1e293b,stroke-width:2px
+    classDef d fill:#e0f2fe,stroke:#0ea5e9,color:#0c4a6e
+    class ST st
+    class LT lt
+    class RF,OV d
+  </div><figcaption><b>Figure 7</b> — Boucle de gestion : réflexion, débordement, consolidation.</figcaption></figure>
+  <div class="warn"><b>Piège classique :</b> le FIFO pur fait oublier à l'agent <b>pourquoi</b> la conversation a commencé. Préférez résumé + compléments, ou réflexion explicite.</div>
+</section>
+
+<!-- 10 -->
+<section class="card" id="s10">
+  <h2><span class="num">10</span>Relire : retrieval &amp; construction du contexte</h2>
+  <p class="sub">🆕 Du store au contexte — livre, chap. 6 (« RAG »), chap. 3, chap. 5</p>
+  <p>La récupération en mémoire long terme est un <b>pipeline RAG</b> : indexer les données (chunking + embeddings si recherche sémantique), puis pour chaque requête rechercher, fusionner, reranker, assembler.</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart LR
+    Q["👤 Requête"] --> QR["✍️ Query rewriting<br/>(rendre la requête autonome)"]
+    QR --> BM["🔤 BM25 / terme"]
+    QR --> VE["🎯 Recherche vectorielle"]
+    BM & VE --> RRF["🔀 Reciprocal Rank Fusion"]
+    RRF --> RR["🥇 Reranker (cross-encoder)"]
+    RR --> CTX["🧩 Contexte assemblé<br/>(budget de jetons)"]
+    IDX[("📄 Chunks indexés<br/>+ contexte de situation<br/>(contextual retrieval)")] -.-> BM & VE
+    classDef p fill:#f8fafc,stroke:#94a3b8,color:#1e293b
+    classDef d fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-width:2px
+    class QR,BM,VE,RRF,RR,CTX p
+    class IDX d
+  </div><figcaption><b>Figure 8</b> — Pipeline de lecture : rewrite → recherche hybride → fusion → rerank → contexte.</figcaption></figure>
+  <h3>Points qui font la qualité (chap. 6)</h3>
+  <ul>
+    <li><b>Chunking avec recouvrement</b> : éviter de couper un fait en deux ; taille ni trop grande (bruit, coût) ni trop petite (perte de contexte, overhead vectoriel).</li>
+    <li><b>Contextual retrieval</b> (Anthropic) : préfixer chaque chunk d'un court contexte (50–100 jetons) le situant dans le document d'origine → bien meilleur recall.</li>
+    <li><b>Recherche hybride</b> : le vectoriel rate les mots-clés exacts (codes erreur, noms de produit) que BM25 attrape ; RRF combine les classements.</li>
+    <li><b>Métriques :</b> <i>context precision</i> (part des documents récupérés qui sont pertinents) et <i>context recall</i> (part des documents pertinents qui sont récupérés) ; NDCG/MAP/MRR si le rang compte ; MTEB pour la qualité des embeddings.</li>
+    <li><b>Test NIAH</b> (chap. 5) : cacher une « aiguille » privée à différentes positions du contexte pour vérifier que le modèle la retrouve vraiment — utile avant de croire aux longs contextes.</li>
+  </ul>
+  <div class="book"><b>Coût à surveiller :</b> régénérer des embeddings sur des données qui changent souvent peut coûter cher (jusqu'à la moitié du budget API vectoriel d'une équipe, rapporte le livre). Arbitrez fréquence de réindexation vs fraîcheur requise.</div>
+</section>
+
+<!-- 11 -->
+<section class="card" id="s11">
+  <h2><span class="num">11</span>Fraîcheur, dédoublonnage &amp; gouvernance</h2>
+  <p class="sub">🆕 Garder la mémoire saine — livre, chap. 8 &amp; 10</p>
+  <ul>
+    <li><b>À jour :</b> une mémoire persistante n'est pas un instantané. Prévoyez réindexation, mise à jour et <b>suppression</b> ; avantage décisif du long terme : on peut y supprimer une information <b>sans réentraîner le modèle</b> — impossible pour la connaissance interne.</li>
+    <li><b>Dédoublonnage (chap. 8) :</b> les doublons biaisent la distribution, créent de la contamination train/test et gaspillent du compute (répéter 0,1 % des données 100 fois dégrade un modèle 800M au niveau d'un 400M). Techniques : comparaison par similarité, MinHash/Bloom filter, réduction de dimension.</li>
+    <li><b>Dérive &amp; monitoring (chap. 10) :</b> surveillez changements de prompts système, de comportement utilisateur et de modèles sous-jacents ; journalisez requêtes, chunks récupérés et prompts finaux (traces) pour diagnostiquer une mémoire qui « ment ».</li>
+    <li><b>Conformité :</b> PII et données sensibles doivent être détectés, masqués ou exclus ; la suppression à la demande (droit à l'oubli) se conçoit dès l'architecture : identifiants stables entre stores (objet ↔ relationnel ↔ documents).</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>Étape du cycle de vie d'un fait</th><th>Bon réflexe</th></tr></thead>
+    <tbody>
+      <tr><td>Créer</td><td>Choisir la famille via l'arbre de décision (§5) ; poser un identifiant stable</td></tr>
+      <tr><td>Indexer</td><td>Chunking + recouvrement, contextual retrieval, dédoublonnage</td></tr>
+      <tr><td>Relire</td><td>Recherche hybride + rerank ; mesurer precision/recall du contexte</td></tr>
+      <tr><td>Mettre à jour</td><td>Réindexation planifiée ; réflexion insert/merge/replace côté agent</td></tr>
+      <tr><td>Supprimer</td><td>Suppression propagée à tous les stores + index ; traçabilité</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 12 -->
+<section class="card" id="s12">
+  <h2><span class="num">12</span>Mémoire ≠ cache : ne pas confondre</h2>
+  <p class="sub">🆕 Livre, chap. 9 (inférence) &amp; chap. 10 (système)</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Mécanisme</th><th>Nature</th><th>Ce que ce n'est pas</th></tr></thead>
+    <tbody>
+      <tr><td><b>KV cache</b> (chap. 9)</td><td>Vecteurs clés/valeurs réutilisés pendant le décodage d'une requête</td><td>Pas de connaissance : disparaît avec la session d'inférence</td></tr>
+      <tr><td><b>Prompt cache</b> (chap. 9)</td><td>Segments de prompt répétés (system prompt, longs documents) précalculés</td><td>Économie de compute, pas une source de vérité</td></tr>
+      <tr><td><b>Cache exact</b> (chap. 10)</td><td>Réponse réutilisée seulement pour la <b>même</b> requête</td><td>Ne généralise pas ; politique d'éviction requise</td></tr>
+      <tr><td><b>Cache sémantique</b> (chap. 10)</td><td>Réponse réutilisée pour une requête <b>similaire</b> (seuil de similarité)</td><td>Fragile : mauvais seuil = réponse fausse resservie</td></tr>
+      <tr><td><b>Mémoire persistante</b> (ce cours)</td><td>Données de domaine interrogeables, à jour, gouvernées</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="warn"><b>Fuite par cache (chap. 10) :</b> si la réponse dépend de l'utilisateur (politique de retour personnalisée) et qu'on la met en cache comme « générique », le client Y recevra les données du client X. N'invoquez jamais une réponse dépendante d'un contexte privé.</div>
+</section>
+
+<!-- 13 -->
+<section class="card" id="s13">
+  <h2><span class="num">13</span>Architecture de référence &amp; synthèse</h2>
+  <p class="sub">🆕 Assemblage complet : stores + mémoires + gestion + retrieval + évaluation</p>
+  <figure class="diagram"><div class="mermaid">
+flowchart TB
+    U["👤 Utilisateur"] --> AG["🤖 Agent / Planner"]
+    AG --> RT["🧭 Routeur de mémoire"]
+    RT --> ST[("⚡ Court terme<br/>contexte + seuil 70 %")]
+    RT --> RET["🔎 Pipeline de retrieval<br/>hybride + rerank"]
+    RET --> LT[("🗄 Long terme<br/>graph · doc · rel · temp · obj")]
+    AG --> MM["🪞 Memory manager<br/>réflexion · résumé · suppression"]
+    MM --> LT
+    AG --> EV["📊 Évaluation &amp; monitoring<br/>context precision/recall · fraîcheur · traces"]
+    EV -.->|signaux| MM
+    classDef ag fill:#e0f2fe,stroke:#0ea5e9,color:#0c4a6e,stroke-width:2px
+    classDef st fill:#fffbeb,stroke:#f59e0b,color:#78350f,stroke-width:2px
+    classDef lt fill:#f8fafc,stroke:#94a3b8,color:#1e293b,stroke-width:2px
+    class AG,RT,RET,MM,EV ag
+    class ST st
+    class LT lt
+  </div><figcaption><b>Figure 9</b> — Couche mémoire complète d'un système agentique.</figcaption></figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Mécanisme</th><th>Où ça vit</th><th>Apport du livre</th><th>Panne évitée</th></tr></thead>
+    <tbody>
+      <tr><td>Connaissance interne</td><td>Poids du modèle</td><td>Chap. 2, 7 (finetuning)</td><td>Répéter le contexte à chaque requête</td></tr>
+      <tr><td>Court terme</td><td>Fenêtre de contexte</td><td>Chap. 5 (lost in the middle, NIAH)</td><td>Contexte gonflé, coûteux, peu fiable</td></tr>
+      <tr><td>Long terme (5 familles)</td><td>Stores polyglottes</td><td>Chap. 6 (RAG, memory)</td><td>Oubli entre sessions, données forcées dans un mauvais moule</td></tr>
+      <tr><td>Gestion (add/merge/replace/delete)</td><td>Memory manager</td><td>Chap. 6 (FIFO, résumé, réflexion)</td><td>Contradictions, oubli du but initial</td></tr>
+      <tr><td>Retrieval</td><td>Pipeline hybride + rerank</td><td>Chap. 6, 3</td><td>Chunks non pertinents, hallucinations</td></tr>
+      <tr><td>Gouvernance</td><td>Dédup, PII, monitoring</td><td>Chap. 8, 10</td><td>Biais, fuites, mémoire périmée</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section class="card" id="s14">
+  <h2><span class="num">✏️</span>Exercices 2–3 &amp; quiz</h2>
+
+  <div class="exo">
+    <h4>Exercice 2 — Placer chaque information dans la bonne mémoire</h4>
+    <p class="enonce">Vous construisez un <b>coach de carrière</b> agentique. Placez chaque élément dans l'une des trois mémoires (§8) ; si c'est du long terme, précisez la famille de stockage :<br>
+    (a) historique de la session en cours ; (b) CV du client (PDF) ; (c) résumés des sessions passées ; (d) horodatage des rendez-vous et relances ; (e) savoir mener un entretien de recrutement ; (f) réseau de relations clients ↔ entreprises partenaires (cooptations).</p>
+    <details><summary>Corrigé</summary><div class="in">
+      <ul>
+        <li><b>(a)</b> Court terme (contexte) — information immédiate de la tâche.</li>
+        <li><b>(b)</b> Long terme : <b>Objets</b> pour le fichier + <b>Documents</b> pour les chunks indexés (recherche sémantique).</li>
+        <li><b>(c)</b> Long terme : <b>Documents</b> (texte semi-structuré relu par similarité) — ou Relationnel si fortement structuré.</li>
+        <li><b>(d)</b> Long terme : <b>Séries temporelles</b> (flux horodaté, relances/anomalies) ; Relationnel acceptable à faible volume.</li>
+        <li><b>(e)</b> <b>Connaissance interne</b> — compétence stable attendue à chaque requête → finetuning si le modèle de base est insuffisant.</li>
+        <li><b>(f)</b> Long terme : <b>Graph</b> — la valeur est dans les connexions multi-sauts.</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="exo">
+    <h4>Exercice 3 — Diagnostiquer trois pannes de mémoire</h4>
+    <p class="enonce">1) Sur les longues conversations, l'agent oublie le début et répète des questions déjà posées. 2) Il affirme lundi que le dossier est « validé » puis mardi qu'il est « en attente », sans nouvel événement. 3) Il cite un tarif supprimé du catalogue il y a trois mois. Identifiez le mécanisme en faute (§9, §11) et proposez la correction.</p>
+    <details><summary>Corrigé</summary><div class="in">
+      <ul>
+        <li><b>1)</b> Débordement du court terme avec éviction <b>FIFO</b> : correction = seuil de débordement + <b>résumé avec réinjection des infos clés</b> (ou réflexion insert/merge), et persistance du but de session en long terme.</li>
+        <li><b>2)</b> <b>Contradiction non résolue</b> dans la mémoire : correction = réflexion <b>replace/merge</b> (garder l'état le plus récent horodaté) ou arbitrage par juge ; stocker l'état en Relationnel (source de vérité) plutôt qu'en prose dupliquée.</li>
+        <li><b>3)</b> <b>Fraîcheur</b> : index non réactualisé, donnée non supprimée : correction = réindexation planifiée + <b>suppression propagée</b> à tous les stores/index + monitoring de dérive ; vérifier aussi qu'un cache sémantique ne ressert pas l'ancienne réponse (§12).</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="exo">
+    <h4>Quiz express (5 questions)</h4>
+    <p class="enonce">1) Où placer une information stable, nécessaire à <b>toutes</b> les requêtes ? 2) Risque principal du FIFO pur ? 3) Quelle métrique mesure la part des documents <b>récupérés</b> qui sont pertinents ? 4) Un cache sémantique est-il une mémoire ? 5) Comment retirer une donnée sensible <b>sans réentraîner</b> le modèle ?</p>
+    <details><summary>Corrigé</summary><div class="in">
+      <p>1) Connaissance interne (training/finetuning).<br>
+      2) Perdre les premiers messages, qui portent le but de la conversation.<br>
+      3) La <b>context precision</b> (le recall mesure l'autre sens).<br>
+      4) Non : c'est une optimisation de réponses réutilisées, fragile au seuil de similarité, sans gouvernance de donnée.<br>
+      5) En la supprimant de la <b>mémoire long terme</b> (stores + index) — la connaissance interne, elle, exigerait un réentraînement.</p>
+    </div></details>
+  </div>
+</section>
+
+</div>
+
+<footer>© 2026 — Cours « La Connaissance Persistante » v2 · Enrichi par <b>AI Engineering: Building Applications with Foundation Models</b>, Chip Huyen (O'Reilly, 2025) — chap. 5, 6, 8, 9, 10. Schémas Mermaid.</footer>
+
+<script type="module">
+  const CDNS=['https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs','https://unpkg.com/mermaid@11/dist/mermaid.esm.min.mjs'];
+  try{
+    let mod;for(const u of CDNS){try{mod=await import(u);break}catch(e){}}
+    const m=mod.default||mod;
+    m.initialize({startOnLoad:true,theme:'base',securityLevel:'loose',flowchart:{curve:'basis',htmlLabels:true,useMaxWidth:true},themeVariables:{fontSize:'13px',lineColor:'#94a3b8'}});
+  }catch(e){
+    document.querySelectorAll('.mermaid').forEach(el=>{const d=document.createElement('div');d.className='err';d.textContent='⚠️ Mermaid indisponible (hors ligne). '+e.message;el.replaceWith(d);});
+  }
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panorama des frameworks agentiques</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #a855f7;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #d8b4fe;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">écosystème LLM — quatre briques</p>
+    <h1>Quel framework agentique choisir&nbsp;?</h1>
+    <p>LangChain, LangGraph, LlamaIndex et CrewAI ne sont pas en concurrence : chacun répond à une question différente. Cliquez un nœud du schéma pour voir sa fiche technique.</p>
+  </header>
+
+  <div class="diagram-shell" id="diagram-shell">
+    <svg viewBox="0 0 900 210" role="img" aria-label="Schéma d'un pipeline agentique reliant LlamaIndex, LangChain, LangGraph et CrewAI">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="flow-arrow"></path>
+        </marker>
+      </defs>
+
+      <path id="path-1" class="flow-path" d="M158,105 H322" marker-end="url(#arrow)"></path>
+      <path id="path-2" class="flow-path" d="M418,105 H562" marker-end="url(#arrow)"></path>
+      <path id="path-3" class="flow-path" d="M658,105 H802" marker-end="url(#arrow)"></path>
+
+      <!-- LlamaIndex -->
+      <g class="node-group" tabindex="0" role="button" aria-pressed="true" data-fw="llamaindex" style="--node-color:var(--llamaindex)" transform="translate(108,105)">
+        <title>Voir la fiche technique de LlamaIndex</title>
+        <circle class="node-circle" r="48"></circle>
+        <g class="node-icon" transform="translate(-14,-16)">
+          <ellipse cx="14" cy="4" rx="14" ry="5"></ellipse>
+          <path d="M0,4 V22 C0,25 6,27 14,27 C22,27 28,25 28,22 V4"></path>
+          <path d="M0,13 C0,16 6,18 14,18 C22,18 28,16 28,13"></path>
+        </g>
+        <text class="node-label" text-anchor="middle" y="72">LlamaIndex</text>
+      </g>
+
+      <!-- LangChain -->
+      <g class="node-group" tabindex="0" role="button" aria-pressed="false" data-fw="langchain" style="--node-color:var(--langchain)" transform="translate(340,105)">
+        <title>Voir la fiche technique de LangChain</title>
+        <circle class="node-circle" r="48"></circle>
+        <g class="node-icon" transform="translate(-15,-10)">
+          <rect x="0" y="0" width="16" height="20" rx="8"></rect>
+          <rect x="14" y="0" width="16" height="20" rx="8"></rect>
+        </g>
+        <text class="node-label" text-anchor="middle" y="72">LangChain</text>
+      </g>
+
+      <!-- LangGraph -->
+      <g class="node-group" tabindex="0" role="button" aria-pressed="false" data-fw="langgraph" style="--node-color:var(--langgraph)" transform="translate(580,105)">
+        <title>Voir la fiche technique de LangGraph</title>
+        <circle class="node-circle" r="48"></circle>
+        <g class="node-icon" transform="translate(-15,-14)">
+          <circle cx="3" cy="3" r="3" fill="var(--langgraph)" stroke="none"></circle>
+          <circle cx="27" cy="3" r="3" fill="var(--langgraph)" stroke="none"></circle>
+          <circle cx="15" cy="25" r="3" fill="var(--langgraph)" stroke="none"></circle>
+          <path d="M3,3 L15,25 L27,3 M3,3 L27,3"></path>
+        </g>
+        <text class="node-label" text-anchor="middle" y="72">LangGraph</text>
+      </g>
+
+      <!-- CrewAI -->
+      <g class="node-group" tabindex="0" role="button" aria-pressed="false" data-fw="crewai" style="--node-color:var(--crewai)" transform="translate(812,105)">
+        <title>Voir la fiche technique de CrewAI</title>
+        <circle class="node-circle" r="48"></circle>
+        <g class="node-icon" transform="translate(-16,-10)">
+          <circle cx="8" cy="6" r="6"></circle>
+          <circle cx="24" cy="6" r="6"></circle>
+          <path d="M0,24 C0,17 4,14 8,14 C12,14 16,17 16,24"></path>
+          <path d="M16,24 C16,17 20,14 24,14 C28,14 32,17 32,24"></path>
+        </g>
+        <text class="node-label" text-anchor="middle" y="72">CrewAI</text>
+      </g>
+    </svg>
+    <p class="diagram-caption">données → assemblage → orchestration → collaboration</p>
+  </div>
+
+  <section class="panel" id="panel">
+    <div class="panel-head">
+      <h2 id="panel-title">LlamaIndex</h2>
+      <span class="tagline" id="panel-tagline">Connecter les LLM à vos données pour le RAG</span>
+    </div>
+    <dl class="spec" id="panel-spec"></dl>
+  </section>
+
+  <div class="stack-note">
+    <h3>Comment ils s'articulent</h3>
+    <p><code>LlamaIndex</code> indexe et récupère vos données → <code>LangChain</code> assemble prompts, outils et mémoire autour de ces données → <code>LangGraph</code> orchestre l'état, les boucles et les points de contrôle du workflow → <code>CrewAI</code> répartit le travail final entre agents spécialisés qui collaborent vers l'objectif. On peut n'en utiliser qu'un seul, mais chaque brique reste utilisable indépendamment des autres.</p>
+  </div>
+
+  <footer>schéma interactif — cliquez un nœud, ou naviguez au clavier (tab + entrée)</footer>
+</div>
+
+<script>
+const DATA = {
+  llamaindex: {
+    title: "LlamaIndex",
+    tagline: "Connecter les LLM à vos données pour le RAG",
+    color: "var(--llamaindex)",
+    rows: [
+      ["Ce que c'est", "Un framework pour ingérer, indexer et interroger vos données afin que les LLM répondent en s'appuyant sur des documents privés."],
+      ["Caractéristiques", ["Ingestion depuis des sources multiples", "Indexation vectorielle, par mot-clé, etc.", "Récupération + intégration au LLM", "Moteurs de requête et d'agents", "Support des données structurées"]],
+      ["Quand l'utiliser", "Quand le LLM doit répondre en s'appuyant sur vos propres données privées plutôt que sur sa seule mémoire."],
+      ["Cas d'usage réels", ["Chat avec PDF ou sites web", "Recherche de connaissances d'entreprise", "Assistants de recherche sur données privées", "Résumé documentaire et QA"]],
+      ["Problème résolu", "Corrige la méconnaissance des données privées par les LLM en ancrant les réponses dans le contenu réel."],
+      ["Différence clé", "Spécialisé sur la connexion aux données et la récupération — il ne s'agit pas d'agents, mais de rendre les LLM conscients de vos données."]
+    ]
+  },
+  langchain: {
+    title: "LangChain",
+    tagline: "Construire des applications LLM avec chaînes, outils et mémoire",
+    color: "var(--langchain)",
+    rows: [
+      ["Ce que c'est", "Un framework pour construire des applications propulsées par LLM en assemblant prompts, outils, mémoire et chaînes de traitement."],
+      ["Caractéristiques", ["Intégration facile avec les LLM", "Chaînage de workflows", "Outils et appel de fonctions", "Gestion de la mémoire", "Agents de style ReAct"]],
+      ["Quand l'utiliser", "Pour bâtir rapidement une application LLM avec des chaînes, des prompts et des outils, sans logique multi-étapes complexe."],
+      ["Cas d'usage réels", ["Chatbots outillés (recherche, API)", "QA documentaire", "Automatisation du support client", "Extraction de données"]],
+      ["Problème résolu", "Simplifie la connexion des LLM aux sources externes, aux outils et aux workflows."],
+      ["Différence clé", "Se concentre sur l'assemblage de composants et de chaînes ; sans état persistant par défaut, idéal pour une complexité simple à moyenne."]
+    ]
+  },
+  langgraph: {
+    title: "LangGraph",
+    tagline: "Workflows d'agents multi-étapes, avec état, sous forme de graphes",
+    color: "var(--langgraph)",
+    rows: [
+      ["Ce que c'est", "Un framework construit au-dessus de LangChain pour créer des workflows d'agents multi-acteurs et cycliques, avec état."],
+      ["Caractéristiques", ["Gestion de l'état", "Workflows cycliques", "Support humain-dans-la-boucle", "Persistance et points de contrôle", "Conçu pour les agents complexes"]],
+      ["Quand l'utiliser", "Quand l'agent suit des logiques à boucles et conditions multi-étapes, et doit se souvenir de l'état au fil du temps."],
+      ["Cas d'usage réels", ["Automatisation de processus métier", "Agents de recherche multi-étapes", "Agents avec mémoire sur plusieurs tours", "Workflows d'approbation humaine"]],
+      ["Problème résolu", "Gère des workflows complexes avec cycles, mémoire et processus longue durée, de façon fiable."],
+      ["Différence clé", "Orchestre le flux de contrôle comme un cerveau qui pilote l'ensemble — plus complexe et plus \u00e9tat\u00e9 que LangChain."]
+    ]
+  },
+  crewai: {
+    title: "CrewAI",
+    tagline: "Équipes d'agents collaboratifs, avec rôles et objectifs",
+    color: "var(--crewai)",
+    rows: [
+      ["Ce que c'est", "Un framework pour créer des équipes d'agents IA avec des rôles spécifiques qui collaborent vers un objectif commun."],
+      ["Caractéristiques", ["Agents basés sur des rôles", "Délégation de tâches", "Collaboration entre agents", "Mémoire et contexte partagés", "Configuration multi-agents simple"]],
+      ["Quand l'utiliser", "Quand les tâches sont complexes et nécessitent plusieurs agents aux compétences différentes travaillant ensemble."],
+      ["Cas d'usage réels", ["Équipes de création de contenu", "Automatisation d'études de marché", "Support client multi-agents", "Automatisation commerciale de bout en bout"]],
+      ["Problème résolu", "Décompose les problèmes complexes en tâches plus petites, résolues par des agents spécialisés en collaboration."],
+      ["Différence clé", "Se concentre sur la collaboration multi-agents basée sur les rôles, pas seulement sur des workflows mono-agent."]
+    ]
+  }
+};
+
+const panel = document.getElementById('panel');
+const title = document.getElementById('panel-title');
+const tagline = document.getElementById('panel-tagline');
+const spec = document.getElementById('panel-spec');
+const nodes = Array.from(document.querySelectorAll('.node-group'));
+const paths = ['path-1','path-2','path-3'].map(id => document.getElementById(id));
+const order = ['llamaindex','langchain','langgraph','crewai'];
+
+function renderRow([label, content]){
+  const dt = document.createElement('dt');
+  dt.textContent = label;
+  const dd = document.createElement('dd');
+  if (Array.isArray(content)){
+    if (label === "Caractéristiques"){
+      const wrap = document.createElement('div');
+      wrap.className = 'pill-list';
+      content.forEach(item => {
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = item;
+        wrap.appendChild(pill);
+      });
+      dd.appendChild(wrap);
+    } else {
+      const ul = document.createElement('ul');
+      content.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      dd.appendChild(ul);
+    }
+  } else {
+    dd.textContent = content;
+  }
+  const row = document.createElement('div');
+  row.className = 'spec-row';
+  row.appendChild(dt);
+  row.appendChild(dd);
+  return row;
+}
+
+function select(fw, {animate=true, updateHash=true} = {}){
+  if (!DATA[fw]) return;
+  const d = DATA[fw];
+  panel.style.setProperty('--accent', d.color);
+  title.textContent = d.title;
+  tagline.textContent = d.tagline;
+  spec.innerHTML = '';
+  d.rows.forEach(r => spec.appendChild(renderRow(r)));
+
+  nodes.forEach(n => n.setAttribute('aria-pressed', n.dataset.fw === fw ? 'true' : 'false'));
+
+  const idx = order.indexOf(fw);
+  paths.forEach((p, i) => {
+    p.classList.toggle('active', i < idx);
+    if (i < idx) p.style.setProperty('--node-color', DATA[order[i+1]].color);
+  });
+
+  if (updateHash && window.location.hash.slice(1) !== fw){
+    try {
+      history.pushState(null, '', '#' + fw);
+    } catch (err) {
+      // Ignoré : certains contextes d'aperçu (iframe sandboxée, document
+      // servi via srcdoc) interdisent la mise à jour de l'URL réelle.
+      // Le reste de l'interface continue de fonctionner normalement.
+    }
+  }
+
+  if (animate){
+    panel.style.opacity = 0;
+    panel.style.transform = 'translateY(4px)';
+    requestAnimationFrame(() => {
+      panel.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      panel.style.opacity = 1;
+      panel.style.transform = 'translateY(0)';
+    });
+  }
+}
+
+// délégation d'événements : un seul écouteur sur le conteneur du diagramme
+// plutôt qu'un écouteur par nœud (tient si le nombre de nœuds augmente)
+const diagramShell = document.getElementById('diagram-shell');
+
+diagramShell.addEventListener('click', e => {
+  const node = e.target.closest('.node-group');
+  if (node) select(node.dataset.fw);
+});
+
+diagramShell.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const node = e.target.closest('.node-group');
+  if (!node) return;
+  e.preventDefault();
+  select(node.dataset.fw);
+});
+
+// deep-linking : le hash de l'URL fait autorité au chargement et à la navigation historique
+function selectFromHash(animate){
+  const fw = window.location.hash.slice(1);
+  select(DATA[fw] ? fw : 'llamaindex', {animate, updateHash:false});
+}
+
+window.addEventListener('hashchange', () => selectFromHash(true));
+
+// le contenu s'affiche toujours immédiatement, avant toute animation
+selectFromHash(false);
+
+// animation d'entrée des liaisons : seulement au premier chargement sans hash,
+// jamais si un lien profond ou prefers-reduced-motion est déjà là
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduceMotion && !window.location.hash){
+  paths.forEach((p, i) => {
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.getBoundingClientRect();
+    p.style.transition = `stroke-dashoffset 0.7s ease ${0.15 + i*0.18}s`;
+    requestAnimationFrame(() => { p.style.strokeDashoffset = 0; });
+    setTimeout(() => { p.style.strokeDasharray = ''; }, 1400);
+  });
+}
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

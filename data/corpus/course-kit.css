@@ -1,0 +1,76 @@
+:root {
+  /* === Canonical tokens injected per-course === */
+  /* --bg, --panel, --line, --txt, --muted, --accent, --accent-2, --ok, --warn, --bad, etc. */
+}
+
+/* === Layout === */
+.wrap { max-width: 1050px; margin: auto; padding: var(--space-lg); }
+.header { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 94%, transparent); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
+.header-inner { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; }
+.eyebrow { color: var(--accent-2); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .75rem; }
+.progress { height: 8px; background: var(--panel-hover); border-radius: var(--radius-full); overflow: hidden; margin-top: var(--space-md); }
+.bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width var(--transition-normal); }
+.tabs { display: flex; gap: 8px; overflow: auto; padding: var(--space-sm) 0; }
+
+/* === Buttons === */
+.btn, .tabs button { border: 1px solid var(--line); background: var(--panel); color: var(--txt); border-radius: var(--radius-md); padding: 9px 13px; cursor: pointer; white-space: nowrap; font: inherit; transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast); }
+.btn:hover, .tabs button:hover { background: var(--panel-hover); }
+.btn:focus-visible, .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tabs button.active, .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.btn.ghost { background: transparent; }
+.btn.danger { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+
+/* === Cards & Modules === */
+.card { background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-lg); margin: var(--space-lg) 0; box-shadow: var(--shadow-lg); }
+.module { display: none; }
+.module.active { display: block; animation: fade-in var(--transition-normal); }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* === Typography === */
+h1 { font-size: clamp(1.8rem, 4vw, 3.5rem); line-height: 1.05; margin: .3em 0; }
+h2 { color: var(--accent); margin-top: 0; }
+h3 { color: var(--txt); }
+.muted { color: var(--muted); }
+.pill { display: inline-block; padding: 4px 9px; border-radius: var(--radius-full); background: var(--panel-hover); color: var(--accent-2); font-size: .8rem; font-weight: 600; }
+
+/* === Grid === */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-md); }
+
+/* === Diagrams === */
+.diagram { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 10px; margin: var(--space-md) 0; overflow: auto; }
+.diagram svg { width: 100%; height: auto; }
+.flow { stroke-dasharray: 8 8; animation: dash 2s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -32; } }
+@media (prefers-reduced-motion: reduce) { .flow { animation: none; } }
+
+/* === Quiz === */
+.quiz { margin-top: var(--space-lg); }
+.quiz h3 { margin-bottom: var(--space-sm); }
+.choice { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--panel); color: var(--txt); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); margin: var(--space-xs) 0; cursor: pointer; transition: background var(--transition-fast), border-color var(--transition-fast); }
+.choice:hover { background: var(--panel-hover); }
+.choice:disabled { cursor: default; opacity: 0.7; }
+.choice.correct { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.choice.wrong { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.feedback { margin-top: var(--space-sm); font-size: .9rem; }
+
+/* === Checklists === */
+.check { display: block; margin: var(--space-sm) 0; cursor: pointer; font-size: .95rem; }
+.check input { margin-right: var(--space-sm); accent-color: var(--accent); }
+
+/* === Footer Navigation === */
+.footer-nav { display: flex; justify-content: space-between; gap: var(--space-md); padding: var(--space-lg); border-top: 1px solid var(--line); margin-top: var(--space-xl); }
+.footer-nav .btn { flex: 1; text-align: center; }
+
+/* === Parcours Navigation Bar (injected at top) === */
+.parcours-bar { background: var(--panel); border-bottom: 1px solid var(--line); padding: var(--space-sm) var(--space-md); font-size: .85rem; display: flex; items-center; gap: var(--space-md); flex-wrap: wrap; }
+.parcours-bar a { color: var(--accent-2); text-decoration: none; padding: 2px 8px; border-radius: var(--radius-sm); transition: background var(--transition-fast); }
+.parcours-bar a:hover { background: var(--accent-soft); color: var(--accent); }
+.parcours-bar .current { color: var(--txt); font-weight: 600; pointer-events: none; }
+.parcours-bar .sep { color: var(--muted); }
+
+/* === Copy button === */
+.copy-btn { margin-top: var(--space-sm); }
+
+/* === Reset === */
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(circle at top, color-mix(in srgb, var(--panel) 30%, var(--bg)) 0%, var(--bg) 55%); color: var(--txt); font: var(--text-base)/var(--leading) var(--font-sans); }

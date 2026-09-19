@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours Interactif : Agent Harness Engineering</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+    <!-- Scroll Progress -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <span class="badge"><i class="fas fa-graduation-cap"></i> Cours Interactif</span>
+            <h1>Le Guide de l'Agent Harness Engineering</h1>
+            <p class="subtitle">
+                Inspiré de la vidéo de Shaw Talebi. Découvrez comment construire l'environnement qui rend l'IA réellement utile et autonome.
+            </p>
+
+            <svg viewBox="0 0 600 240" style="width:100%;max-width:520px;height:auto;display:block;margin:10px auto 0;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma d'un agent harness : un modèle central relié au contexte, aux outils et aux automations">
+                <defs>
+                    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#6366f1"/>
+                        <stop offset="100%" stop-color="#8b5cf6"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="300" cy="120" r="75" fill="url(#coreGlow)"/>
+                <line x1="300" y1="120" x2="140" y2="45" stroke="url(#lineGrad)" stroke-width="2" stroke-dasharray="4 4"/>
+                <line x1="300" y1="120" x2="460" y2="45" stroke="url(#lineGrad)" stroke-width="2" stroke-dasharray="4 4"/>
+                <line x1="300" y1="120" x2="300" y2="205" stroke="url(#lineGrad)" stroke-width="2" stroke-dasharray="4 4"/>
+                <circle cx="300" cy="120" r="42" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+                <text x="300" y="116" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#f8fafc" font-weight="700">MODÈLE</text>
+                <text x="300" y="130" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#94a3b8">le moteur</text>
+                <circle cx="140" cy="45" r="34" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
+                <text x="140" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#f8fafc" font-weight="600">Contexte</text>
+                <text x="140" y="55" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#94a3b8">le savoir</text>
+                <circle cx="460" cy="45" r="34" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
+                <text x="460" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#f8fafc" font-weight="600">Outils</text>
+                <text x="460" y="55" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#94a3b8">l'action</text>
+                <circle cx="300" cy="205" r="34" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
+                <text x="300" y="202" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f8fafc" font-weight="600">Automations</text>
+                <text x="300" y="215" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#94a3b8">le rythme</text>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#intro" class="nav-link">Introduction</a></li>
+                <li><a href="#niveaux" class="nav-link">3 Niveaux</a></li>
+                <li><a href="#leviers" class="nav-link">3 Leviers</a></li>
+                <li><a href="#evals" class="nav-link">Evals</a></li>
+                <li><a href="#conclusion" class="nav-link">Mindset</a></li>
+                <li><a href="#quiz" class="nav-link">Évaluation</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <!-- Section 1: Introduction -->
+        <section id="intro">
+            <h2><i class="fas fa-lightbulb"></i> 1. Introduction : Qu'est-ce qu'un « Harness » ?</h2>
+            <div class="highlight-box info">
+                <strong>Définition :</strong> Un <em>agent harness</em> regroupe tout ce qui est construit autour d'un modèle d'IA pour le rendre plus utile et performant.
+            </div>
+            
+            <div class="card">
+                <h3><i class="fas fa-car"></i> L'Analogie de la Voiture</h3>
+                <p>Pour bien comprendre, faisons un parallèle avec l'automobile :</p>
+                <ul class="feature-list">
+                    <li><strong>Le Modèle d'IA</strong> = Le <strong>moteur</strong> de la voiture.</li>
+                    <li><strong>L'Agent Harness</strong> = Tout le reste (les roues, la carrosserie, les sièges, le volant, le tableau de bord).</li>
+                </ul>
+                <p>De même que l'on personnalise une voiture pour l'adapter à ses besoins, on personnalise l'<strong>agent harness</strong> pour optimiser les performances de l'IA.</p>
+
+                <svg viewBox="0 0 640 190" style="width:100%;max-width:600px;height:auto;display:block;margin:10px auto 0;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration d'une voiture : le moteur représente le modèle d'IA, le reste de la carrosserie représente l'agent harness">
+                    <line x1="110" y1="105" x2="110" y2="28" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <text x="110" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#c4b5fd" font-weight="600">Le modèle d'IA</text>
+                    <line x1="400" y1="80" x2="400" y2="28" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <text x="400" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#a5b4fc" font-weight="600">L'agent harness</text>
+
+                    <path d="M40 140 Q40 100 90 95 L160 95 Q190 60 250 60 L430 60 Q470 60 490 95 L560 95 Q600 100 600 140 L600 150 L40 150 Z"
+                          fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M175 92 L205 63 L245 63 L245 92 Z" fill="none" stroke="#94a3b8" stroke-width="2"/>
+                    <path d="M255 92 L255 63 L420 63 L440 92 Z" fill="none" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="150" cy="150" r="26" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+                    <circle cx="490" cy="150" r="26" fill="#0f172a" stroke="#94a3b8" stroke-width="3"/>
+
+                    <rect x="70" y="105" width="80" height="35" rx="6" fill="rgba(139,92,246,0.18)" stroke="#8b5cf6" stroke-width="2.5"/>
+                    <text x="110" y="127" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c4b5fd" font-weight="700">MOTEUR</text>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Section 2: Niveaux -->
+        <section id="niveaux">
+            <h2><i class="fas fa-layer-group"></i> 2. Les 3 Niveaux de Harness Engineering</h2>
+            <p>La classification des niveaux dépend de votre point de départ et de votre expertise technique.</p>
+
+            <svg viewBox="0 0 700 160" style="width:100%;max-width:650px;height:auto;display:block;margin:10px auto 20px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trois niveaux de personnalisation, du véhicule de série au véhicule sur-mesure">
+                <defs>
+                    <linearGradient id="lvlGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#6366f1"/>
+                        <stop offset="100%" stop-color="#8b5cf6"/>
+                    </linearGradient>
+                </defs>
+                <line x1="60" y1="130" x2="640" y2="130" stroke="url(#lvlGrad)" stroke-width="2" stroke-dasharray="2 4"/>
+
+                <g>
+                    <rect x="70" y="88" width="90" height="27" rx="8" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                    <rect x="90" y="72" width="50" height="20" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="90" cy="118" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="140" cy="118" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="115" cy="130" r="5" fill="#6366f1"/>
+                    <text x="115" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">Clé en main</text>
+                </g>
+
+                <g>
+                    <path d="M300 115 L305 95 Q330 78 365 78 Q395 78 405 95 L410 115 Z" fill="#1e293b" stroke="#6366f1" stroke-width="2"/>
+                    <rect x="393" y="70" width="22" height="8" rx="2" fill="none" stroke="#6366f1" stroke-width="2"/>
+                    <circle cx="315" cy="118" r="10" fill="#0f172a" stroke="#6366f1" stroke-width="2"/>
+                    <circle cx="395" cy="118" r="10" fill="#0f172a" stroke="#6366f1" stroke-width="2"/>
+                    <circle cx="355" cy="130" r="5" fill="#8b5cf6"/>
+                    <text x="355" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#c4b5fd">Tuning avancé</text>
+                </g>
+
+                <g>
+                    <rect x="545" y="90" width="60" height="22" rx="5" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="3 3"/>
+                    <circle cx="560" cy="122" r="9" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="2 2"/>
+                    <circle cx="600" cy="122" r="9" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="2 2"/>
+                    <rect x="565" y="70" width="16" height="14" rx="3" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+                    <circle cx="580" cy="130" r="5" fill="#a855f7"/>
+                    <text x="580" y="150" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#d8b4fe">Sur-mesure</text>
+                </g>
+            </svg>
+
+            <div class="grid-3">
+                <div class="card level-card">
+                    <span class="level-number">01</span>
+                    <h3>Clé en main<br><small style="color: var(--text-secondary); font-size: 0.8em;">(Off-the-shelf)</small></h3>
+                    <p><strong>Exemples :</strong> Claude Co-work, ChatGPT Work.</p>
+                    <p><strong>Analogie :</strong> Acheter une voiture de série. On peut ajuster les sièges ou la couleur, mais on ne change pas le moteur.</p>
+                </div>
+
+                <div class="card level-card">
+                    <span class="level-number">02</span>
+                    <h3>Tuning Avancé</h3>
+                    <p><strong>Exemples :</strong> Claude Code.</p>
+                    <p><strong>Analogie :</strong> Préparer une voiture pour la F1. On optimise chaque détail pour aller plus vite, ce qui demande une expertise pointue.</p>
+                </div>
+
+                <div class="card level-card">
+                    <span class="level-number">03</span>
+                    <h3>Sur-mesure<br><small style="color: var(--text-secondary); font-size: 0.8em;">(Custom Agent Harness)</small></h3>
+                    <p><strong>Approche :</strong> Utilisation directe d'API et écriture de code personnalisé autour de son modèle favori.</p>
+                    <p><strong>Analogie :</strong> Construire son propre véhicule à partir d'un moteur brut. Liberté totale, complexité maximale.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Leviers -->
+        <section id="leviers">
+            <h2><i class="fas fa-sliders-h"></i> 3. Les 3 Leviers d'Optimisation</h2>
+            <p>Pour piloter et optimiser votre harness (du niveau 1 au niveau 2), vous disposez de trois leviers principaux. Cliquez pour explorer :</p>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'contexte')"><i class="fas fa-brain"></i> Le Contexte</button>
+                <button class="tab-btn" onclick="openTab(event, 'outils')"><i class="fas fa-toolbox"></i> Les Outils</button>
+                <button class="tab-btn" onclick="openTab(event, 'automations')"><i class="fas fa-robot"></i> Les Automations</button>
+            </div>
+
+            <div id="contexte" class="tab-content active">
+                <div class="card">
+                    <h3>Levier 1 : Le Contexte (<em>Context</em>)</h3>
+                    <p>Le contexte englobe les instructions, les connaissances et les données mises à disposition de l'agent.</p>
+
+                    <svg viewBox="0 0 500 110" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto 20px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Le contexte alimente le modèle en connaissances">
+                        <rect x="30" y="30" width="70" height="14" rx="3" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+                        <rect x="30" y="48" width="70" height="14" rx="3" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+                        <rect x="30" y="66" width="70" height="14" rx="3" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+                        <text x="65" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Skills · Fichiers · Sources</text>
+                        <line x1="108" y1="55" x2="220" y2="55" stroke="#6366f1" stroke-width="2" stroke-dasharray="4 3"/>
+                        <polygon points="220,50 232,55 220,60" fill="#6366f1"/>
+                        <circle cx="280" cy="55" r="34" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+                        <text x="280" y="59" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#f8fafc" font-weight="700">MODÈLE</text>
+                    </svg>
+
+                    <ul class="feature-list">
+                        <li><strong>Contexte natif :</strong> Instructions système, métadonnées (date, lieu), et <em>memories</em> (mémoires extraites des conversations passées).</li>
+                        <li><strong>Personnalisation par fichier :</strong> Fichier de configuration global (ex. <code>claude.md</code>) injecté automatiquement au début de chaque session.</li>
+                        <li><strong>Le concept des <em>Skills</em> :</strong> Un dossier contenant un fichier central <code>skill.md</code> (prompt sophistiqué), des références, templates ou scripts Python.</li>
+                        <li><strong>Progressive Disclosure :</strong> Pour ne pas surcharger la fenêtre de contexte, l'IA ne charge initialement que la liste des skills, et n'importe le contenu détaillé que lorsqu'il devient pertinent.</li>
+                        <li><strong>Sources externes :</strong> Connexion à Notion, Obsidian, Confluence, Google Drive, évitant de saturer le contexte local.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="outils" class="tab-content">
+                <div class="card">
+                    <h3>Levier 2 : Les Outils (<em>Tools</em>)</h3>
+                    <p>Les outils permettent à l'agent d'interagir activement avec des applications et services externes (en lecture comme en écriture).</p>
+
+                    <svg viewBox="0 0 500 110" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto 20px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="L'agent lit et écrit dans des applications externes via des outils">
+                        <circle cx="90" cy="55" r="34" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+                        <text x="90" y="59" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#f8fafc" font-weight="700">AGENT</text>
+                        <line x1="128" y1="45" x2="200" y2="45" stroke="#6366f1" stroke-width="2"/>
+                        <polygon points="200,40 212,45 200,50" fill="#6366f1"/>
+                        <line x1="200" y1="65" x2="128" y2="65" stroke="#8b5cf6" stroke-width="2"/>
+                        <polygon points="128,60 116,65 128,70" fill="#8b5cf6"/>
+                        <text x="164" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">lecture / écriture</text>
+                        <rect x="215" y="25" width="60" height="20" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="245" y="39" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">Emails</text>
+                        <rect x="215" y="50" width="60" height="20" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="245" y="64" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">Tickets</text>
+                        <rect x="215" y="75" width="60" height="20" rx="5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="245" y="89" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">Calendrier</text>
+                    </svg>
+
+                    <ul class="feature-list">
+                        <li><strong>Outils natifs :</strong> Web Search, Code Interpreter.</li>
+                        <li><strong>Connecteurs et serveurs MCP (<em>Model Context Protocol</em>) :</strong> Relient l'IA à des environnements professionnels (Gmail, Slack, HubSpot, Jira, Canva, etc.).</li>
+                        <li><strong>Outils via les <em>Skills</em> :</strong> Intégration de scripts en ligne de commande ou d'appels API (piloter Keynote, éditer des vidéos Final Cut Pro, interagir avec Railway, YouTube Analytics, ConvertKit ou MUX).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="automations" class="tab-content">
+                <div class="card">
+                    <h3>Levier 3 : Les Automations (<em>Automations</em>)</h3>
+                    <p>Processus s'exécutant automatiquement, déclenchés par le temps ou par des événements spécifiques.</p>
+
+                    <svg viewBox="0 0 500 110" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto 20px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un déclencheur temporel ou événementiel lance une action de façon récurrente">
+                        <circle cx="80" cy="55" r="30" fill="none" stroke="#6366f1" stroke-width="2"/>
+                        <line x1="80" y1="55" x2="80" y2="36" stroke="#6366f1" stroke-width="2"/>
+                        <line x1="80" y1="55" x2="94" y2="60" stroke="#6366f1" stroke-width="2"/>
+                        <text x="80" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Déclencheur</text>
+                        <path d="M120 55 Q160 20 200 55" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 3"/>
+                        <polygon points="196,48 208,55 197,62" fill="#8b5cf6"/>
+                        <rect x="215" y="35" width="70" height="40" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+                        <text x="250" y="59" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#f8fafc" font-weight="600">Action</text>
+                        <path d="M283 68 Q260 100 220 90 Q195 82 198 68" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 3"/>
+                        <polygon points="194,70 199,58 208,68" fill="#475569"/>
+                    </svg>
+
+                    <ul class="feature-list">
+                        <li><strong>Automations natives :</strong> Filtrage anti-prompt injection, prétraitement des PDF, modération.</li>
+                        <li><strong>Planification de tâches (<em>Scheduled Tasks</em>) :</strong> Exécution récurrente (ex. commande <code>/schedule</code> pour une préparation de réunion matinale).</li>
+                        <li><strong>Les Hooks :</strong> Déclenchés par des événements précis (dans Claude Code ou Cursor) :
+                            <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+                                <li>Sauvegarder et pousser automatiquement la config sur GitHub à la fermeture d'une session.</li>
+                                <li>Nettoyer les captures d'écran générées par un outil comme Playwright MCP.</li>
+                                <li>Déclencher un contrôle qualité via Git avant un <code>push</code>.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Evals -->
+        <section id="evals">
+            <h2><i class="fas fa-vial"></i> 4. Le Levier Bonus : Les Evals</h2>
+            <div class="highlight-box">
+                <strong>Définition :</strong> Les <em>evals</em> sont des tests automatisés qui indiquent à l'agent si son travail est correct ou non.
+            </div>
+            
+            <svg viewBox="0 0 700 145" style="width:100%;max-width:650px;height:auto;display:block;margin:10px auto 25px;" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison entre une boucle avec humain dans la boucle et une boucle autonome avec evals">
+                <text x="20" y="22" font-family="Inter, sans-serif" font-size="12" fill="#ef4444" font-weight="700">Sans evals</text>
+                <circle cx="40" cy="58" r="20" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                <text x="40" y="62" text-anchor="middle" font-size="9" fill="#f8fafc" font-family="Inter, sans-serif">Humain</text>
+                <line x1="60" y1="58" x2="118" y2="58" stroke="#ef4444" stroke-width="2"/>
+                <polygon points="118,53 128,58 118,63" fill="#ef4444"/>
+                <circle cx="153" cy="58" r="20" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                <text x="153" y="62" text-anchor="middle" font-size="9" fill="#f8fafc" font-family="Inter, sans-serif">Agent</text>
+                <line x1="173" y1="58" x2="231" y2="58" stroke="#ef4444" stroke-width="2"/>
+                <polygon points="231,53 241,58 231,63" fill="#ef4444"/>
+                <circle cx="266" cy="58" r="20" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+                <text x="266" y="56" text-anchor="middle" font-size="8" fill="#f8fafc" font-family="Inter, sans-serif">Humain</text>
+                <text x="266" y="66" text-anchor="middle" font-size="8" fill="#f8fafc" font-family="Inter, sans-serif">évalue</text>
+                <path d="M266 78 Q210 118 153 78" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <polygon points="158,71 148,79 161,83" fill="#ef4444"/>
+                <text x="210" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">correction manuelle, lente</text>
+
+                <text x="420" y="22" font-family="Inter, sans-serif" font-size="12" fill="#10b981" font-weight="700">Avec evals</text>
+                <circle cx="440" cy="58" r="20" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                <text x="440" y="62" text-anchor="middle" font-size="9" fill="#f8fafc" font-family="Inter, sans-serif">Agent</text>
+                <line x1="460" y1="58" x2="518" y2="58" stroke="#10b981" stroke-width="2"/>
+                <polygon points="518,53 528,58 518,63" fill="#10b981"/>
+                <circle cx="553" cy="58" r="20" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                <text x="553" y="62" text-anchor="middle" font-size="8" fill="#f8fafc" font-family="Inter, sans-serif">Tests</text>
+                <path d="M553 78 Q495 118 440 78" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <polygon points="445,71 435,79 448,83" fill="#10b981"/>
+                <line x1="573" y1="58" x2="631" y2="58" stroke="#10b981" stroke-width="2"/>
+                <polygon points="631,53 641,58 631,63" fill="#10b981"/>
+                <circle cx="660" cy="58" r="20" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                <text x="660" y="62" text-anchor="middle" font-size="12" fill="#10b981" font-family="Inter, sans-serif">✓</text>
+                <text x="550" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94a3b8">auto-correction en boucle, rapide</text>
+            </svg>
+
+            <div class="grid-3" style="grid-template-columns: 1fr 1fr; margin-bottom: 30px;">
+                <div class="card" style="border-left: 4px solid #ef4444;">
+                    <h4 style="color: #ef4444; margin-bottom: 10px;"><i class="fas fa-user"></i> Sans Evals (Human-in-the-loop)</h4>
+                    <p style="font-size: 0.95rem;">Humain envoie requête → Agent génère → Humain évalue → Humain corrige. <strong>Répétition lente.</strong></p>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--success);">
+                    <h4 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-robot"></i> Avec Evals (Agent-in-the-loop)</h4>
+                    <p style="font-size: 0.95rem;">Agent génère → Exécute tests d'évaluation → S'auto-corrige en boucle → Présente le résultat final. <strong>Autonomie et vitesse.</strong></p>
+                </div>
+            </div>
+
+            <div class="card" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3);">
+                <h3><i class="fas fa-star"></i> Cas d'étude : Le projet <em>Auto-Research</em> d'Andrei Karpathy</h3>
+                <p>Au lieu d'écrire et d'itérer manuellement sur ses scripts d'entraînement de machine learning (<code>train.py</code>), Karpathy a écrit un fichier de programme (<code>program.md</code>) guidant l'agent. Le système a tourné toute la nuit, évaluant et optimisant les hyperparamètres de manière autonome pour surpasser les performances initiales de son créateur.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Conclusion -->
+        <section id="conclusion">
+            <h2><i class="fas fa-chess-king"></i> 5. Conclusion & Mindset : L'Agent Empathy</h2>
+            <p>Pour réussir en tant que <em>Harness Engineer</em>, il faut opérer un changement fondamental de mentalité :</p>
+            
+            <div class="mindset-shift">
+                <div class="mindset-old">
+                    <i class="fas fa-times-circle"></i> Ancien réflexe : « Comment est-ce que je fais cette tâche ? »
+                </div>
+                <div class="arrow-down">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="mindset-new">
+                    <i class="fas fa-check-circle"></i> Nouveau réflexe : « Comment est-ce que je construis le harness pour que l'IA réalise cette tâche de façon fiable ? »
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-heart"></i> Agent Empathy (Empathie envers l'agent)</h3>
+                <p>Mettez-vous à la place de l'agent. Face au contexte fourni et aux outils à disposition, seriez-vous capable de réussir la tâche ? Si la réponse est non, demandez-vous comment améliorer le <em>harness</em> pour l'aider à réussir.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Quiz -->
+        <section id="quiz">
+            <h2><i class="fas fa-comments"></i> Espace d'Évaluation Interactive</h2>
+            <div class="quiz-container">
+                <p style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600;">
+                    Selon vous, quelle est la principale différence entre un <em>Connecteur MCP</em> (Levier 2) et une source de <em>Contexte externe</em> (Levier 1) ?
+                </p>
+                <p style="font-size: 0.9rem; margin-bottom: 20px;">Partagez votre réponse ci-dessous pour valider votre compréhension :</p>
+                
+                <textarea class="quiz-input" id="quizAnswer" placeholder="Écrivez votre réflexion ici... (Ex: Le contexte externe fournit des informations en lecture seule, tandis que MCP permet une interaction bidirectionnelle...)"></textarea>
+                
+                <button class="btn-primary" onclick="submitQuiz()">
+                    <i class="fas fa-paper-plane"></i> Soumettre ma réponse
+                </button>
+
+                <div class="feedback-box" id="feedbackBox">
+                    <h4 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-check-circle"></i> Excellente réflexion !</h4>
+                    <p>Voici les éléments clés pour compléter votre réponse :</p>
+                    <ul class="feature-list" style="margin-top: 10px;">
+                        <li><strong>Contexte externe (Levier 1) :</strong> Principalement en <em>lecture seule</em>. Il s'agit d'alimenter l'IA en informations (RAG, bases de connaissances) pour enrichir sa compréhension sans saturer sa fenêtre de contexte.</li>
+                        <li><strong>Connecteur MCP (Levier 2) :</strong> Permet une interaction <em>bidirectionnelle (lecture ET écriture)</em>. L'agent peut non seulement consulter, mais aussi <strong>agir</strong> (envoyer un email, créer un ticket Jira, modifier un calendrier) de manière autonome.</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-style: italic; color: var(--text-secondary);">Continuez à développer cette <em>Agent Empathy</em> pour concevoir des harness toujours plus efficaces !</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Conçu pour l'apprentissage interactif • Agent Harness Engineering</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.7;">Inspiré des travaux de Shaw Talebi • 2026</p>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll Progress Bar
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+            
+            // Active Nav Link
+            let sections = document.querySelectorAll("section");
+            let navLinks = document.querySelectorAll(".nav-link");
+            
+            sections.forEach((sec, index) => {
+                let top = window.scrollY;
+                let offset = sec.offsetTop - 150;
+                let height = sec.offsetHeight;
+                let id = sec.getAttribute("id");
+                
+                if(top >= offset && top < offset + height) {
+                    navLinks.forEach(link => {
+                        link.classList.remove("active");
+                        if(link.getAttribute("href") === "#" + id) {
+                            link.classList.add("active");
+                        }
+                    });
+                }
+            });
+        };
+
+        // Tab Functionality
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Quiz Submission
+        function submitQuiz() {
+            const answer = document.getElementById("quizAnswer").value;
+            const feedback = document.getElementById("feedbackBox");
+            
+            if(answer.trim().length < 10) {
+                alert("Veuillez écrire une réponse un peu plus détaillée pour valider l'exercice !");
+                return;
+            }
+            
+            // Simulate processing
+            const btn = document.querySelector(".btn-primary");
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyse en cours...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                feedback.classList.add("show");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 1000);
+        }
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

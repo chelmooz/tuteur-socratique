@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recherche Traditionnelle → RAG</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Passer en mode sombre" title="Mode sombre / clair">
+  <span class="theme-icon" aria-hidden="true">🌙</span>
+</button>
+<div class="wrap">
+
+  <header>
+    <h1>Recherche Traditionnelle <span class="arrow">→</span> RAG</h1>
+    <p class="subtitle">De la correspondance de mots-clés à la génération augmentée par la connaissance</p>
+    <div class="legend">
+      <span class="chip"><span class="swatch-box"></span> Composant</span>
+      <span class="chip"><span class="swatch-arrow"></span> Flux de données</span>
+      <span class="chip"><span class="swatch-dot adv"></span> Avantage</span>
+      <span class="chip"><span class="swatch-dot lim"></span> Limite</span>
+    </div>
+  </header>
+
+  <main class="stack">
+
+    <!-- 1 & 2 : diagrammes comparatifs -->
+    <div class="compare-grid">
+
+      <!-- Traditional -->
+      <section class="card">
+        <div class="card-head"><span class="num">1</span><h2>Recherche Traditionnelle (Mots-clés)</h2></div>
+        <div class="card-inner">
+          <p class="section-label">Comment ça marche</p>
+          <div class="diagram-wrap">
+            <div class="diagram-toolbar">
+              <button class="play-btn" data-target="dot-trad" type="button">▶ Lancer le flux</button>
+            </div>
+            <svg class="diagram-svg" viewBox="0 0 660 100" role="img" aria-label="Flux de la recherche traditionnelle : requête utilisateur, moteur de recherche, documents classés, lecture des résultats">
+              <defs>
+                <marker id="arr-trad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="#232323"></path>
+                </marker>
+              </defs>
+              <path class="flow-arrow" marker-end="url(#arr-trad)" d="M160,55 L180,55"></path>
+              <path class="flow-arrow" marker-end="url(#arr-trad)" d="M320,55 L340,55"></path>
+              <path class="flow-arrow" marker-end="url(#arr-trad)" d="M480,55 L500,55"></path>
+
+              <g class="node" tabindex="0" role="button" data-title="Requête utilisateur"
+                 data-desc="Le point de départ : l'utilisateur tape des mots-clés dans la barre de recherche.">
+                <rect x="20" y="20" width="140" height="70" rx="10"></rect>
+                <path class="ic" d="M60,42 h60 M60,54 h60 M60,66 h34" stroke-width="2.4" fill="none" transform="translate(0,-4)"></path>
+                <text x="90" y="82" text-anchor="middle" class="small">Requête utilisateur</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="Moteur de recherche"
+                 data-desc="Indexe le web et fait correspondre les mots-clés de la requête aux documents existants.">
+                <rect x="180" y="20" width="140" height="70" rx="10"></rect>
+                <circle class="ic" cx="242" cy="44" r="10" fill="none" stroke-width="2.4"></circle>
+                <line class="ic" x1="250" y1="52" x2="262" y2="64" stroke-width="2.4"></line>
+                <text x="250" y="82" text-anchor="middle" class="small">Moteur de recherche</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="Documents classés"
+                 data-desc="Une liste de pages triées par pertinence de mots-clés, pas par réponse à la question.">
+                <rect x="340" y="20" width="140" height="70" rx="10"></rect>
+                <rect class="ic" x="382" y="34" width="36" height="8" rx="2" fill="none" stroke-width="2"></rect>
+                <rect class="ic" x="382" y="46" width="36" height="8" rx="2" fill="none" stroke-width="2"></rect>
+                <rect class="ic" x="382" y="58" width="24" height="8" rx="2" fill="none" stroke-width="2"></rect>
+                <text x="410" y="82" text-anchor="middle" class="small">Documents classés</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="L'utilisateur lit les résultats"
+                 data-desc="À l'utilisateur d'ouvrir les liens, lire les pages et extraire lui-même l'information.">
+                <rect x="500" y="20" width="140" height="70" rx="10"></rect>
+                <path class="ic" d="M552,36 v26 M552,36 c-10,-4 -20,-4 -20,0 v26 c10,-4 20,-4 20,0 c0,-4 10,-4 20,0 v-26 c0,-4 -10,-4 -20,0 Z" fill="none" stroke-width="2"></path>
+                <text x="570" y="82" text-anchor="middle" class="small">Lecture des résultats</text>
+              </g>
+
+              <circle id="dot-trad" class="flow-dot" r="5" style="offset-path:path('M20,55 L640,55')"></circle>
+            </svg>
+          </div>
+
+          <details open>
+            <summary>Caractéristiques</summary>
+            <div class="body">
+              <ul class="dotted">
+                <li>Trouve des documents en fonction de la correspondance des mots-clés</li>
+                <li>Renvoie une liste de liens</li>
+                <li>L'utilisateur doit lire et extraire les informations</li>
+                <li>Peut ne pas comprendre le contexte ou l'intention</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Limites</summary>
+            <div class="body">
+              <ul class="dotted marked lim">
+                <li>Inadéquation des mots-clés → résultats non pertinents</li>
+                <li>Informations dispersées dans de nombreux documents</li>
+                <li>Pas de réponse synthétisée</li>
+                <li>Informations obsolètes ou superficielles</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- RAG -->
+      <section class="card">
+        <div class="card-head"><span class="num">2</span><h2>RAG (Génération Augmentée par la Recherche)</h2></div>
+        <div class="card-inner">
+          <p class="section-label">Comment ça marche</p>
+          <div class="diagram-wrap">
+            <div class="diagram-toolbar">
+              <button class="play-btn" data-target="dot-rag" type="button">▶ Lancer le flux</button>
+            </div>
+            <svg class="diagram-svg" viewBox="0 0 660 250" role="img" aria-label="Flux du RAG : requête utilisateur, récupération dans la base de connaissances, augmentation du prompt, génération de la réponse">
+              <defs>
+                <marker id="arr-rag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="#232323"></path>
+                </marker>
+              </defs>
+              <path class="flow-arrow" marker-end="url(#arr-rag)" d="M160,55 L180,55"></path>
+              <path class="flow-arrow" marker-end="url(#arr-rag)" d="M320,55 L340,55"></path>
+              <path class="flow-arrow" marker-end="url(#arr-rag)" d="M480,55 L500,55"></path>
+              <path class="flow-arrow dash" marker-end="url(#arr-rag)" d="M250,200 C250,150 250,120 250,92"></path>
+              <text class="flow-label" x="258" y="150">Indexing</text>
+
+              <g class="node" tabindex="0" role="button" data-title="Requête utilisateur"
+                 data-desc="L'utilisateur pose sa question en langage naturel, comme à un assistant.">
+                <rect x="20" y="20" width="140" height="70" rx="10"></rect>
+                <path class="ic" d="M60,42 h60 M60,54 h60 M60,66 h34" stroke-width="2.4" fill="none" transform="translate(0,-4)"></path>
+                <text x="90" y="82" text-anchor="middle" class="small">Requête utilisateur</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="Récupérer"
+                 data-desc="Trouve les segments (chunks) les plus pertinents dans la base de connaissances / vos données.">
+                <rect x="180" y="20" width="140" height="70" rx="10"></rect>
+                <circle class="ic" cx="238" cy="44" r="9" fill="none" stroke-width="2.4"></circle>
+                <line class="ic" x1="245" y1="51" x2="256" y2="62" stroke-width="2.4"></line>
+                <rect class="ic" x="262" y="36" width="16" height="20" rx="2" fill="none" stroke-width="2"></rect>
+                <text x="250" y="82" text-anchor="middle" class="small">Récupérer</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="Augmenter"
+                 data-desc="Le contexte récupéré est ajouté au prompt envoyé au LLM.">
+                <rect x="340" y="20" width="140" height="70" rx="10"></rect>
+                <circle class="ic" cx="410" cy="48" r="13" fill="none" stroke-width="2.2"></circle>
+                <path class="ic" d="M410,38 v20 M400,48 h20" stroke-width="2"></path>
+                <text x="410" y="82" text-anchor="middle" class="small">Augmenter</text>
+              </g>
+
+              <g class="node" tabindex="0" role="button" data-title="Générer"
+                 data-desc="Le LLM rédige une réponse synthétisée, ancrée dans le contexte fourni.">
+                <rect x="500" y="20" width="140" height="70" rx="10"></rect>
+                <path class="ic" d="M552,36 h30 a6,6 0 0 1 6,6 v14 a6,6 0 0 1 -6,6 h-16 l-8,8 v-8 h-6 a6,6 0 0 1 -6,-6 v-14 a6,6 0 0 1 6,-6 Z" fill="none" stroke-width="2"></path>
+                <text x="570" y="82" text-anchor="middle" class="small">Générer</text>
+              </g>
+
+              <g class="node kb" tabindex="0" role="button" data-title="Base de connaissances"
+                 data-desc="Vos documents, indexés à l'avance sous forme vectorielle pour être retrouvés rapidement.">
+                <rect x="150" y="200" width="200" height="50" rx="10"></rect>
+                <path class="ic" d="M180,215 c0,-4 8,-6 16,-6 s16,2 16,6 v14 c0,4 -8,6 -16,6 s-16,-2 -16,-6 Z M180,215 c0,4 8,6 16,6 s16,-2 16,-6" fill="none" stroke-width="1.8"></path>
+                <text x="270" y="222" text-anchor="middle" class="small" style="font-weight:600">Base de connaissances</text>
+                <text x="270" y="235" text-anchor="middle" class="small">(Vos données)</text>
+              </g>
+
+              <circle id="dot-rag" class="flow-dot" r="5" style="offset-path:path('M20,55 L640,55')"></circle>
+            </svg>
+          </div>
+
+          <details open>
+            <summary>Caractéristiques</summary>
+            <div class="body">
+              <ul class="dotted">
+                <li>Récupère les informations pertinentes à partir de vos données</li>
+                <li>Augmente le prompt avec le contexte</li>
+                <li>Le LLM génère une réponse synthétisée et précise</li>
+                <li>Fondé sur vos connaissances de confiance</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Avantages</summary>
+            <div class="body">
+              <ul class="dotted marked adv">
+                <li>Réponses plus précises et tenant compte du contexte</li>
+                <li>Utilise vos propres données à jour</li>
+                <li>Réduit les hallucinations</li>
+                <li>Gagne du temps — réponses prêtes à l'emploi</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+    </div>
+
+    <!-- 3 : tableau comparatif -->
+    <section class="card">
+      <div class="card-head"><span class="num">3</span><h2>Comparaison côte à côte</h2></div>
+      <div class="card-inner">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Aspect</th><th>Recherche Traditionnelle</th><th>RAG</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Ce qu'elle renvoie</th><td>Liste de liens / documents</td><td>Réponse directe, synthétisée</td></tr>
+              <tr><th scope="row">Compréhension</th><td>Aucune compréhension</td><td>Comprend + génère</td></tr>
+              <tr><th scope="row">Effort (utilisateur)</th><td>Élevé (lire et extraire)</td><td>Faible (réponse directe)</td></tr>
+              <tr><th scope="row">Fiabilité</th><td>Variable</td><td>Plus élevée (fondée sur vos données)</td></tr>
+              <tr><th scope="row">Personnalisation</th><td>Données web générales</td><td>Vos propres données / base de connaissances</td></tr>
+              <tr><th scope="row">Idéal pour</th><td>Navigation générale</td><td>Réponses précises et spécifiques à un domaine</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 : pipeline RAG -->
+    <section class="card">
+      <div class="card-head"><span class="num">4</span><h2>Pipeline RAG (Haut niveau)</h2></div>
+      <div class="card-inner">
+        <div class="pipeline" role="tablist" aria-label="Étapes du pipeline RAG">
+
+          <button class="pipe-step active" type="button" role="tab" aria-selected="true"
+            data-detail="Chaque document source (PDF, page, note...) est chargé tel quel dans le système, avant tout traitement.">
+            <div class="pipe-num">1</div>
+            <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="3" width="12" height="16" rx="1.5"></rect><rect x="7" y="5" width="12" height="16" rx="1.5" fill="var(--card)"></rect><line x1="10" y1="9" x2="16" y2="9"></line><line x1="10" y1="13" x2="16" y2="13"></line></svg>
+            <div class="pipe-label">Ingérer les documents</div>
+          </button>
+
+          <button class="pipe-step" type="button" role="tab" aria-selected="false"
+            data-detail="Les documents sont découpés en petits segments (chunks) : plus faciles à indexer et à retrouver précisément.">
+            <div class="pipe-num">2</div>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6 4l6 8-6 8M12 12h9"></path><circle cx="6" cy="4" r="1.6" fill="#232323" stroke="none"></circle><circle cx="6" cy="20" r="1.6" fill="#232323" stroke="none"></circle></svg>
+            <div class="pipe-label">Diviser en segments</div>
+          </button>
+
+          <button class="pipe-step" type="button" role="tab" aria-selected="false"
+            data-detail="Chaque segment est transformé en vecteur numérique (embedding) qui capture son sens, ex. [0.2, -0.1, ...].">
+            <div class="pipe-num">3</div>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M8 4 L4 12 L8 20 M16 4 L20 12 L16 20"></path><circle cx="12" cy="12" r="1.6" fill="#232323" stroke="none"></circle></svg>
+            <div class="pipe-label">Créer les embeddings</div>
+          </button>
+
+          <button class="pipe-step" type="button" role="tab" aria-selected="false"
+            data-detail="Les vecteurs sont stockés dans une base de données vectorielle, optimisée pour la recherche par similarité.">
+            <div class="pipe-num">4</div>
+            <svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"></path></svg>
+            <div class="pipe-label">Stocker dans une base vectorielle</div>
+          </button>
+
+          <button class="pipe-step" type="button" role="tab" aria-selected="false"
+            data-detail="À la question de l'utilisateur, on retrouve les segments dont le sens est le plus proche de la requête.">
+            <div class="pipe-num">5</div>
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"></circle><line x1="14.5" y1="14.5" x2="20" y2="20"></line></svg>
+            <div class="pipe-label">Récupérer les segments pertinents</div>
+          </button>
+
+          <button class="pipe-step" type="button" role="tab" aria-selected="false"
+            data-detail="Les segments retrouvés sont ajoutés au prompt, puis le LLM génère la réponse finale à partir de ce contexte.">
+            <div class="pipe-num">6</div>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H10l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"></path></svg>
+            <div class="pipe-label">Augmenter + Générer la réponse</div>
+          </button>
+        </div>
+        <div class="pipe-detail" id="pipe-detail" role="tabpanel">Chaque document source (PDF, page, note...) est chargé tel quel dans le système, avant tout traitement.</div>
+      </div>
+    </section>
+
+    <!-- 5 : quand utiliser quoi -->
+    <section class="card">
+      <div class="card-head"><span class="num">5</span><h2>Quand utiliser quoi ?</h2></div>
+      <div class="card-inner">
+        <div class="decision-grid">
+          <div class="use-list trad">
+            <h3>Utilisez la Recherche Traditionnelle quand :</h3>
+            <ul class="dotted">
+              <li>Vous avez besoin d'informations générales</li>
+              <li>Les données changent fréquemment</li>
+              <li>Vous souhaitez plusieurs points de vue</li>
+              <li>Vous explorez librement un sujet</li>
+            </ul>
+          </div>
+          <div class="use-list rag">
+            <h3>Utilisez le RAG quand :</h3>
+            <ul class="dotted">
+              <li>Vous avez besoin de réponses précises et spécifiques à un domaine</li>
+              <li>Vous possédez des données propriétaires ou privées</li>
+              <li>Vous voulez des réponses cohérentes et fiables</li>
+              <li>Vous voulez réduire l'effort manuel</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="helper-card">
+          <h3>🧭 Petit assistant de décision</h3>
+          <p class="lead">Répondez à ces 4 questions, la recommandation se met à jour toute seule.</p>
+
+          <div class="q-row" data-q="1">
+            <p>Vos données changent-elles très fréquemment ?</p>
+            <div class="choice-btns">
+              <button class="choice-btn" data-value="trad" type="button">Oui</button>
+              <button class="choice-btn" data-value="rag" type="button">Non</button>
+            </div>
+          </div>
+          <div class="q-row" data-q="2">
+            <p>Voulez-vous une réponse directe plutôt qu'une liste de liens ?</p>
+            <div class="choice-btns">
+              <button class="choice-btn" data-value="rag" type="button">Oui</button>
+              <button class="choice-btn" data-value="trad" type="button">Non</button>
+            </div>
+          </div>
+          <div class="q-row" data-q="3">
+            <p>Travaillez-vous avec des données propriétaires ou privées ?</p>
+            <div class="choice-btns">
+              <button class="choice-btn" data-value="rag" type="button">Oui</button>
+              <button class="choice-btn" data-value="trad" type="button">Non</button>
+            </div>
+          </div>
+          <div class="q-row" data-q="4">
+            <p>Explorez-vous librement un sujet, sans question précise ?</p>
+            <div class="choice-btns">
+              <button class="choice-btn" data-value="trad" type="button">Oui</button>
+              <button class="choice-btn" data-value="rag" type="button">Non</button>
+            </div>
+          </div>
+
+          <div class="result-box" id="result-box" aria-live="polite">
+            <span>Répondez aux questions ci-dessus pour voir la recommandation.</span>
+          </div>
+          <button class="reset-btn" id="reset-btn" type="button">Réinitialiser</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="takeaway">
+      <h3>💡 À retenir</h3>
+      <p>La Recherche Traditionnelle trouve l'information.</p>
+      <p>Le RAG la comprend et vous donne la réponse.</p>
+    </aside>
+
+  </main>
+
+  <footer>Inspiré du sketchnote original — crédit original : mltut</footer>
+</div>
+
+<div id="tip" role="status" hidden>
+  <div class="tip-title"></div>
+  <div class="tip-body"></div>
+</div>
+
+<script>
+(function(){
+  var themeToggle = document.getElementById('theme-toggle');
+  var themeIcon = themeToggle.querySelector('.theme-icon');
+
+  function applyIcon(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', isDark ? 'Passer en mode clair' : 'Passer en mode sombre');
+  }
+  applyIcon();
+
+  themeToggle.addEventListener('click', function(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark){
+      document.documentElement.removeAttribute('data-theme');
+      try{ localStorage.setItem('theme', 'light'); }catch(e){}
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      try{ localStorage.setItem('theme', 'dark'); }catch(e){}
+    }
+    applyIcon();
+  });
+})();
+
+(function(){
+  /* ---- tooltips sur les noeuds des diagrammes ---- */
+  var tip = document.getElementById('tip');
+
+  function showTip(node){
+    var title = node.getAttribute('data-title') || '';
+    var desc = node.getAttribute('data-desc') || '';
+    tip.querySelector('.tip-title').textContent = title;
+    tip.querySelector('.tip-body').textContent = desc;
+    tip.hidden = false;
+
+    var r = node.getBoundingClientRect();
+    var tr = tip.getBoundingClientRect();
+    var left = r.left + r.width/2 - tr.width/2;
+    var top = r.bottom + 10;
+    var maxLeft = window.innerWidth - tr.width - 8;
+    if (left < 8) left = 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (top + tr.height > window.innerHeight - 8) top = r.top - tr.height - 10;
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hideTip(){ tip.hidden = true; }
+
+  document.querySelectorAll('.node').forEach(function(node){
+    node.addEventListener('click', function(e){ e.stopPropagation(); showTip(node); });
+    node.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); showTip(node); }
+    });
+  });
+  document.addEventListener('click', function(e){
+    if (!tip.hidden && !e.target.closest('#tip')) hideTip();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') hideTip(); });
+
+  /* ---- lecture du flux animé ---- */
+  document.querySelectorAll('.play-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var dot = document.getElementById(btn.getAttribute('data-target'));
+      var running = dot.classList.toggle('running');
+      btn.textContent = running ? '⏸ Mettre en pause' : '▶ Lancer le flux';
+    });
+  });
+
+  /* ---- pipeline interactif ---- */
+  var steps = document.querySelectorAll('.pipe-step');
+  var detailBox = document.getElementById('pipe-detail');
+  steps.forEach(function(step){
+    step.addEventListener('click', function(){
+      steps.forEach(function(s){ s.classList.remove('active'); s.setAttribute('aria-selected','false'); });
+      step.classList.add('active');
+      step.setAttribute('aria-selected','true');
+      detailBox.innerHTML = '<strong>' + step.querySelector('.pipe-label').textContent + ' — </strong>' + step.getAttribute('data-detail');
+    });
+  });
+
+  /* ---- assistant de décision ---- */
+  var answers = {};
+  var resultBox = document.getElementById('result-box');
+  var resetBtn = document.getElementById('reset-btn');
+
+  function updateResult(){
+    var count = Object.keys(answers).length;
+    if (count < 4){
+      resultBox.innerHTML = '<span>' + count + '/4 questions répondues — continuez pour affiner la recommandation.</span>';
+      return;
+    }
+    var ragScore = 0, tradScore = 0;
+    Object.keys(answers).forEach(function(k){
+      if (answers[k] === 'rag') ragScore++; else tradScore++;
+    });
+    var html;
+    if (ragScore > tradScore){
+      html = '<span class="badge">RAG</span><span>Vos réponses pointent vers le RAG : vous voulez une réponse directe, fondée sur vos propres données.</span>';
+    } else if (tradScore > ragScore){
+      html = '<span class="badge trad">Recherche Traditionnelle</span><span>Vos réponses pointent vers la recherche classique : exploration libre et données changeantes.</span>';
+    } else {
+      html = '<span class="badge trad">Les deux</span><span>Match nul — les deux approches se complètent bien pour votre cas.</span>';
+    }
+    resultBox.innerHTML = html;
+  }
+
+  document.querySelectorAll('.q-row').forEach(function(row){
+    var qid = row.getAttribute('data-q');
+    row.querySelectorAll('.choice-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        row.querySelectorAll('.choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        answers[qid] = btn.getAttribute('data-value');
+        updateResult();
+      });
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    answers = {};
+    document.querySelectorAll('.choice-btn.selected').forEach(function(b){ b.classList.remove('selected'); });
+    resultBox.innerHTML = '<span>Répondez aux questions ci-dessus pour voir la recommandation.</span>';
+  });
+})();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

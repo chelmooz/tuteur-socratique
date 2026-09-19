@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La mémoire des agents IA — architecture Mem0</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<header class="site">
+  <div class="site-inner">
+    <div class="brand">Mémoire des agents · Mem0</div>
+    <nav class="toc">
+      <a href="#architecture">Architecture</a>
+      <a href="#ingestion">Ingestion</a>
+      <a href="#retrieval">Récupération</a>
+      <a href="#local">En local</a>
+      <a href="#quiz">Quiz</a>
+    </nav>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Changer de thème">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      <span id="theme-label">Mode sombre</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="wrap">
+    <section class="hero" style="padding-top:44px;">
+      <p class="kicker mono">Cours — mémoire à long terme des agents IA</p>
+      <h1>Un LLM ne se souvient de rien. Voici comment on lui construit une mémoire.</h1>
+      <p class="lede">Chaque appel à un LLM est traité isolément : rien ne persiste d'une requête à l'autre. Pour qu'un agent retienne des faits sur son utilisateur, sur lui-même et sur le monde, à travers ses conversations, il lui faut un service de mémoire externe, persistant et interrogeable. Ce cours détaille l'architecture qu'utilise <strong>Mem0</strong>, une implémentation de référence pour cette mémoire à long terme, de l'ingestion des souvenirs jusqu'à leur récupération classée.</p>
+    </section>
+  </div>
+
+  <div class="wrap-wide">
+    <section id="architecture" style="border-top:none; padding-top:8px;">
+      <div class="diagram-shell">
+        <svg viewBox="0 0 1000 710" role="img" aria-label="Diagramme des deux pipelines Mem0 : ingestion des souvenirs en haut, récupération classée en bas">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path>
+            </marker>
+          </defs>
+
+          <text x="20" y="20" font-family="var(--font-sans)" font-size="13" fill="var(--muted)">L'ingestion se déclenche après chaque tour de l'agent.</text>
+
+          <!-- Row A : ingestion pipeline -->
+          <g font-family="var(--font-sans)">
+            <rect x="20" y="40" width="180" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="110" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Tour de l'agent</text>
+            <text x="110" y="88" text-anchor="middle" font-size="12" fill="var(--muted)">messages produits</text>
+
+            <line x1="200" y1="75" x2="228" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#arrow)"></line>
+
+            <rect x="230" y="40" width="220" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="340" y="62" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">SQLite</text>
+            <text x="340" y="80" text-anchor="middle" font-size="12" fill="var(--muted)">10 derniers messages</text>
+            <text x="340" y="96" text-anchor="middle" font-size="12" fill="var(--muted)">(résolution des pronoms)</text>
+
+            <line x1="450" y1="75" x2="478" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#arrow)"></line>
+
+            <rect x="480" y="40" width="180" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="570" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">LLM extracteur</text>
+            <text x="570" y="88" text-anchor="middle" font-size="12" fill="var(--muted)">1 à 12 Md param.</text>
+
+            <line x1="660" y1="75" x2="688" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#arrow)"></line>
+
+            <rect x="690" y="40" width="290" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="835" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">JSON structuré</text>
+            <text x="835" y="88" text-anchor="middle" font-size="12" fill="var(--muted)" class="mono">{ "memory": "…" }</text>
+          </g>
+
+          <!-- Row B : the 3 stores -->
+          <g font-family="var(--font-sans)">
+            <line x1="835" y1="110" x2="190" y2="188" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="835" y1="110" x2="490" y2="188" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="835" y1="110" x2="800" y2="188" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+            <rect x="40" y="190" width="280" height="80" rx="4" fill="var(--teal)"></rect>
+            <text x="180" y="224" text-anchor="middle" font-size="14" font-weight="600" fill="#12241F">Mémoire principale</text>
+            <text x="180" y="242" text-anchor="middle" font-size="12" fill="#12241F">base vectorielle des souvenirs</text>
+
+            <rect x="380" y="190" width="220" height="80" rx="4" fill="var(--amber)"></rect>
+            <text x="490" y="224" text-anchor="middle" font-size="14" font-weight="600" fill="#2A1E08">Store d'entités</text>
+            <text x="490" y="242" text-anchor="middle" font-size="12" fill="#2A1E08">base vectorielle des entités</text>
+
+            <rect x="660" y="190" width="280" height="80" rx="4" fill="var(--violet)"></rect>
+            <text x="800" y="224" text-anchor="middle" font-size="14" font-weight="600" fill="#1B1740">SQLite</text>
+            <text x="800" y="242" text-anchor="middle" font-size="12" fill="#1B1740">logs + contexte des échanges</text>
+          </g>
+
+          <text x="20" y="345" font-family="var(--font-sans)" font-size="13" fill="var(--muted)">La récupération s'exécute à chaque tour, ou sur demande explicite de l'agent.</text>
+
+          <!-- cross connectors, drawn before row C/D so they appear to run underneath -->
+          <line x1="180" y1="270" x2="585" y2="378" stroke="var(--teal)" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow)"></line>
+          <line x1="490" y1="270" x2="755" y2="498" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow)"></line>
+
+          <!-- Row C : retrieval query -->
+          <g font-family="var(--font-sans)">
+            <rect x="20" y="380" width="170" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="105" y="410" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Requête</text>
+            <text x="105" y="428" text-anchor="middle" font-size="12" fill="var(--muted)">de l'utilisateur</text>
+
+            <line x1="190" y1="415" x2="218" y2="415" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#arrow)"></line>
+
+            <rect x="220" y="380" width="190" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="315" y="410" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Embedding</text>
+            <text x="315" y="428" text-anchor="middle" font-size="12" fill="var(--muted)">même modèle qu'à l'indexation</text>
+
+            <line x1="410" y1="415" x2="438" y2="415" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#arrow)"></line>
+
+            <rect x="440" y="380" width="290" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="585" y="410" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Recherche ANN</text>
+            <text x="585" y="428" text-anchor="middle" font-size="12" fill="var(--muted)">pool ≥ 60 (Top K × 4)</text>
+          </g>
+
+          <!-- Row D : re-ranking -->
+          <g font-family="var(--font-sans)">
+            <line x1="585" y1="450" x2="175" y2="498" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="585" y1="450" x2="465" y2="498" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="585" y1="450" x2="755" y2="498" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+            <rect x="60" y="500" width="230" height="90" rx="4" fill="var(--teal)"></rect>
+            <text x="175" y="530" text-anchor="middle" font-size="14" font-weight="600" fill="#12241F">Score vectoriel</text>
+            <text x="175" y="548" text-anchor="middle" font-size="12" fill="#12241F">similarité sémantique</text>
+            <text x="175" y="564" text-anchor="middle" font-size="12" fill="#12241F" class="mono">0 – 1</text>
+
+            <rect x="340" y="500" width="250" height="90" rx="4" fill="var(--violet)"></rect>
+            <text x="465" y="530" text-anchor="middle" font-size="14" font-weight="600" fill="#1B1740">Score BM25</text>
+            <text x="465" y="548" text-anchor="middle" font-size="12" fill="#1B1740">mots-clés lemmatisés</text>
+            <text x="465" y="564" text-anchor="middle" font-size="12" fill="#1B1740" class="mono">0 – 1</text>
+
+            <rect x="640" y="500" width="230" height="90" rx="4" fill="var(--amber)"></rect>
+            <text x="755" y="530" text-anchor="middle" font-size="14" font-weight="600" fill="#2A1E08">Entity boost</text>
+            <text x="755" y="548" text-anchor="middle" font-size="12" fill="#2A1E08">rareté de l'entité</text>
+            <text x="755" y="564" text-anchor="middle" font-size="12" fill="#2A1E08" class="mono">0 – 0,5</text>
+          </g>
+
+          <!-- Row E : final score -->
+          <g font-family="var(--font-sans)">
+            <line x1="175" y1="590" x2="450" y2="628" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="465" y1="590" x2="495" y2="628" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+            <line x1="755" y1="590" x2="545" y2="628" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+            <rect x="260" y="630" width="480" height="60" rx="4" fill="var(--surface)" stroke="var(--line)"></rect>
+            <text x="500" y="655" text-anchor="middle" font-size="13.5" font-weight="600" fill="var(--ink)" class="mono">score = (vect + BM25 + entity) / 2,5</text>
+            <text x="500" y="674" text-anchor="middle" font-size="12" fill="var(--muted)">tri par score → Top K retourné</text>
+          </g>
+        </svg>
+
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--teal)"></span>Vecteurs — similarité sémantique</span>
+          <span><span class="swatch" style="background:var(--violet)"></span>Mots-clés / logs — SQLite, BM25</span>
+          <span><span class="swatch" style="background:var(--amber)"></span>Entités — la rareté fait la pertinence</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+
+    <section id="conversationnelle">
+      <h2>Mémoire conversationnelle et mémoire à long terme</h2>
+      <p>Deux formes de mémoire coexistent chez un agent, et elles répondent à des besoins différents.</p>
+      <p><strong>Mémoire conversationnelle.</strong> L'historique complet de la session en cours est renvoyé au LLM à chaque nouveau tour : message, réponse, message suivant, et ainsi de suite. C'est ce qui donne l'illusion de continuité pendant une conversation. Dès qu'une nouvelle session démarre, cet historique disparaît : l'agent repart de zéro.</p>
+      <p><strong>Mémoire à long terme.</strong> Un service externe et persistant, indépendant de la session, stocke des faits sur l'utilisateur ou sur l'agent lui-même. L'agent l'interroge à chaque tour pour récupérer un contexte pertinent, et cette mémoire peut, si elle est centrée sur l'utilisateur, être partagée entre plusieurs agents distincts.</p>
+      <div class="pill-row">
+        <span class="pill">Session courante → conversationnelle</span>
+        <span class="pill">Toutes les sessions → long terme</span>
+        <span class="pill">Partageable entre agents → long terme</span>
+      </div>
+    </section>
+
+    <section id="stores">
+      <h2>Les trois bases de stockage de Mem0</h2>
+      <p>L'architecture repose sur trois systèmes de stockage distincts, chacun avec un rôle précis.</p>
+      <table>
+        <thead>
+          <tr><th>Store</th><th>Technologie</th><th>Rôle</th><th>Contenu et métadonnées</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Mémoire principale</td>
+            <td>Base vectorielle</td>
+            <td>Stocke les souvenirs eux-mêmes</td>
+            <td>Texte du souvenir, dates de création / mise à jour / expiration, attribution (utilisateur ou agent), hash pour la déduplication exacte, version lemmatisée pour la recherche par mots-clés</td>
+          </tr>
+          <tr>
+            <td>Store d'entités</td>
+            <td>Base vectorielle</td>
+            <td>Isole les entités nommées</td>
+            <td>Lieux, personnes, objets extraits des souvenirs ; chaque entité est liée à une ou plusieurs mémoires principales</td>
+          </tr>
+          <tr>
+            <td>SQLite</td>
+            <td>Base relationnelle</td>
+            <td>Logs et contexte immédiat</td>
+            <td>Historique des changements dans les bases vectorielles, et fenêtre glissante des 10 derniers messages envoyés au pipeline</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Exemple : le souvenir « mon quartier préféré à Paris est Montmartre » génère deux entités liées, <span class="mono">Paris</span> et <span class="mono">Montmartre</span>, chacune pointant vers ce souvenir dans le store d'entités.
+      </div>
+    </section>
+
+    <section id="ingestion">
+      <h2>Le pipeline d'ingestion</h2>
+      <p>L'ingestion se déclenche après chaque tour de l'agent, pour transformer l'échange qui vient de se produire en souvenirs exploitables.</p>
+      <table>
+        <thead><tr><th>Mode</th><th>Fonctionnement</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td>Mémoire procédurale</td><td>Résume les actions et outils utilisés par l'agent</td><td>Rarement utilisé aujourd'hui</td></tr>
+          <tr><td class="mono">infer=false</td><td>Embarque les messages bruts directement dans la base</td><td>Simple, sans extraction</td></tr>
+          <tr><td class="mono">infer=true</td><td>Extraction structurée par un LLM dédié</td><td>Mode recommandé</td></tr>
+        </tbody>
+      </table>
+      <p>Le pipeline complet en mode <span class="mono">infer=true</span> :</p>
+      <ol class="steps">
+        <li><strong>Chargement du contexte récent.</strong> Les 10 derniers messages sont récupérés depuis SQLite, pour permettre au LLM de résoudre les pronoms et les références ambiguës du nouvel échange.</li>
+        <li><strong>Recherche de souvenirs pertinents.</strong> Les nouveaux messages sont vectorisés pour retrouver, dans la mémoire principale, les souvenirs déjà existants liés au même sujet — ils seront inclus dans le prompt d'extraction pour éviter les doublons de sens.</li>
+        <li><strong>Extraction par le LLM.</strong> Un modèle reçoit le rôle d'extracteur, un résumé de l'utilisateur, les nouveaux messages, le contexte récent, les souvenirs pertinents et les dates, puis produit un objet JSON structuré contenant les nouveaux souvenirs.</li>
+        <li><strong>Traitement et sauvegarde.</strong> Chaque nouveau souvenir est haché (pour écarter les doublons stricts), lemmatisé (pour la recherche par mots-clés), puis inséré dans la mémoire principale, avec mise à jour du store d'entités et du journal SQLite.</li>
+      </ol>
+      <div class="formula">{ "memory": "L'utilisateur préfère les restaurants vegans" }</div>
+    </section>
+
+    <section id="retrieval">
+      <h2>Le pipeline de récupération</h2>
+      <p>La mémoire peut être interrogée de deux manières : <strong>explicitement</strong>, quand l'agent appelle lui-même un outil de recherche, ou <strong>automatiquement</strong>, quand le système enrichit le prompt à chaque tour sans que l'agent n'ait à le demander.</p>
+      <p>Les paramètres d'entrée sont la requête, le nombre de souvenirs souhaités (Top K), un seuil de score minimal, et l'identité concernée (utilisateur, agent ou exécution).</p>
+      <ol class="steps">
+        <li><strong>Embedding de la requête,</strong> avec le même modèle que celui utilisé pour indexer les souvenirs.</li>
+        <li><strong>Recherche vectorielle ANN.</strong> Le système ne cherche pas directement le Top K demandé : il extrait un pool plus large de candidats — généralement Top K × 4, avec un minimum de 60 souvenirs — afin de laisser de la marge au reclassement qui suit.</li>
+        <li><strong>Reclassement à trois scores,</strong> calculés pour chaque souvenir du pool.</li>
+        <li><strong>Score final et sélection</strong> du vrai Top K, celui réellement retourné à l'agent.</li>
+      </ol>
+      <table>
+        <thead><tr><th>Score</th><th>Ce qu'il mesure</th><th>Plage</th></tr></thead>
+        <tbody>
+          <tr><td>Vectoriel</td><td>Similarité sémantique entre la requête et le souvenir</td><td class="mono">0 – 1</td></tr>
+          <tr><td>BM25</td><td>Chevauchement de mots-clés entre versions lemmatisées</td><td class="mono">0 – 1</td></tr>
+          <tr><td>Entity boost</td><td>Bonus si le souvenir est lié à une entité de la requête</td><td class="mono">0 – 0,5</td></tr>
+        </tbody>
+      </table>
+      <div class="formula">score final = (score vectoriel + score BM25 + entity boost) / 2,5</div>
+      <p>Le boost d'entité mérite un détail : il est <strong>inversement proportionnel</strong> au nombre total de souvenirs liés à cette entité. Une entité très répandue comme « Paris », liée à des centaines de souvenirs, apporte un boost faible ; une entité rare, liée à deux ou trois souvenirs seulement, apporte un boost fort — parce que l'information qu'elle signale est plus spécifique, donc plus pertinente.</p>
+      <div class="callout warn">
+        Mem0 ne réécrit pas la requête par défaut. Ajouter une étape de <em>query rewriting</em> — un petit LLM qui reformule la requête utilisateur en une meilleure requête de recherche, avant l'embedding — améliore sensiblement la pertinence des résultats.
+      </div>
+    </section>
+
+    <section id="local">
+      <h2>Construire ce système en local</h2>
+      <p>Rien n'impose de dépendre d'une API propriétaire : l'ensemble du pipeline tourne avec des modèles open source, hébergés localement.</p>
+      <h3>Modèle d'extraction</h3>
+      <p>La tâche d'extraction est structurée et relativement simple — elle ne justifie pas un modèle massif. Un modèle de <strong>1 à 12 milliards de paramètres</strong> suffit largement, par exemple la famille Qwen3 (Qwen3 8B) ou Llama. Un fine-tuning ciblé sur cette tâche d'extraction peut encore améliorer la précision sur la durée.</p>
+      <h3>Modèle d'embedding</h3>
+      <p>Le choix du modèle d'embedding dépend de la langue et du domaine visés (généraliste, médical, multilingue…). Le classement <strong>MTEB</strong> (Massive Text Embedding Benchmark) sur Hugging Face donne un point de comparaison fiable pour orienter ce choix, avec la possibilité d'affiner soi-même un modèle si le domaine est spécifique.</p>
+    </section>
+
+    <section id="quiz">
+      <h2>Quiz de validation</h2>
+      <p>12 questions couvrant l'ensemble du cours. <span id="quiz-score">score : 0 / 12</span></p>
+      <div id="quiz-container"></div>
+      <button class="btn" id="quiz-reset" type="button">Recommencer le quiz</button>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Cours de synthèse sur l'architecture de mémoire à long terme Mem0, à l'usage d'agents IA locaux.</div>
+</footer>
+
+<script>
+  // --- Thème ---
+  (function(){
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var label = document.getElementById('theme-label');
+    function sync(){
+      var dark = root.getAttribute('data-theme') === 'dark';
+      label.textContent = dark ? 'Mode clair' : 'Mode sombre';
+      btn.setAttribute('aria-pressed', String(dark));
+    }
+    sync();
+    btn.addEventListener('click', function(){
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      sync();
+    });
+  })();
+
+  // --- Quiz ---
+  (function(){
+    var QUIZ = [
+      {
+        q: "Pourquoi un agent basé sur un LLM a-t-il besoin d'un système de mémoire externe ?",
+        options: [
+          "Le LLM manque de paramètres pour retenir l'information",
+          "Le LLM est stateless : chaque requête est traitée indépendamment des précédentes",
+          "Le LLM ne comprend pas le langage naturel",
+          "Les serveurs d'inférence sont trop lents pour stocker des données"
+        ],
+        correct: 1,
+        explain: "Un LLM traite chaque prompt isolément. Sans mémoire externe, rien ne persiste d'une requête à l'autre."
+      },
+      {
+        q: "Quelle affirmation distingue correctement mémoire conversationnelle et mémoire à long terme ?",
+        options: [
+          "La mémoire conversationnelle persiste entre les sessions, la mémoire à long terme non",
+          "La mémoire conversationnelle est limitée à la session en cours, la mémoire à long terme persiste et peut être partagée entre agents",
+          "Les deux sont stockées dans la même base vectorielle",
+          "La mémoire à long terme est recalculée à chaque prompt"
+        ],
+        correct: 1,
+        explain: "La conversationnelle vit dans le fil de la session ; la long terme est externe, persistante, et réutilisable par plusieurs agents pour le même utilisateur."
+      },
+      {
+        q: "Dans l'architecture Mem0, quel est le rôle du store d'entités ?",
+        options: [
+          "Stocker les embeddings de tous les messages bruts",
+          "Isoler les entités nommées (lieux, personnes…) et les lier aux souvenirs qui les mentionnent",
+          "Remplacer la base SQLite pour les logs",
+          "Calculer le score BM25"
+        ],
+        correct: 1,
+        explain: "Le store d'entités relie chaque entité nommée détectée aux souvenirs de la mémoire principale qui la mentionnent."
+      },
+      {
+        q: "Que contient concrètement la base SQLite du pipeline ?",
+        options: [
+          "Les vecteurs d'embedding des souvenirs",
+          "L'historique des modifications et les 10 derniers messages échangés",
+          "La liste des entités nommées",
+          "Le modèle d'extraction fine-tuné"
+        ],
+        correct: 1,
+        explain: "SQLite journalise les changements des bases vectorielles et garde une fenêtre glissante des 10 derniers messages."
+      },
+      {
+        q: "Pourquoi conserver précisément les 10 derniers messages avant l'extraction ?",
+        options: [
+          "Pour entraîner le modèle d'embedding",
+          "Pour permettre au LLM extracteur de résoudre les pronoms et références ambiguës",
+          "Pour calculer le hash de déduplication",
+          "Pour remplir le quota minimal de la recherche vectorielle"
+        ],
+        correct: 1,
+        explain: "Sans ce contexte immédiat, le LLM ne peut pas déterminer à quoi renvoient des mots comme « il » ou « ça »."
+      },
+      {
+        q: "Quel mode d'ingestion est recommandé pour la qualité des souvenirs extraits ?",
+        options: [
+          "La mémoire procédurale seule",
+          "infer=false, qui embarque les messages bruts",
+          "infer=true, qui passe par une extraction structurée par LLM",
+          "Aucune ingestion, uniquement de la recherche en direct dans l'historique"
+        ],
+        correct: 2,
+        explain: "infer=true déclenche une extraction structurée par LLM, plus fiable que l'embarquement brut des messages ou le résumé procédural."
+      },
+      {
+        q: "Lors de la récupération, pourquoi interroger un pool de souvenirs plus large que le Top K demandé (Top K × 4, minimum 60) ?",
+        options: [
+          "Pour compenser l'imprécision du moteur vectoriel par la quantité",
+          "Pour disposer d'assez de candidats afin d'appliquer un reclassement pertinent (BM25 + entity boost) avant de tronquer",
+          "Pour remplir le cache SQLite",
+          "Parce que la base vectorielle impose ce minimum techniquement"
+        ],
+        correct: 1,
+        explain: "Un pool large de candidats est nécessaire pour que le re-ranking par BM25 et entity boost puisse réellement reclasser avant de tronquer au Top K final."
+      },
+      {
+        q: "Quels sont les trois scores combinés lors du reclassement d'un souvenir candidat ?",
+        options: [
+          "Fraîcheur, popularité, longueur du texte",
+          "Score vectoriel, score BM25 (lexical), entity boost",
+          "Coût de calcul, latence, taille du modèle",
+          "Date de création, auteur, langue"
+        ],
+        correct: 1,
+        explain: "Ces trois scores sont calculés indépendamment pour chaque souvenir candidat avant d'être combinés."
+      },
+      {
+        q: "Comment est calculé le boost d'entité d'un souvenir ?",
+        options: [
+          "Il est fixe à 0,5 pour tout souvenir lié à une entité",
+          "Il augmente avec le nombre total de souvenirs liés à cette entité",
+          "Il augmente quand l'entité est rare, c'est-à-dire liée à peu de souvenirs",
+          "Il dépend uniquement de la longueur du nom de l'entité"
+        ],
+        correct: 2,
+        explain: "Une entité rare rend un souvenir plus spécifique et donc plus pertinent : le boost est inversement proportionnel au nombre de souvenirs liés."
+      },
+      {
+        q: "Comment le score final d'un souvenir candidat est-il obtenu ?",
+        options: [
+          "On garde le maximum des trois scores",
+          "On additionne les trois scores puis on divise par 2,5",
+          "On multiplie les trois scores entre eux",
+          "On fait une moyenne pondérée par la date de création"
+        ],
+        correct: 1,
+        explain: "Score final = (vectoriel + BM25 + entity boost) / 2,5, la division ramenant le maximum théorique (2,5) à 1."
+      },
+      {
+        q: "Pour une extraction de mémoire tournant en local, quelle taille de modèle est recommandée ?",
+        options: [
+          "Plus de 70 milliards de paramètres, pour garantir la précision",
+          "Entre 1 et 12 milliards de paramètres, la tâche d'extraction structurée étant simple",
+          "Uniquement des modèles propriétaires type GPT-5",
+          "Un modèle de vision, pas un LLM texte"
+        ],
+        correct: 1,
+        explain: "L'extraction de faits structurés est une tâche simple : un modèle de 1 à 12 milliards de paramètres (ex. Qwen3 8B) suffit, sans fine-tuning obligatoire."
+      },
+      {
+        q: "Où trouver un point de comparaison pour choisir un modèle d'embedding adapté à son domaine (médical, multilingue…) ?",
+        options: [
+          "Le classement MTEB sur Hugging Face",
+          "La documentation SQLite",
+          "Le score BM25 du dernier souvenir indexé",
+          "Le nombre de paramètres du LLM extracteur"
+        ],
+        correct: 0,
+        explain: "Le benchmark MTEB compare les modèles d'embedding par tâche, langue et domaine, ce qui aide à choisir le bon modèle pour un cas d'usage précis."
+      }
+    ];
+
+    var container = document.getElementById('quiz-container');
+    var scoreEl = document.getElementById('quiz-score');
+    var score = 0;
+    var answered = 0;
+
+    function updateScore(){
+      scoreEl.textContent = 'score : ' + score + ' / ' + QUIZ.length;
+    }
+
+    function render(){
+      container.innerHTML = '';
+      score = 0; answered = 0; updateScore();
+      QUIZ.forEach(function(item, qi){
+        var card = document.createElement('div');
+        card.className = 'quiz-item';
+
+        var qRow = document.createElement('div');
+        qRow.className = 'quiz-q';
+        var num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = String(qi + 1).padStart(2, '0');
+        var qText = document.createElement('span');
+        qText.textContent = item.q;
+        qRow.appendChild(num);
+        qRow.appendChild(qText);
+        card.appendChild(qRow);
+
+        var optWrap = document.createElement('div');
+        optWrap.className = 'quiz-options';
+
+        var feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback';
+
+        item.options.forEach(function(opt, oi){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'quiz-option';
+          b.textContent = opt;
+          b.addEventListener('click', function(){
+            var buttons = optWrap.querySelectorAll('.quiz-option');
+            buttons.forEach(function(bb){ bb.disabled = true; });
+            if (oi === item.correct){
+              b.classList.add('correct');
+              score++;
+            } else {
+              b.classList.add('incorrect');
+              buttons[item.correct].classList.add('correct');
+            }
+            answered++;
+            updateScore();
+            feedback.classList.add('show');
+            feedback.innerHTML = '<strong>' + (oi === item.correct ? 'Correct.' : 'Pas tout à fait.') + '</strong> ' + item.explain;
+          });
+          optWrap.appendChild(b);
+        });
+
+        card.appendChild(optWrap);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    render();
+    document.getElementById('quiz-reset').addEventListener('click', render);
+  })();
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

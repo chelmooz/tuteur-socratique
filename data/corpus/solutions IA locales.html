@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masterclass Premium : Ollama | LLMs Locaux, RAG & Agents IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🦙 <span>Ollama</span> Masterclass</div>
+        <div class="muted small">LLMs locaux • Modelfile • REST API • Python • RAG • Agents</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation du cours"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "ollama-premium-masterclass-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false,
+      cli: { installed: ["llama3.2:latest"], log: [] }
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden,
+          cli: STATE.cli
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        Object.assign(STATE, {
+          theme: data.theme || "dark",
+          visited: new Set(data.visited || []),
+          quizScores: data.quizScores || {},
+          diagnostic: data.diagnostic || null,
+          path: data.path || "masterclass",
+          certName: data.certName || "",
+          sourcesHidden: !!data.sourcesHidden
+        });
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+        if (data.cli) STATE.cli = data.cli;
+      } catch (e) {}
+    }
+
+    function esc(v) {
+      return String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express", boxId = "") {
+      const idAttr = boxId ? ' id="' + boxId + '"' : "";
+      return `
+        <div class="quiz" data-module="${moduleId}"${idAttr}>
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function codeHTML(label, id, code) {
+      return `
+        <div class="card">
+          <h3>${label}</h3>
+          <pre class="code" id="${id}">${code}</pre>
+          <button class="btn secondary small" onclick="copyText('${id}', this)">Copier</button>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + qs.length;
+      STATE.quizScores[moduleId] = { correct, total: qs.length };
+      saveState();
+      updateScore();
+    }
+
+    function copyText(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.innerText.trim();
+      const done = () => {
+        if (!btn) return;
+        const old = btn.textContent;
+        btn.textContent = "✅ Copié";
+        setTimeout(() => { btn.textContent = old; }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else fallbackCopy(text, done);
+    }
+
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      $("#nav").innerHTML = visibleModules().map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">${m.title}</button>
+      `).join("");
+      $$("#nav button").forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.target)));
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `<section id="${m.id}" class="section">${m.content}</section>`).join("");
+    }
+
+    function showSection(id) {
+      if (!MODULES.find(m => m.id === id)) return;
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "cli") renderTerminal();
+      if (id === "rag-project") resetRagSim();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0, total = 0;
+      Object.values(STATE.quizScores).forEach(s => { correct += s.correct || 0; total += s.total || 0; });
+      if (STATE.exam.finished) { correct += STATE.exam.score; total += STATE.exam.total; }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() { STATE.theme = STATE.theme === "dark" ? "light" : "dark"; document.body.setAttribute("data-theme", STATE.theme); saveState(); }
+    function toggleSources() { STATE.sourcesHidden = !STATE.sourcesHidden; document.body.classList.toggle("hide-sources", STATE.sourcesHidden); saveState(); }
+    function toggleMobileNav() { $("#sidebar").classList.toggle("mobile-open"); }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    const DIAG_TEXT = {
+      debutant: "Suivez l ordre des modules : installation, CLI, choix de modèles, puis le premier projet Grocery Organizer avant de toucher au RAG.",
+      praticien: "Passez rapidement aux modules Modelfile, REST API et Python, puis concentrez-vous sur les projets RAG et agence de recrutement IA.",
+      expert: "Allez directement aux projets avancés : RAG avec LangChain + ChromaDB, orchestration multi-agents, puis sécurisez la mise en production."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) { alert("Répondez aux trois questions du diagnostic."); return; }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    // ============ SÉLECTEUR DE MODÈLES ============
+    const MODEL_CATALOG = {
+      "llama3.2:latest": { name: "llama3.2 (3B)", size: "2.0 GB", best: "Tâches générales, instructions, résumé, tool use", needs: "Ressources moyennes" },
+      "llama3.2:1b": { name: "llama3.2:1b", size: "1.3 GB", best: "Edge devices, multilingue, tâches légères", needs: "Ressources faibles" },
+      "codellama:7b": { name: "codellama:7b", size: "3.8 GB", best: "Génération et complétion de code", needs: "Ressources moyennes" },
+      "llava:7b": { name: "llava:7b", size: "4.7 GB", best: "Multimodal : images + texte", needs: "Ressources moyennes" },
+      "nomic-embed-text": { name: "nomic-embed-text", size: "274 MB", best: "Embeddings pour systèmes RAG", needs: "Ressources faibles" },
+      "mistral:7b": { name: "mistral:7b", size: "4.1 GB", best: "Génération générale équilibrée", needs: "Ressources moyennes" }
+    };
+
+    function selectModel() {
+      const usecase = $("#ms-usecase").value;
+      const resources = $("#ms-resources").value;
+      let rec = "", why = "";
+
+      if (usecase === "rag") {
+        rec = "nomic-embed-text + llama3.2:latest";
+        why = "Pour un RAG il faut deux modèles : un modèle d embedding (nomic-embed-text, léger, grande fenêtre) et un LLM pour la génération (llama3.2). C est exactement l architecture du projet PDF RAG du cours.";
+      } else if (usecase === "images") {
+        rec = "llava:7b";
+        why = "LLaVA est un modèle multimodal entraîné pour comprendre images et texte. Le cours l utilise pour décrire une photo de fleurs et répondre à des questions de suivi.";
+      } else if (usecase === "code") {
+        rec = "codellama:7b";
+        why = "CodeLlama est spécialisé en complétion et génération de code (fill-in-the-middle, génération). Le cours teste avec une fonction Python hello world.";
+      } else if (usecase === "texte" && resources === "faible") {
+        rec = "llama3.2:1b";
+        why = "Le variant 1B (1.3 GB) est conçu pour tourner sur edge et reste compétitif pour les tâches légères : gestion d infos personnelles, retrieval multilingue, rewriting.";
+      } else if (usecase === "texte") {
+        rec = "llama3.2:latest (3B)";
+        why = "Le 3B est le défaut recommandé : bon équilibre performance / ressources. Il surpasse des modèles plus anciens sur instructions, résumé, rewriting et tool use.";
+      } else {
+        rec = "mistral:7b";
+        why = "Bon modèle généraliste équilibré à tester. Le cours insiste : testez plusieurs modèles, il n y a pas de modèle universel.";
+      }
+
+      const m = MODEL_CATALOG[rec.split(" + ")[0]] || {};
+      const out = $("#ms-out");
+      if (out) {
+        out.style.display = "block";
+        out.textContent =
+          "MODÈLE RECOMMANDÉ : " + rec + "\n" +
+          (m.size ? "Taille : " + m.size + "\n" : "") +
+          (m.best ? "Points forts : " + m.best + "\n" : "") +
+          "\nPOURQUOI :\n" + why +
+          "\n\nRÈGLE DU COURS : il n y a pas de modèle universel. Testez, comparez, puis gardez celui qui fonctionne pour VOTRE cas d usage. Swapper un modèle dans Ollama ne demande qu une ligne de configuration.";
+      }
+    }
+
+    // ============ SIMULATEUR CLI ============
+    function renderTerminal() {
+      const log = $("#cli-log");
+      if (!log) return;
+      log.innerHTML = STATE.cli.log.map(l => `<span class="${l.cls || ""}">${esc(l.text)}</span>`).join("\n");
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function cliPrint(text, cls) {
+      STATE.cli.log.push({ text, cls: cls || "" });
+      if (STATE.cli.log.length > 120) STATE.cli.log = STATE.cli.log.slice(-120);
+      renderTerminal();
+    }
+
+    function runCli(input) {
+      const cmd = (input.value || "").trim();
+      if (!cmd) return;
+      input.value = "";
+      cliPrint("$ " + cmd, "info");
+
+      const parts = cmd.split(/\s+/);
+      const base = parts[0].toLowerCase();
+
+      if (base !== "ollama") { cliPrint("commande non reconnue. Essayez : ollama list", "err"); saveState(); return; }
+      const action = (parts[1] || "").toLowerCase();
+      const target = parts.slice(2).join(" ");
+
+      if (action === "list") {
+        if (STATE.cli.installed.length === 0) { cliPrint("aucun modèle installé", "info"); }
+        else {
+          cliPrint("NAME                    SIZE", "info");
+          STATE.cli.installed.forEach(m => {
+            const info = MODEL_CATALOG[m] || { size: "?" };
+            cliPrint(m.padEnd(24) + (info.size || "?"), "ok");
+          });
+        }
+      } else if (action === "pull") {
+        if (!target) { cliPrint("usage : ollama pull <model>", "err"); }
+        else if (!MODEL_CATALOG[target]) { cliPrint("modèle inconnu. Disponibles : " + Object.keys(MODEL_CATALOG).join(", "), "err"); }
+        else if (STATE.cli.installed.includes(target)) { cliPrint("déjà installé", "info"); }
+        else {
+          STATE.cli.installed.push(target);
+          cliPrint("pulling manifest...", "info");
+          cliPrint("success : " + target + " téléchargé localement", "ok");
+        }
+      } else if (action === "run") {
+        if (!target) { cliPrint("usage : ollama run <model>", "err"); }
+        else if (!STATE.cli.installed.includes(target)) { cliPrint("modèle non installé. Faites d abord : ollama pull " + target, "err"); }
+        else {
+          cliPrint(">>> session ouverte avec " + target, "ok");
+          if (target === "llava:7b") cliPrint("(modèle multimodal : vous pouvez lui passer une image)", "info");
+          if (target === "nomic-embed-text") cliPrint("(modèle d embeddings : plutôt utilisé via API, pas en chat)", "info");
+          cliPrint(">>> tapez /bye pour sortir", "info");
+        }
+      } else if (action === "rm" || action === "remove") {
+        if (!target) { cliPrint("usage : ollama rm <model>", "err"); }
+        else if (!STATE.cli.installed.includes(target)) { cliPrint("modèle non trouvé", "err"); }
+        else {
+          STATE.cli.installed = STATE.cli.installed.filter(m => m !== target);
+          cliPrint("supprimé : " + target, "ok");
+        }
+      } else if (action === "show") {
+        if (!target) { cliPrint("usage : ollama show <model>", "err"); }
+        else if (!STATE.cli.installed.includes(target)) { cliPrint("modèle non installé", "err"); }
+        else {
+          const info = MODEL_CATALOG[target] || {};
+          cliPrint("architecture  llama", "info");
+          cliPrint("parameters    " + (info.name || target), "info");
+          cliPrint("taille        " + (info.size || "?"), "info");
+          cliPrint("usage         " + (info.best || "-"), "info");
+        }
+      } else if (action === "help") {
+        cliPrint("Commandes disponibles dans ce simulateur :", "info");
+        cliPrint("  ollama list | pull <model> | run <model> | rm <model> | show <model>", "info");
+      } else {
+        cliPrint("action inconnue. Essayez : ollama help", "err");
+      }
+      saveState();
+    }
+
+    // ============ ATELIER MODELFILE ============
+    function generateModelfile() {
+      const base = $("#mf-base").value;
+      const temp = $("#mf-temp").value;
+      const persona = $("#mf-persona").value || "assistant concis";
+      const name = ($("#mf-name").value || "mon-modele").toLowerCase().replace(/[^a-z0-9-]/g, "-");
+
+      const modelfile = `FROM ${base}
+
+PARAMETER temperature ${temp}
+
+SYSTEM """
+Tu es ${persona}. Réponds de manière concise et informative.
+"""`;
+
+      const out = $("#mf-out");
+      if (out) {
+        out.style.display = "block";
+        out.textContent =
+          "# Modelfile\n" + modelfile +
+          "\n\n# Commande pour créer le modèle personnalisé :\n" +
+          "ollama create " + name + " -f Modelfile" +
+          "\n\n# Commande pour l utiliser :\n" +
+          "ollama run " + name;
+      }
+      const copy = $("#mf-copy");
+      if (copy) copy.style.display = "inline-flex";
+    }
+
+    // ============ CONSTRUCTEUR REST API ============
+    function buildRestRequest() {
+      const endpoint = $("#ra-endpoint").value;
+      const model = $("#ra-model").value;
+      const prompt = $("#ra-prompt").value || "Pourquoi le ciel est bleu ?";
+
+      const curl = endpoint === "generate"
+        ? `curl http://localhost:11434/api/generate -d '{
+  "model": "${model}",
+  "prompt": "${prompt}",
+  "stream": false
+}'`
+        : `curl http://localhost:11434/api/chat -d '{
+  "model": "${model}",
+  "messages": [
+    { "role": "user", "content": "${prompt}" }
+  ],
+  "stream": false
+}'`;
+
+      const py = endpoint === "generate"
+        ? `import requests, json
+
+url = "http://localhost:11434/api/generate"
+data = {"model": "${model}", "prompt": "${prompt}", "stream": False}
+
+response = requests.post(url, json=data)
+if response.status_code == 200:
+    print(json.loads(response.text)["response"])`
+        : `import ollama
+
+response = ollama.chat(
+    model="${model}",
+    messages=[{"role": "user", "content": "${prompt}"}]
+)
+print(response["message"]["content"])`;
+
+      const out = $("#ra-out");
+      if (out) {
+        out.style.display = "block";
+        out.textContent = "# CURL (REST API)\n" + curl + "\n\n# PYTHON\n" + py +
+          "\n\n# NOTES :\n" +
+          "- Ollama sert localement sur localhost:11434 en arrière-plan.\n" +
+          "- stream:false évite la réponse en morceaux. Par défaut stream est true.\n" +
+          "- /api/generate = une seule génération. /api/chat = conversation avec messages.";
+      }
+      const copy = $("#ra-copy");
+      if (copy) copy.style.display = "inline-flex";
+    }
+
+    // ============ SIMULATEUR RAG ============
+    let ragStep = 0;
+    const RAG_STEPS = [
+      { title: "1. Chargement du document", text: "Le PDF (ex : BOI filing instructions) est chargé avec un loader LangChain. Le texte brut est extrait." },
+      { title: "2. Découpage en chunks", text: "RecursiveCharacterTextSplitter découpe le texte en chunks de ~1200 caractères avec un overlap de 300 pour préserver le contexte." },
+      { title: "3. Embedding", text: "Chaque chunk passe dans nomic-embed-text (modèle d embeddings Ollama) et devient un vecteur numérique." },
+      { title: "4. Stockage", text: "Les vecteurs sont enregistrés dans ChromaDB avec leur texte d origine et leurs métadonnées (source)." },
+      { title: "5. Requête", text: "La question de l utilisateur est embeddée avec le même modèle pour être comparable aux vecteurs stockés." },
+      { title: "6. Recherche de similarité", text: "Le MultiQueryRetriever génère plusieurs variantes de la question et cherche les chunks les plus proches dans l espace vectoriel." },
+      { title: "7. Génération", text: "Chunks pertinents + question sont passés à llama3.2 qui répond en se basant uniquement sur le contexte fourni." }
+    ];
+
+    function resetRagSim() {
+      ragStep = 0;
+      RAG_STEPS.forEach((s, i) => {
+        const el = $("#rag-step-" + i);
+        if (el) el.className = "rag-step";
+      });
+      const out = $("#rag-out");
+      if (out) out.textContent = "";
+    }
+
+    function runRagStep() {
+      if (ragStep >= RAG_STEPS.length) return;
+      const el = $("#rag-step-" + ragStep);
+      if (el) el.className = "rag-step done";
+      const out = $("#rag-out");
+      if (out) out.textContent = RAG_STEPS[ragStep].title + " — " + RAG_STEPS[ragStep].text;
+      ragStep++;
+      if (ragStep === RAG_STEPS.length && out) {
+        out.textContent = "✅ Pipeline RAG complet. La réponse est ancrée dans le document : moins d hallucinations, données privées, zéro coût API.";
+      }
+    }
+
+    // ============ FLASHCARDS ============
+    const FLASHCARDS = [
+      { front: "Ollama", back: "Outil open-source qui simplifie l exécution de LLMs localement : téléchargement, gestion et interaction avec de nombreux modèles via CLI, API ou UI.", tip: "6:58" },
+      { front: "Pourquoi local ?", back: "Gratuit, privé (pas d envoi de données), latence réduite, personnalisable. On élimine les coûts API et la dépendance au cloud.", tip: "10:17" },
+      { front: "Modelfile", back: "Fichier de personnalisation : FROM base-model, PARAMETER temperature, SYSTEM prompt. Créé avec ollama create nom -f Modelfile.", tip: "54:15" },
+      { front: "Paramètres", back: "Poids internes du réseau (ex : 3B = 3 milliards). Plus il y en a, meilleure capacité, mais plus de ressources nécessaires.", tip: "34:50" },
+      { front: "Context length", back: "Nombre maximum de tokens que le modèle peut traiter en une entrée. Détermine la taille des documents exploitables.", tip: "37:30" },
+      { front: "Quantization", back: "Réduction de la précision des poids (ex : 4-bit) : modèle plus petit, plus rapide, moins de mémoire.", tip: "39:31" },
+      { front: "localhost:11434", back: "Endpoint local où Ollama sert sa REST API : /api/generate, /api/chat, etc.", tip: "1:00:55" },
+      { front: "stream:false", back: "Paramètre REST API pour recevoir la réponse complète d un coup au lieu d un flux mot par mot.", tip: "1:02:27" },
+      { front: "RAG", back: "Retrieval Augmented Generation : injecter ses propres documents dans le contexte du LLM pour réduire les hallucinations et répondre sur des données privées.", tip: "1:52:05" },
+      { front: "Embedding", back: "Représentation vectorielle d un texte. Des textes sémantiquement proches ont des vecteurs proches.", tip: "1:54:30" },
+      { front: "nomic-embed-text", back: "Modèle d embeddings d Ollama utilisé dans le projet RAG du cours, avec une grande fenêtre de contexte.", tip: "2:14:31" },
+      { front: "MultiQueryRetriever", back: "Composant LangChain qui génère plusieurs variantes d une question pour améliorer la recherche vectorielle.", tip: "2:16:46" },
+      { front: "BaseAgent", back: "Classe parente dans l agence IA : chaque agent spécialisé (extractor, matcher, screener, recommender) en hérite.", tip: "2:37:26" },
+      { front: "Orchestrateur", back: "Agent qui coordonne le workflow : extraction, analyse, matching, screening, recommandation, en maintenant le contexte entre étapes.", tip: "2:49:29" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">⏱ ${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    // ============ SCÉNARIOS ============
+    function chooseScenario(key) {
+      const texts = {
+        privacy: "Cas : cabinet médical, données patients.\nRecommandation : tout local avec Ollama. LLM + embeddings locaux, documents jamais envoyés à un serveur externe.\nC est exactement l argument du cours : santé et finance exigent la confidentialité.",
+        edge: "Cas : application sur appareil modeste.\nRecommandation : llama3.2:1b (1.3 GB), conçu pour l edge et les tâches légères.\nÉvitez les 7B+ qui demandent trop de ressources.",
+        rag_doc: "Cas : discuter avec ses propres PDFs.\nRecommandation : nomic-embed-text pour l embedding + ChromaDB + llama3.2 pour la génération, avec LangChain pour le pipeline.\nReproduit le projet PDF RAG du cours.",
+        multiagent: "Cas : automatiser un processus métier complet (ex : recrutement).\nRecommandation : plusieurs agents spécialisés héritant d un BaseAgent, coordonnés par un orchestrateur, le tout sur llama3.2 local.\nReproduit l AI Recruiter Agency.",
+        quick_test: "Cas : tester rapidement des modèles.\nRecommandation : ollama pull / run / rm en CLI. L intérêt d Ollama est de swapper les modèles en une commande."
+      };
+      const out = $("#scenario-out");
+      if (out) { out.style.display = "block"; out.textContent = texts[key] || ""; }
+    }
+
+    // ============ EXAMEN ============
+    const FINAL_QUESTIONS = [
+      { q: "Quel problème principal Ollama résout-il ?", o: ["Rendre les LLMs plus rapides que le cloud", "Simplifier l exécution locale de LLMs : gratuit, privé, sans configuration complexe", "Remplacer Python"], a: 1, e: "Ollama abstrait la complexité technique pour rendre les LLMs accessibles localement." },
+      { q: "Quel avantage apporte l exécution locale pour une application manipulant des données sensibles ?", o: ["Plus de créativité", "Les données ne quittent pas la machine : confidentialité renforcée", "Moins de mémoire"], a: 1, e: "C est l argument clé du cours pour la santé et la finance." },
+      { q: "Que signifie 3B dans llama3.2:3b ?", o: ["3 milliards de paramètres (poids internes)", "3 bits de quantization", "3 GB obligatoires"], a: 0, e: "Plus de paramètres = plus de capacité, mais plus de ressources nécessaires." },
+      { q: "À quoi sert la quantization ?", o: ["À augmenter la créativité", "À réduire taille et mémoire du modèle en diminuant la précision des poids", "À connecter le cloud"], a: 1, e: "Ex : 4-bit => modèle plus petit, plus rapide, moins gourmand." },
+      { q: "Quelle commande crée un modèle personnalisé à partir d un Modelfile ?", o: ["ollama create nom -f Modelfile", "ollama new nom", "ollama build nom"], a: 0, e: "FROM + PARAMETER + SYSTEM définissent la personnalisation." },
+      { q: "Sur quel endpoint local Ollama sert-il sa REST API ?", o: ["localhost:11434", "localhost:8080", "api.ollama.ai"], a: 0, e: "Le serveur tourne en arrière-plan et expose /api/generate, /api/chat, etc." },
+      { q: "Dans un système RAG, quel est le rôle du modèle d embeddings ?", o: ["Générer la réponse finale", "Transformer les chunks de texte en vecteurs stockés dans une base vectorielle", "Découper le PDF"], a: 1, e: "Le cours utilise nomic-embed-text pour cette étape." },
+      { q: "Pourquoi le RAG réduit-il les hallucinations ?", o: ["Il utilise un modèle plus gros", "Le LLM répond à partir de documents pertinents injectés dans le contexte plutôt que de sa seule mémoire", "Il désactive le streaming"], a: 1, e: "La réponse est ancrée dans les chunks récupérés par similarité." },
+      { q: "Dans l AI Recruiter Agency, quel est le rôle de l orchestrateur ?", o: ["Extraire le texte du PDF", "Coordonner le workflow en déléguant aux agents spécialisés et en agrégeant leurs résultats", "Afficher l interface Streamlit"], a: 1, e: "Il maintient le contexte entre extraction, analyse, matching, screening et recommandation." },
+      { q: "Quelle est la règle d or du cours pour choisir un modèle ?", o: ["Toujours prendre le plus gros", "Tester plusieurs modèles et garder celui qui fonctionne pour VOTRE cas d usage", "Toujours prendre le plus petit"], a: 1, e: "Ollama permet de swapper facilement, donc testez et comparez." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+        if (!selected) { q.classList.add("incorrect"); return; }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = STATE.exam.passed
+          ? "Vous pouvez installer Ollama, choisir un modèle, construire un RAG local et structurer une application multi-agents."
+          : (correct >= 5 ? "Bases solides. Revoyez les paramètres de modèles, le Modelfile et le pipeline RAG." : "Reprenez les fondamentaux : installation, CLI, puis le module RAG avant de réessayer.");
+        res.innerHTML = `<strong>Résultat : ${correct}/${qs.length}</strong><br>${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br><span class="muted">${advice}</span>`;
+      }
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) { alert("Terminez d abord l examen final."); return; }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        cours: "Ollama Masterclass Premium",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-ollama-masterclass.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencez par llama3.2:3b en CLI, puis le projet Grocery Organizer avant le RAG.";
+      if (d.level === "expert") return "Attaquez directement le RAG LangChain + ChromaDB et l orchestration multi-agents, puis passez en production avec logs et tests.";
+      return "Stack pragmatique : llama3.2 + nomic-embed-text, Modelfile pour personnaliser, Python + REST API pour intégrer, RAG pour vos documents.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    // ============ CONTENU DES MODULES ============
+    const MODULES = [
+      {
+        id: "home", title: "🏠 Accueil", express: true,
+        content: `
+          <h1>Ollama : construisez des solutions IA locales, gratuites et privées</h1>
+          <p class="lead">
+            Ollama est un outil open-source qui simplifie l exécution de grands modèles de langage localement, sur votre propre machine.
+            Ce cours premium vous emmène des fondamentaux jusqu à trois projets réels : un organisateur de liste de courses,
+            un système RAG sur PDF, et une agence de recrutement pilotée par agents IA. Le tout 100% local, 100% gratuit.
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 280" role="img" aria-label="Ollama au centre de vos modèles locaux">
+              <defs>
+                <marker id="arrow-home" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="350" y="100" width="200" height="80" class="node purple pulse" />
+              <text x="450" y="132" text-anchor="middle">Ollama</text>
+              <text x="450" y="154" text-anchor="middle" class="sub">gestionnaire local de LLMs</text>
+
+              <rect x="60" y="30" width="170" height="60" class="node" />
+              <text x="145" y="55" text-anchor="middle">llama3.2</text>
+              <text x="145" y="75" text-anchor="middle" class="sub">texte général</text>
+              <path class="dash" d="M230 75 L350 120" marker-end="url(#arrow-home)" />
+
+              <rect x="60" y="190" width="170" height="60" class="node green" />
+              <text x="145" y="215" text-anchor="middle">codellama</text>
+              <text x="145" y="235" text-anchor="middle" class="sub">code</text>
+              <path class="dash green" d="M230 205 L350 165" marker-end="url(#arrow-home)" />
+
+              <rect x="670" y="30" width="170" height="60" class="node yellow" />
+              <text x="755" y="55" text-anchor="middle">llava</text>
+              <text x="755" y="75" text-anchor="middle" class="sub">images + texte</text>
+              <path class="dash" d="M670 75 L550 120" marker-end="url(#arrow-home)" style="stroke: var(--yellow);" />
+
+              <rect x="670" y="190" width="170" height="60" class="node green" />
+              <text x="755" y="215" text-anchor="middle">nomic-embed</text>
+              <text x="755" y="235" text-anchor="middle" class="sub">embeddings RAG</text>
+              <path class="dash green" d="M670 205 L550 165" marker-end="url(#arrow-home)" />
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous saurez installer Ollama, choisir et personnaliser des modèles, utiliser la REST API et Python, construire un RAG local et orchestrer des agents IA.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, fondamentaux, simulateur CLI, ateliers Modelfile et REST API, sélecteur de modèles, trois projets réels, flashcards, examen chronométré.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Des commandes copiables, un Modelfile, un pipeline RAG, une architecture multi-agents, un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('why-local')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic", title: "🎯 Diagnostic", express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter le parcours à votre niveau, votre objectif et votre temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau avec les LLMs locaux ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je n ai jamais fait tourner de modèle localement.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : j ai déjà utilisé des LLMs ou un peu de Python.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je construis des applications LLM et je connais RAG.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre Ollama et les LLMs locaux.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="construire"> Construire des applications concrètes (RAG, agents).</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="production"> Préparer une mise en production sécurisée.</label>
+            </div>
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, l essentiel.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, tout le parcours.</label>
+            </div>
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "why-local", title: "1. Pourquoi le local ?", express: true,
+        content: `
+          <h1>Le problème que résout Ollama</h1>
+          <p class="lead">
+            Aujourd hui, utiliser un LLM signifie souvent passer par des services cloud payants : OpenAI, ChatGPT et autres.
+            Ollama change la donne en permettant de télécharger, exécuter et gérer des modèles entièrement localement.
+            <span class="source">⏱ 7:04</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 240" role="img" aria-label="Cloud payant vs local gratuit">
+              <defs>
+                <marker id="arrow-why" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="40" y="40" width="340" height="160" class="node red" />
+              <text x="210" y="75" text-anchor="middle">Cloud API</text>
+              <text x="210" y="105" text-anchor="middle" class="sub">Coût par appel API</text>
+              <text x="210" y="127" text-anchor="middle" class="sub">Données envoyées à des serveurs</text>
+              <text x="210" y="149" text-anchor="middle" class="sub">Latence réseau</text>
+              <text x="210" y="171" text-anchor="middle" class="sub">Personnalisation limitée</text>
+
+              <path class="dash red" d="M380 120 L520 120" marker-end="url(#arrow-why)" />
+
+              <rect x="520" y="40" width="340" height="160" class="node green pulse" />
+              <text x="690" y="75" text-anchor="middle">Local avec Ollama</text>
+              <text x="690" y="105" text-anchor="middle" class="sub">Gratuit après installation</text>
+              <text x="690" y="127" text-anchor="middle" class="sub">Données restent sur votre machine</text>
+              <text x="690" y="149" text-anchor="middle" class="sub">Réponses rapides, pas de réseau</text>
+              <text x="690" y="171" text-anchor="middle" class="sub">Modèles personnalisables</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Coût</h3>
+              <p>Zéro dépense API. Une fois installé, vous lancez les modèles autant de fois que vous voulez. <span class="source">⏱ 11:46</span></p>
+            </div>
+            <div class="card good">
+              <h3>Confidentialité</h3>
+              <p>Vos données sensibles ne quittent jamais votre machine. Critique pour la santé et la finance. <span class="source">⏱ 10:22</span></p>
+            </div>
+            <div class="card good">
+              <h3>Latence</h3>
+              <p>Pas d aller-retour réseau : réponses plus rapides pour les applications interactives. <span class="source">⏱ 12:08</span></p>
+            </div>
+            <div class="card good">
+              <h3>Personnalisation</h3>
+              <p>Liberté de customiser et d adapter les modèles à vos besoins, sans les limites des services tiers. <span class="source">⏱ 12:42</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Idée clé du cours</h3>
+            <p>Les modèles sont à vous : vous les téléchargez, vous les contrôlez. Le cours insiste : tout ce qui sera construit est gratuit, sans clé API payante.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi le local est-il critique pour une application traitant des données médicales ?", o: ["Les données ne sont pas envoyées à des serveurs externes", "Le modèle devient plus intelligent", "C est plus rapide uniquement"], a: 0, e: "La confidentialité est l argument principal pour santé et finance." },
+            { q: "Que se passe-t-il une fois Ollama et les modèles installés ?", o: ["On paie par requête", "On peut exécuter les modèles sans frais supplémentaires", "Il faut une clé API"], a: 1, e: "C est la promesse de cost efficiency du cours." }
+          ], "why-local")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('why-local')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('why-local')">Fondamentaux Ollama →</button>
+          </div>
+        `
+      },
+      {
+        id: "fundamentals", title: "2. Fondamentaux", express: true,
+        content: `
+          <h1>Ce qu est Ollama et ce qu il permet</h1>
+          <p class="lead">
+            Ollama est un gestionnaire de modèles : il télécharge, exécute et orchestre de nombreux LLMs localement via une interface unifiée,
+            en abstrayant la complexité technique des frameworks ML et du matériel. <span class="source">⏱ 7:04</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Gestion des modèles</h3>
+              <p>Téléchargez et swappez facilement entre différents LLMs depuis un point central. C est le cœur d Ollama. <span class="source">⏱ 13:20</span></p>
+            </div>
+            <div class="card info">
+              <h3>Interface unifiée</h3>
+              <p>Un jeu de commandes cohérent pour interagir avec tous les modèles, sans réapprendre à chaque fois. <span class="source">⏱ 13:50</span></p>
+            </div>
+            <div class="card info">
+              <h3>Extensibilité</h3>
+              <p>Ajout de modèles personnalisés et d extensions via Modelfile. <span class="source">⏱ 14:09</span></p>
+            </div>
+            <div class="card info">
+              <h3>Performance</h3>
+              <p>Utilisation efficace de votre matériel, y compris accélération GPU si disponible. <span class="source">⏱ 14:15</span></p>
+            </div>
+          </div>
+
+          <h2>Cas d usage typiques</h2>
+          <div class="grid">
+            <div class="card good">
+              <h3>Développement & tests</h3>
+              <p>Tester plusieurs modèles rapidement pour trouver celui qui performe le mieux, sans multiplier les environnements cloud. <span class="source">⏱ 15:20</span></p>
+            </div>
+            <div class="card good">
+              <h3>Éducation & recherche</h3>
+              <p>Expérimenter sans barrière d entrée liée aux services cloud. <span class="source">⏱ 15:53</span></p>
+            </div>
+            <div class="card good">
+              <h3>Applications sécurisées</h3>
+              <p>Secteurs où la confidentialité est critique : santé, finance. Tout reste local. <span class="source">⏱ 16:12</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la fonction principale d Ollama ?", o: ["Gérer et exécuter des LLMs localement via une interface unifiée", "Entraîner des modèles from scratch", "Remplacer le terminal"], a: 0, e: "Ollama est un gestionnaire de modèles locaux, pas un outil d entraînement." },
+            { q: "Pourquoi un développeur voudrait-il swapper entre modèles ?", o: ["Pour tester lequel performe le mieux sur SON cas d usage", "Pour payer moins", "Pour décorer"], a: 0, e: "Le cours insiste : pas de modèle universel, testez et comparez." }
+          ], "fundamentals")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('fundamentals')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('fundamentals')">Installation →</button>
+          </div>
+        `
+      },
+      {
+        id: "install", title: "3. Installation", express: true,
+        content: `
+          <h1>Installer Ollama et lancer son premier modèle</h1>
+          <p class="lead">
+            Le cours installe Ollama depuis ollama.com, lance llama3.2, et explore les commandes shell de base.
+            <span class="source">⏱ 17:12</span>
+          </p>
+
+          <div class="card warn">
+            <h3>Prérequis système</h3>
+            <ul>
+              <li>Mac, Linux ou Windows.</li>
+              <li>Environ 10 GB d espace disque libre (les modèles sont volumineux).</li>
+              <li>Un CPU moderne. Un GPU aide mais n est pas obligatoire pour commencer.</li>
+            </ul>
+          </div>
+
+          ${codeHTML("Installation et premier lancement", "code-install", `# 1. Télécharger depuis ollama.com (app Mac/Windows)
+#    ou via la commande d installation Linux du site
+
+# 2. Lancer le premier modèle (installé avec l app)
+ollama run llama3.2
+
+# 3. Dans le shell du modèle :
+/show info      # infos sur le modèle
+/help           # commandes disponibles
+/clear          # effacer la session
+/bye            # quitter le shell
+
+# 4. Lister les modèles installés
+ollama list
+
+# 5. Supprimer un modèle
+ollama rm llama3.2:1b`)}
+
+          <div class="card info">
+            <h3>Ce qui se passe vraiment</h3>
+            <p>Ollama tourne en arrière-plan et sert une API locale. Quand vous faites <code>ollama run llama3.2</code>, le modèle est chargé et un shell interactif s ouvre. Vous pouvez ensuite poser des questions directement.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Combien d espace disque minimum le cours recommande-t-il ?", o: ["Environ 10 GB libres", "500 MB", "1 GB"], a: 0, e: "Les modèles font plusieurs GB chacun." },
+            { q: "Que fait /bye dans le shell d un modèle ?", o: ["Il supprime le modèle", "Il quitte la session interactive", "Il redémarre Ollama"], a: 1, e: "C est simplement la sortie du shell." }
+          ], "install")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('install')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('install')">Choisir un modèle →</button>
+          </div>
+        `
+      },
+      {
+        id: "models", title: "4. Choisir un modèle", express: true,
+        content: `
+          <h1>Comprendre les modèles : paramètres, contexte, quantization</h1>
+          <p class="lead">
+            Le cours décortique les informations affichées par <code>/show info</code> : architecture, paramètres, longueur de contexte,
+            longueur d embedding, quantization. Comprendre ces notions évite de choisir un modèle au hasard. <span class="source">⏱ 33:46</span>
+          </p>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-params')">Paramètres</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-context')">Contexte</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-embed')">Embedding</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-quant')">Quantization</button>
+            </div>
+
+            <div id="tab-params" class="tab-panel active">
+              <div class="card info">
+                <h3>Paramètres = poids internes</h3>
+                <p>3B signifie 3 milliards de paramètres : les poids et biais que le modèle a appris pendant l entraînement. Plus il y en a, plus le modèle a de capacité et de connexions internes.</p>
+                <p><strong>Trade-off</strong> : plus de paramètres = meilleure performance, mais plus de ressources de calcul. Le 3B de llama3.2 est un bon équilibre. <span class="source">⏱ 36:16</span></p>
+              </div>
+              <div class="card warn">
+                <h3>Attention au gigantisme</h3>
+                <p>Llama 3.1 405B pèse 229 GB et exige une capacité de calcul énorme. Pour la plupart des usages locaux, 3B, 7B ou 8B suffisent largement. <span class="source">⏱ 40:57</span></p>
+              </div>
+            </div>
+
+            <div id="tab-context" class="tab-panel">
+              <div class="card info">
+                <h3>Context length</h3>
+                <p>Nombre maximum de tokens (morceaux de texte) que le modèle peut traiter en une seule entrée. Ex : 131 072 tokens permet de traiter de très longs documents et conversations. <span class="source">⏱ 37:30</span></p>
+              </div>
+            </div>
+
+            <div id="tab-embed" class="tab-panel">
+              <div class="card info">
+                <h3>Embedding length</h3>
+                <p>Taille du vecteur représentant chaque token. Ex : 3072 dimensions. Plus il y a de dimensions, plus la richesse sémantique est grande : le modèle capture des significations et relations plus nuancées. <span class="source">⏱ 38:14</span></p>
+                <p>Contrepartie : plus de calcul nécessaire.</p>
+              </div>
+            </div>
+
+            <div id="tab-quant" class="tab-panel">
+              <div class="card info">
+                <h3>Quantization</h3>
+                <p>Technique qui réduit la taille du modèle en diminuant la précision des poids (ex : 4-bit). Résultat : modèle plus petit, plus rapide, moins de mémoire, au prix d une légère perte de précision. <span class="source">⏱ 39:31</span></p>
+              </div>
+            </div>
+          </div>
+
+          <h2>Atelier : sélecteur de modèles</h2>
+          <div class="simulator">
+            <p class="muted">Décrivez votre besoin, le simulateur recommande un modèle en se basant sur les enseignements du cours.</p>
+            <div class="grid">
+              <div>
+                <label for="ms-usecase">Cas d usage</label>
+                <select id="ms-usecase">
+                  <option value="texte">Génération de texte générale</option>
+                  <option value="code">Génération de code</option>
+                  <option value="images">Compréhension d images</option>
+                  <option value="rag">Système RAG sur documents</option>
+                </select>
+              </div>
+              <div>
+                <label for="ms-resources">Ressources machine</label>
+                <select id="ms-resources">
+                  <option value="faible">Limitées (vieux laptop, edge)</option>
+                  <option value="moyenne" selected>Normales</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn" onclick="selectModel()">Recommander un modèle</button>
+            <pre id="ms-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          ${quizHTML([
+            { q: "Que mesure la context length ?", o: ["Le nombre maximum de tokens traités en une entrée", "Le prix du modèle", "Le nombre de GPU"], a: 0, e: "Elle détermine la taille des documents exploitables." },
+            { q: "Quel est l effet de la quantization 4-bit ?", o: ["Modèle plus petit et plus rapide, moins de mémoire", "Modèle plus gros et plus précis", "Aucun effet"], a: 0, e: "On réduit la précision des poids pour gagner en efficacité." },
+            { q: "Pour un usage local courant, quelle taille de modèle le cours juge réaliste ?", o: ["405B", "3B à 8B", "70B minimum"], a: 1, e: "405B = 229 GB, irréaliste pour la plupart des machines." }
+          ], "models")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('models')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('models')">Simulateur CLI →</button>
+          </div>
+        `
+      },
+      {
+        id: "cli", title: "5. Simulateur CLI", express: true,
+        content: `
+          <h1>Atelier : pratiquez les commandes Ollama</h1>
+          <p class="lead">
+            Ce terminal simulé reproduit les commandes essentielles du cours : <code>list</code>, <code>pull</code>, <code>run</code>, <code>rm</code>, <code>show</code>.
+            Essayez par exemple : <code>ollama pull llava:7b</code> puis <code>ollama list</code>.
+          </p>
+
+          <div class="simulator">
+            <div id="cli-log" class="terminal"></div>
+            <div class="terminal-input">
+              <span>$</span>
+              <input id="cli-input" placeholder="Tapez une commande, ex : ollama pull llava:7b" onkeydown="if(event.key==='Enter'){runCli(this)}" />
+              <button class="btn small" onclick="runCli($('#cli-input'))">Entrée</button>
+              <button class="btn secondary small" onclick="STATE.cli.log=[];STATE.cli.installed=['llama3.2:latest'];saveState();renderTerminal()">Reset</button>
+            </div>
+            <p class="muted small" style="margin-top:0.6rem">Modèles disponibles au pull : ${Object.keys(MODEL_CATALOG).join(" • ")}</p>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Commandes clés du cours</h3>
+              <ul>
+                <li><code>ollama list</code> : modèles installés localement.</li>
+                <li><code>ollama pull modele</code> : télécharger un modèle.</li>
+                <li><code>ollama run modele</code> : ouvrir un shell avec le modèle.</li>
+                <li><code>ollama rm modele</code> : supprimer.</li>
+                <li><code>ollama show modele</code> : infos détaillées.</li>
+              </ul>
+            </div>
+            <div class="card purple">
+              <h3>Modèles testés dans le cours</h3>
+              <ul>
+                <li><code>llama3.2</code> et <code>llama3.2:1b</code> : texte général.</li>
+                <li><code>codellama</code> : tâches de code.</li>
+                <li><code>llava:7b</code> : multimodal images.</li>
+                <li><code>nomic-embed-text</code> : embeddings RAG.</li>
+              </ul>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle commande télécharge un modèle localement ?", o: ["ollama pull", "ollama get", "ollama install"], a: 0, e: "pull récupère le modèle depuis la bibliothèque." },
+            { q: "Pourquoi le cours utilise llama3.2:1b ?", o: ["Plus léger, pensé pour l edge et les tâches légères", "Plus intelligent que le 3B", "Obligatoire"], a: 0, e: "1.3 GB vs 2 GB, compétitif pour des tâches restreintes." }
+          ], "cli")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('cli')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('cli')">Modelfile →</button>
+          </div>
+        `
+      },
+      {
+        id: "modelfile", title: "6. Modelfile", express: true,
+        content: `
+          <h1>Personnaliser un modèle avec le Modelfile</h1>
+          <p class="lead">
+            Le Modelfile permet de créer une version personnalisée d un modèle : modèle de base, température, prompt système.
+            Le cours crée un modèle nommé james, concis et informatif, à partir de llama3.2. <span class="source">⏱ 54:15</span>
+          </p>
+
+          ${codeHTML("Exemple du cours", "code-modelfile", `# Fichier : Modelfile (sans extension)
+FROM llama3.2
+
+PARAMETER temperature 0.3
+
+SYSTEM """
+You are a very smart assistant who answers questions
+succinctly and informatively.
+"""
+
+# Créer le modèle personnalisé :
+ollama create james -f Modelfile
+
+# L utiliser :
+ollama run james
+
+# Supprimer :
+ollama rm james`)}
+
+          <div class="card info">
+            <h3>À quoi sert la température ?</h3>
+            <p>De 0 à 1 : plus elle est basse, plus les réponses sont directes et factuelles ; plus elle est haute, plus elles sont créatives et élaborées. Le cours utilise 0.3 pour un comportement concis. <span class="source">⏱ 54:59</span></p>
+          </div>
+
+          <h2>Atelier : générez votre Modelfile</h2>
+          <div class="generator">
+            <div class="grid">
+              <div>
+                <label for="mf-base">Modèle de base</label>
+                <select id="mf-base">
+                  <option value="llama3.2">llama3.2</option>
+                  <option value="llama3.2:1b">llama3.2:1b</option>
+                  <option value="mistral:7b">mistral:7b</option>
+                </select>
+              </div>
+              <div>
+                <label for="mf-temp">Température</label>
+                <select id="mf-temp">
+                  <option value="0">0 (très factuel)</option>
+                  <option value="0.3" selected>0.3 (concis)</option>
+                  <option value="0.7">0.7 (créatif)</option>
+                </select>
+              </div>
+              <div>
+                <label for="mf-persona">Persona</label>
+                <input id="mf-persona" value="un assistant juridique concis" />
+              </div>
+              <div>
+                <label for="mf-name">Nom du modèle</label>
+                <input id="mf-name" value="mon-modele" />
+              </div>
+            </div>
+            <button class="btn" onclick="generateModelfile()">Générer le Modelfile</button>
+            <pre id="mf-out" class="prompt" style="display:none"></pre>
+            <button class="btn secondary small" id="mf-copy" style="display:none" onclick="copyText('mf-out', this)">Copier</button>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle directive définit le comportement par défaut du modèle ?", o: ["SYSTEM", "FROM", "PARAMETER"], a: 0, e: "SYSTEM contient le prompt système permanent." },
+            { q: "Que fait une température basse comme 0.3 ?", o: ["Réponses plus directes et factuelles", "Plus de créativité", "Moins de mémoire"], a: 0, e: "Basse température = moins d élaboration créative." }
+          ], "modelfile")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('modelfile')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('modelfile')">REST API & Python →</button>
+          </div>
+        `
+      },
+      {
+        id: "api", title: "7. REST API & Python", express: true,
+        content: `
+          <h1>Interagir avec Ollama par API et par code</h1>
+          <p class="lead">
+            En plus du CLI, Ollama sert une REST API sur localhost:11434. C est la base de tout ce qu on construit ensuite en Python.
+            Le cours montre aussi la bibliothèque Python officielle. <span class="source">⏱ 1:00:06</span>
+          </p>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>/api/generate</h3>
+              <p>Génération simple : model + prompt. Idéal pour une tâche ponctuelle.</p>
+            </div>
+            <div class="card info">
+              <h3>/api/chat</h3>
+              <p>Conversation : model + messages (liste de role/content). Pour un échange multi-tours.</p>
+            </div>
+            <div class="card info">
+              <h3>stream:false</h3>
+              <p>Par défaut la réponse arrive en flux mot par mot. Mettre stream:false pour recevoir la réponse complète. <span class="source">⏱ 1:02:27</span></p>
+            </div>
+            <div class="card info">
+              <h3>format:json</h3>
+              <p>Force la sortie en JSON quand votre application a besoin de données structurées. <span class="source">⏱ 1:04:55</span></p>
+            </div>
+          </div>
+
+          <h2>Atelier : constructeur de requêtes</h2>
+          <div class="generator">
+            <div class="grid">
+              <div>
+                <label for="ra-endpoint">Endpoint</label>
+                <select id="ra-endpoint">
+                  <option value="generate">/api/generate</option>
+                  <option value="chat">/api/chat</option>
+                </select>
+              </div>
+              <div>
+                <label for="ra-model">Modèle</label>
+                <select id="ra-model">
+                  <option value="llama3.2">llama3.2</option>
+                  <option value="llama3.2:1b">llama3.2:1b</option>
+                  <option value="mistral:7b">mistral:7b</option>
+                </select>
+              </div>
+              <div>
+                <label for="ra-prompt">Prompt</label>
+                <input id="ra-prompt" value="Pourquoi le ciel est bleu ?" />
+              </div>
+            </div>
+            <button class="btn" onclick="buildRestRequest()">Générer la requête</button>
+            <pre id="ra-out" class="prompt" style="display:none"></pre>
+            <button class="btn secondary small" id="ra-copy" style="display:none" onclick="copyText('ra-out', this)">Copier</button>
+          </div>
+
+          ${codeHTML("Bibliothèque Python ollama (extrait du cours)", "code-python", `import ollama
+
+# Lister les modèles
+print(ollama.list())
+
+# Chat simple
+response = ollama.chat(
+    model="llama3.2",
+    messages=[{"role": "user", "content": "Why is the sky blue?"}]
+)
+print(response["message"]["content"])
+
+# Streaming
+for part in ollama.chat(model="llama3.2",
+                        messages=[{"role": "user", "content": "Why is the ocean salty?"}],
+                        stream=True):
+    print(part["message"]["content"], end="", flush=True)
+
+# Créer un modèle personnalisé depuis le code
+ollama.create(
+    model="know-it-all",
+    modelfile='FROM llama3.2\\nPARAMETER temperature 0.1\\nSYSTEM You are succinct and informative.'
+)
+
+# Supprimer
+ollama.delete("know-it-all")`)}
+
+          <div class="card warn">
+            <h3>À retenir</h3>
+            <p>La bibliothèque Python est une abstraction au-dessus de la REST API : en interne, elle frappe les mêmes endpoints localhost:11434. Comprendre l API vous rend autonome. <span class="source">⏱ 1:37:19</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle est la différence entre /api/generate et /api/chat ?", o: ["generate = une génération, chat = liste de messages multi-tours", "Aucune", "chat est payant"], a: 0, e: "chat accepte une conversation, generate un prompt unique." },
+            { q: "Pourquoi ajouter stream:false ?", o: ["Recevoir la réponse complète d un coup plutôt qu un flux mot par mot", "Accélérer le modèle", "Activer le JSON"], a: 0, e: "Par défaut stream est true et la réponse arrive par morceaux." }
+          ], "api")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('api')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('api')">Projet 1 →</button>
+          </div>
+        `
+      },
+      {
+        id: "project1", title: "8. Projet 1 : Grocery", express: true,
+        content: `
+          <h1>Projet 1 : organisateur de liste de courses</h1>
+          <p class="lead">
+            Premier cas d usage réel : lire une liste de courses brute depuis un fichier texte, la faire catégoriser et trier par llama3.2,
+            puis sauvegarder le résultat. Simple, mais montre le schéma complet d une application LLM locale. <span class="source">⏱ 1:43:33</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 180" role="img" aria-label="Pipeline du grocery organizer">
+              <defs>
+                <marker id="arrow-grocery" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="55" width="160" height="70" class="node" />
+              <text x="110" y="82" text-anchor="middle">grocery_list.txt</text>
+              <text x="110" y="102" text-anchor="middle" class="sub">items bruts</text>
+
+              <path class="dash" d="M190 90 L250 90" marker-end="url(#arrow-grocery)" />
+
+              <rect x="250" y="55" width="170" height="70" class="node purple pulse" />
+              <text x="335" y="82" text-anchor="middle">ollama.generate</text>
+              <text x="335" y="102" text-anchor="middle" class="sub">prompt de catégorisation</text>
+
+              <path class="dash purple" d="M420 90 L480 90" marker-end="url(#arrow-grocery)" />
+
+              <rect x="480" y="55" width="170" height="70" class="node green" />
+              <text x="565" y="82" text-anchor="middle">liste catégorisée</text>
+              <text x="565" y="102" text-anchor="middle" class="sub">triée alphabétiquement</text>
+
+              <path class="dash green" d="M650 90 L710 90" marker-end="url(#arrow-grocery)" />
+
+              <rect x="710" y="55" width="160" height="70" class="node yellow" />
+              <text x="790" y="82" text-anchor="middle">fichier de sortie</text>
+              <text x="790" y="102" text-anchor="middle" class="sub">.txt</text>
+            </svg>
+          </div>
+
+          ${codeHTML("Structure du script categorizer.py", "code-grocery", `import ollama
+import os
+
+MODEL = "llama3.2"
+INPUT_PATH = "data/grocery_list.txt"
+OUTPUT_PATH = "data/categorized_grocery_list.txt"
+
+# 1. Vérifier que le fichier existe
+if not os.path.exists(INPUT_PATH):
+    print("Input file not found")
+    exit()
+
+# 2. Lire les items
+with open(INPUT_PATH, "r") as f:
+    items = f.read().strip()
+
+# 3. Le prompt dirige le modèle
+prompt = f"""
+You are an assistant that categorizes and sorts grocery items.
+Here is a list of groceries: {items}
+Please:
+1. Categorize these items into appropriate categories (Produce, Dairy, Meat, Bakery, Beverages, etc.)
+2. Sort the items alphabetically within each category
+3. Present the categorized list clearly using bullet points
+"""
+
+# 4. Générer avec Ollama
+response = ollama.generate(model=MODEL, prompt=prompt)
+generated_text = response["response"]
+
+# 5. Sauvegarder
+with open(OUTPUT_PATH, "w") as f:
+    f.write(generated_text)
+print("Categorized grocery list has been saved")`)}
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Leçon 1 : le prompt dirige tout</h3>
+              <p>Le prompt spécifie rôle, catégories attendues, tri et format de sortie. Sans direction claire, le modèle part ailleurs.</p>
+            </div>
+            <div class="card good">
+              <h3>Leçon 2 : modèle swappable</h3>
+              <p>Le modèle est défini dans une seule variable. Si un autre modèle convient mieux, une seule ligne change. <span class="source">⏱ 1:50:35</span></p>
+            </div>
+            <div class="card good">
+              <h3>Leçon 3 : 100% local</h3>
+              <p>Aucun appel API payant, aucune donnée envoyée. Tout tourne sur votre machine.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi le prompt du grocery organizer détaille-t-il les catégories et le tri ?", o: ["Pour donner une direction claire et éviter que le modèle dévie", "Pour le décor", "Pour ralentir le modèle"], a: 0, e: "Sans instructions précises, la sortie serait imprévisible." },
+            { q: "Que faut-il changer pour utiliser un autre modèle ?", o: ["Une seule variable MODEL", "Tout le code", "L ordinateur"], a: 0, e: "C est la beauté d Ollama selon le cours." }
+          ], "project1")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('project1')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('project1')">Théorie RAG →</button>
+          </div>
+        `
+      },
+      {
+        id: "rag-theory", title: "9. Théorie RAG", express: true,
+        content: `
+          <h1>Comprendre le RAG avant de le construire</h1>
+          <p class="lead">
+            RAG = Retrieval Augmented Generation. L idée : injecter vos propres documents dans le contexte du LLM pour qu il réponde
+            sur VOS données, en réduisant les hallucinations. <span class="source">⏱ 1:52:05</span>
+          </p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Le problème des LLMs</h3>
+              <p>Ils ne connaissent que leur entraînement. Ils ignorent vos données internes et, quand ils ne savent pas, ils inventent : c est l hallucination. <span class="source">⏱ 1:53:18</span></p>
+            </div>
+            <div class="card good">
+              <h3>La solution RAG</h3>
+              <p>On récupère les morceaux de documents pertinents pour la question, on les injecte avec le prompt, et le LLM répond en s appuyant sur ce contexte réel.</p>
+            </div>
+          </div>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 300" role="img" aria-label="Pipeline RAG complet">
+              <defs>
+                <marker id="arrow-rag" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="20" y="20" width="150" height="60" class="node" />
+              <text x="95" y="45" text-anchor="middle">Documents</text>
+              <text x="95" y="65" text-anchor="middle" class="sub">PDF, texte</text>
+
+              <path class="dash" d="M170 50 L220 50" marker-end="url(#arrow-rag)" />
+
+              <rect x="220" y="20" width="140" height="60" class="node" />
+              <text x="290" y="45" text-anchor="middle">Découpage</text>
+              <text x="290" y="65" text-anchor="middle" class="sub">chunks</text>
+
+              <path class="dash" d="M360 50 L410 50" marker-end="url(#arrow-rag)" />
+
+              <rect x="410" y="20" width="150" height="60" class="node purple" />
+              <text x="485" y="45" text-anchor="middle">Embedding</text>
+              <text x="485" y="65" text-anchor="middle" class="sub">nomic-embed-text</text>
+
+              <path class="dash purple" d="M560 50 L610 50" marker-end="url(#arrow-rag)" />
+
+              <rect x="610" y="20" width="150" height="60" class="node green" />
+              <text x="685" y="45" text-anchor="middle">Vector DB</text>
+              <text x="685" y="65" text-anchor="middle" class="sub">ChromaDB</text>
+
+              <rect x="20" y="200" width="150" height="60" class="node yellow" />
+              <text x="95" y="225" text-anchor="middle">Question</text>
+              <text x="95" y="245" text-anchor="middle" class="sub">utilisateur</text>
+
+              <path class="dash" d="M170 230 L220 230" marker-end="url(#arrow-rag)" style="stroke: var(--yellow);" />
+
+              <rect x="220" y="200" width="140" height="60" class="node purple" />
+              <text x="290" y="225" text-anchor="middle">Embedding</text>
+              <text x="290" y="245" text-anchor="middle" class="sub">de la question</text>
+
+              <path class="dash purple" d="M360 230 L460 160" marker-end="url(#arrow-rag)" />
+
+              <rect x="460" y="120" width="170" height="60" class="node green" />
+              <text x="545" y="145" text-anchor="middle">Similarity search</text>
+              <text x="545" y="165" text-anchor="middle" class="sub">chunks proches</text>
+
+              <path class="dash green" d="M630 150 L680 150" marker-end="url(#arrow-rag)" />
+
+              <rect x="680" y="120" width="150" height="60" class="node" />
+              <text x="755" y="145" text-anchor="middle">LLM</text>
+              <text x="755" y="165" text-anchor="middle" class="sub">contexte + question</text>
+
+              <path class="dash" d="M830 150 L860 150" marker-end="url(#arrow-rag)" />
+              <rect x="860" y="120" width="70" height="60" class="node yellow pulse" />
+              <text x="895" y="155" text-anchor="middle">Rép.</text>
+            </svg>
+          </div>
+
+          <div class="card info">
+            <h3>Pourquoi les vecteurs ?</h3>
+            <p>Un embedding est une représentation numérique d un texte. Des textes au sens proche (ex : cat et kitty) ont des vecteurs proches dans l espace multidimensionnel. C est ce qui permet la recherche sémantique : retrouver le sens, pas seulement les mots exacts. <span class="source">⏱ 2:01:43</span></p>
+          </div>
+
+          <h2>Les briques nécessaires</h2>
+          <ul>
+            <li><strong>Un LLM</strong> : pour générer la réponse finale (ici llama3.2).</li>
+            <li><strong>Un corpus de documents</strong> : votre base de connaissances.</li>
+            <li><strong>Un modèle d embeddings</strong> : pour vectoriser chunks et questions (ici nomic-embed-text).</li>
+            <li><strong>Une base vectorielle</strong> : ChromaDB dans le cours (ou FAISS, Pinecone...).</li>
+            <li><strong>Un mécanisme de retrieval</strong> : recherche de similarité.</li>
+          </ul>
+
+          ${quizHTML([
+            { q: "Quel problème le RAG résout-il en priorité ?", o: ["Les hallucinations et le manque de connaissance des données privées", "La lenteur des modèles", "Le prix du matériel"], a: 0, e: "En ancrant la réponse dans des documents réels." },
+            { q: "Pourquoi embedder aussi la question de l utilisateur ?", o: ["Pour la comparer aux vecteurs stockés dans le même format", "Pour la traduire", "Pour la raccourcir"], a: 0, e: "La recherche de similarité exige le même espace vectoriel." }
+          ], "rag-theory")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('rag-theory')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('rag-theory')">Projet 2 : PDF RAG →</button>
+          </div>
+        `
+      },
+      {
+        id: "rag-project", title: "10. Projet 2 : PDF RAG", express: true,
+        content: `
+          <h1>Projet 2 : discuter avec un PDF en local</h1>
+          <p class="lead">
+            Le cours construit un système RAG complet : LangChain charge un PDF (BOI filing instructions), le découpe, l embedde avec
+            nomic-embed-text, le stocke dans ChromaDB, puis répond aux questions avec llama3.2 via un MultiQueryRetriever.
+            <span class="source">⏱ 2:05:34</span>
+          </p>
+
+          <div class="simulator">
+            <h3>Simulateur de pipeline RAG</h3>
+            <p class="muted">Cliquez sur Exécuter une étape pour dérouler le pipeline du cours.</p>
+            <div id="rag-steps">
+              ${RAG_STEPS.map((s, i) => `<div class="rag-step" id="rag-step-${i}"><strong>${s.title}</strong></div>`).join("")}
+            </div>
+            <div class="toolbar no-print">
+              <button class="btn" onclick="runRagStep()">Exécuter une étape</button>
+              <button class="btn secondary" onclick="resetRagSim()">Réinitialiser</button>
+            </div>
+            <pre id="rag-out" class="prompt" style="margin-top:0.8rem"></pre>
+          </div>
+
+          ${codeHTML("Cœur du système pdf_rag.py (simplifié)", "code-rag", `from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_ollama import OllamaEmbeddings, ChatOllama
+from langchain_chroma import Chroma
+from langchain.retrievers import MultiQueryRetriever
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+
+MODEL = "llama3.2"
+EMBED_MODEL = "nomic-embed-text"
+DOC_PATH = "data/boi.pdf"
+
+# 1. Charger le PDF
+loader = UnstructuredPDFLoader(file_path=DOC_PATH)
+data = loader.load()
+
+# 2. Découper en chunks (1200 caractères, overlap 300)
+splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=300)
+chunks = splitter.split_documents(data)
+
+# 3 + 4. Embeddings + stockage vectoriel
+embeddings = OllamaEmbeddings(model=EMBED_MODEL)
+vector_db = Chroma.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    collection_name="simple-rag"
+)
+
+# 5. LLM local
+llm = ChatOllama(model=MODEL)
+
+# 6. Retrieval multi-questions
+QUERY_PROMPT = PromptTemplate(
+    input_variables=["question"],
+    template="Generate five different versions of the given user question "
+             "to retrieve relevant documents. Original question: {question}"
+)
+retriever = MultiQueryRetriever.from_llm(
+    retriever=vector_db.as_retriever(),
+    llm=llm,
+    prompt=QUERY_PROMPT
+)
+
+# 7. Chaîne RAG
+template = "Answer the question based only on the following context: {context}\\nQuestion: {question}"
+prompt = ChatPromptTemplate.from_template(template)
+
+chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+
+print(chain.invoke("What is the document about?"))`)}
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Leçon 1 : deux modèles locaux</h3>
+              <p>nomic-embed-text pour les embeddings, llama3.2 pour la génération. Les deux sont swappables sans casser le système. <span class="source">⏱ 2:07:01</span></p>
+            </div>
+            <div class="card good">
+              <h3>Leçon 2 : l overlap préserve le contexte</h3>
+              <p>300 caractères de chevauchement entre chunks évitent de couper des informations au milieu d une idée. <span class="source">⏱ 2:12:53</span></p>
+            </div>
+            <div class="card good">
+              <h3>Leçon 3 : zéro coût</h3>
+              <p>Vous pouvez poser autant de questions que vous voulez, sans payer le moindre appel API. <span class="source">⏱ 2:23:49</span></p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Versions améliorées montrées</h3>
+            <p>Le cours fournit aussi une version refactorisée (fonctions propres : ingest, split, create database, retriever, chain) et une version Streamlit avec interface de chat. <span class="source">⏱ 2:24:30</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi utilise-t-on un overlap entre les chunks ?", o: ["Pour préserver le contexte aux frontières des morceaux", "Pour réduire le nombre de chunks", "C est obligatoire dans ChromaDB"], a: 0, e: "Le chevauchement évite de perdre du sens aux coupures." },
+            { q: "Quel composant génère plusieurs variantes de la question ?", o: ["MultiQueryRetriever", "RecursiveCharacterTextSplitter", "StrOutputParser"], a: 0, e: "Il améliore le recall de la recherche vectorielle." }
+          ], "rag-project")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('rag-project')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('rag-project')">Projet 3 : Agence IA →</button>
+          </div>
+        `
+      },
+      {
+        id: "agents", title: "11. Projet 3 : Agence IA", express: false,
+        content: `
+          <h1>Projet 3 : une agence de recrutement pilotée par agents IA</h1>
+          <p class="lead">
+            Le projet le plus avancé du cours : une application complète où plusieurs agents IA spécialisés collaborent pour analyser
+            un CV, le comparer à des offres, screener le candidat et produire une recommandation. Le tout avec llama3.2 local.
+            <span class="source">⏱ 2:28:33</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 940 340" role="img" aria-label="Workflow de l agence de recrutement IA">
+              <defs>
+                <marker id="arrow-agency" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <rect x="30" y="130" width="130" height="70" class="node" />
+              <text x="95" y="158" text-anchor="middle">CV PDF</text>
+              <text x="95" y="178" text-anchor="middle" class="sub">upload</text>
+
+              <path class="dash" d="M160 165 L210 165" marker-end="url(#arrow-agency)" />
+
+              <rect x="210" y="130" width="130" height="70" class="node purple" />
+              <text x="275" y="158" text-anchor="middle">Extractor</text>
+              <text x="275" y="178" text-anchor="middle" class="sub">données du CV</text>
+
+              <path class="dash purple" d="M340 165 L390 165" marker-end="url(#arrow-agency)" />
+
+              <rect x="390" y="130" width="130" height="70" class="node green" />
+              <text x="455" y="158" text-anchor="middle">Analyzer</text>
+              <text x="455" y="178" text-anchor="middle" class="sub">profil, skills</text>
+
+              <path class="dash green" d="M520 165 L570 165" marker-end="url(#arrow-agency)" />
+
+              <rect x="570" y="40" width="130" height="60" class="node yellow" />
+              <text x="635" y="65" text-anchor="middle">Matcher</text>
+              <text x="635" y="83" text-anchor="middle" class="sub">jobs, score</text>
+
+              <rect x="570" y="130" width="130" height="60" class="node" />
+              <text x="635" y="155" text-anchor="middle">Screener</text>
+              <text x="635" y="173" text-anchor="middle" class="sub">screening 85%</text>
+
+              <rect x="570" y="220" width="130" height="60" class="node purple" />
+              <text x="635" y="245" text-anchor="middle">Recommender</text>
+              <text x="635" y="263" text-anchor="middle" class="sub">conseils</text>
+
+              <path class="dash" d="M520 145 L570 70" marker-end="url(#arrow-agency)" />
+              <path class="dash" d="M520 165 L570 160" marker-end="url(#arrow-agency)" />
+              <path class="dash" d="M520 185 L570 250" marker-end="url(#arrow-agency)" />
+
+              <path class="dash green" d="M700 70 L760 140" marker-end="url(#arrow-agency)" />
+              <path class="dash" d="M700 160 L760 165" marker-end="url(#arrow-agency)" />
+              <path class="dash purple" d="M700 250 L760 190" marker-end="url(#arrow-agency)" />
+
+              <rect x="760" y="130" width="150" height="70" class="node green pulse" />
+              <text x="835" y="158" text-anchor="middle">Orchestrateur</text>
+              <text x="835" y="178" text-anchor="middle" class="sub">rapport final</text>
+            </svg>
+          </div>
+
+          ${codeHTML("Architecture BaseAgent (extrait du cours)", "code-agents", `# base_agent.py
+class BaseAgent:
+    def __init__(self, name, instructions, model="llama3.2"):
+        self.name = name
+        self.instructions = instructions
+        self.model = model
+        # Le client pointe vers Ollama local, pas OpenAI
+        # base_url = endpoint local d Ollama
+
+    def query_ollama(self, prompt):
+        # Appelle le chat du modèle local avec
+        # system = self.instructions
+        ...
+
+# Exemple d agent spécialisé
+class ScreenerAgent(BaseAgent):
+    def __init__(self):
+        super().__init__(
+            name="screener",
+            instructions="Screen candidates based on qualifications, "
+                         "experience and alignment. Provide comprehensive "
+                         "screening reports."
+        )
+
+    def run(self, workflow_context):
+        result = self.query_ollama(workflow_context)
+        return {"screening_report": result, "screening_score": 85}
+
+# L orchestrateur délègue dans l ordre :
+# extract -> analyze -> match -> screen -> recommend`)}
+
+          <div class="grid">
+            <div class="card info">
+              <h3>BaseAgent comme fondation</h3>
+              <p>Tous les agents héritent d une classe parente qui gère le modèle et l appel à Ollama. Propre, scalable, proche d une structure de production. <span class="source">⏱ 2:37:26</span></p>
+            </div>
+            <div class="card info">
+              <h3>Instructions directes</h3>
+              <p>Chaque agent a des instructions concises : quoi extraire, quoi matcher, quel format JSON retourner. <span class="source">⏱ 2:43:25</span></p>
+            </div>
+            <div class="card info">
+              <h3>Orchestration</h3>
+              <p>L orchestrateur délègue aux spécialistes, maintient le contexte entre étapes et agrège les résultats. <span class="source">⏱ 2:49:29</span></p>
+            </div>
+            <div class="card info">
+              <h3>Résultat utilisateur</h3>
+              <p>Analyse de skills avec score de confiance 85%, job matches avec pourcentages, screening détaillé, recommandations personnalisées. <span class="source">⏱ 2:53:43</span></p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi tous les agents héritent-ils de BaseAgent ?", o: ["Pour factoriser l accès au modèle et la structure de base", "Par obligation Python", "Pour utiliser OpenAI"], a: 0, e: "Chaque agent ajoute sa spécialité, la base gère le reste." },
+            { q: "Quel est le rôle de l orchestrateur ?", o: ["Coordonner le workflow et agréger les résultats des agents", "Afficher l UI", "Stocker le CV"], a: 0, e: "Il délègue et maintient le contexte entre les étapes." }
+          ], "agents")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('agents')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('agents')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios", title: "12. Scénarios", express: false,
+        content: `
+          <h1>Scénarios branching : quelle architecture pour quel besoin ?</h1>
+          <p class="lead">Sélectionnez un scénario pour voir l architecture recommandée, fondée sur les enseignements du cours.</p>
+
+          <div class="simulator">
+            <div class="tab-list no-print">
+              <button class="tab-btn" onclick="chooseScenario('privacy')">Données médicales</button>
+              <button class="tab-btn" onclick="chooseScenario('edge')">Machine modeste</button>
+              <button class="tab-btn" onclick="chooseScenario('rag_doc')">Discuter avec mes PDFs</button>
+              <button class="tab-btn" onclick="chooseScenario('multiagent')">Processus métier complet</button>
+              <button class="tab-btn" onclick="chooseScenario('quick_test')">Tester des modèles</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="card info">
+            <h3>Leçon transversale du cours</h3>
+            <p>Il n y a pas de solution universelle. Le cours répète : testez plusieurs modèles, gardez celui qui fonctionne pour votre cas, et sachez que swapper ne coûte qu une ligne.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards", title: "13. Flashcards", express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. Ces cartes résument le vocabulaire essentiel du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Erreurs fréquentes →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors", title: "14. Erreurs fréquentes", express: true,
+        content: `
+          <h1>Anti-patterns à éviter absolument</h1>
+          <p class="lead">Le cours, par ses démonstrations et mises en garde, révèle les pièges classiques des LLMs locaux.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>1. Prendre le plus gros modèle</h3>
+              <p>Un 405B pèse 229 GB et exige une machine énorme. Pour la plupart des usages, 3B à 8B suffisent.</p>
+            </div>
+            <div class="card bad">
+              <h3>2. Négliger l espace disque</h3>
+              <p>Les modèles font plusieurs GB. Le cours recommande ~10 GB libres minimum et nettoie les modèles inutilisés avec ollama rm.</p>
+            </div>
+            <div class="card bad">
+              <h3>3. Croire aveuglément le modèle</h3>
+              <p>Le cours montre une réponse factuellement fausse (une péninsule inventée). Les LLMs ne sont pas toujours corrects : vérifiez. <span class="source">⏱ 1:04:29</span></p>
+            </div>
+            <div class="card bad">
+              <h3>4. Oublier stream:false</h3>
+              <p>Sans ce paramètre, la REST API renvoie un flux brut mot par mot, difficile à exploiter.</p>
+            </div>
+            <div class="card bad">
+              <h3>5. RAG sans modèle d embedding adapté</h3>
+              <p>Un LLM généraliste ne produit pas les embeddings. Il faut un modèle dédié comme nomic-embed-text.</p>
+            </div>
+            <div class="card bad">
+              <h3>6. Prompt flou</h3>
+              <p>Dans le grocery organizer comme dans l agence IA, des instructions directes et concises font toute la qualité de la sortie.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi le cours vérifie-t-il lui-même la réponse du LLM sur la péninsule ?", o: ["Parce que les LLMs peuvent produire des faits faux avec assurance", "Par habitude", "Pour tester la latence"], a: 0, e: "Toujours garder un esprit critique face à une sortie de modèle." },
+            { q: "Que faire avant de construire un RAG ?", o: ["Pull un modèle d embedding dédié comme nomic-embed-text", "Utiliser uniquement le LLM", "Installer un GPU"], a: 0, e: "L embedding exige un modèle spécifique." }
+          ], "errors")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final", title: "✅ Examen final", express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : valider que vous pouvez installer, configurer et construire avec Ollama.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action", title: "🏆 Certificat", express: true,
+        content: `
+          <h1>Certificat et plan d action 7 jours</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport et passez à la pratique réelle.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🦙</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété la masterclass</p>
+            <p class="highlight">Ollama : LLMs Locaux, Modelfile, REST API, RAG & Agents IA</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Plan d action 7 jours</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Jour 1 : installer Ollama et lancer llama3.2 en CLI.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Jour 2 : pull deux autres modèles (ex : codellama, llava) et les comparer.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Jour 3 : créer un modèle personnalisé avec un Modelfile.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Jour 4 : interroger l API REST avec curl puis avec Python.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Jour 5 : reproduire le grocery organizer sur vos propres données.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Jour 6 : construire le RAG PDF avec nomic-embed-text et ChromaDB.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Jour 7 : esquisser votre propre application multi-agents locale.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+          <h2>Ressources ancrées au transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Ollama</strong> : ollama.com, bibliothèque de modèles (llama3.2, codellama, llava, nomic-embed-text, mistral).</li>
+              <li><strong>Projets du cours</strong> : grocery list organizer, PDF RAG (LangChain + ChromaDB), AI Recruiter Agency.</li>
+              <li><strong>Écosystème</strong> : LangChain, ChromaDB, MultiQueryRetriever, Streamlit, Swarm framework.</li>
+              <li><strong>Formateur</strong> : Paulo Deson, instructeur en ligne (280 000+ étudiants, ~175 pays).</li>
+              <li><strong>Bonus du cours</strong> : Ollama Starter Pack avec templates de code.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      showSection(visibleModules()[0]?.id || "home");
+      updateScore();
+      updateChecklistProgress();
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.copyText = copyText;
+    window.selectModel = selectModel;
+    window.runCli = runCli;
+    window.renderTerminal = renderTerminal;
+    window.generateModelfile = generateModelfile;
+    window.buildRestRequest = buildRestRequest;
+    window.runRagStep = runRagStep;
+    window.resetRagSim = resetRagSim;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.chooseScenario = chooseScenario;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+    window.$ = $;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

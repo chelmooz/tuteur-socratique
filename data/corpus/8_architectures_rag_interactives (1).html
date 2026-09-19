@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>8 Architectures RAG (Retrieval-Augmented Generation) - Interactif</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body class="min-h-screen antialiased text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <header class="sticky top-0 z-40 bg-[#0b0f19]/90 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-diagram-project text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-300 bg-clip-text text-transparent">
+                        8 Architectures RAG
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium hidden sm:block">Retrieval-Augmented Generation & Systèmes d'Information IA</p>
+                </div>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center space-x-2.5 sm:space-x-4">
+                <button id="btn-simulate-all" onclick="simulateAllArchitectures()" class="flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-500/20 active:scale-95 transition-all">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Simuler Tout (Flux)</span>
+                </button>
+                <button onclick="resetAllSimulations()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 active:scale-95 transition-all">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="hidden md:inline">Réinitialiser</span>
+                </button>
+                <button onclick="openLegendModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium bg-slate-800/80 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 active:scale-95 transition-all">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span class="hidden md:inline">Légende & Rôles</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+        <!-- Interactive Legend Strip -->
+        <div class="mb-6 p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center space-x-2 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+                <i class="fa-solid fa-palette text-indigo-400"></i>
+                <span>Composants Clés :</span>
+            </div>
+            <div class="flex flex-wrap gap-2 sm:gap-3 text-[11px] font-medium">
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <i class="fa-solid fa-user mr-1.5"></i> Requête Utilisateur
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <i class="fa-solid fa-cube mr-1.5"></i> Embeddings
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <i class="fa-solid fa-database mr-1.5"></i> Bases & Données
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                    <i class="fa-solid fa-circle-nodes mr-1.5"></i> Graphe de Connaissances
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                    <i class="fa-solid fa-file-lines mr-1.5"></i> Modèle Prompt
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <i class="fa-solid fa-brain mr-1.5"></i> LLM & Inférence
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    <i class="fa-solid fa-server mr-1.5"></i> Serveurs MCP / Outils
+                </span>
+            </div>
+            <div class="text-[11px] text-slate-400 italic">
+                <i class="fa-regular fa-hand-pointer mr-1"></i> Cliquez sur un bloc pour l'inspecter
+            </div>
+        </div>
+
+        <!-- 8 Architectures Grid: exactly as original image layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- CARD 1: NAIVE RAG -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-1">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">1</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Naïf <span class="text-xs text-slate-400 font-normal">(Naive RAG)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(1)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(1)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 1 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <!-- Flow Status pill -->
+                    <div id="status-1" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (cliquez sur lecture)</div>
+
+                    <!-- Diagram Body -->
+                    <div class="grid grid-cols-3 gap-2 items-center text-center text-xs my-auto">
+                        <!-- Left Col: User Query -->
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'La question brute posée en langage naturel par l’utilisateur.')"
+                                 id="node-1-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-user text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Requête Utilisateur</span>
+                            </div>
+                        </div>
+
+                        <!-- Arrow 1 -> Embedding -->
+                        <div class="flex flex-col items-center justify-center">
+                            <div onclick="showNodeInfo('embed', 'Plongement Vectoriel (Embedding)', 'Transforme le texte de la requête en vecteur multidimensionnel sémantique (via un modèle d’embedding comme text-embedding-3 ou BGE).')"
+                                 id="node-1-embed" class="node-box p-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-cube text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Embedding</span>
+                            </div>
+                        </div>
+
+                        <!-- Right Col: Data Sources -> Vector DB -->
+                        <div class="flex flex-col items-center space-y-2">
+                            <div onclick="showNodeInfo('source', 'Sources de Données', 'Documents d’origine (PDF, Markdown, pages web, docs notion) découpés en segments (chunks).')"
+                                 id="node-1-sources" class="node-box p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 w-20 flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-file-lines text-xs"></i>
+                                <span class="text-[9px] font-semibold">Sources</span>
+                            </div>
+                            <div onclick="showNodeInfo('db', 'Base Vectorielle (Vector DB)', 'Stocke les embeddings des documents et effectue une recherche de similarité cosinus ou k-NN pour extraire les chunks pertinents.')"
+                                 id="node-1-db" class="node-box p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-database text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Base Vectorielle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Prompt Template & LLM Output -->
+                    <div class="mt-4 pt-3 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('output', 'Réponse Finale (Output)', 'La réponse générée par le modèle avec contexte, factuellement étayée par les documents récupérés.')"
+                                 id="node-1-output" class="node-box p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-circle-check text-base mb-1"></i>
+                                <span class="text-[10px] font-semibold">Sortie (Output)</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('llm', 'Modèle LLM', 'Modèle de langage (GPT-4o, Claude 3.5, Llama 3) qui synthétise la réponse à partir du prompt enrichi.')"
+                                 id="node-1-llm" class="node-box p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-brain text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold">LLM</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('prompt', 'Modèle de Prompt (Prompt Template)', 'Concatène l’instruction système, la question initiale et les extraits récupérés de la base vectorielle.')"
+                                 id="node-1-prompt" class="node-box p-2 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-receipt text-lg mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Template Prompt</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Flux séquentiel 1-étape</span>
+                    <span class="text-indigo-400 font-mono">Simple & Rapide</span>
+                </div>
+            </div>
+
+            <!-- CARD 2: MULTIMODAL RAG -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-2">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">2</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Multimodal <span class="text-xs text-slate-400 font-normal">(Multimodal RAG)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(2)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(2)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 2 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <div id="status-2" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Texte + Images)</div>
+
+                    <div class="grid grid-cols-3 gap-2 items-center text-center text-xs my-auto">
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Multimodale', 'L\'utilisateur soumet une requête textuelle et/ou une image (schéma, capture, photo).')"
+                                 id="node-2-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-20 flex flex-col items-center">
+                                <div class="flex space-x-1 text-xs mb-1">
+                                    <i class="fa-solid fa-user"></i>
+                                    <i class="fa-solid fa-image text-cyan-400"></i>
+                                </div>
+                                <span class="text-[10px] font-semibold leading-tight">Requête Texte/Image</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-center">
+                            <div onclick="showNodeInfo('embed', 'Embedding Multimodal', 'Modèle de projection cross-modal (ex: CLIP, SigLIP, ColPali) alignant texte et images dans le même espace vectoriel.')"
+                                 id="node-2-embed" class="node-box p-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-cubes-stacked text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Embedding Multimodal</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center space-y-2">
+                            <div onclick="showNodeInfo('source', 'Sources Multi-formats', 'Catalogues PDF scannés, diagrammes techniques, graphiques, audio, images haute définition.')"
+                                 id="node-2-sources" class="node-box p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 w-20 flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-photo-film text-xs"></i>
+                                <span class="text-[9px] font-semibold">Multi-Sources</span>
+                            </div>
+                            <div onclick="showNodeInfo('db', 'Base Vectorielle Multimodale', 'Indexe simultanément les descriptions textuelles et les représentations vectorielles d’images.')"
+                                 id="node-2-db" class="node-box p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-database text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Vector DB Vision</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div id="node-2-output" class="node-box p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center"
+                                 onclick="showNodeInfo('output', 'Réponse Multimodale', 'Génération textuelle intégrant des références ou extraits d’images corroborés.')">
+                                <i class="fa-solid fa-circle-check text-base mb-1"></i>
+                                <span class="text-[10px] font-semibold">Sortie (Output)</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('llm', 'LLM Multimodal (VLM)', 'Modèle Vision-Language (GPT-4o, Gemini 1.5 Pro, Claude Sonnet) capable d’interpréter visuellement les documents.')"
+                                 id="node-2-llm" class="node-box p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-eye text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold">LLM Vision</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-2-prompt" class="node-box p-2 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center"
+                                 onclick="showNodeInfo('prompt', 'Prompt Template Multimodal', 'Assemble le texte de la requête, les images sélectionnées et les consignes de formatage visuel.')">
+                                <i class="fa-solid fa-file-image text-lg mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Template Visuel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Texte, schémas & visuels</span>
+                    <span class="text-cyan-400 font-mono">Espace partagé CLIP</span>
+                </div>
+            </div>
+
+            <!-- CARD 3: HyDE -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">3</span>
+                        <h2 class="font-bold text-slate-100 text-base">HyDE <span class="text-xs text-slate-400 font-normal">(Hypothetical Doc Embed)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(3)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(3)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 3 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <div id="status-3" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Hypothèse zéro-shot)</div>
+
+                    <div class="grid grid-cols-3 gap-2 items-center text-center text-xs my-auto">
+                        <!-- User Query -->
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Question posée, potentiellement courte ou sans vocabulaire technique pointu.')"
+                                 id="node-3-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-user text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Requête Utilisateur</span>
+                            </div>
+                        </div>
+
+                        <!-- Hypothetical Response & Embedding -->
+                        <div class="flex flex-col items-center space-y-1">
+                            <div onclick="showNodeInfo('hyde_hypo', 'Réponse Hypothétique (par LLM)', 'Le LLM génère un faux document plausible répondant à la question sans consulter la base.')"
+                                 id="node-3-hypo" class="node-box p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 w-24 flex flex-col items-center">
+                                <i class="fa-solid fa-wand-magic-sparkles text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Réponse Hypothétique</span>
+                            </div>
+                            <div onclick="showNodeInfo('embed', 'Embedding de la Réponse Hypothétique', 'On calcule le vecteur de cette fausse réponse (plus proche du style des documents indexés que de la requête courte).')"
+                                 id="node-3-embed" class="node-box p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-24 flex flex-col items-center">
+                                <i class="fa-solid fa-cube text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Embedding Hypo</span>
+                            </div>
+                        </div>
+
+                        <!-- Data Sources -> Vector DB -->
+                        <div class="flex flex-col items-center space-y-2">
+                            <div onclick="showNodeInfo('source', 'Sources de Données', 'Corpus documentaire répertorié.')"
+                                 id="node-3-sources" class="node-box p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 w-20 flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-file-lines text-xs"></i>
+                                <span class="text-[9px] font-semibold">Sources</span>
+                            </div>
+                            <div onclick="showNodeInfo('db', 'Base Vectorielle', 'Recherche vectorielle document-vers-document beaucoup plus précise que question-vers-document.')"
+                                 id="node-3-db" class="node-box p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-database text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Base Vectorielle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row -->
+                    <div class="mt-4 pt-3 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div id="node-3-output" class="node-box p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center"
+                                 onclick="showNodeInfo('output', 'Sortie Finale', 'Réponse factuelle basée sur les vrais documents retrouvés grâce à la projection HyDE.')">
+                                <i class="fa-solid fa-circle-check text-base mb-1"></i>
+                                <span class="text-[10px] font-semibold">Sortie</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('llm', 'LLM Final', 'Synthèse rigoureuse basée sur les vrais extraits documents trouvés.')"
+                                 id="node-3-llm" class="node-box p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-brain text-lg mb-1"></i>
+                                <span class="text-[10px] font-semibold">LLM Final</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-3-prompt" class="node-box p-2 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center"
+                                 onclick="showNodeInfo('prompt', 'Template Prompt', 'Structure la réponse avec le contexte réel issu du Vector DB.')">
+                                <i class="fa-solid fa-receipt text-lg mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Template Prompt</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Comble le fossé sémantique</span>
+                    <span class="text-amber-400 font-mono">Doc-to-Doc search</span>
+                </div>
+            </div>
+
+            <!-- CARD 4: CORRECTIVE RAG -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">4</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Correctif <span class="text-xs text-slate-400 font-normal">(CRAG)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(4)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(4)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 4 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <div id="status-4" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Auto-évaluation & Web)</div>
+
+                    <!-- Flow Diagram Grid -->
+                    <div class="grid grid-cols-12 gap-1 items-center text-center text-xs my-auto">
+                        <!-- User (col 1-3) -->
+                        <div class="col-span-3 flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Question soumise au système.')"
+                                 id="node-4-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-16 flex flex-col items-center">
+                                <i class="fa-solid fa-user text-sm mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Requête</span>
+                            </div>
+                        </div>
+
+                        <!-- Embedding (col 4-6) -->
+                        <div class="col-span-3 flex flex-col items-center">
+                            <div onclick="showNodeInfo('embed', 'Embedding', 'Vectorisation de la requête.')"
+                                 id="node-4-embed" class="node-box p-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-16 flex flex-col items-center">
+                                <i class="fa-solid fa-cube text-sm mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Embedding</span>
+                            </div>
+                        </div>
+
+                        <!-- Correction Pipeline (col 7-12) -->
+                        <div class="col-span-6 flex flex-col space-y-1.5 items-center">
+                            <div onclick="showNodeInfo('analyzer', 'Analyseur de Pertinence (Query Analyzer)', 'Évalue le score de confiance des documents extraits (Correct, Ambigu, Incorrect).')"
+                                 id="node-4-analyzer" class="node-box px-2 py-1 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 w-full flex items-center justify-between text-[10px]">
+                                <span><i class="fa-solid fa-clipboard-check mr-1 text-indigo-400"></i> Évaluateur</span>
+                                <span class="text-[9px] px-1 rounded bg-indigo-900/50">Score</span>
+                            </div>
+
+                            <div onclick="showNodeInfo('web', 'Recherche Web (Fallback)', 'Si les documents locaux sont insuffisants ou obsolètes, déclenche une recherche web en direct.')"
+                                 id="node-4-web" class="node-box px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 w-full flex items-center justify-between text-[10px]">
+                                <span><i class="fa-solid fa-globe mr-1 text-amber-400"></i> Recherche Web</span>
+                                <span class="text-[9px] px-1 rounded bg-amber-900/50">Tavily/Serp</span>
+                            </div>
+
+                            <div onclick="showNodeInfo('correct', 'Info Corrigée & Filtrée', 'Synthèse des fragments certifiés fiables avant injection dans le prompt.')"
+                                 id="node-4-correct" class="node-box px-2 py-1 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300 w-full flex items-center justify-between text-[10px]">
+                                <span><i class="fa-solid fa-filter mr-1 text-teal-400"></i> Info Corrigée</span>
+                                <i class="fa-solid fa-check text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom -->
+                    <div class="mt-3 pt-2 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div id="node-4-output" class="node-box p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-circle-check text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">Sortie</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-4-llm" class="node-box p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-brain text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">LLM</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-4-prompt" class="node-box p-1.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-receipt text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Prompt Filtré</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Auto-évaluation de pertinence</span>
+                    <span class="text-teal-400 font-mono">Anti-hallucination</span>
+                </div>
+            </div>
+
+            <!-- CARD 5: GRAPH RAG -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-5">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">5</span>
+                        <h2 class="font-bold text-slate-100 text-base">Graph RAG <span class="text-xs text-slate-400 font-normal">(Knowledge Graph)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(5)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(5)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 5 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <div id="status-5" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Graphe d'entités & relations)</div>
+
+                    <!-- Top Construction Row -->
+                    <div class="flex items-center justify-between px-2 py-1.5 mb-2 bg-slate-900/50 rounded-lg border border-slate-800 text-[10px]">
+                        <div onclick="showNodeInfo('source', 'Sources de Données', 'Textes complexes contenant de nombreuses entités interconnectées.')"
+                             id="node-5-sources" class="text-amber-400 flex items-center space-x-1 cursor-pointer">
+                            <i class="fa-solid fa-file"></i>
+                            <span>Sources</span>
+                        </div>
+                        <div onclick="showNodeInfo('graph_builder', 'Constructeur de Graphe (Graph Builder)', 'Extrait entités, relations et communautés (via LLM ou NLP) pour forger un graphe.')"
+                             id="node-5-builder" class="text-teal-300 flex items-center space-x-1 bg-teal-500/10 px-1.5 py-0.5 rounded border border-teal-500/30 cursor-pointer">
+                            <i class="fa-solid fa-network-wired"></i>
+                            <span>Graph Builder</span>
+                        </div>
+                    </div>
+
+                    <!-- Center row: User -> Embed -> (Vector DB + Graph DB) -->
+                    <div class="grid grid-cols-3 gap-2 items-center text-center text-xs my-auto">
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Questions complexes nécessitant une vue d’ensemble ou des relations multi-sauts (multi-hop).')"
+                                 id="node-5-user" class="node-box p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-user text-sm mb-1"></i>
+                                <span class="text-[10px] font-semibold leading-tight">Requête</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div onclick="showNodeInfo('embed', 'Embedding Sémantique', 'Localise les entités les plus proches.')"
+                                 id="node-5-embed" class="node-box p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-cube text-sm mb-1"></i>
+                                <span class="text-[10px] font-semibold">Embedding</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center space-y-1">
+                            <div onclick="showNodeInfo('db', 'Base Vectorielle', 'Recherche sémantique standard sur les segments de texte.')"
+                                 id="node-5-vectordb" class="node-box px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 w-24 flex items-center space-x-1">
+                                <i class="fa-solid fa-database text-xs"></i>
+                                <span class="text-[9px]">Vector DB</span>
+                            </div>
+                            <div onclick="showNodeInfo('graph_db', 'Base de Graphe (Graph DB - Neo4j / Nebula)', 'Traverse les relations entre entités et résume les communautés globales (Global Search / Local Search).')"
+                                 id="node-5-graphdb" class="node-box px-2 py-1 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300 w-24 flex items-center space-x-1">
+                                <i class="fa-solid fa-circle-nodes text-xs"></i>
+                                <span class="text-[9px]">Graph DB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom row -->
+                    <div class="mt-3 pt-2 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div id="node-5-output" class="node-box p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-circle-check text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">Sortie</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-5-llm" class="node-box p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-brain text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">LLM</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-5-prompt" class="node-box p-1.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-receipt text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">Contexte Graphe</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Relations inter-entités & synthèse</span>
+                    <span class="text-teal-400 font-mono">Multi-hop Reasoning</span>
+                </div>
+            </div>
+
+            <!-- CARD 6: HYBRID RAG -->
+            <div class="card-canvas p-4 flex flex-col justify-between relative group" id="arch-card-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">6</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Hybride <span class="text-xs text-slate-400 font-normal">(Hybrid RAG)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(6)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(6)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schematic Canvas Diagram 6 -->
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[260px] flex flex-col justify-between">
+                    <div id="status-6" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Dense + Sparse / Graphe)</div>
+
+                    <div class="grid grid-cols-12 gap-1 items-center text-center text-xs my-auto">
+                        <div class="col-span-3 flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Recherche nécessitant à la fois du sens sémantique et des mots-clés exacts.')"
+                                 id="node-6-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-16 flex flex-col items-center">
+                                <i class="fa-solid fa-user text-sm mb-1"></i>
+                                <span class="text-[9px] font-semibold leading-tight">Requête</span>
+                            </div>
+                        </div>
+
+                        <div class="col-span-3 flex flex-col items-center">
+                            <div onclick="showNodeInfo('embed', 'Embedding Sémantique', 'Génère la représentation pour la recherche dense.')"
+                                 id="node-6-embed" class="node-box p-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 w-16 flex flex-col items-center">
+                                <i class="fa-solid fa-cube text-sm mb-1"></i>
+                                <span class="text-[9px] font-semibold">Embedding</span>
+                            </div>
+                        </div>
+
+                        <!-- 2 Streams: Vector DB (Context 1) & Graph/Keyword (Context 2) -->
+                        <div class="col-span-6 flex flex-col space-y-2 items-center">
+                            <div onclick="showNodeInfo('hybrid_c1', 'Vector DB (Contexte 1)', 'Recherche vectorielle dense capturant le sens sémantique général.')"
+                                 id="node-6-c1" class="node-box p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 w-full flex items-center justify-between text-[10px]">
+                                <span><i class="fa-solid fa-database mr-1 text-cyan-400"></i> Vector DB (C1)</span>
+                                <span class="text-[9px] font-mono text-cyan-400">Dense</span>
+                            </div>
+                            <div onclick="showNodeInfo('hybrid_c2', 'Graph DB / BM25 (Contexte 2)', 'Recherche lexicale exacte (BM25) ou traversée de graphe relationnel pour compléter la précision.')"
+                                 id="node-6-c2" class="node-box p-1.5 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-300 w-full flex items-center justify-between text-[10px]">
+                                <span><i class="fa-solid fa-circle-nodes mr-1 text-teal-400"></i> Graph DB (C2)</span>
+                                <span class="text-[9px] font-mono text-teal-400">Sparse</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom -->
+                    <div class="mt-3 pt-2 border-t border-slate-900 grid grid-cols-3 gap-2 items-center text-center">
+                        <div class="flex flex-col items-center">
+                            <div id="node-6-output" class="node-box p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-circle-check text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">Sortie</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-6-llm" class="node-box p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-brain text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">LLM</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="node-6-prompt" class="node-box p-1.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-400 w-20 flex flex-col items-center">
+                                <i class="fa-solid fa-receipt text-xs mb-0.5"></i>
+                                <span class="text-[9px] font-semibold">Fusion RRF</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Re-ranking & Reciprocal Rank Fusion</span>
+                    <span class="text-cyan-400 font-mono">Dense + Lexical</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: TWO LARGE CARDS (7. Adaptive RAG & 8. Agentic RAG) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+
+            <!-- CARD 7: ADAPTIVE RAG (Large Left Card, 5 cols) -->
+            <div class="lg:col-span-5 card-canvas p-5 flex flex-col justify-between relative" id="arch-card-7">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">7</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Adaptatif <span class="text-xs text-slate-400 font-normal">(Adaptive RAG)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(7)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(7)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[360px] flex flex-col justify-between text-xs">
+                    <div id="status-7" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Routage dynamique conditionnel)</div>
+
+                    <!-- Top Decision Branch -->
+                    <div class="flex items-center justify-between gap-2 p-2 bg-slate-900/40 rounded-lg border border-slate-800">
+                        <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Requête pouvant être simple (calcul, salutation) ou complexe (faits précis).')"
+                             id="node-7-user" class="node-box p-1.5 rounded bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center space-x-1">
+                            <i class="fa-solid fa-user"></i>
+                            <span class="text-[10px]">Requête</span>
+                        </div>
+
+                        <!-- Diamond Decision: Need Retrieval? -->
+                        <div onclick="showNodeInfo('decision', 'Classificateur : Besoin de Recherche ?', 'Un classificateur rapide ou petit LLM détermine si la question requiert des données externes ou si la mémoire interne du LLM suffit.')"
+                             id="node-7-decision" class="node-box p-2 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-center font-semibold text-[10px]">
+                            <i class="fa-solid fa-code-branch text-amber-400 mr-1"></i> Besoin de Recherche ?
+                        </div>
+
+                        <!-- Direct path if NO -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-[9px] text-slate-500 font-mono">Non -> Direct</span>
+                        </div>
+
+                        <div id="node-7-direct-llm" class="node-box p-1.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1">
+                            <i class="fa-solid fa-brain"></i>
+                            <span class="text-[10px]">LLM Direct</span>
+                        </div>
+                    </div>
+
+                    <!-- Middle Branch: If YES -> Strategy Selector -->
+                    <div class="my-3 p-2 bg-slate-900/70 rounded-lg border border-indigo-900/40">
+                        <div class="text-[10px] text-indigo-300 font-semibold mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-route mr-1"></i> Si Oui : Sélection de Stratégie</span>
+                            <span class="text-[9px] text-slate-400 font-normal">Choix optimal de recherche</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- Vector Strategy -->
+                            <div onclick="showNodeInfo('strat_vec', 'Recherche Vectorielle', 'Adaptée pour les requêtes floues et sémantiques.')"
+                                 id="node-7-strat-vec" class="node-box p-1.5 rounded bg-blue-500/10 border border-blue-500/30 text-blue-300 text-center">
+                                <i class="fa-solid fa-magnifying-glass text-xs mb-1"></i>
+                                <div class="text-[9px] font-bold">Vector Search</div>
+                                <div class="text-[8px] text-slate-400 mt-1">Vector DB</div>
+                            </div>
+                            <!-- Graph Strategy -->
+                            <div onclick="showNodeInfo('strat_graph', 'Recherche de Graphe', 'Adaptée pour cartographier les liens entre personnes, entreprises, concepts.')"
+                                 id="node-7-strat-graph" class="node-box p-1.5 rounded bg-teal-500/10 border border-teal-500/30 text-teal-300 text-center">
+                                <i class="fa-solid fa-circle-nodes text-xs mb-1"></i>
+                                <div class="text-[9px] font-bold">Graph Search</div>
+                                <div class="text-[8px] text-slate-400 mt-1">Graph DB</div>
+                            </div>
+                            <!-- Keyword Strategy -->
+                            <div onclick="showNodeInfo('strat_key', 'Recherche Mots-clés (BM25)', 'Adaptée pour retrouver des identifiants exacts, numéros de série, codes d\'erreur.')"
+                                 id="node-7-strat-key" class="node-box p-1.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-center">
+                                <i class="fa-solid fa-font text-xs mb-1"></i>
+                                <div class="text-[9px] font-bold">Mots-clés</div>
+                                <div class="text-[8px] text-slate-400 mt-1">Index BM25</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Generation Row -->
+                    <div class="pt-2 border-t border-slate-900 flex items-center justify-between">
+                        <div id="node-7-prompt" class="node-box p-2 rounded bg-pink-500/10 border border-pink-500/30 text-pink-400 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-receipt"></i>
+                            <span class="text-[10px]">Template Prompt</span>
+                        </div>
+                        <div id="node-7-llm" class="node-box p-2 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-brain"></i>
+                            <span class="text-[10px]">LLM Final</span>
+                        </div>
+                        <div id="node-7-output" class="node-box p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span class="text-[10px]">Sortie</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Aiguillage intelligent par requête</span>
+                    <span class="text-amber-400 font-mono">Économie de latence & coûts</span>
+                </div>
+            </div>
+
+            <!-- CARD 8: AGENTIC RAG (Large Right Card, 7 cols) -->
+            <div class="lg:col-span-7 card-canvas p-5 flex flex-col justify-between relative" id="arch-card-8">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center">8</span>
+                        <h2 class="font-bold text-slate-100 text-base">RAG Agentique <span class="text-xs text-slate-400 font-normal">(Agentic RAG & MCP)</span></h2>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="simulateSingle(8)" title="Lancer le flux" class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button onclick="openDetailModal(8)" title="Détails" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-maximize"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative bg-slate-950/80 rounded-xl p-3 border border-slate-800/80 min-h-[360px] flex flex-col justify-between text-xs">
+                    <div id="status-8" class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 w-fit mb-2">Prêt (Multi-agents + Outils MCP connectés)</div>
+
+                    <!-- Top Memory & Planning Triad feeding Orchestrator -->
+                    <div class="grid grid-cols-3 gap-2 mb-2 text-center text-[10px]">
+                        <div onclick="showNodeInfo('stm', 'Mémoire Court Terme (Short Term Memory)', 'Historique de conversation immédiat, contexte du fil en cours.')"
+                             id="node-8-stm" class="node-box p-1 rounded bg-slate-800 border border-slate-700 text-indigo-300">
+                            <i class="fa-regular fa-clock mr-1"></i> Mémoire Court Terme
+                        </div>
+                        <div onclick="showNodeInfo('ltm', 'Mémoire Long Terme (Long Term Memory)', 'Base vectorielle ou profil utilisateur persistant d\'une session à l\'autre.')"
+                             id="node-8-ltm" class="node-box p-1 rounded bg-slate-800 border border-slate-700 text-indigo-300">
+                            <i class="fa-solid fa-box-archive mr-1"></i> Mémoire Long Terme
+                        </div>
+                        <div onclick="showNodeInfo('planner', 'Module de Planification (Planner)', 'Décompose un objectif complexe en une suite d\'actions et sous-tâches (ReAct, Plan-and-Solve).')"
+                             id="node-8-planner" class="node-box p-1 rounded bg-slate-800 border border-slate-700 text-indigo-300">
+                            <i class="fa-solid fa-list-check mr-1"></i> Planification
+                        </div>
+                    </div>
+
+                    <!-- Main Core: User -> Orchestrator -> Sub-Agents <-> MCP Servers -->
+                    <div class="grid grid-cols-12 gap-2 items-center my-auto">
+                        <!-- User Query (col 1-2) -->
+                        <div class="col-span-2 flex flex-col items-center">
+                            <div onclick="showNodeInfo('query', 'Requête Utilisateur', 'Objectif de haut niveau formulé par l\'utilisateur.')"
+                                 id="node-8-user" class="node-box p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 w-full text-center">
+                                <i class="fa-solid fa-user text-base mb-1"></i>
+                                <span class="text-[9px] font-semibold block">Requête</span>
+                            </div>
+                        </div>
+
+                        <!-- Orchestrator (col 3-5) -->
+                        <div class="col-span-3 flex flex-col items-center">
+                            <div onclick="showNodeInfo('agent_orch', 'Agent Orchestrateur', 'Cerveau décisionnel qui pilote la boucle de réflexion, délègue les tâches aux sous-agents et synthétise.')"
+                                 id="node-8-orch" class="node-box p-2 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 w-full text-center shadow-lg shadow-indigo-950/50">
+                                <i class="fa-solid fa-robot text-xl mb-1 text-indigo-400"></i>
+                                <div class="text-[10px] font-bold">Orchestrateur</div>
+                                <div class="text-[8px] text-slate-400">Gestion de flux</div>
+                            </div>
+                        </div>
+
+                        <!-- Sub-Agents (col 6-7) -->
+                        <div id="node-8-agents-block" class="col-span-2 flex flex-col space-y-1.5">
+                            <div id="node-8-sub1" class="node-box p-1 rounded bg-slate-900 border border-indigo-500/30 text-slate-300 flex items-center space-x-1 text-[9px]">
+                                <i class="fa-solid fa-robot text-indigo-400"></i>
+                                <span>Agent 1</span>
+                            </div>
+                            <div id="node-8-sub2" class="node-box p-1 rounded bg-slate-900 border border-indigo-500/30 text-slate-300 flex items-center space-x-1 text-[9px]">
+                                <i class="fa-solid fa-robot text-indigo-400"></i>
+                                <span>Agent 2</span>
+                            </div>
+                            <div id="node-8-sub3" class="node-box p-1 rounded bg-slate-900 border border-indigo-500/30 text-slate-300 flex items-center space-x-1 text-[9px]">
+                                <i class="fa-solid fa-robot text-indigo-400"></i>
+                                <span>Agent 3...</span>
+                            </div>
+                        </div>
+
+                        <!-- MCP Servers Box (col 8-12) -->
+                        <div id="node-8-mcp-block" class="col-span-5 bg-orange-950/20 border border-orange-500/30 rounded-xl p-2.5">
+                            <div class="flex items-center justify-between text-orange-400 font-semibold text-[10px] mb-2 pb-1 border-b border-orange-500/20">
+                                <span><i class="fa-solid fa-plug mr-1"></i> Serveurs MCP</span>
+                                <span class="text-[8px] text-orange-300 font-mono">Model Context Protocol</span>
+                            </div>
+                            <div class="space-y-1 text-[9px]">
+                                <div onclick="showNodeInfo('mcp_files', 'Fichiers Locaux & Données (MCP)', 'Lecture/écriture de code, logs, documents de travail en local via MCP.')"
+                                     id="node-8-mcp-1" class="node-box px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+                                    <span><i class="fa-regular fa-folder-open text-amber-400 mr-1"></i> Fichiers Locaux</span>
+                                    <span class="text-[8px] text-slate-500">Local I/O</span>
+                                </div>
+                                <div onclick="showNodeInfo('mcp_db', 'Bases de Données (MCP)', 'Connexions PostgreSQL, MySQL, Snowflake, MongoDB sans risque.')"
+                                     id="node-8-mcp-2" class="node-box px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-database text-cyan-400 mr-1"></i> Bases de Données</span>
+                                    <span class="text-[8px] text-slate-500">SQL/NoSQL</span>
+                                </div>
+                                <div onclick="showNodeInfo('mcp_search', 'APIs de Recherche Web (MCP)', 'Tavily, Brave Search, Perplexity API pour temps réel.')"
+                                     id="node-8-mcp-3" class="node-box px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-magnifying-glass text-blue-400 mr-1"></i> Recherche Web</span>
+                                    <span class="text-[8px] text-slate-500">Web Search</span>
+                                </div>
+                                <div onclick="showNodeInfo('mcp_cloud', 'Stockage Cloud (MCP)', 'Buckets S3, Google Cloud Storage, Azure Blobs.')"
+                                     id="node-8-mcp-4" class="node-box px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-cloud text-indigo-400 mr-1"></i> Cloud Storage</span>
+                                    <span class="text-[8px] text-slate-500">AWS/GCP/Azure</span>
+                                </div>
+                                <div onclick="showNodeInfo('mcp_api', 'APIs Externes & Services (MCP)', 'GitHub, Slack, Jira, Stripe, CRM déclenchés de manière autonome.')"
+                                     id="node-8-mcp-5" class="node-box px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-network-wired text-emerald-400 mr-1"></i> APIs Externes</span>
+                                    <span class="text-[8px] text-slate-500">REST/gRPC</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Output & Final LLM -->
+                    <div class="mt-2 pt-2 border-t border-slate-900 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div id="node-8-llm" class="node-box px-3 py-1.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-brain"></i>
+                                <span class="text-[10px] font-bold">LLM de Synthèse</span>
+                            </div>
+                            <div id="node-8-output" class="node-box px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span class="text-[10px] font-bold">Sortie (Output Réussi)</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-slate-500 italic">Boucle d'actions & outillage autonome</span>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>Protocol ouvert MCP & orchestration</span>
+                    <span class="text-orange-400 font-mono">Autonomie Maximale</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal: Node Inspection Info / Tooltip Drawer -->
+    <div id="node-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative transform transition-all">
+            <button onclick="closeNodeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center space-x-3 mb-4">
+                <div id="modal-icon-wrap" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl">
+                    <i id="modal-icon" class="fa-solid fa-cube"></i>
+                </div>
+                <div>
+                    <span id="modal-badge" class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">Composant RAG</span>
+                    <h3 id="modal-title" class="text-lg font-bold text-slate-100 leading-tight mt-0.5">Titre du composant</h3>
+                </div>
+            </div>
+            <p id="modal-desc" class="text-slate-300 text-sm leading-relaxed mb-6">
+                Description détaillée du composant et de son fonctionnement technique.
+            </p>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
+                <strong class="text-slate-200">Astuce Architecturale :</strong>
+                <span id="modal-tip">Consultez les détails pour découvrir comment ce nœud réduit la latence et évite les hallucinations.</span>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button onclick="closeNodeModal()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Complete Architecture Deep Dive -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+                <div class="flex items-center space-x-3">
+                    <span id="deep-id" class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">1</span>
+                    <div>
+                        <h2 id="deep-title" class="text-xl font-bold text-white">Nom de l'architecture</h2>
+                        <p id="deep-subtitle" class="text-xs text-slate-400">Sous-titre technique</p>
+                    </div>
+                </div>
+                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Scrollable Content -->
+            <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-300 flex-1">
+                <div>
+                    <h4 class="text-indigo-400 font-semibold uppercase text-xs tracking-wider mb-2">Description & Mécanisme de Flux</h4>
+                    <p id="deep-mechanism" class="leading-relaxed text-slate-200 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        Explication pas à pas du fonctionnement du flux de données.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20">
+                        <div class="text-emerald-400 font-bold text-xs flex items-center space-x-2 mb-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Avantages Clés</span>
+                        </div>
+                        <ul id="deep-pros" class="space-y-1.5 text-xs text-slate-300 list-disc list-inside">
+                            <!-- Pros populated via JS -->
+                        </ul>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-rose-950/20 border border-rose-500/20">
+                        <div class="text-rose-400 font-bold text-xs flex items-center space-x-2 mb-2">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>Limites & Défis</span>
+                        </div>
+                        <ul id="deep-cons" class="space-y-1.5 text-xs text-slate-300 list-disc list-inside">
+                            <!-- Cons populated via JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-indigo-400 font-semibold uppercase text-xs tracking-wider mb-2">Cas d'Usage Typiques (Production)</h4>
+                    <div id="deep-usecases" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <!-- Usecases cards -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs">
+                <span class="text-slate-400">Architecture prête pour des systèmes d'inférence modernes</span>
+                <button onclick="closeDetailModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium">
+                    Fermer l'aperçu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Global Legend & Explanation -->
+    <div id="legend-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeLegendModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-book-open text-indigo-400"></i>
+                <span>Guide des Composants du RAG Moderne</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">
+                Le RAG (Retrieval-Augmented Generation) surmonte les limitations de mémoire statique des LLMs en injectant dynamiquement des documents pertinents en temps réel.
+            </p>
+
+            <div class="space-y-3 text-xs">
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-start space-x-3">
+                    <div class="p-2 rounded bg-blue-500/20 text-blue-400"><i class="fa-solid fa-user"></i></div>
+                    <div>
+                        <div class="font-bold text-slate-200">Requête Utilisateur (User Query)</div>
+                        <p class="text-slate-400 mt-0.5">Entrée naturelle fournie par l'humain ou un système en amont. Peut être textuelle, visuelle ou multi-requête.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-start space-x-3">
+                    <div class="p-2 rounded bg-purple-500/20 text-purple-400"><i class="fa-solid fa-cube"></i></div>
+                    <div>
+                        <div class="font-bold text-slate-200">Embedding (Vectorisation)</div>
+                        <p class="text-slate-400 mt-0.5">Conversion mathématique d'un concept en vecteur de nombres (ex: 1536 ou 3072 dimensions) pour mesurer la similarité conceptuelle.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-start space-x-3">
+                    <div class="p-2 rounded bg-cyan-500/20 text-cyan-400"><i class="fa-solid fa-database"></i></div>
+                    <div>
+                        <div class="font-bold text-slate-200">Base Vectorielle (Vector DB)</div>
+                        <p class="text-slate-400 mt-0.5">Systèmes optimisés (Milvus, Pinecone, Qdrant, Chroma, pgvector) pour exécuter des recherches HNSW ou ScaNN à grande vitesse.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-start space-x-3">
+                    <div class="p-2 rounded bg-teal-500/20 text-teal-400"><i class="fa-solid fa-circle-nodes"></i></div>
+                    <div>
+                        <div class="font-bold text-slate-200">Knowledge Graph & Graph DB</div>
+                        <p class="text-slate-400 mt-0.5">Réseau d'entités interconnectées par des triplets (Sujet - Prédicat - Objet). Permet des raisonnements déductifs globaux impossibles en simple similarité cosinus.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-start space-x-3">
+                    <div class="p-2 rounded bg-orange-500/20 text-orange-400"><i class="fa-solid fa-server"></i></div>
+                    <div>
+                        <div class="font-bold text-slate-200">Serveurs MCP (Model Context Protocol)</div>
+                        <p class="text-slate-400 mt-0.5">Nouveau standard universel permettant aux agents IA de se connecter en toute sécurité aux bases de données, disques locaux et API tierces sans code sur-mesure fragile.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button onclick="closeLegendModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">
+                    Compris
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-12 border-t border-slate-800/80 bg-slate-950/70 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>
+                <span class="font-bold text-slate-400">8 Architectures RAG Interactives</span> &bull; Modélisation fidèle de l'infographie de référence
+            </div>
+            <div class="flex items-center space-x-4">
+                <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Mode Réactif</span>
+                <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Données Souveraines</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* Node info definitions for inspection drawer */
+        const NODE_DEFINITIONS = {
+            query: {
+                title: "Requête Utilisateur (User Query)",
+                badge: "Point d'Entrée",
+                badgeClass: "bg-blue-500/20 text-blue-300",
+                iconClass: "fa-solid fa-user text-blue-400 bg-blue-500/10",
+                desc: "L'instruction ou la question transmise par l'utilisateur. En RAG naïf, elle est vectorisée telle quelle. En RAG avancé, elle peut être réécrite, enrichie ou décomposée en sous-questions.",
+                tip: "Une mauvaise formulation de requête est la 1ère cause d'échec de récupération dans les systèmes d'information."
+            },
+            embed: {
+                title: "Plongement Vectoriel (Embedding)",
+                badge: "Vectorisation",
+                badgeClass: "bg-purple-500/20 text-purple-300",
+                iconClass: "fa-solid fa-cube text-purple-400 bg-purple-500/10",
+                desc: "Réseau de neurones spécialisé transformant un bloc de texte en coordonnées sémantiques. Permet d'identifier que 'voiture' et 'automobile' pointent vers un même espace géométrique.",
+                tip: "Veillez à utiliser le même modèle d'embedding pour l'ingestion des documents et pour la requête."
+            },
+            source: {
+                title: "Sources de Données (Data Sources)",
+                badge: "Corpus Brut",
+                badgeClass: "bg-amber-500/20 text-amber-300",
+                iconClass: "fa-solid fa-file-lines text-amber-400 bg-amber-500/10",
+                desc: "Ensemble des documents hétérogènes (fichiers PDF, pages web, Confluence, tables SQL). Ces données subissent un nettoyage, découpage en morceaux (chunking) et enrichissement de métadonnées.",
+                tip: "La qualité du découpage (taille et chevauchement des chunks) impacte directement la pertinence finale."
+            },
+            db: {
+                title: "Base Vectorielle (Vector DB)",
+                badge: "Index Sémantique",
+                badgeClass: "bg-cyan-500/20 text-cyan-300",
+                iconClass: "fa-solid fa-database text-cyan-400 bg-cyan-500/10",
+                desc: "Stockage haute performance spécialisé dans le calcul de distance (cosinus, produit scalaire, euclidienne) pour extraire instantanément le Top-K fragments les plus similaires.",
+                tip: "Des moteurs comme Qdrant, Milvus ou pgvector indexent des millions de vecteurs en quelques millisecondes."
+            },
+            prompt: {
+                title: "Modèle de Prompt (Prompt Template)",
+                badge: "Construction de Contexte",
+                badgeClass: "bg-pink-500/20 text-pink-300",
+                iconClass: "fa-solid fa-receipt text-pink-400 bg-pink-500/10",
+                desc: "Gabarit d'assemblage combinant les consignes de sécurité, le rôle du modèle, la question d'origine et les extraits récupérés, avec une formule du type: 'Réponds uniquement avec le contexte fourni ci-dessous'.",
+                tip: "L'ordre des documents dans le prompt compte (problème du 'Lost in the Middle'). Mettez les plus décisifs au début et à la fin."
+            },
+            llm: {
+                title: "Modèle de Langage (LLM)",
+                badge: "Générateur & Raisonneur",
+                badgeClass: "bg-emerald-500/20 text-emerald-300",
+                iconClass: "fa-solid fa-brain text-emerald-400 bg-emerald-500/10",
+                desc: "Modèle génératif (ex: GPT-4o, Claude 3.5 Sonnet, Llama 3) qui prend connaissance du prompt enrichi pour formuler une réponse limpide et sourcée sans inventer d'information.",
+                tip: "Réglez la température proche de 0 ou 0.2 pour favoriser une adhésion stricte aux documents cités."
+            },
+            output: {
+                title: "Sortie Factuelle (Output)",
+                badge: "Résultat Final",
+                badgeClass: "bg-emerald-500/20 text-emerald-300",
+                iconClass: "fa-solid fa-circle-check text-emerald-400 bg-emerald-500/10",
+                desc: "Réponse achevée transmise à l'utilisateur, idéalement assortie de liens hypertextes et de citations vers les documents sources originaux pour auditabilité.",
+                tip: "Une bonne sortie RAG contient des citations formelles des sources [Doc 1, Page 4]."
+            },
+            hyde_hypo: {
+                title: "Réponse Hypothétique (HyDE)",
+                badge: "Génération Zéro-Shot",
+                badgeClass: "bg-amber-500/20 text-amber-300",
+                iconClass: "fa-solid fa-wand-magic-sparkles text-amber-400 bg-amber-500/10",
+                desc: "Le LLM produit un 'faux' document répondant fictivement à la question. Même s'il contient des faits inexacts, son style rédactionnel et son lexique correspondent exactement au style des documents indexés.",
+                tip: "Transforme un problème de recherche 'Question vs Document' en une recherche optimale 'Document vs Document'."
+            },
+            analyzer: {
+                title: "Analyseur de Requête & Confiance (CRAG)",
+                badge: "Garde-Fou",
+                badgeClass: "bg-indigo-500/20 text-indigo-300",
+                iconClass: "fa-solid fa-clipboard-check text-indigo-400 bg-indigo-500/10",
+                desc: "Module vérificateur qui note la qualité des passages récupérés. Si le score est en dessous d'un seuil, le système rejette les documents trompeurs pour éviter d'induire le LLM en erreur.",
+                tip: "Évite que le modèle ne fabrique une réponse absurde sur la base d'extraits hors-sujet."
+            },
+            web: {
+                title: "Recherche Web (Fallback Correctif)",
+                badge: "Source Externe Dynamique",
+                badgeClass: "bg-amber-500/20 text-amber-300",
+                iconClass: "fa-solid fa-globe text-amber-400 bg-amber-500/10",
+                desc: "Si la base de connaissances interne est muette ou périmée, l'analyseur déclenche une requête sur les moteurs de recherche via API (Tavily, SerpApi, Brave Search).",
+                tip: "Garantit que même les événements de la journée en cours peuvent être traités avec rigueur."
+            },
+            correct: {
+                title: "Informations Corrigées & Filtrées",
+                badge: "Assainissement",
+                badgeClass: "bg-teal-500/20 text-teal-300",
+                iconClass: "fa-solid fa-filter text-teal-400 bg-teal-500/10",
+                desc: "Découpage fin et extraction sélective des phrases réellement pertinentes trouvées sur le Web ou dans la base interne, écartant le bruit superflu.",
+                tip: "Réduit la consommation de tokens et optimise la concentration du LLM."
+            },
+            graph_builder: {
+                title: "Constructeur de Graphe (Knowledge Graph Builder)",
+                badge: "Extraction de Relations",
+                badgeClass: "bg-teal-500/20 text-teal-300",
+                iconClass: "fa-solid fa-network-wired text-teal-400 bg-teal-500/10",
+                desc: "Processus qui lit les documents pour en extraire des entités nommées (personnes, projets, dates) et leurs liens logiques, structurant ainsi un graphe de connaissances interconnecté.",
+                tip: "Révolutionne les questions de synthèse globale comme : 'Quelles sont les faiblesses récurrentes de tous nos projets en 2025 ?'"
+            },
+            graph_db: {
+                title: "Base de Données Graphe (Graph DB)",
+                badge: "Navigation Multi-Sauts",
+                badgeClass: "bg-teal-500/20 text-teal-300",
+                iconClass: "fa-solid fa-circle-nodes text-teal-400 bg-teal-500/10",
+                desc: "Base spécialisée (Neo4j, Memgraph, Amazon Neptune) capable d'effectuer des traversées de relations pour interconnecter des fragments disséminés dans des dizaines de fichiers distincts.",
+                tip: "Comble l'angle mort des bases vectorielles pures, aveugles aux structures relationnelles complexes."
+            },
+            hybrid_c1: {
+                title: "Contexte 1 : Base Vectorielle (Dense)",
+                badge: "Similarité Cosinus",
+                badgeClass: "bg-cyan-500/20 text-cyan-300",
+                iconClass: "fa-solid fa-database text-cyan-400 bg-cyan-500/10",
+                desc: "Première voie de recherche capturant l'affinité sémantique et conceptuelle même si le mot exact recherché ne figure pas dans le texte.",
+                tip: "Excellente pour les requêtes périphériques et le langage informel."
+            },
+            hybrid_c2: {
+                title: "Contexte 2 : Graph DB / Recherche Lexicale (Sparse)",
+                badge: "Précision Exacte BM25",
+                badgeClass: "bg-teal-500/20 text-teal-300",
+                iconClass: "fa-solid fa-circle-nodes text-teal-400 bg-teal-500/10",
+                desc: "Seconde voie de recherche basée sur la fréquence exacte des termes (BM25) ou les relations de graphe. Les deux flux sont ensuite fusionnés via l'algorithme RRF (Reciprocal Rank Fusion).",
+                tip: "Empêche les vecteurs d'ignorer un numéro d'identifiant crucial comme 'TX-8920-v2'."
+            },
+            decision: {
+                title: "Classificateur Décisionnel (Besoin de Recherche ?)",
+                badge: "Routage Intelligent",
+                badgeClass: "bg-amber-500/20 text-amber-300",
+                iconClass: "fa-solid fa-code-branch text-amber-400 bg-amber-500/10",
+                desc: "Un modèle ultra-léger (ex: SLM ou classificateur BERT) vérifie si la question nécessite vraiment une consultation de bases. Si la question est triviale ('Bonjour', 'Raconte une blague'), elle va directement au LLM.",
+                tip: "Économise jusqu'à 40% des coûts d'infrastructure et réduit la latence perçue par l'utilisateur."
+            },
+            strat_vec: {
+                title: "Stratégie de Recherche Vectorielle",
+                badge: "Sémantique",
+                badgeClass: "bg-blue-500/20 text-blue-300",
+                iconClass: "fa-solid fa-magnifying-glass text-blue-400 bg-blue-500/10",
+                desc: "Activée pour les questions thématiques, abstraites ou nécessitant une compréhension de sens générale.",
+                tip: "Priorise la recherche par similarité dense."
+            },
+            strat_graph: {
+                title: "Stratégie de Recherche Graph",
+                badge: "Relationnelle",
+                badgeClass: "bg-teal-500/20 text-teal-300",
+                iconClass: "fa-solid fa-circle-nodes text-teal-400 bg-teal-500/10",
+                desc: "Activée quand la question implique une hiérarchie, un organigramme ou une chaîne de causalité complexe.",
+                tip: "Priorise les traversées de graphe et détection de communautés."
+            },
+            strat_key: {
+                title: "Stratégie Mots-Clés (BM25 / Full-Text)",
+                badge: "Exactitude",
+                badgeClass: "bg-amber-500/20 text-amber-300",
+                iconClass: "fa-solid fa-font text-amber-400 bg-amber-500/10",
+                desc: "Activée pour les numéros de code, dénominations de médicaments, références d'articles juridiques précis.",
+                tip: "Garantit un rappel sans faille sur les termes rares."
+            },
+            stm: {
+                title: "Mémoire Court Terme (Short-Term Memory)",
+                badge: "Buffer de Conversation",
+                badgeClass: "bg-indigo-500/20 text-indigo-300",
+                iconClass: "fa-regular fa-clock text-indigo-400 bg-indigo-500/10",
+                desc: "Maintient l'état courant de la conversation, les variables temporaires et les retours d'exécution d'outils précédents.",
+                tip: "Gérée via une fenêtre glissante ou un résumé dynamique de contexte."
+            },
+            ltm: {
+                title: "Mémoire Long Terme (Long-Term Memory)",
+                badge: "Expérience Cumulative",
+                badgeClass: "bg-indigo-500/20 text-indigo-300",
+                iconClass: "fa-solid fa-box-archive text-indigo-400 bg-indigo-500/10",
+                desc: "Stocke les préférences persistantes de l'utilisateur, l'historique des requêtes passées et les solutions de bugs déjà résolues.",
+                tip: "Souvent implémentée avec une base vectorielle dédiée aux souvenirs de l'agent."
+            },
+            planner: {
+                title: "Module de Planification (Planner)",
+                badge: "Stratégie & Décomposition",
+                badgeClass: "bg-indigo-500/20 text-indigo-300",
+                iconClass: "fa-solid fa-list-check text-indigo-400 bg-indigo-500/10",
+                desc: "Établit un plan par étapes : 1) Chercher les fichiers de log, 2) Comparer avec la documentation, 3) Écrire le correctif.",
+                tip: "Permet de reboucler et d'adapter le plan si un outil échoue (Self-Correction)."
+            },
+            agent_orch: {
+                title: "Agent Orchestrateur",
+                badge: "Superviseur IA",
+                badgeClass: "bg-indigo-500/20 text-indigo-300",
+                iconClass: "fa-solid fa-robot text-indigo-400 bg-indigo-500/10",
+                desc: "Chef d'orchestre qui délègue des sous-objectifs à des agents spécialisés (Agent Recherche, Agent Code, Agent Audit) et consolide le résultat.",
+                tip: "Architecture typique des frameworks AutoGen, CrewAI ou LangGraph."
+            },
+            mcp_files: {
+                title: "Serveur MCP : Fichiers Locaux & Données",
+                badge: "Protocole MCP",
+                badgeClass: "bg-orange-500/20 text-orange-300",
+                iconClass: "fa-regular fa-folder-open text-amber-400 bg-amber-500/10",
+                desc: "Serveur standardisé fournissant un accès sécurisé en lecture/écriture aux fichiers locaux de l'entreprise (code source, logs, CSV).",
+                tip: "Isolé par des permissions granulaires pour éviter toute suppression involontaire."
+            },
+            mcp_db: {
+                title: "Serveur MCP : Bases de Données",
+                badge: "Protocole MCP",
+                badgeClass: "bg-orange-500/20 text-orange-300",
+                iconClass: "fa-solid fa-database text-cyan-400 bg-cyan-500/10",
+                desc: "Permet aux agents d'exécuter des requêtes SQL ou analytiques sur des bases PostgreSQL, Snowflake ou BigQuery de façon sécurisée.",
+                tip: "L'agent formule la requête SQL, l'exécute via MCP et reçoit les données structurées."
+            },
+            mcp_search: {
+                title: "Serveur MCP : Recherche Web",
+                badge: "Protocole MCP",
+                badgeClass: "bg-orange-500/20 text-orange-300",
+                iconClass: "fa-solid fa-magnifying-glass text-blue-400 bg-blue-500/10",
+                desc: "Point de connexion unifié permettant d'appeler des moteurs web ou des APIs de veille technologique.",
+                tip: "Standardisé au format MCP pour être branchable sur n'importe quel LLM sans modifier le code de l'agent."
+            },
+            mcp_cloud: {
+                title: "Serveur MCP : Stockage Cloud",
+                badge: "Protocole MCP",
+                badgeClass: "bg-orange-500/20 text-orange-300",
+                iconClass: "fa-solid fa-cloud text-indigo-400 bg-indigo-500/10",
+                desc: "Connecteur cloud pour auditer, télécharger et verser des assets dans AWS S3, Google Cloud Storage ou Azure Blob.",
+                tip: "Supporte l'analyse directe de volumes de données massifs."
+            },
+            mcp_api: {
+                title: "Serveur MCP : APIs Externes & Services",
+                badge: "Protocole MCP",
+                badgeClass: "bg-orange-500/20 text-orange-300",
+                iconClass: "fa-solid fa-network-wired text-emerald-400 bg-emerald-500/10",
+                desc: "Permet à l'agent d'agir sur le monde réel : ouvrir une issue GitHub, poster un rapport Slack, déclencher une pipeline CI/CD.",
+                tip: "Fait passer l'IA d'un statut passif d'informateur à un statut d'exécuteur opérationnel."
+            }
+        };
+
+        /* Data for deep-dive architecture modal */
+        const ARCHITECTURES_DATA = {
+            1: {
+                title: "1. RAG Naïf (Naive RAG)",
+                subtitle: "L'architecture fondamentale de génération augmentée de récupération",
+                mechanism: "Le processus se déroule en une seule passe : La requête utilisateur est vectorisée par un modèle d'embedding. La base vectorielle compare ce vecteur à ceux des documents préalablement indexés via similarité cosinus. Les K meilleurs extraits sont insérés dans un template de prompt avec la question initiale. Le LLM génère la réponse finale.",
+                pros: [
+                    "Très simple et rapide à implémenter (quelques dizaines de lignes de code).",
+                    "Coût de calcul minimal (une seule requête d'embedding et un seul appel LLM).",
+                    "Idéal pour les questions simples et les bases documentaires homogènes."
+                ],
+                cons: [
+                    "Sensible au bruit : si les mauvais documents sont récupérés, le LLM hallucine.",
+                    "Aucune auto-correction ni re-classement des résultats.",
+                    "Fossé sémantique entre une question courte et des paragraphes longs."
+                ],
+                usecases: [
+                    { title: "FAQ d'Entreprise", desc: "Répondre à des questions courantes sur les congés ou le règlement intérieur." },
+                    { title: "Documentation Produit", desc: "Assistance technique de premier niveau sur un manuel logiciel." },
+                    { title: "Moteur de Recherche Interne", desc: "Retrouver rapidement un paragraphe dans une base de connaissances." }
+                ]
+            },
+            2: {
+                title: "2. RAG Multimodal (Multimodal RAG)",
+                subtitle: "Compréhension simultanée de texte, images, schémas et graphiques",
+                mechanism: "Cette architecture gère les documents riches. Les images et schémas techniques sont projetés dans un espace vectoriel partagé (modèles type CLIP ou SigLIP) ou annotés visuellement. Lors de la requête, l'utilisateur peut joindre un visuel. Le système extrait les fragments textuels et les images pertinentes, puis un VLM (Vision-Language Model) interprète conjointement les deux flux.",
+                pros: [
+                    "Capable d'exploiter les schémas techniques, brevets, factures et infographies.",
+                    "Permet à l'utilisateur de soumettre une capture d'écran pour poser une question.",
+                    "Évite de perdre l'information critique stockée uniquement sous forme de graphiques."
+                ],
+                cons: [
+                    "Coût des embeddings visuels et des tokens images plus élevé.",
+                    "Besoin de modèles de vision performants et faible latence.",
+                    "Complexité de découpage (chunking) sur des PDF multi-colonnes avec figures."
+                ],
+                usecases: [
+                    { title: "Diagnostic Médical & Imagerie", desc: "Analyse croisée de comptes-rendus cliniques et de radiographies." },
+                    { title: "Manuels Techniques & Aéronautique", desc: "Support aux techniciens exploitant des plans d'assemblage détaillés." },
+                    { title: "E-Commerce & Mode", desc: "Recherche de produits à partir d'une photo et d'une description textuelle." }
+                ]
+            },
+            3: {
+                title: "3. HyDE (Hypothetical Document Embeddings)",
+                subtitle: "Surmonter le fossé sémantique par la génération d'un document hypothétique",
+                mechanism: "Plutôt que de chercher directement dans la base avec la question brute (ex: 'Comment réparer l'erreur 503 ?'), on demande d'abord au LLM de rédiger un paragraphe hypothétique expliquant cette panne. Même si cette explication fictive contient des inexactitudes factuelles, sa forme lexicale est identique aux vrais documents de la base. On calcule son vecteur pour effectuer une recherche 'document-à-document'.",
+                pros: [
+                    "Résout le problème de déséquilibre sémantique entre requêtes courtes et textes longs.",
+                    "Fonctionne sans entraînement spécifique (Zero-Shot retrieval).",
+                    "Augmente drastiquement le rappel sur des sujets techniques pointus."
+                ],
+                cons: [
+                    "Double appel au LLM : ajoute une latence initiale pour générer le doc hypothétique.",
+                    "Si le LLM extrapole dans une direction totalement hors-sujet, la recherche dérive.",
+                    "Légère augmentation des coûts de tokens d'inférence."
+                ],
+                usecases: [
+                    { title: "Recherche Juridique & Textes de Lois", desc: "Trouver des jurisprudences à partir d'une simple situation de fait." },
+                    { title: "Support Développeurs & Logs", desc: "Faire le lien entre un message d'erreur cryptique et sa solution documentaire." },
+                    { title: "Recherche Scientifique & Médicale", desc: "Localiser des articles académiques à partir d'une hypothèse formulée succinctement." }
+                ]
+            },
+            4: {
+                title: "4. RAG Correctif (Corrective RAG - CRAG)",
+                subtitle: "Auto-évaluation de la pertinence et repli sur la recherche Web",
+                mechanism: "Après la première étape de récupération vectorielle, un 'Analyseur de Requête' évalue le niveau de confiance des documents obtenus. Si le score est bon, ils passent au prompt. Si le score est faible ou ambigu, le système déclenche automatiquement une recherche sur le Web public, extrait les pages récentes, filtre le bruit et fournit une information assainie au LLM.",
+                pros: [
+                    "Empêche les hallucinations causées par des documents internes incomplets ou périmés.",
+                    "Garantit une couverture de sujets d'actualité récente grâce au fallback web.",
+                    "Robuste et résilient aux lacunes de la base de connaissances."
+                ],
+                cons: [
+                    "Nécessite une API de recherche Web payante et rapide (Tavily, Brave, SerpApi).",
+                    "Architecture plus complexe intégrant des filtres heuristiques ou classificateurs.",
+                    "Latence variable selon que la recherche web est déclenchée ou non."
+                ],
+                usecases: [
+                    { title: "Veille Réglementaire & Fiscale", desc: "Compléter les dossiers juridiques internes avec les derniers décrets publiés." },
+                    { title: "Helpdesk IT Généraliste", desc: "Résoudre des pannes logicielles internes tout en vérifiant les pannes serveurs mondiales." },
+                    { title: "Intelligence Économique", desc: "Suivre la réputation et l'actualité des concurrents en temps réel." }
+                ]
+            },
+            5: {
+                title: "5. Graph RAG (Graphe de Connaissances)",
+                subtitle: "Raisonnement multi-sauts et compréhension holistique globale",
+                mechanism: "Pendant la phase d'ingestion, un constructeur de graphe extrait les entités (personnes, projets, technologies) et leurs liens conceptuels, formant un graphe structuré. Lors d'une requête, le système consulte à la fois l'index vectoriel pour la proximité sémantique et la base de graphe pour explorer les relations de voisinage. Les synthèses de communautés fournissent une compréhension d'ensemble.",
+                pros: [
+                    "Excelle sur les questions globales ('Quels sont les thèmes récurrents dans tous les audits ?').",
+                    "Permet le raisonnement multi-sauts (A est lié à B, qui dépend de C).",
+                    "Moins de fragmentation de l'information par rapport aux simples découpages en chunks."
+                ],
+                cons: [
+                    "Construction initiale du graphe très coûteuse en tokens LLM.",
+                    "Maintenance et mise à jour dynamique du graphe complexes lors des ajouts documentaires.",
+                    "Nécessite une infrastructure de base de graphe dédiée (Neo4j, Memgraph)."
+                ],
+                usecases: [
+                    { title: "Enquêtes Financières & Anti-Fraude", desc: "Détecter les participations croisées et circuits de blanchiment entre sociétés." },
+                    { title: "Synthèse de Dossiers Médicaux Complexes", desc: "Relier les antécédents, traitements successifs et interactions médicamenteuses." },
+                    { title: "Cartographie de Code Source Legacy", desc: "Comprendre les dépendances profondes entre des milliers de modules applicatifs." }
+                ]
+            },
+            6: {
+                title: "6. RAG Hybride (Hybrid RAG)",
+                subtitle: "Alliance de la recherche sémantique dense et lexicale par mots-clés",
+                mechanism: "La requête utilisateur est simultanément envoyée à deux moteurs distincts : un moteur dense (Vector DB pour la compréhension sémantique) et un moteur sparse (BM25 ou Graphe pour la présence exacte des mots). Les deux listes de résultats sont fusionnées et réordonnées par un algorithme comme le Reciprocal Rank Fusion (RRF) ou un modèle de Re-ranking cross-encoder.",
+                pros: [
+                    "Combine le meilleur des deux mondes : tolérance sémantique + exactitude des termes précis.",
+                    "Idéal pour retrouver des codes produits, acronymes, matricules ou noms propres rares.",
+                    "Taux de rappel et de précision très largement supérieur au RAG naïf."
+                ],
+                cons: [
+                    "Deux moteurs d'indexation à maintenir en parallèle.",
+                    "L'étape de re-ranking ajoute quelques dizaines de millisecondes de latence.",
+                    "Nécessite un réglage fin des poids entre recherche dense et lexicale."
+                ],
+                usecases: [
+                    { title: "Catalogues Industriels & Pièces Détachées", desc: "Chercher à la fois par fonction ('joint d'étanchéité') et par référence ('REF-7782-X')." },
+                    { title: "Droit & Jurisprudence", desc: "Cibler un concept juridique tout en exigeant la mention d'un article de loi strict." },
+                    { title: "Support Médical & Pharmaceutique", desc: "Rechercher une molécule par son nom commercial exact ou sa classe thérapeutique." }
+                ]
+            },
+            7: {
+                title: "7. RAG Adaptatif (Adaptive RAG)",
+                subtitle: "Routage dynamique et classification conditionnelle de la complexité",
+                mechanism: "Toute requête passe d'abord par un classificateur léger. Celui-ci décide : 1) Si la question est triviale, elle part directement au LLM sans recherche (gain de temps et de coût). 2) Si elle nécessite une recherche, il sélectionne la stratégie adéquate (Vectorielle pour le sens, Graphe pour les liens, ou Mots-clés BM25 pour les données chiffrées).",
+                pros: [
+                    "Économie drastique de ressources (pas de requêtes de recherche inutiles).",
+                    "Adaptabilité sur-mesure à la complexité de chaque question posée.",
+                    "Expérience utilisateur fluide avec des réponses instantanées sur les questions de base."
+                ],
+                cons: [
+                    "Le classificateur doit être ultra-rapide et fiable pour ne pas devenir un goulot d'étranglement.",
+                    "Risque de 'faux négatif' si le système pense à tort qu'aucune recherche n'est requise.",
+                    "Configuration plus élaborée des règles de décision."
+                ],
+                usecases: [
+                    { title: "Assistants Virtuels d'Entreprise Polyvalents", desc: "Traiter les conversations courantes instantanément et basculer en mode recherche sur demande." },
+                    { title: "Plateformes SaaS Multi-Tenants", desc: "Optimiser les coûts d'infrastructure d'inférence à grande échelle." },
+                    { title: "Systèmes de Service Client Omnicanal", desc: "Routage intelligent entre salutations courtoises et interrogations de facturation complexes." }
+                ]
+            },
+            8: {
+                title: "8. RAG Agentique (Agentic RAG & MCP)",
+                subtitle: "Orchestration multi-agents, planification autonome et serveurs MCP",
+                mechanism: "L'utilisateur confie un objectif de haut niveau. Un Agent Orchestrateur consulte ses mémoires (court et long terme) et conçoit un plan d'action. Il mobilise des agents spécialisés qui interagissent avec des serveurs MCP (Model Context Protocol). Ces serveurs offrent un accès standardisé aux disques locaux, bases SQL, APIs de recherche et services cloud. L'agent analyse les résultats, itère si nécessaire et formule la synthèse finale.",
+                pros: [
+                    "Capacité à résoudre des problèmes complexes multi-étapes sans intervention humaine.",
+                    "Interopérabilité maximale grâce au standard ouvert MCP (Model Context Protocol).",
+                    "Capacités d'auto-correction, de reprise sur erreur et d'exécution d'actions concrètes."
+                ],
+                cons: [
+                    "Coût en tokens plus important lié aux boucles d'itération et de réflexion des agents.",
+                    "Temps de réponse plus long pour les tâches complexes nécessitant plusieurs appels d'outils.",
+                    "Nécessite des garde-fous stricts sur les permissions accordées aux serveurs MCP."
+                ],
+                usecases: [
+                    { title: "Développeur IA Autonome (Devin-like)", desc: "Lire le code local, exécuter les tests, interroger la doc et soumettre un correctif via MCP." },
+                    { title: "Analyste Financier Automatisé", desc: "Télécharger les rapports annuels, interroger les bases SQL de ventes et générer un rapport comparatif." },
+                    { title: "Gestionnaire d'Incidents Cloud DevOps", desc: "Analyser les logs Datadog, vérifier la config AWS et rédiger le post-mortem d'incident." }
+                ]
+            }
+        };
+
+        /* Step-by-step interactive simulation logic */
+        const SIMULATION_STEPS = {
+            1: [
+                { node: 'node-1-user', status: '1/5 : Réception de la Requête Utilisateur...' },
+                { node: 'node-1-embed', status: '2/5 : Calcul de l\'Embedding de la question...' },
+                { node: 'node-1-sources', status: '3/5 : Consultation de la Base Vectorielle & Chunks...' },
+                { node: 'node-1-db', status: '3/5 : Recherche de similarité cosinus (Top-K)...' },
+                { node: 'node-1-prompt', status: '4/5 : Injection du contexte dans le Template Prompt...' },
+                { node: 'node-1-llm', status: '5/5 : Inférence LLM & Génération...' },
+                { node: 'node-1-output', status: 'Terminé : Réponse factuelle délivrée !' }
+            ],
+            2: [
+                { node: 'node-2-user', status: '1/5 : Requête Multimodale (Texte + Image soumise)...' },
+                { node: 'node-2-embed', status: '2/5 : Embedding combiné Vision-Langage (CLIP)...' },
+                { node: 'node-2-sources', status: '3/5 : Récupération des PDF scannés & schémas...' },
+                { node: 'node-2-db', status: '3/5 : Extraction des correspondances visuelles...' },
+                { node: 'node-2-prompt', status: '4/5 : Formatage du prompt visuel enrichi...' },
+                { node: 'node-2-llm', status: '5/5 : Raisonnement par le VLM (LLM Vision)...' },
+                { node: 'node-2-output', status: 'Terminé : Sortie multimodale générée !' }
+            ],
+            3: [
+                { node: 'node-3-user', status: '1/6 : Question utilisateur initiale reçue...' },
+                { node: 'node-3-hypo', status: '2/6 : Le LLM invente une réponse hypothétique plausible...' },
+                { node: 'node-3-embed', status: '3/6 : Vectorisation de la réponse hypothétique...' },
+                { node: 'node-3-sources', status: '4/6 : Recherche Doc-vers-Doc dans la base...' },
+                { node: 'node-3-db', status: '4/6 : Extraction des vrais documents concordants...' },
+                { node: 'node-3-prompt', status: '5/6 : Assemblage du prompt avec les vrais extraits...' },
+                { node: 'node-3-llm', status: '6/6 : Synthèse rigoureuse par le LLM...' },
+                { node: 'node-3-output', status: 'Terminé : Réponse ultra-précise HyDE générée !' }
+            ],
+            4: [
+                { node: 'node-4-user', status: '1/6 : Question soumise au système...' },
+                { node: 'node-4-embed', status: '2/6 : Vectorisation et recherche interne...' },
+                { node: 'node-4-analyzer', status: '3/6 : L\'évaluateur détecte un manque de confiance interne...' },
+                { node: 'node-4-web', status: '4/6 : Déclenchement de la Recherche Web en direct...' },
+                { node: 'node-4-correct', status: '5/6 : Filtrage des pages web et extraction d\'infos fiables...' },
+                { node: 'node-4-prompt', status: '6/6 : Injection des données corrigées...' },
+                { node: 'node-4-llm', status: '6/6 : Synthèse par le LLM...' },
+                { node: 'node-4-output', status: 'Terminé : Information vérifiée et actualisée !' }
+            ],
+            5: [
+                { node: 'node-5-sources', status: '1/6 : Ingestion documentaire et Graph Builder...' },
+                { node: 'node-5-builder', status: '1/6 : Extraction des entités et relations clés...' },
+                { node: 'node-5-user', status: '2/6 : Requête complexe multi-sauts posée...' },
+                { node: 'node-5-embed', status: '3/6 : Alignement vectoriel...' },
+                { node: 'node-5-vectordb', status: '4/6 : Récupération textuelle sémantique...' },
+                { node: 'node-5-graphdb', status: '4/6 : Traversée du Graphe & synthèse de communauté...' },
+                { node: 'node-5-prompt', status: '5/6 : Fusion du contexte relationnel...' },
+                { node: 'node-5-llm', status: '6/6 : Raisonnement multi-hop par le LLM...' },
+                { node: 'node-5-output', status: 'Terminé : Réponse globale et holistique générée !' }
+            ],
+            6: [
+                { node: 'node-6-user', status: '1/5 : Requête nécessitant sémantique et mots précis...' },
+                { node: 'node-6-embed', status: '2/5 : Embedding pour la voie dense...' },
+                { node: 'node-6-c1', status: '3/5 : Voie 1 : Recherche Vectorielle dense (C1)...' },
+                { node: 'node-6-c2', status: '3/5 : Voie 2 : Recherche Lexicale BM25 / Graphe (C2)...' },
+                { node: 'node-6-prompt', status: '4/5 : Fusion des scores (RRF) & Re-ranking...' },
+                { node: 'node-6-llm', status: '5/5 : Inférence sur le contexte hybride optimal...' },
+                { node: 'node-6-output', status: 'Terminé : Précision maximale obtenue !' }
+            ],
+            7: [
+                { node: 'node-7-user', status: '1/5 : Analyse de la nature de la requête...' },
+                { node: 'node-7-decision', status: '2/5 : Évaluation : Besoin de Recherche ? -> OUI !' },
+                { node: 'node-7-strat-graph', status: '3/5 : Aiguillage vers la meilleure stratégie (Graph)...' },
+                { node: 'node-7-strat-vec', status: '3/5 : Requête ciblée sur l\'index adapté...' },
+                { node: 'node-7-prompt', status: '4/5 : Formatage du prompt optimisé...' },
+                { node: 'node-7-llm', status: '5/5 : Inférence LLM...' },
+                { node: 'node-7-output', status: 'Terminé : Réponse adaptative livrée sans surcharge !' }
+            ],
+            8: [
+                { node: 'node-8-user', status: '1/7 : Réception de l\'objectif complexe par l\'utilisateur...' },
+                { node: 'node-8-planner', status: '2/7 : Le Planificateur décompose le projet en étapes...' },
+                { node: 'node-8-stm', status: '2/7 : Mise à jour de la mémoire de travail...' },
+                { node: 'node-8-orch', status: '3/7 : L\'Agent Orchestrateur prend les commandes...' },
+                { node: 'node-8-sub1', status: '4/7 : Délégation à l\'Agent spécialisé 1 & 2...' },
+                { node: 'node-8-mcp-2', status: '5/7 : Connexion sécurisée au Serveur MCP (Bases SQL)...' },
+                { node: 'node-8-mcp-3', status: '5/7 : Appel MCP Recherche Web & Fichiers Locaux...' },
+                { node: 'node-8-llm', status: '6/7 : Synthèse autonome des résultats collectés...' },
+                { node: 'node-8-output', status: 'Terminé : Mission agentique exécutée avec succès !' }
+            ]
+        };
+
+        let activeTimeouts = [];
+
+        /* Function to clear any ongoing animation */
+        function clearAllTimeouts() {
+            activeTimeouts.forEach(t => clearTimeout(t));
+            activeTimeouts = [];
+            // Remove active classes
+            document.querySelectorAll('.node-active').forEach(el => el.classList.remove('node-active'));
+        }
+
+        /* Simulate a single architecture step by step */
+        function simulateSingle(archId) {
+            clearAllTimeouts();
+            const steps = SIMULATION_STEPS[archId];
+            if (!steps) return;
+
+            const statusEl = document.getElementById(`status-${archId}`);
+            let delay = 0;
+
+            steps.forEach((step, index) => {
+                const timeoutId = setTimeout(() => {
+                    // Remove highlight from previous node
+                    if (index > 0 && steps[index - 1].node) {
+                        const prevEl = document.getElementById(steps[index - 1].node);
+                        if (prevEl) prevEl.classList.remove('node-active');
+                    }
+
+                    // Highlight current node
+                    const currentEl = document.getElementById(step.node);
+                    if (currentEl) {
+                        currentEl.classList.add('node-active');
+                    }
+
+                    // Update status label
+                    if (statusEl) {
+                        statusEl.innerText = step.status;
+                        statusEl.classList.add('text-indigo-300', 'border-indigo-500/50');
+                    }
+
+                    // On final step, clean up highlight after a delay
+                    if (index === steps.length - 1) {
+                        const finalTimeout = setTimeout(() => {
+                            if (currentEl) currentEl.classList.remove('node-active');
+                            if (statusEl) {
+                                statusEl.innerText = "Terminé (cliquez pour rejouer)";
+                                statusEl.classList.remove('text-indigo-300', 'border-indigo-500/50');
+                            }
+                        }, 2500);
+                        activeTimeouts.push(finalTimeout);
+                    }
+                }, delay);
+
+                activeTimeouts.push(timeoutId);
+                delay += 750; // interval between steps
+            });
+        }
+
+        /* Simulate all architectures sequentially */
+        function simulateAllArchitectures() {
+            clearAllTimeouts();
+            let delay = 0;
+            for (let i = 1; i <= 8; i++) {
+                const t = setTimeout(() => {
+                    simulateSingle(i);
+                }, delay);
+                activeTimeouts.push(t);
+                delay += 1200; // staggered cascade launch
+            }
+        }
+
+        /* Reset all to initial state */
+        function resetAllSimulations() {
+            clearAllTimeouts();
+            for (let i = 1; i <= 8; i++) {
+                const statusEl = document.getElementById(`status-${i}`);
+                if (statusEl) {
+                    statusEl.innerText = "Prêt (cliquez sur lecture)";
+                    statusEl.classList.remove('text-indigo-300', 'border-indigo-500/50');
+                }
+            }
+        }
+
+        /* Show detailed inspection drawer for clicked component */
+        function showNodeInfo(type, fallbackTitle, fallbackDesc) {
+            const data = NODE_DEFINITIONS[type] || {
+                title: fallbackTitle || "Composant Architectural",
+                badge: "Élément Système",
+                badgeClass: "bg-slate-700 text-slate-300",
+                iconClass: "fa-solid fa-cube text-slate-400 bg-slate-800",
+                desc: fallbackDesc || "Rôle clé dans le pipeline RAG.",
+                tip: "Élément essentiel de la génération augmentée de récupération."
+            };
+
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal-tip').innerText = data.tip;
+
+            const badge = document.getElementById('modal-badge');
+            badge.innerText = data.badge;
+            badge.className = `text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${data.badgeClass}`;
+
+            const iconWrap = document.getElementById('modal-icon-wrap');
+            const icon = document.getElementById('modal-icon');
+            iconWrap.className = `w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${data.iconClass}`;
+
+            document.getElementById('node-modal').classList.remove('hidden');
+        }
+
+        function closeNodeModal() {
+            document.getElementById('node-modal').classList.add('hidden');
+        }
+
+        /* Open deep dive modal for full architecture analysis */
+        function openDetailModal(archId) {
+            const data = ARCHITECTURES_DATA[archId];
+            if (!data) return;
+
+            document.getElementById('deep-id').innerText = archId;
+            document.getElementById('deep-title').innerText = data.title;
+            document.getElementById('deep-subtitle').innerText = data.subtitle;
+            document.getElementById('deep-mechanism').innerText = data.mechanism;
+
+            // Pros
+            const prosList = document.getElementById('deep-pros');
+            prosList.innerHTML = data.pros.map(p => `<li>${p}</li>`).join('');
+
+            // Cons
+            const consList = document.getElementById('deep-cons');
+            consList.innerHTML = data.cons.map(c => `<li>${c}</li>`).join('');
+
+            // Usecases
+            const usecasesContainer = document.getElementById('deep-usecases');
+            usecasesContainer.innerHTML = data.usecases.map(u => `
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div class="font-semibold text-slate-200 text-xs mb-1 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-check text-indigo-400 text-[10px]"></i>
+                        <span>${u.title}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">${u.desc}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        /* Legend modal */
+        function openLegendModal() {
+            document.getElementById('legend-modal').classList.remove('hidden');
+        }
+
+        function closeLegendModal() {
+            document.getElementById('legend-modal').classList.add('hidden');
+        }
+
+        // Close modals on Escape key or backdrop click
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeNodeModal();
+                closeDetailModal();
+                closeLegendModal();
+            }
+        });
+
+        // Close on clicking backdrop
+        ['node-modal', 'detail-modal', 'legend-modal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+
+        /* ==========================================================
+           CONNECTEURS SVG — flèches reliant réellement les éléments
+           de chaque diagramme (reproduction fidèle du schéma d'origine)
+           ========================================================== */
+
+        // Topologie des flèches par architecture : [id_source, id_cible, côté_sortie, côté_entrée, bidirectionnel?]
+        const CONNECTIONS = {
+            1: [
+                ['node-1-user', 'node-1-embed', 'right', 'left'],
+                ['node-1-sources', 'node-1-db', 'bottom', 'top'],
+                ['node-1-embed', 'node-1-db', 'right', 'left'],
+                ['node-1-db', 'node-1-prompt', 'bottom', 'top'],
+                ['node-1-prompt', 'node-1-llm', 'left', 'right'],
+                ['node-1-llm', 'node-1-output', 'left', 'right'],
+            ],
+            2: [
+                ['node-2-user', 'node-2-embed', 'right', 'left'],
+                ['node-2-sources', 'node-2-db', 'bottom', 'top'],
+                ['node-2-embed', 'node-2-db', 'right', 'left'],
+                ['node-2-db', 'node-2-prompt', 'bottom', 'top'],
+                ['node-2-prompt', 'node-2-llm', 'left', 'right'],
+                ['node-2-llm', 'node-2-output', 'left', 'right'],
+            ],
+            3: [
+                ['node-3-user', 'node-3-hypo', 'right', 'left'],
+                ['node-3-hypo', 'node-3-embed', 'bottom', 'top'],
+                ['node-3-embed', 'node-3-db', 'right', 'left'],
+                ['node-3-sources', 'node-3-db', 'bottom', 'top'],
+                ['node-3-db', 'node-3-prompt', 'bottom', 'top'],
+                ['node-3-prompt', 'node-3-llm', 'left', 'right'],
+                ['node-3-llm', 'node-3-output', 'left', 'right'],
+            ],
+            4: [
+                ['node-4-user', 'node-4-embed', 'right', 'left'],
+                ['node-4-embed', 'node-4-analyzer', 'right', 'left'],
+                ['node-4-analyzer', 'node-4-web', 'bottom', 'top'],
+                ['node-4-web', 'node-4-correct', 'bottom', 'top'],
+                ['node-4-correct', 'node-4-prompt', 'bottom', 'top'],
+                ['node-4-prompt', 'node-4-llm', 'left', 'right'],
+                ['node-4-llm', 'node-4-output', 'left', 'right'],
+            ],
+            5: [
+                ['node-5-sources', 'node-5-builder', 'right', 'left'],
+                ['node-5-builder', 'node-5-graphdb', 'bottom', 'right'],
+                ['node-5-user', 'node-5-embed', 'right', 'left'],
+                ['node-5-embed', 'node-5-vectordb', 'right', 'left'],
+                ['node-5-vectordb', 'node-5-graphdb', 'bottom', 'top'],
+                ['node-5-graphdb', 'node-5-prompt', 'bottom', 'top'],
+                ['node-5-prompt', 'node-5-llm', 'left', 'right'],
+                ['node-5-llm', 'node-5-output', 'left', 'right'],
+            ],
+            6: [
+                ['node-6-user', 'node-6-embed', 'right', 'left'],
+                ['node-6-embed', 'node-6-c1', 'right', 'left'],
+                ['node-6-embed', 'node-6-c2', 'right', 'left'],
+                ['node-6-c1', 'node-6-prompt', 'bottom', 'top'],
+                ['node-6-c2', 'node-6-prompt', 'bottom', 'top'],
+                ['node-6-prompt', 'node-6-llm', 'left', 'right'],
+                ['node-6-llm', 'node-6-output', 'left', 'right'],
+            ],
+            7: [
+                ['node-7-user', 'node-7-decision', 'right', 'left'],
+                ['node-7-decision', 'node-7-direct-llm', 'right', 'left'],
+                ['node-7-decision', 'node-7-strat-vec', 'bottom', 'top'],
+                ['node-7-decision', 'node-7-strat-graph', 'bottom', 'top'],
+                ['node-7-decision', 'node-7-strat-key', 'bottom', 'top'],
+                ['node-7-strat-vec', 'node-7-prompt', 'bottom', 'top'],
+                ['node-7-strat-graph', 'node-7-prompt', 'bottom', 'top'],
+                ['node-7-strat-key', 'node-7-prompt', 'bottom', 'top'],
+                ['node-7-direct-llm', 'node-7-output', 'bottom', 'top'],
+                ['node-7-prompt', 'node-7-llm', 'right', 'left'],
+                ['node-7-llm', 'node-7-output', 'right', 'left'],
+            ],
+            8: [
+                ['node-8-stm', 'node-8-orch', 'bottom', 'top'],
+                ['node-8-ltm', 'node-8-orch', 'bottom', 'top'],
+                ['node-8-planner', 'node-8-orch', 'bottom', 'top'],
+                ['node-8-user', 'node-8-orch', 'right', 'left'],
+                ['node-8-orch', 'node-8-sub1', 'right', 'left'],
+                ['node-8-orch', 'node-8-sub2', 'right', 'left'],
+                ['node-8-orch', 'node-8-sub3', 'right', 'left'],
+                ['node-8-agents-block', 'node-8-mcp-block', 'right', 'left', true],
+                ['node-8-orch', 'node-8-llm', 'bottom', 'top'],
+                ['node-8-llm', 'node-8-output', 'right', 'left'],
+            ],
+        };
+
+        // Point d'ancrage sur un côté donné d'un rectangle relatif au conteneur
+        function sidePoint(rect, side) {
+            switch (side) {
+                case 'top': return { x: rect.cx, y: rect.top };
+                case 'bottom': return { x: rect.cx, y: rect.bottom };
+                case 'left': return { x: rect.left, y: rect.cy };
+                case 'right': return { x: rect.right, y: rect.cy };
+                default: return { x: rect.cx, y: rect.cy };
+            }
+        }
+
+        // Rectangle d'un élément exprimé en coordonnées relatives au conteneur du diagramme
+        function relRect(el, containerRect) {
+            const r = el.getBoundingClientRect();
+            const left = r.left - containerRect.left;
+            const top = r.top - containerRect.top;
+            return {
+                left, top,
+                right: left + r.width,
+                bottom: top + r.height,
+                cx: left + r.width / 2,
+                cy: top + r.height / 2,
+            };
+        }
+
+        // Construit un chemin orthogonal (droit ou en équerre) entre un point de sortie et un point d'entrée
+        function elbowPath(exit, entry, fromSide, toSide) {
+            const isH = s => s === 'left' || s === 'right';
+            const isV = s => s === 'top' || s === 'bottom';
+
+            if (isH(fromSide) && isH(toSide)) {
+                if (Math.abs(exit.y - entry.y) < 1) {
+                    return `M ${exit.x} ${exit.y} L ${entry.x} ${entry.y}`;
+                }
+                const midX = (exit.x + entry.x) / 2;
+                return `M ${exit.x} ${exit.y} L ${midX} ${exit.y} L ${midX} ${entry.y} L ${entry.x} ${entry.y}`;
+            }
+            if (isV(fromSide) && isV(toSide)) {
+                if (Math.abs(exit.x - entry.x) < 1) {
+                    return `M ${exit.x} ${exit.y} L ${entry.x} ${entry.y}`;
+                }
+                const midY = (exit.y + entry.y) / 2;
+                return `M ${exit.x} ${exit.y} L ${exit.x} ${midY} L ${entry.x} ${midY} L ${entry.x} ${entry.y}`;
+            }
+            if (isH(fromSide) && isV(toSide)) {
+                return `M ${exit.x} ${exit.y} L ${entry.x} ${exit.y} L ${entry.x} ${entry.y}`;
+            }
+            // isV(fromSide) && isH(toSide)
+            return `M ${exit.x} ${exit.y} L ${exit.x} ${entry.y} L ${entry.x} ${entry.y}`;
+        }
+
+        // Dessine (ou redessine) les connecteurs d'une architecture donnée
+        function drawConnectorsForArch(n) {
+            const statusEl = document.getElementById(`status-${n}`);
+            if (!statusEl) return;
+            const container = statusEl.parentElement;
+            const containerRect = container.getBoundingClientRect();
+            if (containerRect.width === 0 || containerRect.height === 0) return;
+
+            let svg = container.querySelector('svg.connector-svg');
+            if (!svg) {
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'connector-svg absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible');
+                svg.innerHTML = `<defs><marker id="arrowhead-${n}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" class="arrow-head"></path></marker></defs>`;
+                container.insertBefore(svg, container.firstChild);
+            } else {
+                svg.querySelectorAll('path.flow-path').forEach(p => p.remove());
+            }
+
+            const conns = CONNECTIONS[n] || [];
+            conns.forEach(([fromId, toId, fromSide, toSide, bidirectional]) => {
+                const fromEl = document.getElementById(fromId);
+                const toEl = document.getElementById(toId);
+                if (!fromEl || !toEl) return;
+
+                const fRect = relRect(fromEl, containerRect);
+                const tRect = relRect(toEl, containerRect);
+                const exit = sidePoint(fRect, fromSide);
+                const entry = sidePoint(tRect, toSide);
+                const d = elbowPath(exit, entry, fromSide, toSide);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', d);
+                path.setAttribute('class', 'flow-path');
+                path.setAttribute('marker-end', `url(#arrowhead-${n})`);
+                if (bidirectional) path.setAttribute('marker-start', `url(#arrowhead-${n})`);
+                svg.appendChild(path);
+            });
+        }
+
+        function drawAllConnectors() {
+            for (let n = 1; n <= 8; n++) drawConnectorsForArch(n);
+        }
+
+        // Redessin sur chargement complet (polices/icônes stabilisées), sur resize (debounce),
+        // et via ResizeObserver par carte pour absorber les changements de breakpoint Tailwind.
+        drawAllConnectors();
+        window.addEventListener('load', drawAllConnectors);
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(drawAllConnectors, 120);
+        });
+
+        if (typeof ResizeObserver !== 'undefined') {
+            for (let n = 1; n <= 8; n++) {
+                const statusEl = document.getElementById(`status-${n}`);
+                if (!statusEl) continue;
+                const container = statusEl.parentElement;
+                let roTimeout;
+                const ro = new ResizeObserver(() => {
+                    clearTimeout(roTimeout);
+                    roTimeout = setTimeout(() => drawConnectorsForArch(n), 60);
+                });
+                ro.observe(container);
+            }
+        }
+    </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours illustré v5 : les 5 familles d'architectures RAG — fil rouge Léa</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<!-- Symboles SVG réutilisés (Léa souriante, étincelle) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sym-lea" viewBox="0 0 64 64">
+    <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="32" cy="24" r="12"/>
+      <path d="M20.5 20 a12 12 0 0 1 23 0" stroke-width="5"/>
+      <path d="M14 55c0-12 8-19 18-19s18 7 18 19"/>
+      <path d="M18 20 a15 15 0 0 1 28 0" stroke-width="3"/>
+      <path d="M46 30 q0 7 -9 8" stroke-width="3"/>
+    </g>
+    <circle cx="18" cy="26" r="3.2" fill="currentColor"/>
+    <circle cx="46" cy="26" r="3.2" fill="currentColor"/>
+    <circle cx="27.5" cy="24" r="1.7" fill="currentColor"/>
+    <circle cx="36.5" cy="24" r="1.7" fill="currentColor"/>
+    <path d="M27.5 29 q4.5 4 9 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="sym-spark" viewBox="0 0 24 24">
+    <path d="M12 1.5 L14.6 9.4 L22.5 12 L14.6 14.6 L12 22.5 L9.4 14.6 L1.5 12 L9.4 9.4 Z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<div class="sheet">
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <svg class="cover-hero" width="520" height="170" viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- confettis -->
+    <g opacity=".85">
+      <circle cx="30" cy="26" r="4" fill="#f59e0b"/><circle cx="497" cy="30" r="4" fill="#db2777"/>
+      <circle cx="150" cy="14" r="3" fill="#0d9488"/><circle cx="360" cy="12" r="3" fill="#7c3aed"/>
+      <circle cx="60" cy="150" r="3.5" fill="#0284c7"/><circle cx="470" cy="150" r="3.5" fill="#059669"/>
+      <use href="#sym-spark" x="108" y="20" width="16" height="16" color="#f59e0b"/>
+      <use href="#sym-spark" x="402" y="16" width="14" height="14" color="#0d9488"/>
+      <use href="#sym-spark" x="248" y="140" width="14" height="14" color="#db2777"/>
+    </g>
+    <!-- Léa -->
+    <circle cx="80" cy="95" r="55" fill="#cffafe"/>
+    <g color="#0e7490"><use href="#sym-lea" x="44" y="59" width="72" height="72"/></g>
+    <!-- arc pointillé + pages volantes -->
+    <path d="M140 100 C 210 34, 310 34, 380 92" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="6 6"/>
+    <g stroke="#64748b" stroke-width="1.6" fill="#ffffff">
+      <rect x="205" y="46" width="22" height="28" rx="3" transform="rotate(-10 216 60)"/>
+      <rect x="247" y="36" width="22" height="28" rx="3"/>
+      <rect x="289" y="46" width="22" height="28" rx="3" transform="rotate(10 300 60)"/>
+    </g>
+    <g stroke="#94a3b8" stroke-width="1.4">
+      <line x1="251" y1="44" x2="265" y2="44"/><line x1="251" y1="50" x2="265" y2="50"/><line x1="251" y1="56" x2="261" y2="56"/>
+    </g>
+    <!-- robot souriant -->
+    <g transform="translate(438,98)">
+      <line x1="0" y1="-58" x2="0" y2="-66" stroke="#7c3aed" stroke-width="3"/>
+      <circle cx="0" cy="-70" r="5" fill="#f59e0b"/>
+      <rect x="-40" y="-58" width="80" height="56" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>
+      <circle cx="-15" cy="-32" r="6" fill="#0284c7"/><circle cx="15" cy="-32" r="6" fill="#0284c7"/>
+      <circle cx="-13" cy="-34" r="2" fill="#ffffff"/><circle cx="17" cy="-34" r="2" fill="#ffffff"/>
+      <path d="M-12 -16 q12 10 24 0" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-30 0 q-14 10 -18 24 M30 0 q14 10 18 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-26 26 q26 14 52 0" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>
+    </g>
+    <!-- bulle réponse sourcée -->
+    <g transform="translate(262,112)">
+      <path d="M-62 -26 H56 a10 10 0 0 1 10 10 V18 a10 10 0 0 1 -10 10 H6 l-14 14 V28 h-54 a10 10 0 0 1 -10 -10 V-16 a10 10 0 0 1 10 -10 Z" fill="#059669"/>
+      <path d="M-40 0 L-28 12 L-6 -12" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <g fill="#bbf7d0"><rect x="6" y="-10" width="44" height="5" rx="2.5"/><rect x="6" y="0" width="36" height="5" rx="2.5"/><rect x="6" y="10" width="26" height="5" rx="2.5"/></g>
+    </g>
+  </svg>
+
+  <h1 class="cover-title">Les 5 familles d'architectures RAG</h1>
+  <svg class="wave" width="280" height="12" viewBox="0 0 280 12" aria-hidden="true">
+    <defs><linearGradient id="wavegrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0d9488"/><stop offset=".2" stop-color="#7c3aed"/><stop offset=".4" stop-color="#d97706"/>
+      <stop offset=".6" stop-color="#db2777"/><stop offset=".8" stop-color="#0284c7"/><stop offset="1" stop-color="#059669"/>
+    </linearGradient></defs>
+    <path d="M4 7 Q 22 1, 40 7 T 76 7 T 112 7 T 148 7 T 184 7 T 220 7 T 256 7 T 276 7" fill="none" stroke="url(#wavegrad)" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <div class="subtitle">Avec le fil rouge de Léa, ingénieure support — boîte à outils, reranking, évaluation, guide de décision et exercices actifs</div>
+
+  <div class="chips">
+    <span class="chip" style="background:#0d9488">01 · Hybrid — matche 🎯</span>
+    <span class="chip" style="background:#7c3aed">02 · Graph — connecte 🕸️</span>
+    <span class="chip" style="background:#d97706">03 · Agentic — raisonne 🧭</span>
+    <span class="chip" style="background:#db2777">04 · Corrective — note ⚖️</span>
+    <span class="chip" style="background:#0284c7">05 · Multimodal — voit 👀</span>
+    <span class="chip" style="background:#059669">06 · Évaluation — mesure 📏</span>
+  </div>
+
+  <div class="modules">
+    <div style="--dot:#0e7490"><b>Rencontre avec Léa</b> — le fil rouge du cours</div>
+    <div style="--dot:#475569"><b>Module 0</b> — Le socle : c'est quoi, un RAG ?</div>
+    <div style="--dot:#475569"><b>Annexe A</b> — Boîte à outils (chunking, embedding, top-k…)</div>
+    <div style="--dot:#0d9488"><b>Module 1</b> — Hybrid RAG + BM25/RRF chiffré + reranking</div>
+    <div style="--dot:#7c3aed"><b>Module 2</b> — Graph RAG</div>
+    <div style="--dot:#d97706"><b>Module 3</b> — Agentic RAG</div>
+    <div style="--dot:#db2777"><b>Module 4</b> — Corrective RAG (CRAG) + self-eval vs gradeur</div>
+    <div style="--dot:#0284c7"><b>Module 5</b> — Multimodal RAG</div>
+    <div style="--dot:#059669"><b>Module 6</b> — Évaluer son RAG (golden set, métriques)</div>
+    <div style="--dot:#0f766e"><b>Guide de décision</b> — quelle famille choisir</div>
+    <div style="--dot:#dc2626"><b>Erreurs classiques</b> + <b>Exercice — Trouve l'erreur</b></div>
+    <div style="--dot:#475569"><b>Architecture de référence</b> (production)</div>
+    <div style="--dot:#0e7490"><b>Corpus fil rouge</b> — les dossiers de Léa + TP niveaux 1 à 4</div>
+    <div style="--dot:#0f766e"><b>Synthèse, quiz</b> + <b>Exercice — Schéma ↔ Famille</b></div>
+    <div style="--dot:#475569"><b>Glossaire</b> &amp; <b>Références</b></div>
+  </div>
+  <div class="v2note">v5 — version joie &amp; illustrations · réponses regroupées en fin de document pour un vrai auto-test</div>
+</div>
+
+<!-- ============ RENCONTRE AVEC LEA ============ -->
+<div class="module acc-cyan">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="32" cy="22" r="12"/><path d="M14 55c0-12 8-20 18-20s18 8 18 20"/>
+        <circle cx="27.5" cy="21" r="1.6" fill="currentColor" stroke="none"/><circle cx="36.5" cy="21" r="1.6" fill="currentColor" stroke="none"/>
+        <path d="M27 26 q5 4 10 0" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Fil rouge</div>
+      <div class="module-title">Rencontre avec Léa 👋</div>
+      <div class="module-motto">Le personnage qui traverse tout le cours</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <p>Léa est ingénieure support depuis deux ans. Elle gère une base de tickets, un contrat cadre avec plusieurs
+  partenaires, et des rapports internes truffés de graphiques. Elle a branché un chatbot RAG sur ces documents
+  — et déchante vite : il invente des réponses, rate des références précises, ignore les liens entre ses
+  partenaires, et ne sait pas lire une courbe. Six questions vont jalonner ce cours ; chacune trouve sa réponse
+  dans un module.</p>
+
+  <table>
+    <tr><th style="width:90px;">Module</th><th>La question de Léa</th></tr>
+    <tr><td>0 — Socle</td><td>« Pourquoi mon chatbot invente des réponses au lieu de lire nos docs ? »</td></tr>
+    <tr><td>1 — Hybrid</td><td>« Il ne retrouve jamais le ticket ERR-4042 quand je le demande mot pour mot. »</td></tr>
+    <tr><td>2 — Graph</td><td>« Quelles entreprises partenaires utilisent la techno X sur des projets communs ? »</td></tr>
+    <tr><td>3 — Agentic</td><td>« Peux-tu comparer nos ventes du dernier trimestre (SQL) aux tendances du marché (web), en citant la note interne ? »</td></tr>
+    <tr><td>4 — Corrective</td><td>« Le corpus est bourré de doublons et de vieux tickets obsolètes, comment éviter qu'il réponde n'importe quoi ? »</td></tr>
+    <tr><td>5 — Multimodal</td><td>« Le rapport financier a une courbe de ventes p.12, il ne sait pas la lire. »</td></tr>
+    <tr><td>6 — Évaluation</td><td>« On a testé trois architectures sur nos données, laquelle est vraiment la meilleure ? »</td></tr>
+  </table>
+
+  <div class="callout">💡 Les travaux pratiques du cours sont littéralement <b>les dossiers de Léa</b> : un même corpus fil rouge, repris à chaque niveau de TP.</div>
+</div>
+
+<!-- ============ MODULE 0 ============ -->
+<div class="module acc-slate">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10 16h40a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H30l-9 7v-7h-7a4 4 0 0 1-4-4V20a4 4 0 0 1 4-4z"/>
+        <path d="M25 28c0-4 3-6 6-6s6 2 6 6c0 3-3 4-5 6"/><circle cx="31" cy="40" r="1.8" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 0</div>
+      <div class="module-title">Le socle : c'est quoi, un RAG ? 📚</div>
+      <div class="module-motto">L'examen à livre ouvert</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : comprendre le principe indexer → récupérer → générer, et pourquoi le RAG naïf a des angles morts.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Pourquoi mon chatbot invente des réponses au lieu de lire nos docs ? »</span>
+  </div>
+  <span class="repare">🩺 Diagnostic : les 4 faiblesses du RAG naïf</span>
+
+  <p><b>RAG = Retrieval-Augmented Generation</b> (Génération Augmentée par Recherche).</p>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">📚 Documents</div><div class="arrow">→</div>
+      <div class="box">✂️ Indexer<br><span style="font-weight:400;font-size:9px;">(chunks)</span></div><div class="arrow">→</div>
+      <div class="box">❓ Query utilisateur</div><div class="arrow">→</div>
+      <div class="box">🔎 Récupérer<br><span style="font-weight:400;font-size:9px;">fragments pertinents</span></div><div class="arrow">→</div>
+      <div class="box">🧠 Augmenter + LLM</div><div class="arrow">→</div>
+      <div class="box answer">✅ Réponse sourcée</div>
+    </div>
+    <div class="small-note">Un LLM seul = étudiant sans documents (récite, hallucine). Le RAG = examen livre ouvert. 📖</div>
+  </div>
+
+  <div class="callout">⚠️ Le RAG « naïf » a 4 faiblesses : il rate les mots-clés exacts, ignore les relations entre documents,
+  fait confiance aveuglément à ce qu'il retrouve, et ne sait pas lire un graphique.
+  <b>Les 5 architectures suivantes sont 5 remèdes à ces faiblesses.</b> Le module 6 ajoute un 6e remède :
+  mesurer si le remède fonctionne vraiment. C'est exactement le chatbot que Léa a branché sur ses docs.</div>
+</div>
+
+<!-- ============ ANNEXE A ============ -->
+<div class="module acc-slate">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="33" width="19" height="19" rx="3"/><rect x="36" y="33" width="19" height="19" rx="3"/><rect x="22.5" y="10" width="19" height="19" rx="3"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Annexe A</div>
+      <div class="module-title">Boîte à outils RAG 🧰</div>
+      <div class="module-motto">Les briques utilisées dans tous les modules suivants</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : donner un sens concret à chunking, embedding, similarité cosinus, base vectorielle et top-k avant de les voir en action.</div>
+
+  <table>
+    <tr><th style="width:120px;">Terme</th><th>Définition concrète</th></tr>
+    <tr><td><b>✂️ Chunking</b></td>
+      <td>Découpage d'un document en fragments (chunks) de taille fixe (ex. 300-500 tokens) avec un <b>overlap</b>
+      (chevauchement, ex. 50 tokens) entre fragments consécutifs pour ne pas couper une idée à la frontière.
+      Trop petit → perd le contexte ; trop grand → dilue le signal utile dans le top-k.</td></tr>
+    <tr><td><b>🧲 Embedding</b></td>
+      <td>Fonction qui transforme un texte en vecteur de nombres (ex. 768 dimensions) tel que deux textes de sens
+      proche ont des vecteurs proches dans l'espace. C'est ce qui permet de chercher par « sens » plutôt que par mot exact.</td></tr>
+    <tr><td><b>📐 Similarité cosinus</b></td>
+      <td>Mesure de l'angle entre deux vecteurs (1 = identiques en direction, 0 = sans rapport). Sert à classer
+      les documents indexés par proximité de sens avec la question.</td></tr>
+    <tr><td><b>🗄️ Base vectorielle</b></td>
+      <td>Index spécialisé dans la recherche du plus proche voisin sur des millions de vecteurs (FAISS, Chroma,
+      Qdrant, pgvector…). Sans elle, comparer la question à chaque document un par un serait trop lent.</td></tr>
+    <tr><td><b>🎯 Top-k</b></td>
+      <td>Nombre de fragments les mieux classés effectivement transmis au LLM comme contexte. k trop bas → le LLM
+      manque d'info ; k trop haut → le contexte est noyé et le LLM peut se perdre ou halluciner.</td></tr>
+  </table>
+
+  <div class="callout">💡 Ces cinq briques suffisent à construire un RAG naïf. Chaque module qui suit ajoute une brique par-dessus pour combler une faiblesse précise.</div>
+</div>
+
+<!-- ============ MODULE 1 ============ -->
+<div class="module acc-hybrid">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <circle cx="25" cy="32" r="16"/><circle cx="39" cy="32" r="16"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 01</div>
+      <div class="module-title">Hybrid RAG 🎯</div>
+      <div class="module-motto">« Meaning + exact matches » — le sens ET la lettre</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : savoir pourquoi et comment combiner recherche sémantique et recherche lexicale, puis pourquoi ajouter un reranker derrière.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Il ne retrouve jamais le ticket ERR-4042 quand je le demande mot pour mot. »</span>
+  </div>
+  <span class="repare">🛠️ Répare la faiblesse ① : les mots-clés exacts ratés</span>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="stack">
+        <div class="box">🧲 Embedding → Vector search</div><div class="branch-label">recherche sémantique</div>
+        <div class="box">🔤 BM25 search</div><div class="branch-label">recherche lexicale exacte</div>
+      </div>
+      <div class="arrow">→</div><div class="box">🤝 Rank fusion</div><div class="arrow">→</div>
+      <div class="box">🎯 Top-k</div><div class="arrow">→</div>
+      <div class="box">🧠 LLM</div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer</div>
+    </div>
+  </div>
+
+  <div class="section-label">Principe</div>
+  <p>On traduit question + documents en vecteurs pour capturer le <b>sens</b> (« connexion lente » ≈ « réseau instable »),
+  tout en gardant une recherche statistique de mots exacts (<b>BM25</b>) pour les références, codes, noms propres
+  (ERR-4042, article L.1234-5) que les vecteurs noient — exactement le ticket qui échappe au chatbot de Léa.
+  Les deux classements sont ensuite fusionnés, puis on garde les k meilleurs fragments.</p>
+
+  <div class="section-label">BM25 + Rank Fusion (RRF), chiffré</div>
+  <p>La fusion la plus utilisée est le <b>Reciprocal Rank Fusion</b> : chaque document reçoit un score
+  1/(k+rang) dans chaque liste (k=60 par convention), puis on additionne.</p>
+  <div class="rrf-example">
+Liste vecteurs (par rang) : d1, d2, d3<br>
+Liste BM25 (par rang)     : d3, d1, d4<br>
+<br>
+score(d1) = 1/(60+1) + 1/(60+2) = 0,01639 + 0,01613 = 0,03252<br>
+score(d3) = 1/(60+3) + 1/(60+1) = 0,01587 + 0,01639 = 0,03226<br>
+score(d2) = 1/(60+2)                          = 0,01613<br>
+score(d4) =                    1/(60+3)        = 0,01587<br>
+<br>
+Ordre fusionné : <b>d1 &gt; d3 &gt; d2 &gt; d4</b>
+  </div>
+  <p style="font-size:10.5px;">Un document présent dans <b>les deux</b> listes (d1, d3) bat systématiquement un document
+  présent dans une seule (d2, d4), même s'il n'est pas 1er dans chacune.</p>
+
+  <div class="section-label">Le pattern retrieve → rerank</div>
+  <p>En production, l'hybrid retrieval seul reste <b>rapide mais approximatif</b> (optimisé pour le rappel : ne rien
+  louper). On ajoute un <b>reranker cross-encoder</b> : un modèle qui lit la paire (question, document) ensemble
+  — plus lent, mais bien plus précis — et réordonne les candidats avant la coupe top-k finale.</p>
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="box">🧺 Hybrid retrieval<br><span style="font-weight:400;font-size:8.5px;">large rappel, ~50-100 candidats</span></div><div class="arrow">→</div>
+      <div class="box rerank">🧐 Reranker<br><span style="font-weight:400;font-size:8.5px;">cross-encoder</span></div><div class="arrow">→</div>
+      <div class="box">🎯 Top-k final</div><div class="arrow">→</div>
+      <div class="box answer">🧠 LLM → ✅ Answer</div>
+    </div>
+    <div class="small-note">Recherche large (rapide) → tri fin (lent mais précis) → contexte final court et pertinent</div>
+  </div>
+
+  <table>
+    <tr><th>Quand ?</th><td>Choix par défaut, surtout corpus techniques/jargonneux avec identifiants</td></tr>
+    <tr><th>Limite</th><td>Ne comprend toujours pas les relations entre documents ; sans reranker, précision plus faible</td></tr>
+    <tr><th>À retenir</th><td>Deux classements valent mieux qu'un ; un reranker derrière vaut mieux que deux</td></tr>
+  </table>
+
+  <div class="checkpoint">✅ <b>Checkpoint 1 :</b> un utilisateur tape « erreur POL-2025-114 ». Quelle branche le sauve, et pourquoi un reranker seul (sans BM25) ne suffirait pas forcément ici ?</div>
+</div>
+
+<!-- ============ MODULE 2 ============ -->
+<div class="module acc-graph">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
+        <circle cx="32" cy="13" r="4.5" fill="currentColor" stroke="none"/><circle cx="15" cy="39" r="4.5" fill="currentColor" stroke="none"/>
+        <circle cx="49" cy="39" r="4.5" fill="currentColor" stroke="none"/><circle cx="32" cy="54" r="4.5" fill="currentColor" stroke="none"/>
+        <line x1="32" y1="13" x2="15" y2="39"/><line x1="32" y1="13" x2="49" y2="39"/>
+        <line x1="15" y1="39" x2="32" y2="54"/><line x1="49" y1="39" x2="32" y2="54"/><line x1="15" y1="39" x2="49" y2="39"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 02</div>
+      <div class="module-title">Graph RAG 🕸️</div>
+      <div class="module-motto">« Answers in relationships » — la réponse est dans les liens</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : reconnaître une question relationnelle multi-sauts et savoir pourquoi le chunk seul ne peut pas y répondre.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Quelles entreprises partenaires utilisent la techno X sur des projets communs ? »</span>
+  </div>
+  <span class="repare">🛠️ Répare la faiblesse ② : les relations ignorées</span>
+
+  <div class="diagram">
+    <div class="kg-row">
+      <div class="kg-node" style="background:#3b82f6;">Person</div>
+      <div class="kg-node" style="background:#22c55e;">Company</div>
+      <div class="kg-node" style="background:#f59e0b;">Project</div>
+      <div class="kg-node" style="background:#a855f7;">Technology</div>
+      <div class="kg-node" style="background:#ec4899;">Location</div>
+    </div>
+    <div class="small-note" style="margin-bottom:8px;">Knowledge graph — entités reliées par des relations</div>
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="box">🗺️ Graph retrieval</div><div class="arrow">→</div>
+      <div class="box">🧩 Context</div><div class="arrow">→</div>
+      <div class="box">🧠 LLM</div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer</div>
+    </div>
+    <div class="small-note">Local subgraphs (voisinage d'une entité) ou global summaries (résumés de communautés)</div>
+  </div>
+
+  <div class="section-label">Principe</div>
+  <p>La connaissance n'est plus une pile de chunks isolés : ce sont des <b>entités reliées par des relations</b>
+  (Marie → travaille pour → Acme → participe à → Projet H2…), exactement ce qu'il faut pour répondre à Léa.
+  Les <b>sous-graphes locaux</b> permettent un raisonnement multi-sauts ; les <b>résumés globaux</b> répondent aux questions macro.</p>
+
+  <table>
+    <tr><th>Quand ?</th><td>Questions relationnelles (qui travaille avec qui, sur quoi, où), traçabilité, synthèses globales</td></tr>
+    <tr><th>Limite</th><td>Construction coûteuse (extraction entités/relations) et maintenance du graphe</td></tr>
+    <tr><th>À retenir</th><td>Souvent, aucun chunk ne contient la réponse : elle existe seulement entre les chunks</td></tr>
+  </table>
+
+  <div class="checkpoint">✅ <b>Checkpoint 2 :</b> pourquoi le Hybrid RAG du module 1 galère sur la question de Léa ?</div>
+</div>
+
+<!-- ============ MODULE 3 ============ -->
+<div class="module acc-agent">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <circle cx="32" cy="32" r="21"/><polygon points="32,19 37,32 32,45 27,32" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 03</div>
+      <div class="module-title">Agentic RAG 🧭</div>
+      <div class="module-motto">« Plan. Retrieve. Verify. » — la récupération devient une stratégie</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : comprendre le rôle du planner, de la boucle de vérification, et pourquoi un budget d'itérations est non négociable.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Peux-tu comparer nos ventes du dernier trimestre (SQL) aux tendances du marché (web), en citant la note interne ? »</span>
+  </div>
+  <span class="repare">🧭 Répare : la récupération subie → une stratégie qui se vérifie</span>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="box">🧭 Planner</div><div class="arrow">→</div>
+      <div class="stack">
+        <div class="box">🔎 Vector search</div>
+        <div class="box">🌍 Web search</div>
+        <div class="box">🗄️ SQL</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="box">🧐 Reason + check</div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer</div>
+    </div>
+    <svg class="retry-svg" viewBox="0 0 340 44" aria-hidden="true">
+      <path d="M262 6 C 262 36, 78 36, 78 10" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6 5"/>
+      <polygon points="78,4 72,14 84,14" fill="#d97706"/>
+      <text x="170" y="40" text-anchor="middle" font-size="10" fill="#b45309" font-family="Segoe UI, Arial">↺ retry within budget (Reason + check → Planner)</text>
+    </svg>
+  </div>
+
+  <div class="section-label">Principe</div>
+  <p>Un <b>agent</b> décide quoi chercher, où, dans quel ordre : base interne (vecteurs), web, ou base de données (SQL) —
+  les trois sources dont Léa a besoin en une seule question. Après chaque récupération, il <b>raisonne et vérifie</b>
+  (<i>self-evaluation</i> : il juge son propre raisonnement) ; si c'est insuffisant, il <b>relance</b> — mais
+  seulement dans la limite d'un <b>budget</b> (nombre d'appels, temps), sinon il répond en l'état.</p>
+
+  <table>
+    <tr><th>Quand ?</th><td>Questions multi-sources (ventes en SQL + tendances marché en web + note interne en vecteurs)</td></tr>
+    <tr><th>Limites</th><td>Latence et coût élevés, débogage difficile → budget obligatoire sous peine de boucles infinies</td></tr>
+    <tr><th>À retenir</th><td>Ce n'est plus un tuyau, c'est un pilote : planifier, récupérer, vérifier, et savoir s'arrêter</td></tr>
+  </table>
+
+  <div class="checkpoint">✅ <b>Checkpoint 3 :</b> qu'empêche la boucle « Retry within budget » de tourner indéfiniment ?</div>
+</div>
+
+<!-- ============ MODULE 4 ============ -->
+<div class="module acc-crag">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+        <path d="M32 8 L50 16 V30 C50 44 42 52 32 57 C22 52 14 44 14 30 V16 Z"/><path d="M23 32 L29 38 L42 24"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 04</div>
+      <div class="module-title">Corrective RAG (CRAG) ⚖️</div>
+      <div class="module-motto">« Grade before you trust » — note avant de croire</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : comprendre pourquoi noter la récupération avant génération réduit les hallucinations, et ce que fait chaque verdict.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Le corpus est bourré de doublons et de vieux tickets obsolètes, comment éviter qu'il réponde n'importe quoi ? »</span>
+  </div>
+  <span class="repare">🛠️ Répare la faiblesse ③ : la confiance aveugle</span>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="box">🧺 Retrieve</div><div class="arrow">→</div>
+      <div class="box grade">⚖️ Grade evidence</div><div class="arrow">→</div>
+      <div class="verdict-col">
+        <div class="verdict v-correct">✓ Correct → Refine evidence</div>
+        <div class="verdict v-ambiguous">? Ambiguous → Combine + refine</div>
+        <div class="verdict v-incorrect">✕ Incorrect → Web search</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="box">🧠 LLM</div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer</div>
+    </div>
+  </div>
+
+  <div class="section-label">Principe</div>
+  <p>Un <b>évaluateur</b> (scoreur) juge la qualité des <b>documents retrouvés</b>, avant même que le LLM génère
+  quoi que ce soit — le filet de sécurité qui manque à Léa contre ses doublons et tickets périmés. Correct → on
+  raffine ; ambigu → on combine avec un complément ; incorrect → on part chercher sur le web avant de combiner.</p>
+
+  <table>
+    <tr><th>Quand ?</th><td>Corpus bruités/hétérogènes/mouvants, besoin de robustesse et de filet de sécurité</td></tr>
+    <tr><th>Limites</th><td>Un composant de plus à calibrer (le gradeur), latence ajoutée</td></tr>
+    <tr><th>À retenir</th><td>Trois verdicts, trois destins : raffiner, combiner, ou sortir chercher ailleurs</td></tr>
+  </table>
+
+  <div class="checkpoint">✅ <b>Checkpoint 4 :</b> documents retrouvés hors-sujet (verdict Incorrect) : que fait CRAG ?</div>
+
+  <div class="warn-callout">⚠️ <b>Self-evaluation (module 3) vs Grade evidence (module 4) — ne pas confondre.</b><br>
+    <b>Self-evaluation</b> (Agentic RAG) : l'agent juge <i>son propre raisonnement ou sa réponse</i>, après avoir
+    déjà récupéré du contexte — c'est un contrôle a posteriori qui peut déclencher une nouvelle recherche.<br>
+    <b>Grade evidence</b> (CRAG) : un gradeur juge <i>la qualité des documents récupérés</i>, avant toute
+    génération — c'est un filtre a priori sur le contexte, pas sur le raisonnement.<br>
+    Les deux peuvent coexister dans un même système : un agent qui appelle un pipeline CRAG comme un de ses outils.</div>
+
+  <div class="checkpoint">✅ <b>Checkpoint 5 :</b> un agent relit sa propre réponse pour vérifier qu'elle a du sens. Est-ce du self-evaluation façon Agentic RAG, ou du grading façon CRAG ?</div>
+</div>
+
+<!-- ============ MODULE 5 ============ -->
+<div class="module acc-multi">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="10" width="30" height="18" rx="3"/><rect x="18" y="23" width="30" height="18" rx="3"/><rect x="27" y="36" width="24" height="16" rx="3"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 05</div>
+      <div class="module-title">Multimodal RAG 👀</div>
+      <div class="module-motto">« Go beyond text » — indexe ce que tu lis, y compris ce que tu vois</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : savoir quand l'information vit dans une figure/un tableau plutôt que dans le texte, et comment l'indexer.</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « Le rapport financier a une courbe de ventes p.12, il ne sait pas la lire. »</span>
+  </div>
+  <span class="repare">🛠️ Répare la faiblesse ④ : les graphiques illisibles</span>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="stack">
+        <div class="box">📄 Text</div>
+        <div class="box">🖼️ Images / charts</div>
+        <div class="box">📊 Tables</div>
+      </div>
+      <div class="arrow">→</div><div class="box">⚙️ Parse + encode</div><div class="arrow">→</div>
+      <div class="box">🗂️ Search indexes</div><div class="arrow">→</div>
+      <div class="box">🔎 Retrieval</div><div class="arrow">→</div>
+      <div class="box">🧠 Multimodal LLM</div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer</div>
+    </div>
+    <div class="small-note">Search indexes = vecteurs + liens source</div>
+  </div>
+
+  <div class="section-label">Principe</div>
+  <p>L'information vitale dort souvent dans une <b>courbe, un schéma, un tableau</b> — exactement le point mort
+  du chatbot de Léa. Deux voies d'encodage : <b>embeddings multimodaux</b> (texte et image dans un même espace
+  vectoriel) ou <b>captioning</b> (un modèle décrit l'image, puis index texte). Les <b>liens source</b> permettent
+  de citer/afficher l'extrait original.</p>
+
+  <table>
+    <tr><th>Quand ?</th><td>PDF techniques/financiers, slides, rapports où figures et tables portent le sens</td></tr>
+    <tr><th>Limites</th><td>Qualité des embeddings multimodaux, alignement des modalités, coût</td></tr>
+    <tr><th>À retenir</th><td>Un chunk n'est pas forcément un paragraphe : ça peut être une figure + légende + tableau</td></tr>
+  </table>
+</div>
+
+<!-- ============ MODULE 6 ============ -->
+<div class="module acc-eval">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <circle cx="32" cy="32" r="21"/><circle cx="32" cy="32" r="12.5"/><circle cx="32" cy="32" r="4" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Module 06</div>
+      <div class="module-title">Évaluer son RAG 📏</div>
+      <div class="module-motto">Sans mesure, « comparer » n'est qu'une impression</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+  <div class="objective">Objectif : construire un golden set et savoir lire les 4 métriques standard avant de déclarer qu'une architecture est « meilleure ».</div>
+  <div class="lea-quote">
+    <svg class="lea-avatar-icon" aria-hidden="true"><use href="#sym-lea"/></svg>
+    <span class="txt"><b>Léa :</b> « On a testé trois architectures sur nos données, laquelle est vraiment la meilleure ? »</span>
+  </div>
+  <span class="repare">📏 Répare : le « ça marche » au feeling</span>
+
+  <div class="section-label">Le golden set</div>
+  <p>Un jeu de référence de <b>questions + réponses attendues + sources attendues</b>, construit à la main
+  sur ton propre corpus (10 à 30 paires suffisent pour démarrer). C'est la seule façon de comparer deux
+  architectures sur un même étalon plutôt qu'au feeling — la seule vraie réponse à la question de Léa.</p>
+
+  <div class="section-label">Les 4 métriques</div>
+  <table>
+    <tr><th style="width:150px;">Métrique</th><th>Ce qu'elle mesure</th></tr>
+    <tr><td><b>🎯 Context precision</b></td><td>Parmi les fragments récupérés, quelle proportion est réellement pertinente ? (mesure le bruit)</td></tr>
+    <tr><td><b>🔎 Context recall</b></td><td>Parmi les fragments réellement pertinents qui existent dans le corpus, quelle proportion a été récupérée ? (mesure les oublis)</td></tr>
+    <tr><td><b>🛡️ Faithfulness (fidélité)</b></td><td>La réponse générée s'appuie-t-elle uniquement sur le contexte fourni, ou invente-t-elle des éléments absents ? (mesure l'hallucination)</td></tr>
+    <tr><td><b>💬 Answer relevance</b></td><td>La réponse répond-elle effectivement à la question posée, même si elle est fidèle au contexte ? (mesure le hors-sujet)</td></tr>
+  </table>
+
+  <div class="callout">💡 Des frameworks comme <b>RAGAS</b> calculent ces 4 métriques automatiquement à partir du golden set, du contexte récupéré et de la réponse générée.</div>
+  <div class="callout">⚠️ Un bon context recall avec une mauvaise faithfulness signale un problème de <b>génération</b>
+  (le LLM ignore le contexte) ; l'inverse signale un problème de <b>récupération</b> (le contexte est incomplet).</div>
+</div>
+
+<!-- ============ GUIDE DE DECISION ============ -->
+<div class="module acc-hybrid">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="32" y1="18" x2="32" y2="54"/>
+        <path d="M32 18 L50 25 L32 32 Z" fill="currentColor" stroke="none"/><path d="M32 27 L14 34 L32 41 Z" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Guide</div>
+      <div class="module-title">Guide de décision 🧭</div>
+      <div class="module-motto">Quelle famille choisir, dans quel ordre se poser les questions</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <div class="section-label">Arbre de décision (à parcourir dans l'ordre, premier « oui » gagne)</div>
+  <div class="decision-item"><div class="decision-num">1</div><div>Le corpus contient des <b>références/codes exacts</b> à retrouver mot pour mot ? → <b>Hybrid RAG</b> (+ reranker)</div></div>
+  <div class="decision-item"><div class="decision-num">2</div><div>La question porte sur des <b>relations entre entités</b> (qui, avec qui, sur quel projet) ? → <b>Graph RAG</b></div></div>
+  <div class="decision-item"><div class="decision-num">3</div><div>La réponse exige de <b>croiser plusieurs sources hétérogènes</b> (SQL + web + interne) ? → <b>Agentic RAG</b></div></div>
+  <div class="decision-item"><div class="decision-num">4</div><div>Le corpus est <b>bruité, mouvant ou incomplet</b>, avec risque de mauvais retrieval ? → <b>Corrective RAG</b></div></div>
+  <div class="decision-item"><div class="decision-num">5</div><div>Le sens est porté par des <b>figures, tableaux, graphiques</b> ? → <b>Multimodal RAG</b></div></div>
+  <div class="decision-item"><div class="decision-num">6</div><div>Aucun cas ci-dessus ne domine ? → <b>Hybrid RAG</b> par défaut, puis instrumenter avec le module 6 avant d'ajouter de la complexité</div></div>
+
+  <div class="section-label">Coût / latence / complexité / fiabilité</div>
+  <table>
+    <tr><th>Architecture</th><th>Problème ciblé</th><th>Complexité</th><th>Latence</th><th>Fiabilité</th></tr>
+    <tr><td>🎯 Hybrid RAG</td><td>Rappel faible sur termes exacts</td><td>Faible</td><td>Faible</td><td>Moyenne</td></tr>
+    <tr><td>🕸️ Graph RAG</td><td>Questions relationnelles multi-hop</td><td>Élevée</td><td>Moyenne</td><td>Moyenne-haute</td></tr>
+    <tr><td>🧭 Agentic RAG</td><td>Sources hétérogènes, raisonnement</td><td>Élevée</td><td>Haute</td><td>Variable (dépend du planner)</td></tr>
+    <tr><td>⚖️ Corrective RAG</td><td>Hallucination sur contexte pauvre</td><td>Moyenne</td><td>Moyenne</td><td>Haute</td></tr>
+    <tr><td>👀 Multimodal RAG</td><td>Contenu non-textuel</td><td>Élevée</td><td>Moyenne-haute</td><td>Moyenne-haute</td></tr>
+  </table>
+
+  <div class="callout">💡 Ces patterns se combinent : rien n'empêche un Graph RAG noté par un gradeur CRAG, ou un Agentic RAG dont l'outil « vector search » est lui-même un Hybrid RAG + reranker.</div>
+</div>
+
+<!-- ============ ERREURS CLASSIQUES ============ -->
+<div class="module acc-red">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+        <path d="M32 10 L57 52 H7 Z"/><line x1="32" y1="26" x2="32" y2="38"/><circle cx="32" cy="44.5" r="1.8" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Repères</div>
+      <div class="module-title">Erreurs classiques 🚧</div>
+      <div class="module-motto">Ce qui casse un RAG en silence</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <ul class="error-list">
+    <li>✂️ <b>Chunks trop gros</b> : chaque fragment mélange plusieurs idées, le vecteur résultant est flou et le retrieval devient imprécis.</li>
+    <li>🧩 <b>Overlap nul</b> : une idée coupée pile à la frontière entre deux chunks devient invisible pour les deux.</li>
+    <li>🌊 <b>Top-k trop élevé</b> : le contexte noie le signal utile dans du bruit, le LLM peut se perdre ou halluciner sur un détail périphérique.</li>
+    <li>🧐 <b>Pas de reranking</b> : bon rappel, mauvaise précision — le LLM reçoit des candidats pertinents mais mal classés.</li>
+    <li>🔗 <b>Absence de citations</b> : impossible de vérifier ou tracer d'où vient une affirmation de la réponse.</li>
+    <li>⚖️ <b>Gradeur CRAG non calibré</b> : trop strict, il déclenche des web search inutiles ; trop laxiste, il laisse passer du mauvais contexte.</li>
+    <li>♾️ <b>Agent sans budget</b> : boucles de retry coûteuses, voire infinies, sans garantie de réponse dans un temps raisonnable.</li>
+  </ul>
+
+  <div class="section-label" style="margin-top:16px;">Exercice — Trouve l'erreur 🔍</div>
+  <p style="font-size:10.5px;">Chaque pipeline ci-dessous contient une erreur de conception. Identifie-la avant de lire les réponses en fin de document.</p>
+  <div class="exercise-item"><span class="exercise-num">A.</span> <span class="exercise-flow">Hybrid RAG :</span> les listes vecteurs et BM25 sont simplement concaténées avant le top-k, sans étape de fusion.</div>
+  <div class="exercise-item"><span class="exercise-num">B.</span> <span class="exercise-flow">Agentic RAG :</span> le Planner peut relancer « Reason + check » tant que le résultat n'est pas jugé satisfaisant, sans limite de nombre d'appels.</div>
+  <div class="exercise-item"><span class="exercise-num">C.</span> <span class="exercise-flow">Corrective RAG :</span> le gradeur classe systématiquement les documents en « Correct », quel que soit leur contenu.</div>
+  <div class="exercise-item"><span class="exercise-num">D.</span> <span class="exercise-flow">RAG naïf :</span> chunks de 100 tokens, top-k = 50.</div>
+  <div class="exercise-item"><span class="exercise-num">E.</span> <span class="exercise-flow">Graph RAG :</span> le graphe de connaissances n'est jamais régénéré après l'ajout de nouveaux documents.</div>
+</div>
+
+<!-- ============ ARCHITECTURE DE REFERENCE ============ -->
+<div class="module acc-slate">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
+        <circle cx="32" cy="32" r="11"/><line x1="32" y1="4" x2="32" y2="16"/><line x1="32" y1="48" x2="32" y2="60"/>
+        <line x1="4" y1="32" x2="16" y2="32"/><line x1="48" y1="32" x2="60" y2="32"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Repères</div>
+      <div class="module-title">Architecture de référence 🏗️</div>
+      <div class="module-motto">Ce à quoi ressemble un système RAG de production</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <div class="diagram">
+    <div class="flow-row">
+      <div class="box">❓ Query</div><div class="arrow">→</div>
+      <div class="box">🧺 Hybrid retrieval<br><span style="font-weight:400;font-size:8.5px;">vector + BM25</span></div><div class="arrow">→</div>
+      <div class="box rerank">🧐 Reranker</div><div class="arrow">→</div>
+      <div class="box grade">⚖️ Grade evidence<br><span style="font-weight:400;font-size:8.5px;">CRAG</span></div><div class="arrow">→</div>
+      <div class="box">🧠 LLM<br><span style="font-weight:400;font-size:8.5px;">+ citations</span></div><div class="arrow">→</div>
+      <div class="box answer">✅ Answer sourcée</div>
+    </div>
+    <div class="small-note">Hybride + reranker + gradeur + citations = le socle réutilisable sous Graph, Agentic ou Multimodal RAG</div>
+  </div>
+
+  <p>Les modules Graph, Agentic et Multimodal ne remplacent pas ce socle : ils l'enrichissent ou l'orchestrent
+  (un agent peut appeler ce pipeline comme un outil parmi d'autres ; un Graph RAG peut l'utiliser comme
+  récupérateur de secours sur les entités non couvertes par le graphe).</p>
+</div>
+
+<!-- ============ CORPUS FIL ROUGE + TP ============ -->
+<div class="module acc-cyan">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+        <path d="M8 20a4 4 0 0 1 4-4h13l4 6h23a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4Z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Fil rouge</div>
+      <div class="module-title">Les dossiers de Léa 🗂️</div>
+      <div class="module-motto">Corpus fil rouge &amp; travaux pratiques</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <div class="section-label">Corpus fil rouge (fictif, ~20 pages)</div>
+  <p>Le corpus de Léa, réutilisé dans les 4 TP pour que les résultats soient réellement comparables d'une architecture à l'autre :</p>
+  <table>
+    <tr><th style="width:140px;">Composant</th><th>Contenu</th></tr>
+    <tr><td>🎫 Notes de support</td><td>Tickets avec identifiants exacts (ex. ERR-4042, POL-2025-114) — pour tester la branche BM25</td></tr>
+    <tr><td>📜 Contrat</td><td>Articles numérotés et clauses croisées entre entreprises/personnes/projets — pour tester le Graph RAG</td></tr>
+    <tr><td>📈 Rapport avec courbes</td><td>Quelques pages avec un graphique de ventes trimestrielles et un tableau — pour tester le Multimodal RAG</td></tr>
+  </table>
+
+  <div class="section-label">TP progressifs</div>
+  <div class="tp-item"><span class="tp-level">Niveau 1 —</span> RAG naïf sur le corpus de Léa (chunks + embeddings + top-k), puis ajoute BM25 + fusion RRF, puis un reranker. Compare sur 5 questions dont 2 avec références exactes.</div>
+  <div class="tp-item"><span class="tp-level">Niveau 2 —</span> construis un mini-graphe (entités/relations) à partir du contrat ; compare hybrid vs graph sur 3 questions relationnelles.</div>
+  <div class="tp-item"><span class="tp-level">Niveau 3 —</span> ajoute un gradeur LLM devant ta récupération (CRAG) ; teste sur des questions sans réponse dans le corpus et observe le repli web.</div>
+  <div class="tp-item"><span class="tp-level">Niveau 4 —</span> construis un golden set de 10 paires question/réponse sur le corpus de Léa ; calcule les 4 métriques du module 6 (à la main ou avec RAGAS) pour chacune des architectures testées aux niveaux 1 à 3 — de quoi enfin répondre à sa question du module 6.</div>
+</div>
+
+<!-- ============ SYNTHESE + QUIZ ============ -->
+<div class="module acc-hybrid">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" stroke="currentColor" stroke-width="3" stroke-linejoin="round" fill="currentColor" aria-hidden="true">
+        <polygon points="32,8 39,25 57,25 42,36 47,54 32,43 17,54 22,36 7,25 25,25"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Bilan</div>
+      <div class="module-title">Synthèse express ⭐</div>
+      <div class="module-motto">à coller sur ton mur</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <table>
+    <tr><th>#</th><th>Famille</th><th>Devise</th><th>Super-pouvoir</th><th>Cas type</th><th>Vigilance</th></tr>
+    <tr><td>01</td><td><b>🎯 Hybrid</b></td><td>Sens + exact</td><td>Rappel maximal</td><td>Jargon, références</td><td>Réglage fusion + reranker</td></tr>
+    <tr><td>02</td><td><b>🕸️ Graph</b></td><td>Réponses dans les liens</td><td>Multi-sauts + synthèses globales</td><td>« Qui avec qui, sur quoi ? »</td><td>Coût de construction</td></tr>
+    <tr><td>03</td><td><b>🧭 Agentic</b></td><td>Plan. Retrieve. Verify.</td><td>Multi-sources adaptatif</td><td>Questions complexes</td><td>Budget, latence</td></tr>
+    <tr><td>04</td><td><b>⚖️ Corrective</b></td><td>Note avant de croire</td><td>Robustesse, filet web</td><td>Corpus bruités</td><td>Calibration du gradeur</td></tr>
+    <tr><td>05</td><td><b>👀 Multimodal</b></td><td>Au-delà du texte</td><td>Figures &amp; tables interrogables</td><td>PDF riches</td><td>Embeddings multimodaux</td></tr>
+    <tr><td>06</td><td><b>📏 Évaluation</b></td><td>Mesurer avant d'affirmer</td><td>Comparaison objective</td><td>Choisir/arbitrer entre familles</td><td>Golden set représentatif</td></tr>
+  </table>
+
+  <div class="callout">💡 <b>Ces familles se combinent.</b> Un système production sérieux = hybride + reranker (01) + gradeur (04) + touches multimodales (05), parfois orchestré par un agent (03), et toujours mesuré (06).</div>
+
+  <div class="section-label" style="margin-top:16px;">Quiz d'auto-évaluation ✍️</div>
+  <div class="quiz-item">1. Question « contrat DC-2024-091 » : quelle branche de l'Hybrid RAG est décisive ?</div>
+  <div class="quiz-item">2. « Résume les grands thèmes de tout le corpus » : quel mode du Graph RAG ?</div>
+  <div class="quiz-item">3. Dans l'Agentic RAG, quel mécanisme borne les relances ?</div>
+  <div class="quiz-item">4. Dans CRAG, verdict « Incorrect » → quelle action ?</div>
+  <div class="quiz-item">5. Répondre sur un graphique d'un PDF : quelle famille ?</div>
+  <div class="quiz-item">6. Quel composant du module 1 fusionne les deux classements ?</div>
+  <div class="quiz-item">7. Un reranker cross-encoder est-il plus rapide ou plus lent qu'un bi-encoder, et pourquoi l'utiliser quand même ?</div>
+  <div class="quiz-item">8. Bon context recall mais mauvaise faithfulness : le problème vient de la récupération ou de la génération ?</div>
+  <div class="quiz-item">9. Dans l'arbre de décision, quel est le choix par défaut si aucun critère ne domine ?</div>
+  <p style="margin-top:10px; font-size:10.5px; color:#64748b;">Réponses en fin de document, avec les checkpoints et les exercices.</p>
+</div>
+
+<!-- ============ EXERCICE SCHEMA <-> FAMILLE ============ -->
+<div class="module acc-graph">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <rect x="8" y="24" width="24" height="16" rx="8"/><rect x="30" y="24" width="24" height="16" rx="8"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Exercice</div>
+      <div class="module-title">Schéma ↔ Famille 🧩</div>
+      <div class="module-motto">Associe chaque flux à son architecture</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <p style="font-size:10.5px;">Six flux ci-dessous, dans le désordre. Retrouve la famille (RAG naïf, Hybrid, Graph,
+  Agentic, Corrective, Multimodal) derrière chacun avant de consulter les réponses en fin de document.</p>
+  <div class="exercise-item"><span class="exercise-num">1.</span> <span class="exercise-flow">Query → Embedding → Vector search → Top-k → LLM → Answer</span></div>
+  <div class="exercise-item"><span class="exercise-num">2.</span> <span class="exercise-flow">Query → Planner → (Vector search / Web search / SQL) → Reason + check → (retry within budget) → Answer</span></div>
+  <div class="exercise-item"><span class="exercise-num">3.</span> <span class="exercise-flow">Query → Graph retrieval → Context → LLM → Answer</span></div>
+  <div class="exercise-item"><span class="exercise-num">4.</span> <span class="exercise-flow">Text / Images / Tables → Parse + encode → Search indexes → Retrieval → Multimodal LLM → Answer</span></div>
+  <div class="exercise-item"><span class="exercise-num">5.</span> <span class="exercise-flow">Query → Retrieve → Grade evidence (Correct / Ambiguous / Incorrect) → … → LLM → Answer</span></div>
+  <div class="exercise-item"><span class="exercise-num">6.</span> <span class="exercise-flow">Query → (Embedding + Vector search) &amp; (BM25 search) → Rank fusion → Top-k → LLM → Answer</span></div>
+</div>
+
+<!-- ============ GLOSSAIRE ============ -->
+<div class="module acc-slate">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+        <path d="M32 16c-6-4-14-4-20-2v34c6-2 14-2 20 2c6-4 14-4 20-2V14c-6-2-14-2-20 2Z"/><line x1="32" y1="16" x2="32" y2="50"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Ressources</div>
+      <div class="module-title">Glossaire 📖</div>
+      <div class="module-motto">15 termes pour ne plus décrocher</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <dl class="glossary">
+    <dt>RAG</dt><dd>Retrieval-Augmented Generation — génération augmentée par une étape de recherche documentaire.</dd>
+    <dt>Chunk</dt><dd>Fragment de document obtenu par découpage (chunking), unité de base indexée et récupérée.</dd>
+    <dt>Embedding</dt><dd>Représentation vectorielle d'un texte capturant son sens.</dd>
+    <dt>Similarité cosinus</dt><dd>Mesure de proximité entre deux vecteurs, utilisée pour classer les résultats du vector search.</dd>
+    <dt>Base vectorielle</dt><dd>Index optimisé pour la recherche de plus proches voisins parmi des embeddings (FAISS, Chroma, Qdrant…).</dd>
+    <dt>BM25</dt><dd>Algorithme de recherche lexicale par pertinence statistique des mots exacts.</dd>
+    <dt>RRF (Reciprocal Rank Fusion)</dt><dd>Méthode de fusion de plusieurs classements en un seul, basée sur l'inverse du rang.</dd>
+    <dt>Reranker / cross-encoder</dt><dd>Modèle qui réordonne un ensemble restreint de candidats en évaluant chaque paire (question, document) conjointement.</dd>
+    <dt>Top-k</dt><dd>Nombre de fragments finalement transmis au LLM comme contexte.</dd>
+    <dt>Knowledge graph</dt><dd>Représentation de la connaissance sous forme d'entités et de relations entre elles.</dd>
+    <dt>Multi-hop</dt><dd>Question dont la réponse nécessite de traverser plusieurs relations/documents successivement.</dd>
+    <dt>Agent</dt><dd>Composant qui planifie ses actions (quels outils appeler, dans quel ordre) plutôt que de suivre un pipeline fixe.</dd>
+    <dt>Budget (agentic)</dt><dd>Limite de nombre d'itérations ou de temps imposée à un agent pour garantir une réponse finale.</dd>
+    <dt>Fidélité (faithfulness)</dt><dd>Degré auquel une réponse générée reste ancrée dans le contexte fourni, sans invention.</dd>
+    <dt>Golden set</dt><dd>Jeu de questions/réponses de référence servant d'étalon pour évaluer un système RAG.</dd>
+  </dl>
+</div>
+
+<!-- ============ REFERENCES ============ -->
+<div class="module acc-slate">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 8h24a2 2 0 0 1 2 2v42l-14-11-14 11V10a2 2 0 0 1 2-2Z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Ressources</div>
+      <div class="module-title">Références 🔖</div>
+      <div class="module-motto">Pour aller plus loin</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <div class="section-label">Papers fondateurs</div>
+  <ul class="ref-list">
+    <li>Lewis et al., 2020 — introduction du RAG (retrieval-augmented generation) pour les tâches génératives à forte intensité de connaissances.</li>
+    <li>Edge et al., 2024 — GraphRAG (Microsoft), retrieval augmenté par graphe de connaissances et résumés de communautés.</li>
+    <li>Yan et al., 2024 — Corrective RAG (CRAG), évaluation de la qualité du contexte récupéré avant génération.</li>
+  </ul>
+
+  <div class="section-label">Outils</div>
+  <ul class="ref-list">
+    <li><b>Frameworks RAG</b> : LlamaIndex, LangChain, Haystack.</li>
+    <li><b>Bases vectorielles</b> : FAISS, Chroma, Qdrant, pgvector.</li>
+    <li><b>Recherche lexicale</b> : rank_bm25 (Python).</li>
+    <li><b>Évaluation</b> : RAGAS, TruLens, DeepEval.</li>
+  </ul>
+</div>
+
+<!-- ============ REPONSES ============ -->
+<div class="module acc-eval">
+  <div class="module-header">
+    <div class="icon-badge">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="32" cy="32" r="22"/><path d="M22 33 L29 40 L44 24"/>
+      </svg>
+    </div>
+    <div>
+      <div class="module-tag">Bilan</div>
+      <div class="module-title">Réponses ✅</div>
+      <div class="module-motto">Checkpoints, quiz, exercices — à consulter après avoir répondu</div>
+    </div>
+    <svg class="sticker" aria-hidden="true"><use href="#sym-spark"/></svg>
+  </div>
+
+  <div class="section-label">Checkpoints</div>
+  <div class="answer-item"><span class="answer-q">Checkpoint 1 —</span> BM25 sauve la mise car la référence exacte est rarement proche vectoriellement d'autre chose qu'elle-même. Un reranker seul ne suffit pas s'il ne voit jamais le bon document dans sa liste de candidats initiale : il réordonne, il ne récupère pas.</div>
+  <div class="answer-item"><span class="answer-q">Checkpoint 2 —</span> le Hybrid RAG cherche des chunks pertinents individuellement ; ici, la réponse dépend de relations entre plusieurs entités (entreprise ↔ techno ↔ projet) qu'aucun chunk isolé ne relie explicitement.</div>
+  <div class="answer-item"><span class="answer-q">Checkpoint 3 —</span> le budget (nombre d'appels ou de temps maximum), qui force l'agent à répondre en l'état plutôt que de relancer indéfiniment.</div>
+  <div class="answer-item"><span class="answer-q">Checkpoint 4 —</span> repli sur web search, puis combinaison avec le contexte existant, au lieu d'halluciner sur des documents hors-sujet.</div>
+  <div class="answer-item"><span class="answer-q">Checkpoint 5 —</span> self-evaluation façon Agentic RAG : l'agent juge sa propre réponse déjà générée. CRAG note les documents en amont, jamais la réponse finale du LLM.</div>
+
+  <div class="section-label" style="margin-top:14px;">Quiz</div>
+  <div class="answer-item"><b>1.</b> BM25 (mots exacts).</div>
+  <div class="answer-item"><b>2.</b> Global summaries.</div>
+  <div class="answer-item"><b>3.</b> Le budget (retry within budget).</div>
+  <div class="answer-item"><b>4.</b> Repli sur Web search puis combinaison.</div>
+  <div class="answer-item"><b>5.</b> Multimodal RAG.</div>
+  <div class="answer-item"><b>6.</b> Rank fusion.</div>
+  <div class="answer-item"><b>7.</b> Plus lent (il évalue chaque paire conjointement) ; on l'utilise quand même car il est bien plus précis, sur un petit nombre de candidats déjà pré-filtrés par une recherche rapide.</div>
+  <div class="answer-item"><b>8.</b> De la génération : le contexte contient l'information nécessaire (bon recall) mais le LLM ne s'y ancre pas correctement (mauvaise fidélité).</div>
+  <div class="answer-item"><b>9.</b> Hybrid RAG par défaut, puis instrumenter avec le module 6 avant d'ajouter de la complexité.</div>
+
+  <div class="section-label" style="margin-top:14px;">Exercice — Trouve l'erreur</div>
+  <div class="answer-item"><b>A.</b> Pas de fusion pondérée : un document présent dans les deux listes n'est pas favorisé, le classement final peut être pire qu'une seule des deux listes.</div>
+  <div class="answer-item"><b>B.</b> Pas de budget : la boucle peut tourner indéfiniment, coût et latence non maîtrisés.</div>
+  <div class="answer-item"><b>C.</b> Gradeur non calibré (biaisé vers « Correct ») : il ne joue plus son rôle de filet de sécurité, le corpus bruité passe sans filtre.</div>
+  <div class="answer-item"><b>D.</b> Deux erreurs cumulées : chunks de 100 tokens (trop petits : le contexte de chaque idée est perdu, cf. annexe A) et top-k = 50 (beaucoup trop élevé : ~5 000 tokens de contexte noient le LLM au lieu de l'aider).</div>
+  <div class="answer-item"><b>E.</b> Graphe jamais mis à jour : les nouvelles entités et relations restent invisibles au retrieval.</div>
+
+  <div class="section-label" style="margin-top:14px;">Exercice — Schéma ↔ Famille</div>
+  <div class="answer-item"><b>1.</b> RAG naïf (module 0) — pas de BM25, pas de fusion, pas de reranker.</div>
+  <div class="answer-item"><b>2.</b> Agentic RAG (module 3).</div>
+  <div class="answer-item"><b>3.</b> Graph RAG (module 2).</div>
+  <div class="answer-item"><b>4.</b> Multimodal RAG (module 5).</div>
+  <div class="answer-item"><b>5.</b> Corrective RAG / CRAG (module 4).</div>
+  <div class="answer-item"><b>6.</b> Hybrid RAG (module 1).</div>
+
+  <div class="bravo">🎉 <b>Bravo, tu es arrivé·e au bout !</b> Tu sais désormais choisir, construire, corriger et mesurer un RAG.<br>
+  Léa aussi te dit merci : son chatbot tient enfin la route. 💚</div>
+  <div class="credit">Fait avec 💚 pour réviser en souriant — pour le PDF : imprimer avec « graphiques d'arrière-plan » activé.</div>
+</div>
+
+</div><!-- /sheet -->
+<script src="/course-kit.js"></script>
+</body>
+</html>

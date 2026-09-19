@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La pile de l’usine d’IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">AI Factory • analogie pédagogique</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Usine"><span class="pill">8 rôles • une chaîne</span><h1>La pile de l’usine d’IA</h1><p class="muted">Une analogie simple pour comprendre les dépendances entre modèle, connaissances, action, connexion, sécurité et qualité.</p><div class="grid"><div class="concept"><b>La machine</b><p>Le LLM génère, raisonne, explique et crée.</p></div><div class="concept"><b>Les matières premières</b><p>RAG et base vectorielle fournissent les bonnes connaissances.</p></div><div class="concept"><b>Le chef d’atelier</b><p>L’agent décide, utilise des outils et accomplit les tâches.</p></div><div class="concept"><b>La sécurité et le contrôle</b><p>MCP connecte ; les garde-fous protègent ; les évaluations mesurent.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel composant joue le rôle de la machine ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Le LLM</button><button class="choice" data-correct="false" onclick="answer(this,false)">La base vectorielle seule</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Connaissance"><span class="pill">Matières premières</span><h2>LLM, RAG et base vectorielle</h2><div class="grid"><div class="concept"><b>LLM — la machine</b><p>Génère du texte, raisonne, explique et crée à partir de son contexte.</p></div><div class="concept"><b>RAG — la réserve</b><p>Trouve les bonnes informations avant que la machine ne fonctionne.</p></div><div class="concept"><b>Base vectorielle — l’entrepôt</b><p>Stocke les connaissances sous forme vectorielle et retrouve par signification.</p></div></div><pre>Documents → embeddings → base vectorielle → recherche RAG → contexte du LLM</pre><div class="quiz"><h3>Quiz</h3><p>Pourquoi une base vectorielle est-elle utile ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Retrouver des connaissances par proximité sémantique</button><button class="choice" data-correct="false" onclick="answer(this,false)">Remplacer le LLM dans la génération</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Action"><span class="pill">Chef d’atelier</span><h2>Agent d’IA et outils</h2><p>L’agent ne se contente pas de répondre. Il décide de la prochaine étape, sélectionne un outil et accomplit une tâche. Les outils peuvent être des fonctions, APIs, recherches, calculatrices ou systèmes métier.</p><pre>Percevoir → décider → choisir un outil → agir → observer → continuer ou terminer</pre><div class="quiz"><h3>Quiz</h3><p>Quelle est la différence entre LLM et agent ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">L’agent organise des actions et utilise des outils autour du modèle</button><button class="choice" data-correct="false" onclick="answer(this,false)">L’agent est seulement un nouveau nom pour une base de données</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Connexion"><span class="pill">Norme de prise électrique</span><h2>MCP : connecter sans multiplier les interfaces</h2><p>MCP est présenté comme une norme ouverte qui relie les agents aux outils, applications, APIs, fichiers et bases de données. L’objectif pédagogique est de remplacer une multitude de connexions spécifiques par une interface plus standardisée.</p><div class="grid"><div class="concept"><b>Avant</b><p>Chaque agent doit connaître chaque outil avec une intégration spécifique.</p></div><div class="concept"><b>Avec MCP</b><p>Les capacités sont exposées selon un cadre partagé, ce qui facilite la réutilisation.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quelle analogie décrit MCP ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Une prise standard pour connecter de nombreux appareils</button><button class="choice" data-correct="false" onclick="answer(this,false)">Un entrepôt qui remplace toutes les données</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Sécurité"><span class="pill">Système de sécurité</span><h2>Garde-fous et évaluations</h2><div class="grid"><div class="concept"><b>Garde-fous</b><p>Définissent ce que l’IA doit et ne doit pas faire, et protègent utilisateurs, données et actions.</p></div><div class="concept"><b>Évaluations</b><p>Testent si le résultat est correct, sûr et utile, puis mesurent qualité, coût, latence et succès.</p></div></div><p>La sécurité ne doit pas être ajoutée après l’agent : elle accompagne les permissions, les outils, les données et les sorties dès la conception.</p><div class="quiz"><h3>Quiz</h3><p>Que mesurent les évaluations ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Qualité, sécurité, utilité, coût, latence et succès</button><button class="choice" data-correct="false" onclick="answer(this,false)">Uniquement le nombre de mots générés</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Checklist"><span class="pill">Passage à l’action</span><h2>Checklist de l’usine d’IA</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Le LLM et ses limites sont documentés.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> RAG, embeddings et base vectorielle sont testés ensemble.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> L’agent possède un workflow, des outils et des critères d’arrêt.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les connexions externes ont des contrats et des permissions.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Des garde-fous bornent les entrées, sorties et actions.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les évaluations mesurent qualité, coût, latence et succès.</label><button class="btn primary" onclick="finish()">Valider mon usine</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

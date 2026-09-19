@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif : Construire un Second Brain avec Obsidian + IA</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">🧠 Second Brain IA</div>
+
+      <div class="progress-box">
+        <div class="progress-label">
+          <span>Progression</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress"><div id="progressBar"></div></div>
+        <div class="score">Score quiz : <span id="globalScore">0/0</span></div>
+      </div>
+
+      <nav id="nav">
+        <button data-target="home" class="active">🏠 Accueil</button>
+        <button data-target="m1">1. Le problème des second brains</button>
+        <button data-target="m2">2. Les 3 piliers</button>
+        <button data-target="m3">3. Architecture Obsidian</button>
+        <button data-target="m4">4. Capturer avec Web Clipper</button>
+        <button data-target="m5">5. Traiter les sources</button>
+        <button data-target="m6">6. Interroger le wiki</button>
+        <button data-target="m7">7. Journal ancré</button>
+        <button data-target="m8">8. CRM personnel</button>
+        <button data-target="m9">9. Automatiser & sauvegarder</button>
+        <button data-target="m10">10. Limites & bonnes pratiques</button>
+        <button data-target="lab">🛠️ Atelier</button>
+        <button data-target="final">✅ Évaluation finale</button>
+      </nav>
+    </aside>
+
+    <main>
+      <!-- HOME -->
+      <section id="home" class="section active">
+        <h1>Construire un Second Brain interactif avec Obsidian et l’IA</h1>
+        <p class="lead">
+          Ce cours transforme le transcript en parcours pratique : comprendre pourquoi un simple “dépôt de notes” ne suffit pas,
+          puis construire un système vivant composé d’un wiki, d’un CRM, d’un journal, de fichiers sources, de pages générées,
+          d’automatisations et de sauvegardes.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 260" role="img" aria-label="Feuille de route du cours second brain">
+          <rect x="0" y="0" width="900" height="260" fill="#09101f" />
+          <line x1="60" y1="130" x2="840" y2="130" stroke="#334155" stroke-width="5" />
+          <g font-size="13" fill="#e5e7eb" text-anchor="middle">
+            <circle cx="90" cy="130" r="18" fill="#1d4ed8" />
+            <text x="90" y="135">1</text>
+            <text x="90" y="170">Stockage</text>
+
+            <circle cx="230" cy="130" r="18" fill="#0ea5e9" />
+            <text x="230" y="135">2</text>
+            <text x="230" y="170">Wiki</text>
+
+            <circle cx="370" cy="130" r="18" fill="#22c55e" />
+            <text x="370" y="135">3</text>
+            <text x="370" y="170">Capture</text>
+
+            <circle cx="510" cy="130" r="18" fill="#f59e0b" />
+            <text x="510" y="135">4</text>
+            <text x="510" y="170">Traitement</text>
+
+            <circle cx="650" cy="130" r="18" fill="#a78bfa" />
+            <text x="650" y="135">5</text>
+            <text x="650" y="170">Journal/CRM</text>
+
+            <circle cx="790" cy="130" r="18" fill="#ef4444" />
+            <text x="790" y="135">6</text>
+            <text x="790" y="170">Automatisation</text>
+          </g>
+          <text x="450" y="55" text-anchor="middle" font-size="22" fill="white" font-weight="700">
+            D’un simple dépôt de notes à un cerveau augmenté
+          </text>
+        </svg>
+
+        <div class="grid3">
+          <div class="card info">
+            <h3>🎯 Objectif</h3>
+            <p>Passer d’un “second brain” passif à un système vivant qui relie sources, idées, personnes et réflexions.</p>
+          </div>
+          <div class="card warn">
+            <h3>🧪 Interactif</h3>
+            <p>Quiz, schémas animés, simulateur de workflow, générateur de prompts et checklist de construction.</p>
+          </div>
+          <div class="card good">
+            <h3>🖼️ Illustré</h3>
+            <p>Chaque module contient une visualisation du flux : capture → traitement → wiki → journal → CRM → automatisation.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Comment utiliser ce cours</h3>
+          <ol>
+            <li>Cliquez sur un module dans le menu de gauche.</li>
+            <li>Observez le schéma animé pour comprendre le flux.</li>
+            <li>Lisez les principes clés et les exemples de prompts.</li>
+            <li>Répondez au quiz express.</li>
+            <li>Utilisez l’atelier pour générer vos propres instructions.</li>
+            <li>Terminez par l’évaluation finale.</li>
+          </ol>
+          <div class="toolbar">
+            <button class="btn" data-goto="m1">Commencer le module 1</button>
+            <button class="btn secondary" data-goto="lab">Aller à l’atelier</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 1 -->
+      <section id="m1" class="section">
+        <h2>1. Le problème des second brains “décharge”</h2>
+        <p class="lead">
+          Beaucoup de systèmes de gestion des connaissances ne font que stocker : articles, transcripts YouTube, podcasts, tweets, notes.
+          Le problème est que l’information “va mourir” dans le dépôt si rien ne la rend réutilisable.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 300" role="img" aria-label="Comparaison dépôt mort vs wiki vivant">
+          <rect x="0" y="0" width="900" height="300" fill="#09101f" />
+          <g>
+            <rect x="60" y="70" width="260" height="150" rx="16" fill="rgba(239,68,68,0.08)" stroke="#ef4444" />
+            <text x="190" y="105" text-anchor="middle" class="label red">Second brain passif</text>
+            <text x="190" y="132" text-anchor="middle" class="muted">articles + transcripts + notes</text>
+            <text x="190" y="158" text-anchor="middle" class="muted">non reliés, non réutilisés</text>
+            <rect x="110" y="180" width="160" height="18" rx="6" fill="rgba(239,68,68,0.25)" class="bar" style="animation-delay:0.1s" />
+          </g>
+
+          <path d="M350 145 C420 145, 430 145, 500 145" stroke="#94a3b8" stroke-width="4" fill="none" marker-end="url(#arrow1)" />
+          <defs>
+            <marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <g>
+            <rect x="520" y="55" width="320" height="190" rx="16" fill="rgba(34,197,94,0.08)" stroke="#22c55e" />
+            <text x="680" y="92" text-anchor="middle" class="label green">Wiki vivant</text>
+            <circle cx="600" cy="150" r="18" fill="rgba(96,165,250,0.20)" stroke="#60a5fa" class="pulse" />
+            <circle cx="680" cy="130" r="18" fill="rgba(34,211,238,0.20)" stroke="#22d3ee" class="pulse" />
+            <circle cx="760" cy="155" r="18" fill="rgba(167,139,250,0.20)" stroke="#a78bfa" class="pulse" />
+            <line x1="618" y1="150" x2="662" y2="135" stroke="#60a5fa" stroke-width="2" />
+            <line x1="698" y1="135" x2="742" y2="150" stroke="#22d3ee" stroke-width="2" />
+            <text x="680" y="205" text-anchor="middle" class="muted">pages reliées, concepts extraits, recherches possibles</text>
+          </g>
+
+          <text x="450" y="270" text-anchor="middle" class="muted">
+            L’idée n’est pas seulement de ranger, mais de transformer les sources en知识 réutilisable.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card bad">
+            <h3>Symptômes d’un dépôt mort</h3>
+            <ul>
+              <li>Vous enregistrez beaucoup, vous relisez peu.</li>
+              <li>Les notes ne sont pas reliées entre elles.</li>
+              <li>Vous ne retrouvez pas l’information au bon moment.</li>
+              <li>Le système devient une archéologie personnelle.</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h3>Objectif d’un second brain utile</h3>
+            <ul>
+              <li>Capturer facilement.</li>
+              <li>Traiter automatiquement ou semi-automatiquement.</li>
+              <li>Extraire entités, concepts, outils, personnes, idées.</li>
+              <li>Relier les notes entre elles.</li>
+              <li>Interroger la base comme un partenaire de réflexion.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 1</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Quel est le principal problème d’un second brain basé uniquement sur le stockage ?</p>
+            <label><input type="radio" name="m1q1" value="a"> Il coûte trop cher.</label>
+            <label><input type="radio" name="m1q1" value="b"> L’information s’y accumule sans être réutilisée ni reliée.</label>
+            <label><input type="radio" name="m1q1" value="c"> Il ne peut pas contenir de vidéos.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Que doit faire un bon système de connaissance ?</p>
+            <label><input type="radio" name="m1q2" value="a"> Transformer les sources en pages reliées et interrogiables.</label>
+            <label><input type="radio" name="m1q2" value="b"> Supprimer toutes les notes anciennes.</label>
+            <label><input type="radio" name="m1q2" value="c"> Interdire l’usage de l’IA.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn" data-goto="m2">Module suivant : les 3 piliers</button>
+        </div>
+      </section>
+
+      <!-- MODULE 2 -->
+      <section id="m2" class="section">
+        <h2>2. Les 3 piliers : Wiki, CRM, Journal</h2>
+        <p class="lead">
+          Le transcript propose une architecture en trois couches : une base de connaissances type wiki, un CRM pour les personnes,
+          et un journal pour réfléchir avec l’IA à partir de vos propres contenus.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 320" role="img" aria-label="Trois piliers du second brain">
+          <rect x="0" y="0" width="900" height="320" fill="#09101f" />
+          <circle cx="450" cy="160" r="70" fill="rgba(96,165,250,0.10)" stroke="#60a5fa" stroke-width="3" class="pulse" />
+          <text x="450" y="155" text-anchor="middle" class="label">Base de</text>
+          <text x="450" y="178" text-anchor="middle" class="label">connaissances</text>
+
+          <rect x="90" y="60" width="200" height="80" rx="16" class="node green" />
+          <text x="190" y="95" text-anchor="middle" class="label green">Wiki</text>
+          <text x="190" y="118" text-anchor="middle" class="muted small">articles, vidéos, idées</text>
+
+          <rect x="610" y="60" width="200" height="80" rx="16" class="node purple" />
+          <text x="710" y="95" text-anchor="middle" class="label purple">CRM</text>
+          <text x="710" y="118" text-anchor="middle" class="muted small">personnes, rencontres</text>
+
+          <rect x="350" y="220" width="200" height="80" rx="16" class="node yellow" />
+          <text x="450" y="255" text-anchor="middle" class="label yellow">Journal</text>
+          <text x="450" y="278" text-anchor="middle" class="muted small">réflexion, conseils, patterns</text>
+
+          <path class="dash green" d="M290 100 L380 140" marker-end="url(#arrow2)" />
+          <path class="dash purple" d="M610 100 L520 140" marker-end="url(#arrow2)" />
+          <path class="dash yellow" d="M450 220 L450 230" marker-end="url(#arrow2)" />
+          <defs>
+            <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="450" y="305" text-anchor="middle" class="muted">
+            Le wiki est au centre. Le CRM et le journal s’appuient dessus pour devenir plus utiles.
+          </text>
+        </svg>
+
+        <div class="grid3">
+          <div class="card good">
+            <h3>1. Wiki / Knowledge base</h3>
+            <p>Contient tout ce que vous trouvez en ligne : articles, transcripts YouTube, podcasts, tweets, notes de recherche, PDF, etc.</p>
+          </div>
+          <div class="card purple">
+            <h3>2. CRM</h3>
+            <p>Contient les personnes rencontrées, les événements, les conversations, les coordonnées, les contextes et les relations.</p>
+          </div>
+          <div class="card warn">
+            <h3>3. Journal</h3>
+            <p>Contient vos réflexions du moment. L’IA peut y répondre en s’appuyant sur votre wiki, vos anciens journaux et votre CRM.</p>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h3>Pourquoi cette combinaison est puissante</h3>
+          <p>
+            Un journal classique vous aide à réfléchir. Un journal connecté à votre base de connaissances devient un partenaire
+            personnalisé : il peut se souvenir de ce que vous avez sauvegardé, repérer des patterns et reformuler des conseils
+            ancrés dans vos propres centres d’intérêt.
+          </p>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 2</h3>
+
+          <div class="q" data-answer="c">
+            <p>1. Quel élément sert de cœur au système décrit ?</p>
+            <label><input type="radio" name="m2q1" value="a"> Le CRM.</label>
+            <label><input type="radio" name="m2q1" value="b"> Le journal.</label>
+            <label><input type="radio" name="m2q1" value="c"> La base de connaissances / wiki.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. À quoi sert le CRM dans ce système ?</p>
+            <label><input type="radio" name="m2q2" value="a"> À stocker et relier les informations sur les personnes, rencontres et conversations.</label>
+            <label><input type="radio" name="m2q2" value="b"> À remplacer完全ement le wiki.</label>
+            <label><input type="radio" name="m2q2" value="c"> À générer des vidéos automatiquement.</label>
+          </div>
+
+          <div class="q" data-answer="b">
+            <p>3. Qu’apporte le journal connecté au wiki ?</p>
+            <label><input type="radio" name="m2q3" value="a"> Il supprime les notes inutiles.</label>
+            <label><input type="radio" name="m2q3" value="b"> Il permet des réponses ancrées dans vos propres contenus et historiques.</label>
+            <label><input type="radio" name="m2q3" value="c"> Il remplace l’IA par des règles fixes.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m1">Module précédent</button>
+          <button class="btn" data-goto="m3">Module suivant : architecture Obsidian</button>
+        </div>
+      </section>
+
+      <!-- MODULE 3 -->
+      <section id="m3" class="section">
+        <h2>3. Architecture Obsidian : raw, wiki, agents.md, index.md, log.md</h2>
+        <p class="lead">
+          Le transcript s’appuie sur Obsidian comme front-end de lecture et d’organisation de fichiers Markdown.
+          L’idée est de séparer clairement les sources brutes, les pages générées, les règles de l’agent, l’index et le journal des modifications.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 340" role="img" aria-label="Architecture des dossiers Obsidian">
+          <rect x="0" y="0" width="900" height="340" fill="#09101f" />
+          <rect x="70" y="40" width="240" height="250" rx="18" fill="rgba(255,255,255,0.03)" stroke="#334155" />
+          <text x="190" y="75" text-anchor="middle" class="label">Vault Second Brain</text>
+
+          <rect x="100" y="100" width="180" height="42" rx="10" class="node red" />
+          <text x="190" y="127" text-anchor="middle" class="label red">/raw</text>
+
+          <rect x="100" y="155" width="180" height="42" rx="10" class="node green" />
+          <text x="190" y="182" text-anchor="middle" class="label green">/wiki</text>
+
+          <rect x="100" y="210" width="180" height="42" rx="10" class="node yellow" />
+          <text x="190" y="237" text-anchor="middle" class="label yellow">agents.md</text>
+
+          <path d="M330 120 L470 120" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow3)" />
+          <path d="M330 175 L470 175" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow3)" />
+          <path d="M330 230 L470 230" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow3)" />
+          <defs>
+            <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <rect x="480" y="85" width="340" height="70" rx="14" fill="rgba(239,68,68,0.08)" stroke="#ef4444" />
+          <text x="505" y="115" class="label red">Sources brutes</text>
+          <text x="505" y="138" class="muted small">transcripts, articles, clips web, fichiers originaux</text>
+
+          <rect x="480" y="165" width="340" height="70" rx="14" fill="rgba(34,197,94,0.08)" stroke="#22c55e" />
+          <text x="505" y="195" class="label green">Pages générées</text>
+          <text x="505" y="218" class="muted small">entités, concepts, synthèses, pages reliées</text>
+
+          <rect x="480" y="245" width="340" height="70" rx="14" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" />
+          <text x="505" y="275" class="label yellow">Règles de l’agent</text>
+          <text x="505" y="298" class="muted small">comment ingérer, interroger, journaliser, mettre à jour CRM</text>
+        </svg>
+
+        <div class="card">
+          <h3>Rôle des fichiers clés</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Élément</th>
+                <th>Rôle</th>
+                <th>Analogie</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/raw</code></td>
+                <td>Dossier des sources brutes et immuables.</td>
+                <td>La bibliothèque originale.</td>
+              </tr>
+              <tr>
+                <td><code>/raw/processed</code></td>
+                <td>Sources déjà traitées, pour éviter les doublons.</td>
+                <td>Le tiroir “déjà lu et digéré”.</td>
+              </tr>
+              <tr>
+                <td><code>/wiki</code></td>
+                <td>Pages Markdown générées par l’IA à partir des sources.</td>
+                <td>Le manuel synthétisé.</td>
+              </tr>
+              <tr>
+                <td><code>agents.md</code></td>
+                <td>Instructions opératoires de l’agent.</td>
+                <td>Le mode d’emploi du cerveau.</td>
+              </tr>
+              <tr>
+                <td><code>index.md</code></td>
+                <td>Catalogue des pages, entrées ou contacts.</td>
+                <td>La table des matières.</td>
+              </tr>
+              <tr>
+                <td><code>log.md</code></td>
+                <td>Journal des actions, ajouts et mises à jour.</td>
+                <td>Le registre d’activité.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card good">
+          <h3>Prompt de démarrage pour construire l’architecture</h3>
+          <div class="prompt" id="p3">
+Dans le dossier actuel, crée une architecture de second brain inspirée d’un wiki LLM :
+- dossier /raw pour les sources brutes,
+- dossier /raw/processed pour les sources déjà traitées,
+- dossier /wiki pour les pages générées,
+- fichier agents.md avec les opérations d’ingestion, de requête, de journal et de CRM,
+- fichier index.md comme catalogue,
+- fichier log.md pour tracer les modifications.
+Commence minimal, puis explique-moi chaque fichier avant d’ajouter des complexités.
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p3')">Copier le prompt</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 3</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Que contient normalement le dossier <code>/raw</code> ?</p>
+            <label><input type="radio" name="m3q1" value="a"> Uniquement les pages générées par l’IA.</label>
+            <label><input type="radio" name="m3q1" value="b"> Les sources brutes : articles, transcripts, fichiers originaux.</label>
+            <label><input type="radio" name="m3q1" value="c"> Les mots de passe et secrets.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. À quoi sert <code>agents.md</code> ?</p>
+            <label><input type="radio" name="m3q2" value="a"> À définir les règles et opérations de l’agent.</label>
+            <label><input type="radio" name="m3q2" value="b"> À stocker les vidéos YouTube.</label>
+            <label><input type="radio" name="m3q2" value="c"> À remplacer Obsidian.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>3. Pourquoi garder un <code>log.md</code> ?</p>
+            <label><input type="radio" name="m3q3" value="a"> Pour décorer le vault.</label>
+            <label><input type="radio" name="m3q3" value="b"> Pour supprimer les anciennes notes.</label>
+            <label><input type="radio" name="m3q3" value="c"> Pour tracer les ajouts, mises à jour et actions de l’agent.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m2">Module précédent</button>
+          <button class="btn" data-goto="m4">Module suivant : capture</button>
+        </div>
+      </section>
+
+      <!-- MODULE 4 -->
+      <section id="m4" class="section">
+        <h2>4. Capturer avec Obsidian Web Clipper</h2>
+        <p class="lead">
+          La capture doit être frictionless : un clic depuis le navigateur envoie l’article, la vidéo YouTube ou la page web
+          dans le dossier <code>/raw</code> sous forme de fichier Markdown.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 280" role="img" aria-label="Capture web vers Obsidian">
+          <rect x="0" y="0" width="900" height="280" fill="#09101f" />
+          <rect x="70" y="70" width="220" height="130" rx="16" class="node" />
+          <text x="180" y="110" text-anchor="middle" class="label">Navigateur</text>
+          <text x="180" y="135" text-anchor="middle" class="muted">article, YouTube,</text>
+          <text x="180" y="155" text-anchor="middle" class="muted">podcast, tweet</text>
+
+          <g class="travel">
+            <circle cx="180" cy="215" r="12" fill="#22d3ee" />
+            <text x="200" y="220" class="muted">Web Clipper</text>
+          </g>
+
+          <path d="M310 135 L470 135" stroke="#94a3b8" stroke-width="4" marker-end="url(#arrow4)" />
+          <defs>
+            <marker id="arrow4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <rect x="480" y="70" width="180" height="130" rx="16" class="node red" />
+          <text x="570" y="120" text-anchor="middle" class="label red">/raw</text>
+          <text x="570" y="148" text-anchor="middle" class="muted small">fichier Markdown</text>
+
+          <path d="M680 135 L760 135" stroke="#94a3b8" stroke-width="4" marker-end="url(#arrow4)" />
+
+          <rect x="760" y="85" width="110" height="100" rx="16" class="node green" />
+          <text x="815" y="125" text-anchor="middle" class="label green">Wiki</text>
+          <text x="815" y="150" text-anchor="middle" class="muted small">après traitement</text>
+
+          <text x="450" y="250" text-anchor="middle" class="muted">
+            Bonne pratique : capturer d’abord sans friction, puis traiter ensuite.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card info">
+            <h3>Éléments à configurer</h3>
+            <ul>
+              <li>Nom exact du vault Obsidian.</li>
+              <li>Dossier de destination : <code>raw</code>.</li>
+              <li>Propriétés : titre, URL, date, tags.</li>
+              <li>Contenu : corps de l’article ou transcript.</li>
+              <li>Pour YouTube : vérifier que le transcript est bien récupéré.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>Piège fréquent</h3>
+            <p>
+              Le clipper peut ne pas récupérer automatiquement certaines métadonnées, par exemple le nom de la chaîne YouTube.
+              Il faut alors ajouter une instruction dans <code>agents.md</code> ou dans le prompt de traitement.
+            </p>
+          </div>
+        </div>
+
+        <div class="card good">
+          <h3>Exemple de règle à ajouter</h3>
+          <div class="prompt" id="p4">
+Pour les vidéos YouTube capturées avec Obsidian Web Clipper :
+- récupérer le transcript dans /raw,
+- extraire le nom de la chaîne depuis l’URL ou la page source,
+- ajouter ce champ dans le front matter du fichier source,
+- ne pas supprimer le fichier original.
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p4')">Copier la règle</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 4</h3>
+
+          <div class="q" data-answer="a">
+            <p>1. Quel est l’avantage principal d’un Web Clipper ?</p>
+            <label><input type="radio" name="m4q1" value="a"> Réduire la friction de capture depuis le web.</label>
+            <label><input type="radio" name="m4q1" value="b"> Remplacer complètement l’IA.</label>
+            <label><input type="radio" name="m4q1" value="c"> Supprimer les doublons automatiquement.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Où doit aller la source brute capturée ?</p>
+            <label><input type="radio" name="m4q2" value="a"> Dans /wiki.</label>
+            <label><input type="radio" name="m4q2" value="b"> Dans le journal.</label>
+            <label><input type="radio" name="m4q2" value="c"> Dans /raw.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m3">Module précédent</button>
+          <button class="btn" data-goto="m5">Module suivant : traitement</button>
+        </div>
+      </section>
+
+      <!-- MODULE 5 -->
+      <section id="m5" class="section">
+        <h2>5. Traiter les sources : résumer, extraire, relier</h2>
+        <p class="lead">
+          Le traitement est l’étape qui transforme une source brute en connaissance utile. L’IA peut résumer, extraire des entités,
+          créer des pages wiki, relier les notes entre elles et mettre à jour l’index.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 300" role="img" aria-label="Pipeline de traitement IA">
+          <rect x="0" y="0" width="900" height="300" fill="#09101f" />
+
+          <g class="stage s1">
+            <rect x="50" y="100" width="140" height="80" rx="16" class="node red" />
+            <text x="120" y="135" text-anchor="middle" class="label red">Source</text>
+            <text x="120" y="158" text-anchor="middle" class="muted small">/raw</text>
+          </g>
+
+          <g class="stage s2">
+            <rect x="230" y="100" width="140" height="80" rx="16" class="node" />
+            <text x="300" y="135" text-anchor="middle" class="label">Résumé</text>
+            <text x="300" y="158" text-anchor="middle" class="muted small">bullets</text>
+          </g>
+
+          <g class="stage s3">
+            <rect x="410" y="100" width="140" height="80" rx="16" class="node cyan" />
+            <text x="480" y="135" text-anchor="middle" class="label cyan">Entités</text>
+            <text x="480" y="158" text-anchor="middle" class="muted small">outils, idées, gens</text>
+          </g>
+
+          <g class="stage s4">
+            <rect x="590" y="100" width="140" height="80" rx="16" class="node green" />
+            <text x="660" y="135" text-anchor="middle" class="label green">Wiki</text>
+            <text x="660" y="158" text-anchor="middle" class="muted small">pages reliées</text>
+          </g>
+
+          <g class="stage s5">
+            <rect x="760" y="100" width="110" height="80" rx="16" class="node yellow" />
+            <text x="815" y="135" text-anchor="middle" class="label yellow">Index</text>
+            <text x="815" y="158" text-anchor="middle" class="muted small">log</text>
+          </g>
+
+          <path d="M190 140 L225 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow5)" />
+          <path d="M370 140 L405 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow5)" />
+          <path d="M550 140 L585 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow5)" />
+          <path d="M730 140 L755 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow5)" />
+          <defs>
+            <marker id="arrow5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="450" y="245" text-anchor="middle" class="muted">
+            Le traitement ne doit pas détruire la source : il crée des pages dérivées tout en gardant le lien vers l’original.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card good">
+            <h3>Bonnes pratiques de traitement</h3>
+            <ul>
+              <li>Garder la source originale intacte.</li>
+              <li>Créer ou mettre à jour des pages concepts/outils/personnes.</li>
+              <li>Ajouter des liens wiki entre notes liées.</li>
+              <li>Mettre à jour <code>index.md</code> et <code>log.md</code>.</li>
+              <li>Déplacer la source traitée vers <code>/raw/processed</code>.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>À éviter</h3>
+            <ul>
+              <li>Écraser la source brute.</li>
+              <li>Créer 50 fichiers inutiles dès le départ.</li>
+              <li>Oublier de relier les pages générées à leur source.</li>
+              <li>Tout mélanger dans un seul dossier monolithique.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h3>Prompt de traitement</h3>
+          <div class="prompt" id="p5">
+Traite les fichiers non traités situés dans /raw.
+Pour chaque source :
+1. LIS le fichier original sans le modifier.
+2. RÉSUME les idées principales en bullets.
+3. EXTRACT les entités utiles : personnes, entreprises, outils, concepts, thèmes.
+4. CRÉE ou METS À JOUR des pages dans /wiki.
+5. LIEN chaque page générée vers la source originale.
+6. METS À JOUR index.md et log.md.
+7. DÉPLACE le fichier source traité vers /raw/processed.
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p5')">Copier le prompt</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 5</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Que doit faire l’IA après avoir traité une source ?</p>
+            <label><input type="radio" name="m5q1" value="a"> Supprimer la source immédiatement.</label>
+            <label><input type="radio" name="m5q1" value="b"> Créer/mettre à jour des pages wiki et relier à la source.</label>
+            <label><input type="radio" name="m5q1" value="c"> Ignorer l’index.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Pourquoi déplacer les sources traitées dans /raw/processed ?</p>
+            <label><input type="radio" name="m5q2" value="a"> Pour éviter de retraiter les mêmes fichiers.</label>
+            <label><input type="radio" name="m5q2" value="b"> Pour les rendre invisibles à Obsidian.</label>
+            <label><input type="radio" name="m5q2" value="c"> Pour compresser le vault.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m4">Module précédent</button>
+          <button class="btn" data-goto="m6">Module suivant : interroger le wiki</button>
+        </div>
+      </section>
+
+      <!-- MODULE 6 -->
+      <section id="m6" class="section">
+        <h2>6. Interroger le wiki : faire grandir la base par les questions</h2>
+        <p class="lead">
+          Un bon second brain ne se contente pas de répondre. Il peut aussi enrichir la base à partir des questions posées.
+          Chaque requête devient une occasion de créer ou d’améliorer une page réutilisable.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 300" role="img" aria-label="Boucle de requête wiki">
+          <rect x="0" y="0" width="900" height="300" fill="#09101f" />
+          <rect x="80" y="100" width="160" height="80" rx="16" class="node" />
+          <text x="160" y="135" text-anchor="middle" class="label">Question</text>
+          <text x="160" y="158" text-anchor="middle" class="muted small">utilisateur</text>
+
+          <rect x="320" y="100" width="160" height="80" rx="16" class="node cyan" />
+          <text x="400" y="135" text-anchor="middle" class="label cyan">Index</text>
+          <text x="400" y="158" text-anchor="middle" class="muted small">recherche pages</text>
+
+          <rect x="560" y="100" width="160" height="80" rx="16" class="node green" />
+          <text x="640" y="135" text-anchor="middle" class="label green">Réponse</text>
+          <text x="640" y="158" text-anchor="middle" class="muted small">ancrée</text>
+
+          <path d="M240 140 L315 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow6)" />
+          <path d="M480 140 L555 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow6)" />
+          <path d="M640 180 C640 245, 400 245, 400 180" stroke="#22c55e" stroke-width="3" fill="none" marker-end="url(#arrow6)" />
+          <defs>
+            <marker id="arrow6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="520" y="270" text-anchor="middle" class="muted">
+            La réponse peut elle-même devenir une nouvelle page wiki si elle est réutilisable.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card info">
+            <h3>Exemple de question</h3>
+            <div class="prompt">
+Quels conseils ai-je déjà sauvegardés pour rester motivé quand je dois faire une tâche difficile ?
+Réponds à partir du wiki, cite les sources, puis crée une page réutilisable si elle n’existe pas.
+            </div>
+          </div>
+          <div class="card good">
+            <h3>Résultat attendu</h3>
+            <ul>
+              <li>L’agent consulte <code>index.md</code>.</li>
+              <li>Il retrouve les pages pertinentes.</li>
+              <li>Il synthétise une réponse ancrée.</li>
+              <li>Il met à jour <code>log.md</code>.</li>
+              <li>Il peut créer une page “motivation pour tâches difficiles”.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h3>Point important</h3>
+          <p>
+            Une requête n’est pas seulement une consultation. Dans un système bien conçu, elle peut aussi alimenter la base.
+            C’est ce qui rend le wiki “composable” et vivant.
+          </p>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 6</h3>
+
+          <div class="q" data-answer="c">
+            <p>1. Que devrait faire l’agent avant de répondre à une question ?</p>
+            <label><input type="radio" name="m6q1" value="a"> Inventer une réponse générale.</label>
+            <label><input type="radio" name="m6q1" value="b"> Supprimer l’index.</label>
+            <label><input type="radio" name="m6q1" value="c"> Consulter l’index et les pages wiki pertinentes.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Pourquoi une bonne question peut-elle enrichir le wiki ?</p>
+            <label><input type="radio" name="m6q2" value="a"> Parce que la réponse synthétisée peut devenir une page réutilisable.</label>
+            <label><input type="radio" name="m6q2" value="b"> Parce que l’IA supprime les anciennes pages.</label>
+            <label><input type="radio" name="m6q2" value="c"> Parce que les questions remplacent les sources.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m5">Module précédent</button>
+          <button class="btn" data-goto="m7">Module suivant : journal</button>
+        </div>
+      </section>
+
+      <!-- MODULE 7 -->
+      <section id="m7" class="section">
+        <h2>7. Journal ancré : réfléchir avec ses propres connaissances</h2>
+        <p class="lead">
+          Le journal est la couche d’interaction personnelle. Au lieu de recevoir une réponse générique, vous obtenez une réponse
+          fondée sur votre wiki, vos anciens journaux et éventuellement votre CRM.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 300" role="img" aria-label="Journal ancré sur wiki, anciens journaux et CRM">
+          <rect x="0" y="0" width="900" height="300" fill="#09101f" />
+          <rect x="70" y="90" width="180" height="100" rx="16" class="node yellow" />
+          <text x="160" y="125" text-anchor="middle" class="label yellow">Journal</text>
+          <text x="160" y="150" text-anchor="middle" class="muted small">entrée du jour</text>
+          <text x="160" y="170" text-anchor="middle" class="muted small">problème, émotion</text>
+
+          <rect x="360" y="40" width="160" height="60" rx="14" class="node green" />
+          <text x="440" y="75" text-anchor="middle" class="label green">Wiki</text>
+
+          <rect x="360" y="120" width="160" height="60" rx="14" class="node cyan" />
+          <text x="440" y="155" text-anchor="middle" class="label cyan">Anciens journaux</text>
+
+          <rect x="360" y="200" width="160" height="60" rx="14" class="node purple" />
+          <text x="440" y="235" text-anchor="middle" class="label purple">CRM</text>
+
+          <rect x="650" y="90" width="180" height="100" rx="16" class="node" />
+          <text x="740" y="125" text-anchor="middle" class="label">Réponse</text>
+          <text x="740" y="150" text-anchor="middle" class="muted small">conseils personnalisés</text>
+          <text x="740" y="170" text-anchor="middle" class="muted small">patterns détectés</text>
+
+          <path d="M250 140 L355 70" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <path d="M250 140 L355 150" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <path d="M250 140 L355 230" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <path d="M520 70 L645 120" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <path d="M520 150 L645 140" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <path d="M520 230 L645 160" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow7)" />
+          <defs>
+            <marker id="arrow7" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="450" y="280" text-anchor="middle" class="muted">
+            Le journal devient un espace de réflexion augmenté, pas seulement un carnet.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card good">
+            <h3>Ce que le journal peut faire</h3>
+            <ul>
+              <li>Sauvegarder l’entrée dans <code>/journal</code>.</li>
+              <li>Mettre à jour l’index du journal.</li>
+              <li>Chercher des pages wiki pertinentes.</li>
+              <li>Repérer des patterns dans vos anciennes entrées.</li>
+              <li>Répondre avec des conseils ancrés dans vos contenus.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>Exemple de cas</h3>
+            <p>
+              Vous écrivez : “J’hésite entre titres clickbait et titres littéraux.”
+              L’agent peut retrouver des vidéos sauvegardées sur la stratégie créateur,
+              vos anciennes frustrations, et proposer une réponse nuancée.
+            </p>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h3>Template de prompt journal</h3>
+          <div class="prompt" id="p7">
+Traite le message suivant comme une entrée de journal.
+1. Crée un fichier Markdown dans /journal avec date + titre court.
+2. Mets à jour /journal/index.md.
+3. Ajoute une entrée dans log.md.
+4. Consulte le wiki, les anciens journaux et le CRM si pertinent.
+5. Réponds-moi avec des insights, tactiques et questions utiles, ancrés dans mes propres contenus.
+6. Signale si une information semble manquer ou contradictoire.
+
+Entrée du journal :
+[coller ici]
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p7')">Copier le template</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 7</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Qu’est-ce qui rend un journal “ancré” plus utile ?</p>
+            <label><input type="radio" name="m7q1" value="a"> Il supprime les émotions.</label>
+            <label><input type="radio" name="m7q1" value="b"> Il s’appuie sur vos propres connaissances sauvegardées.</label>
+            <label><input type="radio" name="m7q1" value="c"> Il remplace le wiki.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Que doit faire l’agent après une entrée de journal ?</p>
+            <label><input type="radio" name="m7q2" value="a"> Sauvegarder l’entrée, mettre à jour index/log, puis répondre.</label>
+            <label><input type="radio" name="m7q2" value="b"> Ignorer l’entrée.</label>
+            <label><input type="radio" name="m7q2" value="c"> Supprimer les anciens journaux.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m6">Module précédent</button>
+          <button class="btn" data-goto="m8">Module suivant : CRM</button>
+        </div>
+      </section>
+
+      <!-- MODULE 8 -->
+      <section id="m8" class="section">
+        <h2>8. CRM personnel : relier personnes, conversations et idées</h2>
+        <p class="lead">
+          Le CRM n’est pas seulement un carnet d’adresses. Dans ce système, il devient une couche relationnelle :
+          qui avez-vous rencontré, où, de quoi avez-vous parlé, quels liens avec vos projets, idées ou contenus ?
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 280" role="img" aria-label="CRM relié au wiki et au journal">
+          <rect x="0" y="0" width="900" height="280" fill="#09101f" />
+          <rect x="80" y="80" width="180" height="110" rx="16" class="node purple" />
+          <text x="170" y="115" text-anchor="middle" class="label purple">Personne</text>
+          <text x="170" y="140" text-anchor="middle" class="muted small">nom, contact,</text>
+          <text x="170" y="160" text-anchor="middle" class="muted small">contexte, historique</text>
+
+          <rect x="360" y="40" width="160" height="60" rx="14" class="node green" />
+          <text x="440" y="75" text-anchor="middle" class="label green">Événements</text>
+
+          <rect x="360" y="120" width="160" height="60" rx="14" class="node cyan" />
+          <text x="440" y="155" text-anchor="middle" class="label cyan">Conversations</text>
+
+          <rect x="360" y="200" width="160" height="60" rx="14" class="node yellow" />
+          <text x="440" y="235" text-anchor="middle" class="label yellow">Idées / projets</text>
+
+          <rect x="650" y="80" width="180" height="110" rx="16" class="node" />
+          <text x="740" y="115" text-anchor="middle" class="label">Index CRM</text>
+          <text x="740" y="140" text-anchor="middle" class="muted small">alphabétique</text>
+          <text x="740" y="160" text-anchor="middle" class="muted small">résumés courts</text>
+
+          <path d="M260 110 L355 70" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <path d="M260 135 L355 150" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <path d="M260 160 L355 230" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <path d="M520 70 L645 110" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <path d="M520 150 L645 135" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <path d="M520 230 L645 160" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow8)" />
+          <defs>
+            <marker id="arrow8" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="450" y="265" text-anchor="middle" class="muted">
+            Le CRM devient utile quand il est relié aux idées, projets et conversations, pas seulement aux coordonnées.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card info">
+            <h3>Champs utiles</h3>
+            <ul>
+              <li>Nom complet.</li>
+              <li>Comment vous vous êtes rencontrés.</li>
+              <li>Où et quand.</li>
+              <li>Coordonnées si pertinent.</li>
+              <li>Sujets discutés.</li>
+              <li>Liens vers projets/idées/pages wiki.</li>
+              <li>Prochaines actions.</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h3>Exemple d’usage</h3>
+            <p>
+              Avant une conférence, vous demandez : “Qui vais-je revoir ? De quoi avons-nous parlé la dernière fois ?
+              Quels projets en commun ?” Le CRM peut répondre à partir de vos notes.
+            </p>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h3>Template CRM</h3>
+          <div class="prompt" id="p8">
+Ajoute ou mets à jour la fiche CRM de [Nom de la personne].
+Inclus :
+- comment nous nous sommes rencontrés,
+- où et quand,
+- coordonnées si fournies,
+- sujets discutés,
+- liens avec projets/idées/pages wiki,
+- prochaines actions.
+Mets à jour /crm/index.md et log.md.
+Ne crée pas de fiche vide si aucune information pertinente n’est disponible.
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p8')">Copier le template</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 8</h3>
+
+          <div class="q" data-answer="c">
+            <p>1. Qu’est-ce qui rend un CRM personnel plus utile ?</p>
+            <label><input type="radio" name="m8q1" value="a"> Stocker seulement des numéros de téléphone.</label>
+            <label><input type="radio" name="m8q1" value="b"> Supprimer les vieilles conversations.</label>
+            <label><input type="radio" name="m8q1" value="c"> Relier les personnes aux idées, projets et contextes.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Que doit faire l’agent quand on lui donne une info CRM ?</p>
+            <label><input type="radio" name="m8q2" value="a"> Créer ou mettre à jour la fiche personne, puis index/log.</label>
+            <label><input type="radio" name="m8q2" value="b"> L’ignorer si ce n’est pas une vedette.</label>
+            <label><input type="radio" name="m8q2" value="c"> Remplacer le wiki.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m7">Module précédent</button>
+          <button class="btn" data-goto="m9">Module suivant : automatisation</button>
+        </div>
+      </section>
+
+      <!-- MODULE 9 -->
+      <section id="m9" class="section">
+        <h2>9. Automatiser et sauvegarder : faire tourner le système en continu</h2>
+        <p class="lead">
+          Le transcript montre qu’on peut automatiser le traitement des fichiers <code>/raw</code> à intervalle régulier,
+          puis pousser les changements vers un dépôt GitHub privé pour sauvegarder l’ensemble.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 300" role="img" aria-label="Automatisation et backup GitHub">
+          <rect x="0" y="0" width="900" height="300" fill="#09101f" />
+          <g class="spin" transform="translate(120 130)">
+            <circle r="42" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="3" />
+            <circle r="12" fill="#60a5fa" />
+            <rect x="-4" y="-54" width="8" height="18" rx="3" fill="#60a5fa" />
+            <rect x="-4" y="36" width="8" height="18" rx="3" fill="#60a5fa" />
+            <rect x="36" y="-4" width="18" height="8" rx="3" fill="#60a5fa" />
+            <rect x="-54" y="-4" width="18" height="8" rx="3" fill="#60a5fa" />
+          </g>
+          <text x="120" y="205" text-anchor="middle" class="label">Timer</text>
+          <text x="120" y="228" text-anchor="middle" class="muted small">horaire / quotidien</text>
+
+          <rect x="260" y="90" width="180" height="90" rx="16" class="node red" />
+          <text x="350" y="125" text-anchor="middle" class="label red">/raw</text>
+          <text x="350" y="150" text-anchor="middle" class="muted small">fichiers non traités</text>
+
+          <rect x="500" y="90" width="180" height="90" rx="16" class="node green" />
+          <text x="590" y="125" text-anchor="middle" class="label green">Traitement</text>
+          <text x="590" y="150" text-anchor="middle" class="muted small">wiki + index + log</text>
+
+          <rect x="720" y="90" width="140" height="90" rx="16" class="node purple" />
+          <text x="790" y="125" text-anchor="middle" class="label purple">GitHub</text>
+          <text x="790" y="150" text-anchor="middle" class="muted small">commit/push</text>
+
+          <path d="M180 130 L255 130" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow9)" />
+          <path d="M440 130 L495 130" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow9)" />
+          <path d="M680 130 L715 130" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow9)" />
+          <defs>
+            <marker id="arrow9" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+            </marker>
+          </defs>
+
+          <text x="450" y="260" text-anchor="middle" class="muted">
+            Automatisation = moins de friction. Backup = moins de risque de perte.
+          </text>
+        </svg>
+
+        <div class="card">
+          <h3>Workflow automatisé type</h3>
+          <div class="steps">
+            <div class="step">Une automatisation se déclenche à intervalle régulier.</div>
+            <div class="step">Elle vérifie s’il y a des fichiers non traités dans <code>/raw</code>.</div>
+            <div class="step">Si oui, elle lance le traitement selon <code>agents.md</code>.</div>
+            <div class="step">Elle met à jour <code>/wiki</code>, <code>index.md</code>, <code>log.md</code>.</div>
+            <div class="step">Elle déplace les sources traitées vers <code>/raw/processed</code>.</div>
+            <div class="step">Elle commit et push vers un dépôt GitHub privé.</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card good">
+            <h3>Avantages</h3>
+            <ul>
+              <li>Le système s’enrichit tout seul.</li>
+              <li>Vous capturez sans penser au traitement.</li>
+              <li>Les sauvegardes deviennent régulières.</li>
+              <li>Moins de risque d’oubli.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h3>Précautions</h3>
+            <ul>
+              <li>Ne pas donner accès à tout le disque sans nécessité.</li>
+              <li>Vérifier les permissions en écriture/suppression.</li>
+              <li>Tester d’abord manuellement avant d’automatiser.</li>
+              <li>Utiliser un dépôt privé pour les données personnelles.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h3>Prompt d’automatisation</h3>
+          <div class="prompt" id="p9">
+Crée une automatisation qui, toutes les heures :
+1. Vérifie s’il y a des fichiers non traités dans /raw.
+2. Si oui, les traite selon les règles de agents.md.
+3. Met à jour /wiki, index.md et log.md.
+4. Déplace les sources traitées vers /raw/processed.
+5. Commit et push la version courante vers le dépôt GitHub privé sur la branche main.
+Utilise le modèle de raisonnement le plus robuste disponible.
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" onclick="copyText('p9')">Copier le prompt</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 9</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Pourquoi automatiser le traitement des fichiers /raw ?</p>
+            <label><input type="radio" name="m9q1" value="a"> Pour supprimer Obsidian.</label>
+            <label><input type="radio" name="m9q1" value="b"> Pour réduire la friction et faire grandir le wiki régulièrement.</label>
+            <label><input type="radio" name="m9q1" value="c"> Pour éviter toute sauvegarde.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Quel est l’intérêt d’un dépôt GitHub privé ?</p>
+            <label><input type="radio" name="m9q2" value="a"> Il rend les notes publiques.</label>
+            <label><input type="radio" name="m9q2" value="b"> Il remplace le CRM.</label>
+            <label><input type="radio" name="m9q2" value="c"> Il permet une sauvegarde versionnée et privée.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m8">Module précédent</button>
+          <button class="btn" data-goto="m10">Module suivant : limites</button>
+        </div>
+      </section>
+
+      <!-- MODULE 10 -->
+      <section id="m10" class="section">
+        <h2>10. Limites, sécurité et bonnes pratiques</h2>
+        <p class="lead">
+          Un second brain augmenté est puissant, mais il manipule des informations personnelles, des conversations,
+          des données sensibles et des sources parfois peu fiables. Il faut donc concevoir le système avec prudence.
+        </p>
+
+        <svg class="illus schema" viewBox="0 0 900 260" role="img" aria-label="Balance entre puissance et prudence">
+          <rect x="0" y="0" width="900" height="260" fill="#09101f" />
+          <line x1="450" y1="50" x2="450" y2="200" stroke="#334155" stroke-width="6" />
+          <line x1="180" y1="105" x2="720" y2="105" stroke="#94a3b8" stroke-width="6" />
+          <circle cx="180" cy="105" r="45" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="3" class="pulse" />
+          <circle cx="720" cy="105" r="45" fill="rgba(34,197,94,0.12)" stroke="#22c55e" stroke-width="3" class="pulse" />
+          <text x="180" y="100" text-anchor="middle" class="label red">Risque</text>
+          <text x="180" y="122" text-anchor="middle" class="muted small">fuites, erreurs, biais</text>
+          <text x="720" y="100" text-anchor="middle" class="label green">Contrôle</text>
+          <text x="720" y="122" text-anchor="middle" class="muted small">permissions, vérif, backup</text>
+          <text x="450" y="235" text-anchor="middle" class="muted">
+            Plus le système est connecté à votre vie numérique, plus la gouvernance compte.
+          </text>
+        </svg>
+
+        <div class="grid2">
+          <div class="card bad">
+            <h3>Risques principaux</h3>
+            <ul>
+              <li>Sources web inexactes ou obsolètes.</li>
+              <li>Hallucinations de l’IA lors de la synthèse.</li>
+              <li>Données personnelles exposées.</li>
+              <li>Automatisations trop larges sur le disque.</li>
+              <li>Perte de fichiers si suppression mal gérée.</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h3>Bonnes pratiques</h3>
+            <ul>
+              <li>Toujours conserver la source originale.</li>
+              <li>Vérifier les affirmations importantes.</li>
+              <li>Limiter les permissions des agents.</li>
+              <li>Utiliser des dépôts privés.</li>
+              <li>Tester manuellement avant d’automatiser.</li>
+              <li>Relire régulièrement <code>log.md</code>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h3>Checklist de sécurité</h3>
+          <ul>
+            <li>Est-ce que l’agent a accès uniquement au dossier nécessaire ?</li>
+            <li>Est-ce qu’il peut supprimer des fichiers ? Si oui, ai-je une sauvegarde ?</li>
+            <li>Est-ce que les données sensibles sont réellement nécessaires ?</li>
+            <li>Est-ce que les sources citées sont fiables ?</li>
+            <li>Est-ce que je peux retrouver la source originale derrière chaque page wiki ?</li>
+            <li>Est-ce que le backup GitHub est privé et à jour ?</li>
+          </ul>
+        </div>
+
+        <div class="quiz">
+          <h3>Quiz express — Module 10</h3>
+
+          <div class="q" data-answer="a">
+            <p>1. Pourquoi faut-il conserver la source originale ?</p>
+            <label><input type="radio" name="m10q1" value="a"> Pour pouvoir vérifier et retracer l’information.</label>
+            <label><input type="radio" name="m10q1" value="b"> Pour augmenter la taille du vault.</label>
+            <label><input type="radio" name="m10q1" value="c"> Pour remplacer l’index.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Quelle est une bonne pratique avant d’automatiser ?</p>
+            <label><input type="radio" name="m10q2" value="a"> Donner accès à tout le disque.</label>
+            <label><input type="radio" name="m10q2" value="b"> Désactiver les sauvegardes.</label>
+            <label><input type="radio" name="m10q2" value="c"> Tester manuellement et limiter les permissions.</label>
+          </div>
+
+          <button class="btn checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="m9">Module précédent</button>
+          <button class="btn" data-goto="lab">Aller à l’atelier</button>
+        </div>
+      </section>
+
+      <!-- LAB -->
+      <section id="lab" class="section">
+        <h2>🛠️ Atelier : générateur de prompts et simulateur de workflow</h2>
+        <p class="lead">
+          Cet atelier vous aide à transformer une intention en instruction concrète pour votre agent,
+          puis à visualiser ce qui se passe dans le vault selon le type d’entrée.
+        </p>
+
+        <div class="card info">
+          <h3>1. Simulateur de workflow</h3>
+          <p>Cliquez sur un type d’entrée pour voir le flux dans le second brain.</p>
+          <div class="scenario-buttons">
+            <button onclick="showScenario('article', this)">Article web</button>
+            <button onclick="showScenario('youtube', this)">Vidéo YouTube</button>
+            <button onclick="showScenario('journal', this)">Journal</button>
+            <button onclick="showScenario('crm', this)">Info CRM</button>
+            <button onclick="showScenario('query', this)">Question au wiki</button>
+          </div>
+          <pre class="prompt" id="scenarioOut">Sélectionnez un scénario pour voir le flux.</pre>
+        </div>
+
+        <div class="card good">
+          <h3>2. Générateur de prompt / règle agents.md</h3>
+          <div class="composer">
+            <label>
+              Type d’instruction
+              <select id="instrType">
+                <option value="architecture">Créer l’architecture du vault</option>
+                <option value="capture">Configurer la capture web</option>
+                <option value="processing">Traiter les fichiers raw</option>
+                <option value="query">Interroger le wiki</option>
+                <option value="journal">Gérer le journal ancré</option>
+                <option value="crm">Gérer le CRM</option>
+                <option value="automation">Automatiser + backup GitHub</option>
+              </select>
+            </label>
+
+            <label>
+              Contexte / besoin spécifique
+              <textarea id="ctx" placeholder="Ex : je veux suivre mes lectures, mes réunions client, mes idées de vidéos, mes recettes, mes notes de cours..."></textarea>
+            </label>
+
+            <label>
+              Niveau de détail
+              <select id="detail">
+                <option value="minimal">Minimal / MVP</option>
+                <option value="standard">Standard</option>
+                <option value="avance">Avancé / robuste</option>
+              </select>
+            </label>
+
+            <label>
+              Contraintes de sécurité
+              <select id="security">
+                <option value="basic">Basique</option>
+                <option value="strict">Strict : limiter écritures, tracer, sauvegarder</option>
+                <option value="privacy">Privacy-first : pas de données sensibles inutiles</option>
+              </select>
+            </label>
+
+            <button class="btn green" onclick="makeBrainPrompt()">Générer mon prompt</button>
+            <pre class="prompt" id="promptOut">Votre prompt optimisé apparaîtra ici…</pre>
+            <button class="btn secondary" onclick="copyText('promptOut')">Copier le prompt</button>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h3>3. Mini checklist de lancement</h3>
+          <ol>
+            <li>Installer Obsidian et créer un vault propre.</li>
+            <li>Installer le Web Clipper et le connecter au bon vault.</li>
+            <li>Créer l’architecture minimale : raw, wiki, agents.md, index.md, log.md.</li>
+            <li>Tester une capture manuelle.</li>
+            <li>Traiter une source et vérifier les pages générées.</li>
+            <li>Poser une question au wiki.</li>
+            <li>Écrire une entrée de journal test.</li>
+            <li>Ajouter une fiche CRM test.</li>
+            <li>Automatiser seulement quand le flux manuel fonctionne.</li>
+            <li>Sauvegarder vers GitHub privé.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- FINAL -->
+      <section id="final" class="section">
+        <h2>✅ Évaluation finale : maîtrisez-vous le Second Brain augmenté ?</h2>
+        <p class="lead">
+          Cette évaluation synthétise les grandes idées : capture, séparation raw/wiki, traitement, requêtes, journal ancré,
+          CRM, automatisation, sécurité et vérification.
+        </p>
+
+        <div class="quiz">
+          <h3>Questions finales</h3>
+
+          <div class="q" data-answer="b">
+            <p>1. Quelle est la différence entre un dépôt de notes et un wiki vivant ?</p>
+            <label><input type="radio" name="fq1" value="a"> Le dépôt est plus sécurisé.</label>
+            <label><input type="radio" name="fq1" value="b"> Le wiki relie, synthétise et rend l’information réutilisable.</label>
+            <label><input type="radio" name="fq1" value="c"> Le dépôt remplace l’IA.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Où doit aller une source brute capturée depuis le web ?</p>
+            <label><input type="radio" name="fq2" value="a"> Dans /raw.</label>
+            <label><input type="radio" name="fq2" value="b"> Directement dans /wiki.</label>
+            <label><input type="radio" name="fq2" value="c"> Dans le CRM uniquement.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>3. Que doit faire l’agent après avoir traité une source ?</p>
+            <label><input type="radio" name="fq3" value="a"> Supprimer la source.</label>
+            <label><input type="radio" name="fq3" value="b"> Ignorer l’index.</label>
+            <label><input type="radio" name="fq3" value="c"> Créer/mettre à jour des pages wiki, relier à la source, mettre à jour index/log.</label>
+          </div>
+
+          <div class="q" data-answer="b">
+            <p>4. Pourquoi le journal gagne-t-il à être connecté au wiki ?</p>
+            <label><input type="radio" name="fq4" value="a"> Parce qu’il supprime les émotions.</label>
+            <label><input type="radio" name="fq4" value="b"> Parce que les réponses peuvent s’ancrer dans vos propres contenus et historiques.</label>
+            <label><input type="radio" name="fq4" value="c"> Parce qu’il remplace le CRM.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>5. Quelle précaution est essentielle avant d’automatiser ?</p>
+            <label><input type="radio" name="fq5" value="a"> Tester manuellement, limiter les permissions et prévoir des sauvegardes.</label>
+            <label><input type="radio" name="fq5" value="b"> Donner accès à tout le disque.</label>
+            <label><input type="radio" name="fq5" value="c"> Désactiver le log.</label>
+          </div>
+
+          <button class="btn checkQuiz">Corriger l’évaluation finale</button>
+          <div class="feedback"></div>
+        </div>
+
+        <div class="card good">
+          <h3>Votre résultat global</h3>
+          <p id="finalMessage">Complétez les quiz pour voir votre niveau.</p>
+          <p class="footer-note">
+            L’objectif n’est pas de tout automatiser immédiatement, mais de construire un système progressif :
+            capture simple → traitement fiable → wiki utile → journal ancré → CRM relationnel → automatisation prudente.
+          </p>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn secondary" data-goto="home">Retour à l’accueil</button>
+          <button class="btn" onclick="resetProgress()">Réinitialiser la progression</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const sections = Array.from(document.querySelectorAll('.section'));
+    const navButtons = Array.from(document.querySelectorAll('#nav button'));
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const globalScore = document.getElementById('globalScore');
+    const finalMessage = document.getElementById('finalMessage');
+
+    let visited = new Set();
+
+    function safeGet(key, fallback) {
+      try {
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function safeSet(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {}
+    }
+
+    function updateProgress() {
+      const pct = Math.round((visited.size / sections.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressText.textContent = pct + '%';
+    }
+
+    function updateScore() {
+      const qs = document.querySelectorAll('.q');
+      const correct = document.querySelectorAll('.q.correct').length;
+      const total = qs.length;
+      globalScore.textContent = correct + '/' + total;
+
+      if (finalMessage) {
+        const pct = total ? Math.round((correct / total) * 100) : 0;
+        if (pct >= 90) {
+          finalMessage.textContent = 'Excellent : vous avez compris l’architecture d’un second brain vivant et augmenté.';
+        } else if (pct >= 70) {
+          finalMessage.textContent = 'Très bon niveau. Revoyez les modules sur le traitement, le journal ancré et l’automatisation.';
+        } else if (pct >= 50) {
+          finalMessage.textContent = 'Bonne base. Concentrez-vous sur la séparation raw/wiki, les liens et la vérification des sources.';
+        } else {
+          finalMessage.textContent = 'À renforcer. Reprenez les modules 1 à 5 : ce sont les fondations du système.';
+        }
+      }
+    }
+
+    function showSection(id) {
+      sections.forEach(s => s.classList.toggle('active', s.id === id));
+      navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+      visited.add(id);
+      safeSet('secondBrainVisited', Array.from(visited));
+      safeSet('secondBrainLast', id);
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => showSection(btn.dataset.target));
+    });
+
+    document.querySelectorAll('[data-goto]').forEach(btn => {
+      btn.addEventListener('click', () => showSection(btn.dataset.goto));
+    });
+
+    document.querySelectorAll('.checkQuiz').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const quiz = btn.closest('.quiz');
+        const qs = quiz.querySelectorAll('.q');
+        let correct = 0;
+
+        qs.forEach(q => {
+          const selected = q.querySelector('input:checked');
+          q.classList.remove('correct', 'incorrect');
+          if (selected && selected.value === q.dataset.answer) {
+            q.classList.add('correct');
+            correct++;
+          } else {
+            q.classList.add('incorrect');
+          }
+        });
+
+        const feedback = quiz.querySelector('.feedback');
+        if (feedback) {
+          feedback.textContent = correct === qs.length
+            ? 'Parfait : ' + correct + '/' + qs.length
+            : 'Résultat : ' + correct + '/' + qs.length + '. Les questions incorrectes sont entourées en rouge.';
+        }
+
+        updateScore();
+      });
+    });
+
+    window.copyText = function(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+        const old = el.style.borderColor;
+        el.style.borderColor = '#22c55e';
+        setTimeout(() => { el.style.borderColor = old || ''; }, 700);
+      }).catch(() => {
+        alert('Copie impossible dans ce contexte. Sélectionnez le texte manuellement.');
+      });
+    };
+
+    window.showScenario = function(type, btn) {
+      document.querySelectorAll('.scenario-buttons button').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const outputs = {
+        article: `Scénario : Article web
+
+Flux :
+1. L’utilisateur clique sur Obsidian Web Clipper.
+2. Le fichier Markdown est créé dans /raw.
+3. Métadonnées ajoutées : titre, URL, date, tags.
+4. L’agent traite la source :
+   - résumé,
+   - extraction de concepts/outils/personnes,
+   - création/mise à jour de pages dans /wiki,
+   - liens vers la source originale,
+   - mise à jour de index.md et log.md,
+   - déplacement du fichier vers /raw/processed.`,
+
+        youtube: `Scénario : Vidéo YouTube
+
+Flux :
+1. Le Web Clipper récupère la page/transcript.
+2. Le fichier brut va dans /raw.
+3. L’agent extrait :
+   - titre,
+   - chaîne,
+   - URL,
+   - transcript,
+   - idées clés,
+   - concepts mentionnés.
+4. Il crée ou met à jour des pages wiki :
+   - concepts,
+   - outils,
+   - personnes,
+   - thèmes.
+5. Il relie tout à la source originale.
+6. Il met à jour index.md, log.md, puis déplace la source dans /raw/processed.`,
+
+        journal: `Scénario : Entrée de journal
+
+Flux :
+1. L’utilisateur écrit une réflexion.
+2. L’agent crée un fichier dans /journal.
+3. Il génère un titre court et met à jour /journal/index.md.
+4. Il consulte :
+   - le wiki,
+   - les anciens journaux,
+   - le CRM si pertinent.
+5. Il répond avec des insights ancrés dans les contenus personnels.
+6. Il loggue l’action dans log.md.`,
+
+        crm: `Scénario : Information CRM
+
+Flux :
+1. L’utilisateur donne des détails sur une personne.
+2. L’agent crée ou met à jour une fiche dans /crm.
+3. Il structure :
+   - nom,
+   - rencontre,
+   - contexte,
+   - coordonnées,
+   - sujets,
+   - liens projets/idées.
+4. Il met à jour /crm/index.md.
+5. Il loggue la mise à jour dans log.md.
+6. La personne devient interrogeable et reliée au reste du système.`,
+
+        query: `Scénario : Question au wiki
+
+Flux :
+1. L’utilisateur pose une question.
+2. L’agent consulte index.md.
+3. Il identifie les pages wiki pertinentes.
+4. Il lit les sources liées si nécessaire.
+5. Il synthétise une réponse ancrée.
+6. Si la réponse est réutilisable, il crée ou met à jour une page wiki.
+7. Il met à jour log.md.`
+      };
+
+      document.getElementById('scenarioOut').textContent = outputs[type] || 'Sélectionnez un scénario.';
+    };
+
+    window.makeBrainPrompt = function() {
+      const type = document.getElementById('instrType').value;
+      const ctx = document.getElementById('ctx').value.trim() || '[Décrivez votre besoin, vos types de contenus, vos objectifs]';
+      const detail = document.getElementById('detail').value;
+      const security = document.getElementById('security').value;
+
+      const typeMap = {
+        architecture: 'Crée l’architecture minimale d’un second brain dans le dossier courant.',
+        capture: 'Configure un workflow de capture depuis le web vers le dossier /raw.',
+        processing: 'Décris la procédure de traitement des fichiers /raw vers /wiki.',
+        query: 'Décris comment interroger le wiki à partir de index.md et des pages existantes.',
+        journal: 'Décris comment traiter une entrée de journal de façon ancrée dans le wiki, les anciens journaux et le CRM.',
+        crm: 'Décris comment créer/mettre à jour les fiches CRM et les relier aux idées, projets et conversations.',
+        automation: 'Décris une automatisation sûre pour traiter /raw et sauvegarder vers GitHub privé.'
+      };
+
+      const detailMap = {
+        minimal: 'Garde la solution la plus simple possible, sans fichiers inutiles.',
+        standard: 'Fournis une structure claire, robuste mais pas sur-compliquée.',
+        avance: 'Ajoute des garde-fous, de la traçabilité, des liens, des vérifications et une maintenance facile.'
+      };
+
+      const securityMap = {
+        basic: 'Applique des précautions de base.',
+        strict: 'Limiter strictement les écritures, tracer toutes les actions, éviter les suppressions irréversibles, prévoir des sauvegardes.',
+        privacy: 'Ne pas introduire de données sensibles inutiles, préférer des dépôts privés, minimiser les informations personnelles stockées.'
+      };
+
+      const prompt = `${typeMap[type]}
+
+Contexte :
+${ctx}
+
+Niveau de détail :
+${detailMap[detail]}
+
+Sécurité :
+${securityMap[security]}
+
+Contraintes générales :
+1. Commence par expliquer brièvement l’architecture proposée.
+2. Ne crée que les fichiers strictement nécessaires.
+3. Sépare clairement :
+   - /raw pour les sources brutes,
+   - /raw/processed pour les sources déjà traitées,
+   - /wiki pour les pages générées,
+   - /journal si demandé,
+   - /crm si demandé,
+   - agents.md pour les règles,
+   - index.md pour le catalogue,
+   - log.md pour la traçabilité.
+4. Toute page générée doit pouvoir être reliée à sa source originale.
+5. Avant d’automatiser, propose un test manuel.
+6. Termine par une checklist de validation.`;
+
+      document.getElementById('promptOut').textContent = prompt;
+    };
+
+    window.resetProgress = function() {
+      visited.clear();
+      safeSet('secondBrainVisited', []);
+      safeSet('secondBrainLast', 'home');
+      document.querySelectorAll('.q').forEach(q => q.classList.remove('correct', 'incorrect'));
+      document.querySelectorAll('.feedback').forEach(f => f.textContent = '');
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      updateScore();
+      showSection('home');
+    };
+
+    // Restore state
+    const savedVisited = safeGet('secondBrainVisited', []);
+    visited = new Set(savedVisited);
+    updateProgress();
+    updateScore();
+
+    const last = safeGet('secondBrainLast', 'home');
+    if (document.getElementById(last)) {
+      showSection(last);
+    }
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

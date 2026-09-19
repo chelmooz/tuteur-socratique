@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — The $0 AI Architecture Stack</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6ee7a0;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #c7f36b;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="current">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Cours interactif • édition 2026</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Modules"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Accueil"><span class="pill">Objectif</span><h1>The $0 AI Architecture Stack</h1><p class="muted">À la fin de ce cours, vous serez capable de décomposer une application IA autonome en couches, de sélectionner des briques locales ou gratuites et de planifier un déploiement souverain.</p><div class="grid"><div><h2>Le paradigme</h2><p>Des modèles open-weights locaux, des protocoles ouverts et des paliers gratuits peuvent former une architecture de production sans abonnement API obligatoire.</p></div><div><h2>La règle d’ingénierie</h2><p>Le coût nul ne signifie pas absence d’architecture : il faut toujours penser routage, persistance, sécurité, observabilité et limites matérielles.</p></div></div><div class="diagram" role="img" aria-label="Architecture en couches de la stack zéro dollar"><svg viewBox="0 0 900 180"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#c7f36b"/></marker></defs><g fill="#16452d" stroke="#6ee7a0" stroke-width="2"><rect x="20" y="65" width="130" height="50" rx="10"/><rect x="185" y="65" width="150" height="50" rx="10"/><rect x="370" y="65" width="150" height="50" rx="10"/><rect x="555" y="65" width="140" height="50" rx="10"/><rect x="730" y="65" width="150" height="50" rx="10"/></g><g fill="#effff4" text-anchor="middle" font-size="15"><text x="85" y="95">Frontend</text><text x="260" y="95">Orchestrateur</text><text x="445" y="95">RAG</text><text x="625" y="95">LLM local</text><text x="805" y="95">Outils / MCP</text></g><g class="flow" stroke="#c7f36b" stroke-width="3" marker-end="url(#a)"><path d="M150 90h30M335 90h30M520 90h30M695 90h30"/></g></svg></div></section>
+<section class="card module" data-title="Les couches"><span class="pill">Architecture</span><h2>Lire la stack de bas en haut</h2><div class="grid"><div><h3>1. Frontend</h3><p>Next.js + Vercel Free Tier pour la production web, ou Streamlit pour prototyper rapidement en Python.</p></div><div><h3>2. Orchestrateur</h3><p>LangGraph formalise les états, transitions conditionnelles, boucles d’évaluation et re-planning ; CrewAI distribue des rôles spécialisés.</p></div><div><h3>3. RAG</h3><p>ChromaDB ou Qdrant récupèrent les données privées ou fraîches lorsque le routage l’exige.</p></div><div><h3>4. LLM local</h3><p>Ollama sert Gemma pour le routage, Mistral pour le raisonnement multilingue ou Llama 3.3 70B quantifié pour les dossiers lourds.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Quelle couche décide si une requête doit passer par le RAG ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Le frontend uniquement</button><button class="choice" data-correct="true" onclick="answer(this,true)">L’orchestrateur avec un routage conditionnel</button><button class="choice" data-correct="false" onclick="answer(this,false)">La base SQLite seule</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="RAG & modèles"><span class="pill">Décision</span><h2>Router avant de récupérer</h2><p>Le mécanisme décrit dans le cours pose une question simple : <strong>Need external knowledge?</strong> Si la réponse est oui, la requête est transformée en embedding local, recherchée dans Qdrant ou ChromaDB, puis injectée dans le prompt.</p><div class="diagram" role="img" aria-label="Routage conditionnel entre réponse directe et RAG"><svg viewBox="0 0 850 180"><g fill="#16452d" stroke="#6ee7a0" stroke-width="2"><rect x="20" y="65" width="145" height="50" rx="10"/><rect x="230" y="65" width="190" height="50" rx="10"/><rect x="490" y="20" width="150" height="50" rx="10"/><rect x="490" y="110" width="150" height="50" rx="10"/><rect x="710" y="65" width="110" height="50" rx="10"/></g><g fill="#effff4" text-anchor="middle" font-size="14"><text x="92" y="95">Question</text><text x="325" y="95">Need external knowledge?</text><text x="565" y="51">Oui → RAG</text><text x="565" y="141">Non → direct</text><text x="765" y="95">Réponse</text></g><g class="flow" stroke="#c7f36b" stroke-width="3" fill="none"><path d="M165 90h65M420 85l65-40M420 95l65 40M640 45l70 40M640 135l70-35"/></g></svg></div><pre id="prompt">Question : {{question}}
+Décision : vérifier si une connaissance externe est nécessaire.
+Si oui : embed → recherche vectorielle → filtrage par métadonnées → contexte sourcé.
+Si non : répondre directement et signaler les limites.</pre><button class="btn primary copy" onclick="copyText('prompt')">Copier le template</button><div class="quiz"><h3>Choix du modèle</h3><p>Quel profil est présenté comme adapté au routage rapide ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Gemma 4 E4B via Ollama</button><button class="choice" data-correct="false" onclick="answer(this,false)">Un modèle propriétaire distant obligatoire</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="MCP & agents"><span class="pill">Outillage</span><h2>Donner des outils au modèle sans connecteurs ad hoc</h2><p>MCP standardise l’exposition de <strong>Tools</strong>, <strong>Prompts</strong> et <strong>Resources</strong>. Les agents de code peuvent ensuite naviguer dans le dépôt, modifier des fichiers, tester et corriger, sous contrôle de l’orchestrateur.</p><div class="grid"><div><h3>Tools</h3><p>Actions exécutables : Git, fichiers, SQLite ou notifications.</p></div><div><h3>Resources</h3><p>Données accessibles avec une adresse et un schéma explicites.</p></div><div><h3>Prompts</h3><p>Gabarits réutilisables exposés de manière standardisée.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Quel est l’intérêt principal de MCP ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Remplacer le vector store par une image</button><button class="choice" data-correct="true" onclick="answer(this,true)">Unifier l’exposition des ressources, prompts et outils</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="État & observation"><span class="pill">Fiabilité</span><h2>Persister et observer l’exécution</h2><p>SQLite stocke l’historique et l’état local, DuckDB accélère l’analyse de logs et Supabase Free fournit une option PostgreSQL gérée. Le checkpointing permet de reprendre après une défaillance.</p><p>Phoenix, instrumenté avec OpenTelemetry, trace les nœuds LangGraph, la latence, les tokens, les requêtes vectorielles et les évaluations de groundedness.</p><div class="grid"><div><h3>Sans observabilité</h3><p>Une réponse incorrecte reste difficile à expliquer : modèle, retrieval, outil ou transition ?</p></div><div><h3>Avec Phoenix</h3><p>Chaque étape devient inspectable et mesurable, ce qui transforme le débogage en boucle d’amélioration.</p></div></div><div class="quiz"><h3>Quiz express</h3><p>Que permet le checkpointing ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Redémarrer sans perdre l’état de l’orchestrateur</button><button class="choice" data-correct="false" onclick="answer(this,false)">Supprimer les traces de latence</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Déploiement"><span class="pill">Atelier</span><h2>Planifier le déploiement en quatre étapes</h2><ol><li><strong>Calcul & inférence :</strong> installer Ollama, l’accélération matérielle et les poids.</li><li><strong>Stockage vectoriel :</strong> lancer Qdrant, choisir la distance cosinus et connecter le parsing.</li><li><strong>Orchestration :</strong> développer le StateGraph avec routage, retrieval et MCP.</li><li><strong>Monitoring :</strong> activer Phoenix sur le port local 6006 avant les premiers essais.</li></ol><label class="check"><input type="checkbox" onchange="saveChecks()"> Le modèle local et son empreinte matérielle sont choisis.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Le routage décide quand activer le RAG.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les outils MCP sont typés et limités.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> L’état et les checkpoints sont persistés.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Les traces Phoenix et les métriques sont visibles.</label><button class="btn primary" onclick="finish()">Valider mon architecture</button><p id="result" class="score"></p></section>
+<footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main>
+<script src="/course-kit.js"></script>
+</body></html>

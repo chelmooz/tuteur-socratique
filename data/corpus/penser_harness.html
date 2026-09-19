@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Harness Engineering & Programmation Stratégique · Cours Interactif</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="container">
+    <span class="eyebrow"><i class="fas fa-microchip"></i> Cours interactif illustré</span>
+    <h1>Penser Harness plutôt que Modèle</h1>
+    <p class="subtitle">
+      Devenir un ingénieur agentique efficace : programmation stratégique, skills bien conçues,
+      agents AFK, files d'attente, DX/AX, et optimisation du codebase.
+    </p>
+
+    <!-- Hero SVG : F1 / Moteur vs Châssis -->
+    <div class="svg-container" style="max-width:640px;margin:34px auto 0;background:transparent;border:none;">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Le modèle est le moteur, le harness est le châssis, le codebase est la route">
+        <defs>
+          <linearGradient id="carGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#2dd4bf"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+          <radialGradient id="glowCenter">
+            <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Route / codebase -->
+        <rect x="40" y="240" width="640" height="14" rx="7" fill="#101820" stroke="#2dd4bf" stroke-width="1.5"/>
+        <text x="360" y="278" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#8ea3ab">CODEBASE — la route</text>
+        <!-- Tirets de route -->
+        <g opacity="0.5">
+          <rect x="80" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="160" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="240" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="320" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="400" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="480" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+          <rect x="560" y="245" width="40" height="4" rx="2" fill="#2dd4bf"/>
+        </g>
+
+        <!-- Voiture (harness) -->
+        <g transform="translate(280,150)">
+          <!-- Châssis / harness -->
+          <path d="M -140 60 L -120 10 L -40 -20 L 60 -20 L 130 10 L 150 60 Z" fill="#101820" stroke="url(#carGrad)" stroke-width="2.5"/>
+          <!-- Cockpit -->
+          <path d="M -60 -20 L -20 -55 L 40 -55 L 70 -20 Z" fill="#0f1a20" stroke="#38bdf8" stroke-width="1.5"/>
+          <!-- Aileron avant -->
+          <rect x="-155" y="40" width="30" height="8" rx="2" fill="#2dd4bf"/>
+          <!-- Aileron arrière -->
+          <rect x="125" y="20" width="20" height="8" rx="2" fill="#2dd4bf"/>
+          <rect x="130" y="20" width="4" height="30" fill="#2dd4bf"/>
+          <!-- Roue avant -->
+          <circle cx="-90" cy="70" r="22" fill="#0f1a20" stroke="#2dd4bf" stroke-width="2"/>
+          <circle cx="-90" cy="70" r="9" fill="#2dd4bf" opacity="0.4"/>
+          <!-- Roue arrière -->
+          <circle cx="90" cy="70" r="22" fill="#0f1a20" stroke="#2dd4bf" stroke-width="2"/>
+          <circle cx="90" cy="70" r="9" fill="#2dd4bf" opacity="0.4"/>
+          <!-- Moteur (modèle) -->
+          <rect x="-20" y="-10" width="60" height="35" rx="6" fill="url(#glowCenter)" stroke="#8b5cf6" stroke-width="2"/>
+          <text x="10" y="12" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-size="10" fill="#e6f1f3" font-weight="700">MODÈLE</text>
+          <text x="10" y="24" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7" fill="#8ea3ab">moteur</text>
+        </g>
+
+        <!-- Labels -->
+        <g font-family="'JetBrains Mono',monospace" font-size="11">
+          <text x="120" y="120" fill="#2dd4bf">HARNESS</text>
+          <text x="120" y="135" fill="#8ea3ab" font-size="9">châssis · volant · freins</text>
+          <text x="560" y="120" fill="#38bdf8">TESTS</text>
+          <text x="560" y="135" fill="#8ea3ab" font-size="9">barrières de sécurité</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ================= NAV ================= -->
+<nav id="navbar">
+  <div class="container">
+    <ul>
+      <li><a href="#intro" class="nav-link">Intro</a></li>
+      <li><a href="#tactique" class="nav-link">Tactique vs Stratégique</a></li>
+      <li><a href="#plafond" class="nav-link">Plafond humain</a></li>
+      <li><a href="#skills" class="nav-link">Skills</a></li>
+      <li><a href="#afk" class="nav-link">AFK & Queues</a></li>
+      <li><a href="#produit" class="nav-link">Produit</a></li>
+      <li><a href="#dxax" class="nav-link">DX / AX</a></li>
+      <li><a href="#bitter" class="nav-link">Bitter Lesson</a></li>
+      <li><a href="#amelioration" class="nav-link">Amélioration</a></li>
+      <li><a href="#plan" class="nav-link">Plan d'action</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container">
+
+<!-- ================= 1. INTRODUCTION ================= -->
+<section id="intro">
+  <h2><span class="num">01</span> Introduction & thèse centrale</h2>
+
+  <div class="info-box">
+    <span class="lbl">Thèse</span>
+    Tout le monde est obsédé par le <strong>modèle</strong> d'IA, alors qu'il faudrait s'intéresser
+    davantage au <strong>harness</strong> — tout ce qui entoure le modèle : les prompts, les skills,
+    l'environnement de travail, et la qualité du codebase lui-même.
+  </div>
+
+  <p>
+    L'analogie utilisée est celle d'une <strong>voiture de Formule 1</strong> : le modèle, c'est le moteur.
+    Mais une voiture de F1, c'est aussi le châssis, l'aérodynamisme, les réglages. Le moteur n'est
+    qu'une partie du système global, et vous avez beaucoup plus de contrôle sur le châssis
+    (le harness) que sur le moteur (le modèle).
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Élément</th><th>Analogie F1</th><th>Rôle</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Modèle</strong></td><td>Moteur</td><td>Puissance brute — peu de contrôle direct</td></tr>
+        <tr><td><strong>Harness</strong></td><td>Châssis, volant, freins</td><td>Contrôle total du développeur</td></tr>
+        <tr><td><strong>Codebase</strong></td><td>Route</td><td>Facilite ou freine le déplacement</td></tr>
+        <tr><td><strong>Tests</strong></td><td>Barrières de sécurité</td><td>Protègent contre les sorties de route</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 2. TACTIQUE VS STRATÉGIQUE ================= -->
+<section id="tactique">
+  <h2><span class="num">02</span> Programmation tactique vs stratégique</h2>
+
+  <p>
+    En s'appuyant sur le livre <em>A Philosophy of Software Design</em> de John Ousterhout, on distingue
+    deux modes de programmation.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--danger);"><i class="fas fa-hammer"></i> Programmation tactique</h4>
+      <p>Le travail au jour le jour :</p>
+      <ul class="flist">
+        <li>Écrire du code et résoudre la syntaxe</li>
+        <li>Corriger des bugs mineurs</li>
+        <li>Créer des commits</li>
+      </ul>
+      <div class="limit-box">
+        <span class="lbl">Constat</span>
+        L'IA a essentiellement <strong>absorbé la programmation tactique</strong>.
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--success);"><i class="fas fa-chess-king"></i> Programmation stratégique</h4>
+      <p>La direction globale :</p>
+      <ul class="flist">
+        <li>Quelle architecture choisir ?</li>
+        <li>Quelles interfaces définir entre les modules ?</li>
+        <li>Comment rendre le codebase facile à modifier ?</li>
+      </ul>
+      <div class="info-box">
+        <span class="lbl">Résultat</span>
+        Vous devez devenir excellent en stratégie pour diriger cette flotte tactique.
+      </div>
+    </div>
+  </div>
+
+  <blockquote>
+    L'IA peut exécuter beaucoup de tâches, mais elle ne doit pas automatiquement décider de la
+    stratégie du produit ou du système.
+  </blockquote>
+</section>
+
+<!-- ================= 3. PLAFOND HUMAIN ================= -->
+<section id="plafond">
+  <h2><span class="num">03</span> Vos compétences sont le plafond de l'IA</h2>
+
+  <div class="info-box">
+    <span class="lbl">Principe</span>
+    Vos compétences agissent comme un <strong>multiplicateur</strong> pour l'IA. Si vos compétences sont
+    faibles, l'IA ne pourra pas dépasser ce plafond.
+  </div>
+
+  <p>
+    De nombreux CTOs rapportent le même phénomène : l'IA rend les développeurs <strong>seniors</strong>
+    dix fois plus productifs, alors qu'elle n'apporte qu'un léger boost aux juniors. 
+  </p>
+  <p>
+    Pourquoi ? Parce qu'un développeur expérimenté possède le contexte, l'intuition architecturale, sait comment scoper proprement une tâche (délégation) et a la capacité de valider techniquement le résultat. L'IA dispose d'un contexte de travail beaucoup plus riche lorsqu'elle est guidée par un expert.
+  </p>
+</section>
+
+<!-- ================= 4. SKILLS ================= -->
+<section id="skills">
+  <h2><span class="num">04</span> Les "Skills" (Procédures vs Capacités)</h2>
+
+  <p>
+    Dans l'écosystème agentique (comme avec Claude Code ou Fable), il existe deux grandes philosophies pour concevoir des "Skills" (compétences ou plugins) pour votre agent.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4><i class="fas fa-user-cog" style="color:var(--accent);"></i> Procédures (Procedures)</h4>
+      <p>Outils que <strong>l'humain</strong> invoque consciemment pour forcer l'agent à adopter un comportement spécifique.</p>
+      <ul class="flist">
+        <li><strong>Contrôle :</strong> Totalement manuel. L'humain est au volant.</li>
+        <li><strong>Exemple :</strong> La skill <code>Grill Me</code>, qui transforme l'IA en intervieweur strict pour remettre en question vos décisions techniques <em>avant</em> de coder.</li>
+        <li><strong>Avantage :</strong> Ne pollue pas le contexte (context window) de l'agent en arrière-plan.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4><i class="fas fa-robot" style="color:var(--accent-2);"></i> Capacités (Abilities)</h4>
+      <p>Outils que <strong>le modèle</strong> décide d'invoquer de lui-même de façon autonome.</p>
+      <ul class="flist">
+        <li><strong>Contrôle :</strong> Délégué à l'IA.</li>
+        <li><strong>Exemple :</strong> Fournir à l'IA un document de standards de code React qu'elle lit automatiquement avant de générer un composant.</li>
+        <li><strong>Inconvénient :</strong> Chaque description de capacité fuite (leak) dans le contexte, réduisant l'efficacité globale du modèle.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <span class="lbl">Best Practice</span>
+    Privilégiez les <strong>Procédures</strong>. Gardez le contrôle. Ne déléguez pas votre réflexion architecturale au modèle. Un bon ingénieur "bundle" ses connaissances (knowledge + skills) sous forme de procédures réutilisables pour toute son équipe.
+  </div>
+</section>
+
+<!-- ================= 5. AFK & QUEUES ================= -->
+<section id="afk">
+  <h2><span class="num">05</span> Travail AFK & Modèle de Queue</h2>
+
+  <p>
+    Il y a une différence fondamentale entre le travail <strong>Human-in-the-loop</strong> (vous et l'agent en session interactive pour de la planification) et le travail <strong>AFK (Away From Keyboard)</strong>. Découvrir le AFK est un game-changer absolu : c'est le moment où vous vous clonez.
+  </p>
+
+  <h3>Le mythe de la boucle infinie</h3>
+  <p>
+    Beaucoup poussent pour créer des boucles infinies (loops) où l'agent se prompt indéfiniment. 
+    Dans la réalité de l'ingénierie, une approche par <strong>Queue (File d'attente)</strong> est beaucoup plus robuste.
+  </p>
+
+  <div class="formula">
+    Issue (Ticket) <span class="plus">➔</span> Agent d'exploration <span class="plus">➔</span> Agent d'implémentation (AFK) <span class="plus">➔</span> Pull Request <span class="plus">➔</span> Revue Humaine
+  </div>
+
+  <ul class="flist">
+    <li><strong>L'approche Queue :</strong> Un développeur (ou un cron job) assigne un ticket. Un agent exécute la tâche de manière isolée dans un bac à sable (sandbox) via GitHub Actions, puis crée une PR.</li>
+    <li><strong>Le but de la revue humaine :</strong> Outre des raisons évidentes de sécurité, la revue de la PR n'est pas là que pour vérifier le code. Elle sert à observer comment l'agent se comporte pour <em>améliorer le harness</em>.</li>
+  </ul>
+</section>
+
+<!-- ================= 6. PRODUIT ================= -->
+<section id="produit">
+  <h2><span class="num">06</span> Produit et Vision</h2>
+
+  <p>
+    L'IA ne change rien aux fondamentaux de la création de produit. 
+  </p>
+  
+  <blockquote>
+    Vous devez toujours parler aux clients. Vous devez toujours comprendre leurs vrais problèmes. L'IA n'inventera pas le bon produit pour vous. 
+  </blockquote>
+
+  <p>
+    En revanche, là où l'IA brille : demandez-lui <em>"Comment puis-je simplifier cette interface ?"</em> ou <em>"Quelle fonctionnalité puis-je retirer pour améliorer l'UX ?"</em>. Gardez la vision produit, déléguez l'implémentation.
+  </p>
+</section>
+
+<!-- ================= 7. DX / AX ================= -->
+<section id="dxax">
+  <h2><span class="num">07</span> DX (Developer Experience) = AX (Agent Experience)</h2>
+
+  <p>
+    Si votre base de code est difficile à modifier pour un humain (mauvaise <strong>DX</strong>), elle le sera aussi pour un agent (mauvaise <strong>AX</strong>). 
+  </p>
+
+  <div class="info-box">
+    <span class="lbl">Optimisation du Token Spend</span>
+    Comment réduire vos coûts d'API (token spend) ? Ayez un codebase dans lequel il est facile de faire des changements ! Un bon codebase avec des limites claires et d'excellents tests vous permet d'utiliser un modèle "plus stupide" (et donc moins cher) pour accomplir la même tâche.
+  </div>
+</section>
+
+<!-- ================= 8. BITTER LESSON ================= -->
+<section id="bitter">
+  <h2><span class="num">08</span> The Bitter Lesson</h2>
+
+  <p>
+    La "Bitter Lesson" en Machine Learning postule que la puissance de calcul (compute brute) finit toujours par battre les optimisations manuelles intelligentes. 
+  </p>
+  <p>
+    <strong>Le piège :</strong> Se dire <em>"Je ne vais pas optimiser mon harness ni mon codebase, je vais juste attendre le prochain modèle (GPT-6, Opus 5) qui sera assez intelligent pour se débrouiller."</em>
+  </p>
+  <div class="limit-box">
+    <span class="lbl">La réponse stratégique</span>
+    Penser en fonction du modèle ("Model First") est une erreur. Concentrez-vous sur ce qui fonctionne depuis 30 ans : les bons principes d'architecture logicielle. Si vous construisez de bonnes fondations indépendantes du modèle aujourd'hui, vous serez le mieux placé pour exploiter la puissance brute des modèles de demain.
+  </div>
+</section>
+
+<!-- ================= 9. AMÉLIORATION SYSTÉMIQUE ================= -->
+<section id="amelioration">
+  <h2><span class="num">09</span> Ne corrigez pas le bug, corrigez le système</h2>
+
+  <p>
+    Certains s'émerveillent quand un nouvel agent IA trouve un bug de sécurité profond qu'ils n'avaient jamais remarqué. C'est bien. Mais la réaction d'un développeur x10 n'est pas de juste faire fusionner (merge) le fix.
+  </p>
+  
+  <p><strong>La question stratégique est :</strong> <em>"Pourquoi ce bug était-il là depuis si longtemps ?"</em></p>
+  
+  <ul class="flist">
+    <li>Manque de tests de régression ?</li>
+    <li>CI/CD défaillante ?</li>
+    <li>Besoin d'un script qui scanne automatiquement ces vulnérabilités ?</li>
+  </ul>
+  <p>
+    Utilisez l'IA pour corriger le bug tactique, mais utilisez votre cerveau stratégique pour construire le système (le harness) qui empêchera ce type de bug de réapparaître.
+  </p>
+</section>
+
+<!-- ================= 10. PLAN D'ACTION ================= -->
+<section id="plan">
+  <h2><span class="num">10</span> Plan d'Action Pratique</h2>
+
+  <div class="card" style="border-color:var(--accent);">
+    <h4 style="color:var(--accent);"><i class="fas fa-broom"></i> Étape 1 : Le grand nettoyage (Tabula Rasa)</h4>
+    <p>
+      Supprimez tous vos plugins, vos serveurs MCP, vos skills et vos instructions systèmes surchargées. Revenez à l'état brut. Observez ce que l'agent fait de base. Le contexte pollué est l'ennemi numéro un de la performance agentique.
+    </p>
+  </div>
+  
+  <div class="card" style="border-color:var(--accent-2);">
+    <h4 style="color:var(--accent-2);"><i class="fas fa-layer-group"></i> Étape 2 : Empilez intelligemment</h4>
+    <p>
+      Ajoutez des outils uniquement sous forme de <strong>Procédures</strong> (que vous invoquez manuellement). Si vous avez besoin d'une aide à la réflexion, rajoutez le "Grill me". Ne rajoutez que ce qui résout un problème précis que vous avez identifié à l'étape 1.
+    </p>
+  </div>
+
+  <div class="card" style="border-color:var(--accent-3);">
+    <h4 style="color:var(--accent-3);"><i class="fas fa-paper-plane"></i> Étape 3 : Déléguez AFK</h4>
+    <p>
+      Trouvez des moyens de sortir l'agent de votre terminal local pour l'exécuter dans des sandboxes distantes (via GitHub Actions, Sandcastle, etc.). Préparez le terrain, lancez l'agent et allez faire autre chose pendant qu'il prépare votre Pull Request.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Conçu pour une tâche éducative. Basé sur les principes d'AI Engineering (Matt Pocock & Huyen Chip).</p>
+  </div>
+</footer>
+
+<!-- Interactive Scripts -->
+<script>
+  // Progress Bar
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.getElementById("progressBar").style.width = scrolled + "%";
+  });
+
+  // Active Nav Link highlighting
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (scrollY >= (sectionTop - 150)) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+      if (link.getAttribute("href").includes(current)) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voir le système avant d'agir — Cours de pensée systémique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="topbar-title">Voir le système avant d'agir</span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Basculer le mode sombre">
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Un cours de pensée systémique</p>
+    <h1>Voir le système<br>avant d'agir</h1>
+    <p class="lede">Chaque semaine, des personnes compétentes prennent de mauvaises décisions — pas par manque d'intelligence, mais parce qu'elles appliquent le mauvais modèle mental au système où elles se trouvent. Ce cours apprend à lire la structure avant de choisir l'action. Un quiz interactif t'attend à la fin.</p>
+    <figure style="margin:0;">
+      <svg class="hero-art" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration d'un pompier face à deux types de fumée, symbolisant la lecture des signaux cachés">
+        <line x1="0" y1="196" x2="640" y2="196" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <rect x="60" y="90" width="120" height="106" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="90" y="120" width="24" height="30" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <rect x="130" y="120" width="24" height="30" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <rect x="100" y="164" width="30" height="32" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <g opacity="0.92">
+          <circle cx="105" cy="70" r="15" fill="var(--ink)"/>
+          <circle cx="122" cy="52" r="19" fill="var(--ink)"/>
+          <circle cx="98" cy="40" r="13" fill="var(--ink)"/>
+          <circle cx="135" cy="30" r="12" fill="var(--ink)"/>
+        </g>
+        <text x="128" y="18" text-anchor="middle" font-family="Public Sans" font-size="12" fill="var(--ink-soft)">fumée noire — produits chimiques</text>
+
+        <rect x="420" y="100" width="120" height="96" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <rect x="450" y="126" width="24" height="28" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <rect x="490" y="126" width="24" height="28" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <g opacity="0.55">
+          <circle cx="465" cy="80" r="15" fill="var(--ink-soft)"/>
+          <circle cx="482" cy="62" r="19" fill="var(--ink-soft)"/>
+          <circle cx="458" cy="48" r="13" fill="var(--ink-soft)"/>
+          <circle cx="495" cy="38" r="12" fill="var(--ink-soft)"/>
+        </g>
+        <text x="482" y="18" text-anchor="middle" font-family="Public Sans" font-size="12" fill="var(--ink-soft)">fumée blanche — manque d'oxygène</text>
+
+        <g transform="translate(300,150)">
+          <circle cx="0" cy="-46" r="12" fill="none" stroke="var(--ember)" stroke-width="2.5"/>
+          <path d="M -14 -34 Q 0 -40 14 -34 L 14 -4 Q 0 6 -14 -4 Z" fill="var(--ember)" opacity="0.14" stroke="var(--ember)" stroke-width="2.5"/>
+          <line x1="0" y1="-4" x2="0" y2="26" stroke="var(--ember)" stroke-width="2.5"/>
+          <line x1="0" y1="26" x2="-12" y2="46" stroke="var(--ember)" stroke-width="2.5"/>
+          <line x1="0" y1="26" x2="12" y2="46" stroke="var(--ember)" stroke-width="2.5"/>
+          <line x1="-14" y1="-20" x2="-60" y2="-32" stroke="var(--ember)" stroke-width="2.5"/>
+          <line x1="14" y1="-20" x2="60" y2="-32" stroke="var(--ember)" stroke-width="2.5"/>
+        </g>
+        <path d="M 240 118 Q 300 90 360 118" stroke="var(--line-strong)" stroke-width="1.5" fill="none" stroke-dasharray="3 4"/>
+      </svg>
+      <figcaption>Un pompier ne voit pas « du feu » : il lit un système à travers ses signaux.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ MODULE 0 — QU'EST-CE QU'UN SYSTÈME ============ -->
+  <section class="module" id="intro">
+    <div class="wrap">
+      <p class="module-num">Introduction</p>
+      <h2>Un système, c'est une structure qui se répète</h2>
+      <p class="lead">Un système est un ensemble de parties connectées qui produisent, encore et encore, un résultat récurrent. Une entreprise, une carrière, un couple, un café — tous sont des systèmes. La question à se poser n'est pas seulement « que s'est-il passé ? » mais « quelle structure produit régulièrement ce résultat ? »</p>
+
+      <h3>Le café comme système</h3>
+      <p>Prenez un café de quartier. Les parties : les clients, le menu, la caisse, le barista, la machine à espresso, le stock. La connexion principale est le flux de commande : le client choisit, le caissier enregistre, le barista prépare, le stock diminue, le client reçoit sa boisson.</p>
+      <p>Regarder uniquement les parties mène souvent au mauvais diagnostic. Embaucher un second caissier ne sert à rien si le vrai goulot d'étranglement est la machine à café.</p>
+
+      <figure>
+        <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagramme du flux de commande dans un café, en boucle">
+          <defs>
+            <marker id="arrow1" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-soft)"/>
+            </marker>
+          </defs>
+          <g font-family="Public Sans" font-size="13.5" fill="var(--ink)">
+            <circle cx="310" cy="40" r="42" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="310" y="45" text-anchor="middle">Client</text>
+
+            <circle cx="500" cy="130" r="42" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="500" y="135" text-anchor="middle">Caissier</text>
+
+            <circle cx="420" cy="230" r="42" fill="var(--paper-2)" stroke="var(--ember)" stroke-width="1.8"/>
+            <text x="420" y="228" text-anchor="middle" font-weight="600">Machine /</text>
+            <text x="420" y="243" text-anchor="middle" font-weight="600">Barista</text>
+
+            <circle cx="200" cy="230" r="42" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="200" y="235" text-anchor="middle">Stock</text>
+
+            <circle cx="120" cy="130" r="42" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="120" y="135" text-anchor="middle">Boisson</text>
+          </g>
+          <g fill="none" stroke="var(--ink-soft)" stroke-width="1.6" marker-end="url(#arrow1)">
+            <path d="M 340 65 Q 430 85 468 100"/>
+            <path d="M 485 168 Q 460 200 458 208"/>
+            <path d="M 382 235 Q 300 245 244 233"/>
+            <path d="M 178 202 Q 150 175 142 168"/>
+            <path d="M 130 95 Q 200 55 274 42"/>
+          </g>
+          <text x="310" y="130" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="14" fill="var(--ember-dark)">le goulot réel est ici</text>
+        </svg>
+        <figcaption>Le schéma se répète à travers la boucle entière — pas seulement à un poste isolé.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ MODULE 1 — LES TROIS PIÈGES ============ -->
+  <section class="module" id="module1">
+    <div class="wrap">
+      <p class="module-num">Module 1</p>
+      <h2>Pourquoi on se trompe si souvent sur les systèmes</h2>
+      <p class="lead">Trois causes reviennent sans cesse dans les erreurs stratégiques.</p>
+
+      <h3>1 — Ignorer le type de système</h3>
+      <p>Il existe quatre types de systèmes, chacun avec sa propre méthode. Appliquer une checklist rigide à un problème imprévisible — ou lancer des expérimentations pendant un incendie — mène droit à l'échec. Le module suivant détaille cette matrice.</p>
+
+      <h3>2 — L'effet cobra : le problème des incitations</h3>
+      <p>Au début du XX<sup>e</sup> siècle, des responsables britanniques en Inde voulaient réduire la population de cobras à Delhi. Ils ont offert une prime pour chaque cobra mort. Résultat : des habitants se sont mis à <strong>élever</strong> des cobras pour toucher davantage de primes. Quand la prime a été supprimée, les éleveurs ont relâché leurs serpents — et la population a explosé.</p>
+
+      <figure>
+        <svg viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Boucle de l'effet cobra : la prime encourage l'élevage au lieu de réduire la population">
+          <defs>
+            <marker id="arrow2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--ember)"/>
+            </marker>
+          </defs>
+          <g font-family="Public Sans" font-size="13.5">
+            <rect x="30" y="26" width="150" height="56" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="105" y="50" text-anchor="middle" fill="var(--ink)">Prime versée</text>
+            <text x="105" y="66" text-anchor="middle" fill="var(--ink)">par cobra mort</text>
+
+            <rect x="380" y="26" width="150" height="56" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="455" y="50" text-anchor="middle" fill="var(--ink)">Élevage de</text>
+            <text x="455" y="66" text-anchor="middle" fill="var(--ink)">cobras en captivité</text>
+
+            <rect x="380" y="140" width="150" height="56" rx="6" fill="none" stroke="var(--ember-dark)" stroke-width="1.8"/>
+            <text x="455" y="164" text-anchor="middle" fill="var(--ember-dark)" font-weight="600">Plus de cobras</text>
+            <text x="455" y="180" text-anchor="middle" fill="var(--ember-dark)" font-weight="600">livrés à la prime</text>
+
+            <rect x="30" y="140" width="150" height="56" rx="6" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+            <text x="105" y="164" text-anchor="middle" fill="var(--ink)">Objectif réel :</text>
+            <text x="105" y="180" text-anchor="middle" fill="var(--ink)">moins de cobras</text>
+          </g>
+          <g fill="none" stroke="var(--ember)" stroke-width="2" marker-end="url(#arrow2)">
+            <path d="M 180 54 L 375 54"/>
+            <path d="M 455 82 L 455 135"/>
+            <path d="M 380 168 L 190 168"/>
+          </g>
+          <line x1="105" y1="140" x2="105" y2="86" stroke="var(--line-strong)" stroke-width="1.6" stroke-dasharray="4 4"/>
+          <text x="270" y="120" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="14" fill="var(--ink-soft)">la boucle s'auto-alimente, loin de l'objectif initial</text>
+        </svg>
+        <figcaption>Récompenser le mauvais indicateur pousse le système à s'optimiser contre son propre but.</figcaption>
+      </figure>
+
+      <p>La bonne question à se poser sur n'importe quel indicateur : <em>« que cette mesure encourage-t-elle réellement les gens à optimiser ? »</em> Une équipe support notée sur le nombre de tickets fermés peut clore trop vite, fractionner un ticket en plusieurs, ou éviter les cas difficiles — la métrique grimpe, la satisfaction client chute.</p>
+
+      <h3>3 — Les boucles de rétroaction différées</h3>
+      <p>Une action peut apporter un bénéfice immédiat et un coût qui n'apparaît que bien plus tard. La cigarette procure une satisfaction en quelques secondes ; les dommages mettent des décennies à se révéler. En développement logiciel, réduire les tests accélère la livraison aujourd'hui — la dette technique ralentit toute l'équipe dans six mois.</p>
+
+      <figure>
+        <svg viewBox="0 0 620 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ligne de temps montrant le décalage entre bénéfice immédiat et coût différé">
+          <line x1="40" y1="90" x2="580" y2="90" stroke="var(--ink)" stroke-width="1.6"/>
+          <circle cx="70" cy="90" r="5" fill="var(--slate)"/>
+          <text x="70" y="115" text-anchor="middle" font-family="Public Sans" font-size="13" fill="var(--slate)">plaisir immédiat</text>
+          <text x="70" y="70" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="12" fill="var(--ink-soft)">quelques secondes</text>
+
+          <circle cx="540" cy="90" r="5" fill="var(--ember-dark)"/>
+          <text x="540" y="115" text-anchor="middle" font-family="Public Sans" font-size="13" fill="var(--ember-dark)">coût réel</text>
+          <text x="540" y="70" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="12" fill="var(--ink-soft)">des décennies plus tard</text>
+
+          <line x1="80" y1="90" x2="528" y2="90" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="2 8"/>
+        </svg>
+        <figcaption>L'absence de conséquence immédiate ne prouve jamais qu'une décision est bonne.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ MODULE 2 — LES 4 TYPES DE SYSTÈMES ============ -->
+  <section class="module" id="module2">
+    <div class="wrap">
+      <p class="module-num">Module 2</p>
+      <h2>Les quatre types de systèmes</h2>
+      <p class="lead">La méthode d'action dépend entièrement de la relation entre la cause et l'effet. Clique sur un quadrant pour repérer sa ligne dans le tableau.</p>
+
+      <figure>
+        <svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Matrice à deux axes des quatre types de systèmes, interactive">
+          <line x1="280" y1="20" x2="280" y2="380" stroke="var(--line-strong)" stroke-width="1.4"/>
+          <line x1="20" y1="200" x2="540" y2="200" stroke="var(--line-strong)" stroke-width="1.4"/>
+
+          <g data-quadrant="tr-clair">
+            <rect x="20" y="20" width="260" height="180" fill="rgba(61,90,108,0.10)"/>
+            <g font-family="Fraunces" font-style="italic" font-size="17" fill="var(--ink)"><text x="150" y="80">Clair</text></g>
+            <g font-family="Public Sans" font-size="12.5" fill="var(--ink-soft)"><text x="150" y="104">cause → effet évidente</text></g>
+          </g>
+          <g data-quadrant="tr-complique">
+            <rect x="280" y="20" width="260" height="180" fill="rgba(217,164,65,0.14)"/>
+            <g font-family="Fraunces" font-style="italic" font-size="17" fill="var(--ink)"><text x="410" y="80">Compliqué</text></g>
+            <g font-family="Public Sans" font-size="12.5" fill="var(--ink-soft)">
+              <text x="410" y="104">cause → effet cachée,</text>
+              <text x="410" y="119">découvrable par expertise</text>
+            </g>
+          </g>
+          <g data-quadrant="tr-complexe">
+            <rect x="20" y="200" width="260" height="180" fill="rgba(193,80,46,0.10)"/>
+            <g font-family="Fraunces" font-style="italic" font-size="17" fill="var(--ink)"><text x="150" y="290">Complexe</text></g>
+            <g font-family="Public Sans" font-size="12.5" fill="var(--ink-soft)">
+              <text x="150" y="314">visible seulement</text>
+              <text x="150" y="329">après coup</text>
+            </g>
+          </g>
+          <g data-quadrant="tr-chaotique">
+            <rect x="280" y="200" width="260" height="180" fill="rgba(31,36,33,0.08)"/>
+            <g font-family="Fraunces" font-style="italic" font-size="17" fill="var(--ink)"><text x="410" y="290">Chaotique</text></g>
+            <g font-family="Public Sans" font-size="12.5" fill="var(--ink-soft)">
+              <text x="410" y="314">lien rompu, information</text>
+              <text x="410" y="329">incomplète et mouvante</text>
+            </g>
+          </g>
+
+          <text x="280" y="14" text-anchor="middle" font-family="Public Sans" font-size="12" fill="var(--ink-soft)">relation cause–effet</text>
+          <text x="10" y="200" text-anchor="middle" font-family="Public Sans" font-size="12" fill="var(--ink-soft)" transform="rotate(-90 10 200)">stabilité du terrain</text>
+        </svg>
+        <p class="hint" style="text-align:center;">clique un quadrant pour surligner la ligne correspondante ci-dessous</p>
+        <figcaption>Deux axes suffisent à situer n'importe quel problème : la cause est-elle visible, le terrain est-il stable ?</figcaption>
+      </figure>
+
+      <table>
+        <caption>Les quatre types de systèmes et la réponse adaptée à chacun</caption>
+        <thead>
+          <tr><th>Type</th><th>Relation cause → effet</th><th>Réponse adaptée</th><th>Exemple</th></tr>
+        </thead>
+        <tbody>
+          <tr id="tr-clair">
+            <td class="tag">Clair</td>
+            <td>Directement observable et prévisible</td>
+            <td>Suivre le processus, utiliser une checklist, viser la précision plutôt que l'inventivité</td>
+            <td>Recette de cuisine, protocole de lavage des mains d'un chirurgien</td>
+          </tr>
+          <tr id="tr-complique">
+            <td class="tag">Compliqué</td>
+            <td>Réelle mais cachée, nécessite une expertise</td>
+            <td>Ralentir, analyser, consulter le bon spécialiste — pas n'importe lequel</td>
+            <td>Diagnostic d'une douleur thoracique, choix d'un prêt immobilier</td>
+          </tr>
+          <tr id="tr-complexe">
+            <td class="tag">Complexe</td>
+            <td>Visible seulement rétrospectivement, émergente</td>
+            <td>Petites expérimentations réversibles, rester directionnellement juste</td>
+            <td>Fusion de deux cultures d'entreprise, adoption de l'IA, élever un adolescent</td>
+          </tr>
+          <tr id="tr-chaotique">
+            <td class="tag">Chaotique</td>
+            <td>Rompue, information incomplète et changeante</td>
+            <td>Stabiliser d'abord, créer la sécurité, analyser ensuite</td>
+            <td>Crise du Tylenol empoisonné, cyberattaque active</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <p>Le groupe Van Halen exigeait, dans un contrat de 400 pages, un bol de M&amp;M's dont tous les marrons auraient été retirés. Ce n'était pas un caprice : si cette clause anodine n'était pas respectée, cela révélait que des points de sécurité scénique bien plus critiques avaient sans doute été négligés aussi.</p>
+        <p class="who">Un système clair sert de test rapide pour l'ensemble du système.</p>
+      </div>
+
+      <div class="callout" style="border-color:var(--slate); background:rgba(61,90,108,0.08);">
+        <p>En 1982, des capsules de Tylenol empoisonnées au cyanure tuent sept personnes à Chicago. Johnson &amp; Johnson n'attend pas une analyse complète : l'entreprise retire 31 millions de bouteilles des rayons avant même de comprendre l'origine exacte du problème.</p>
+        <p class="who">Système chaotique — stabiliser d'abord, comprendre ensuite.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODULE 3 — DART ============ -->
+  <section class="module" id="module3">
+    <div class="wrap">
+      <p class="module-num">Module 3</p>
+      <h2>Le framework DART pour diagnostiquer un système</h2>
+      <p class="lead">La réalité n'arrive jamais avec une étiquette. DART est l'outil de diagnostic à appliquer avant de choisir une méthode. Clique une étape du cycle pour voir son détail.</p>
+
+      <figure>
+        <svg viewBox="0 0 560 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cycle DART interactif en quatre étapes : Déconstruire, Analyser, Reconnaître, Tester">
+          <defs>
+            <marker id="arrow3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-soft)"/>
+            </marker>
+          </defs>
+          <path d="M 150 70 A 140 140 0 0 1 410 70" fill="none" stroke="var(--ink-soft)" stroke-width="1.6" marker-end="url(#arrow3)"/>
+          <path d="M 460 130 A 140 140 0 0 1 460 210" fill="none" stroke="var(--ink-soft)" stroke-width="1.6" marker-end="url(#arrow3)"/>
+          <path d="M 410 270 A 140 140 0 0 1 150 270" fill="none" stroke="var(--ink-soft)" stroke-width="1.6" marker-end="url(#arrow3)"/>
+          <path d="M 100 210 A 140 140 0 0 1 100 130" fill="none" stroke="var(--ink-soft)" stroke-width="1.6" marker-end="url(#arrow3)"/>
+
+          <g font-family="Fraunces" font-size="20">
+            <g class="dart-step" data-step="d">
+              <circle cx="140" cy="70" r="46" fill="var(--paper-2)" stroke="var(--ember)" stroke-width="2"/>
+              <text x="140" y="65" text-anchor="middle" fill="var(--ember-dark)" font-style="italic">D</text>
+              <text x="140" y="86" text-anchor="middle" font-family="Public Sans" font-size="11.5" fill="var(--ink-soft)">déconstruire</text>
+            </g>
+            <g class="dart-step" data-step="a">
+              <circle cx="420" cy="70" r="46" fill="var(--paper-2)" stroke="var(--amber)" stroke-width="2"/>
+              <text x="420" y="65" text-anchor="middle" fill="var(--amber-text)" font-style="italic">A</text>
+              <text x="420" y="86" text-anchor="middle" font-family="Public Sans" font-size="11.5" fill="var(--ink-soft)">analyser</text>
+            </g>
+            <g class="dart-step" data-step="r">
+              <circle cx="420" cy="270" r="46" fill="var(--paper-2)" stroke="var(--slate)" stroke-width="2"/>
+              <text x="420" y="265" text-anchor="middle" fill="var(--slate)" font-style="italic">R</text>
+              <text x="420" y="286" text-anchor="middle" font-family="Public Sans" font-size="11.5" fill="var(--ink-soft)">reconnaître</text>
+            </g>
+            <g class="dart-step" data-step="t">
+              <circle cx="140" cy="270" r="46" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+              <text x="140" y="265" text-anchor="middle" fill="var(--ink)" font-style="italic">T</text>
+              <text x="140" y="286" text-anchor="middle" font-family="Public Sans" font-size="11.5" fill="var(--ink-soft)">tester</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>Un cycle, pas une liste à cocher une seule fois — on y revient à chaque nouveau problème.</figcaption>
+      </figure>
+
+      <div class="dart-detail" id="dart-detail">Clique une des quatre lettres ci-dessus pour afficher la question à se poser à cette étape.</div>
+    </div>
+  </section>
+
+  <!-- ============ MODULE 4 — LE QUAI DE GARE ============ -->
+  <section class="module" id="module4">
+    <div class="wrap">
+      <p class="module-num">Module 4</p>
+      <h2>Prendre du recul : la métaphore du quai de gare</h2>
+      <p class="lead">Chaque système dans lequel vous vivez vous conditionne silencieusement. De l'intérieur, sa trajectoire est difficile à voir.</p>
+
+      <figure>
+        <svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration de deux trains en gare, l'un immobile et l'autre en mouvement, avec une personne sur le quai">
+          <line x1="0" y1="180" x2="620" y2="180" stroke="var(--ink)" stroke-width="2"/>
+          <line x1="0" y1="188" x2="620" y2="188" stroke="var(--ink)" stroke-width="1"/>
+          <g stroke="var(--line-strong)" stroke-width="1.2">
+            <line x1="20" y1="180" x2="10" y2="196"/>
+            <line x1="60" y1="180" x2="50" y2="196"/>
+            <line x1="100" y1="180" x2="90" y2="196"/>
+            <line x1="140" y1="180" x2="130" y2="196"/>
+            <line x1="180" y1="180" x2="170" y2="196"/>
+          </g>
+
+          <g>
+            <rect x="40" y="118" width="150" height="58" rx="8" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.8"/>
+            <rect x="56" y="132" width="30" height="24" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
+            <rect x="96" y="132" width="30" height="24" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
+            <rect x="136" y="132" width="30" height="24" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
+            <circle cx="70" cy="180" r="7" fill="var(--ink)"/>
+            <circle cx="160" cy="180" r="7" fill="var(--ink)"/>
+          </g>
+          <text x="115" y="105" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="13" fill="var(--ink-soft)">votre train — à l'arrêt</text>
+
+          <g>
+            <rect x="380" y="118" width="150" height="58" rx="8" fill="rgba(193,80,46,0.10)" stroke="var(--ember)" stroke-width="1.8"/>
+            <rect x="396" y="132" width="30" height="24" fill="none" stroke="var(--ember)" stroke-width="1.4"/>
+            <rect x="436" y="132" width="30" height="24" fill="none" stroke="var(--ember)" stroke-width="1.4"/>
+            <rect x="476" y="132" width="30" height="24" fill="none" stroke="var(--ember)" stroke-width="1.4"/>
+            <circle cx="410" cy="180" r="7" fill="var(--ember)"/>
+            <circle cx="500" cy="180" r="7" fill="var(--ember)"/>
+          </g>
+          <g stroke="var(--ember)" stroke-width="1.6" opacity="0.7">
+            <line x1="370" y1="130" x2="355" y2="130"/>
+            <line x1="370" y1="150" x2="352" y2="150"/>
+            <line x1="370" y1="170" x2="355" y2="170"/>
+          </g>
+          <text x="455" y="105" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="13" fill="var(--ember-dark)">le train voisin — en mouvement</text>
+
+          <g transform="translate(280,150)">
+            <circle cx="0" cy="0" r="8" fill="none" stroke="var(--slate)" stroke-width="2.2"/>
+            <line x1="0" y1="8" x2="0" y2="34" stroke="var(--slate)" stroke-width="2.2"/>
+            <line x1="0" y1="34" x2="-9" y2="52" stroke="var(--slate)" stroke-width="2.2"/>
+            <line x1="0" y1="34" x2="9" y2="52" stroke="var(--slate)" stroke-width="2.2"/>
+            <line x1="0" y1="16" x2="-14" y2="24" stroke="var(--slate)" stroke-width="2.2"/>
+            <line x1="0" y1="16" x2="14" y2="24" stroke="var(--slate)" stroke-width="2.2"/>
+          </g>
+          <text x="280" y="70" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="13" fill="var(--slate)">sur le quai — aucune confusion possible</text>
+        </svg>
+        <figcaption>Assis dans son wagon, on ne sait plus lequel des deux trains bouge. Depuis le quai, c'est évident.</figcaption>
+      </figure>
+
+      <p>Trois leviers permettent de sortir du wagon et de rejoindre le quai :</p>
+
+      <div class="trio">
+        <div class="card">
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="13" r="7" fill="none" stroke="var(--slate)" stroke-width="2.2"/><path d="M6 34 Q20 20 34 34" fill="none" stroke="var(--slate)" stroke-width="2.2"/></svg>
+          <h4>Les mentors</h4>
+          <p>Des personnes extérieures à votre histoire, sans enjeu direct, capables d'observer votre situation avec neutralité.</p>
+        </div>
+        <div class="card">
+          <svg viewBox="0 0 40 40"><line x1="8" y1="32" x2="8" y2="18" stroke="var(--slate)" stroke-width="3"/><line x1="20" y1="32" x2="20" y2="8" stroke="var(--slate)" stroke-width="3"/><line x1="32" y1="32" x2="32" y2="22" stroke="var(--slate)" stroke-width="3"/></svg>
+          <h4>Les données</h4>
+          <p>Les chiffres ne se soucient pas de votre narration interne — ils montrent ce que le système fait réellement.</p>
+        </div>
+        <div class="card">
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="var(--slate)" stroke-width="2.2"/><line x1="20" y1="20" x2="20" y2="10" stroke="var(--slate)" stroke-width="2.2"/><line x1="20" y1="20" x2="27" y2="24" stroke="var(--slate)" stroke-width="2.2"/></svg>
+          <h4>Le temps</h4>
+          <p>Comparez votre situation actuelle à celle d'il y a un an, un mois, une semaine — le meilleur révélateur de trajectoire.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODULE 5 — CARRIÈRE, IA, ET LES FAUX CHOIX BINAIRES ============ -->
+  <section class="module" id="module5">
+    <div class="wrap">
+      <p class="module-num">Module 5</p>
+      <h2>Application : carrière, IA, et les faux choix binaires</h2>
+
+      <h3>Votre carrière est un système</h3>
+      <p>Compétences, réseau, réputation, habitudes, incitations financières et personnes avec qui vous travaillez forment une structure. Un changement local peut créer une boucle auto-renforçante : travailler davantage augmente la production immédiate, mais la fatigue réduit la qualité, ce qui génère plus de corrections, ce qui prend plus de temps, ce qui augmente encore la fatigue. Pour l'interrompre, il faut souvent changer la structure elle-même — automatiser, réduire le travail en cours, améliorer les retours — plutôt que pousser plus fort dans le même sens.</p>
+
+      <h3>Intégrer l'IA : un problème compliqué qui devient complexe</h3>
+      <p>Construire un outil d'IA fiable est un problème <strong>compliqué</strong> — il demande le bon expert. Faire en sorte que les équipes l'adoptent réellement est un problème <strong>complexe</strong> — les habitudes, les peurs et les intérêts des personnes évoluent au fur et à mesure. Traiter le second comme s'il était le premier est l'erreur la plus fréquente des déploiements d'IA en entreprise.</p>
+
+      <h3>Le mythe Ferrari contre Toyota</h3>
+      <p>La sagesse conventionnelle impose souvent un choix binaire : produit de luxe à faible volume (Ferrari), ou produit de masse à faible marge (Toyota). Apple a refusé cette dichotomie en produisant environ 350 iPhones haut de gamme par minute — un volume de masse, sans sacrifier le positionnement premium.</p>
+
+      <figure>
+        <svg viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparaison entre le choix binaire traditionnel et le système Apple qui combine luxe et volume">
+          <g font-family="Public Sans" font-size="13">
+            <text x="140" y="24" text-anchor="middle" fill="var(--ink-soft)">choix binaire supposé</text>
+            <rect x="40" y="40" width="90" height="100" fill="rgba(61,90,108,0.16)" stroke="var(--slate)" stroke-width="1.6"/>
+            <text x="85" y="95" text-anchor="middle" fill="var(--slate)">Luxe</text>
+            <text x="85" y="112" text-anchor="middle" fill="var(--slate)" font-size="11">faible volume</text>
+
+            <rect x="150" y="40" width="90" height="100" fill="rgba(193,80,46,0.14)" stroke="var(--ember)" stroke-width="1.6"/>
+            <text x="195" y="95" text-anchor="middle" fill="var(--ember-dark)">Volume</text>
+            <text x="195" y="112" text-anchor="middle" fill="var(--ember-dark)" font-size="11">faible marge</text>
+          </g>
+
+          <line x1="280" y1="30" x2="280" y2="180" stroke="var(--line)" stroke-width="1"/>
+
+          <g font-family="Public Sans" font-size="13">
+            <text x="440" y="24" text-anchor="middle" fill="var(--ink-soft)">le système redessiné</text>
+            <rect x="360" y="40" width="160" height="100" rx="8" fill="rgba(217,164,65,0.16)" stroke="var(--amber)" stroke-width="1.8"/>
+            <text x="440" y="90" text-anchor="middle" fill="var(--amber-text)" font-weight="600">Luxe + Volume</text>
+            <text x="440" y="108" text-anchor="middle" fill="var(--ink-soft)" font-size="11.5">350 iPhones / minute</text>
+          </g>
+          <text x="300" y="180" font-family="Fraunces" font-style="italic" font-size="13" fill="var(--ink-soft)">→</text>
+        </svg>
+        <figcaption>La plupart des choix binaires sont des limites de conception du système, pas des limites de la réalité.</figcaption>
+      </figure>
+
+      <blockquote>Le système le plus difficile à redessiner est celui que vous avez construit dans votre propre tête.<cite>Les histoires qu'on accepte sur soi-même deviennent, elles aussi, une partie du système.</cite></blockquote>
+    </div>
+  </section>
+
+  <!-- ============ EXERCICES ============ -->
+  <section class="module" id="exercices">
+    <div class="wrap">
+      <p class="module-num">Mise en pratique</p>
+      <h2>Quatre exercices</h2>
+      <ol class="exlist">
+        <li><strong>Diagnostiquer un problème réel.</strong> Notez le problème observé, les parties du système, le résultat qui se répète, l'indicateur actuellement récompensé, le délai entre l'action et ses conséquences, puis le type de système probable et la première action adaptée.</li>
+        <li><strong>Repérer un effet cobra.</strong> Prenez un objectif de votre travail : quel indicateur le mesure ? Que se passerait-il s'il devenait la seule cible ? Comment pourrait-on le contourner ? Quel indicateur complémentaire protégerait l'objectif réel ?</li>
+        <li><strong>Transformer une grande décision en test.</strong> Plutôt que « dois-je adopter cette stratégie ? », demandez « quelle est la plus petite expérience qui m'en apprendra davantage ? » — définissez l'hypothèse, la durée, le coût maximal, le critère d'arrêt.</li>
+        <li><strong>Trouver une perspective de quai.</strong> Identifiez un mentor extérieur à votre histoire, ou une donnée qui contredit votre récit intérieur actuel — et regardez ce qu'elle révèle.</li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ QUIZ ============ -->
+<section class="quiz-module" id="quiz">
+  <div class="wrap">
+    <p class="module-num">Vérifie tes acquis</p>
+    <h2>Quiz — six questions</h2>
+    <p class="lead">Une question à la fois, feedback immédiat, score à la fin.</p>
+    <div id="quiz-app"></div>
+  </div>
+</section>
+
+<!-- ============ FICHE MEMO ============ -->
+<footer class="memo">
+  <div class="wrap">
+    <p class="module-num">Fiche mémo</p>
+    <h2>Tout le cours sur une page</h2>
+
+    <table>
+      <thead><tr><th>Système</th><th>Cause → effet</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td class="tag">Clair</td><td>Évidente</td><td>Suivre le processus, checklists</td></tr>
+        <tr><td class="tag">Compliqué</td><td>Découvrable</td><td>Ralentir, analyser, bon expert</td></tr>
+        <tr><td class="tag">Complexe</td><td>Visible après coup</td><td>Expérimenter, s'adapter</td></tr>
+        <tr><td class="tag">Chaotique</td><td>Rompue</td><td>Stabiliser, agir vite</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <thead><tr><th>DART</th><th>Question</th></tr></thead>
+      <tbody>
+        <tr><td class="tag">Déconstruire</td><td>De quoi le système est-il constitué ?</td></tr>
+        <tr><td class="tag">Analyser</td><td>Comment la cause produit-elle l'effet ?</td></tr>
+        <tr><td class="tag">Reconnaître</td><td>Quel schéma similaire ai-je déjà vu ?</td></tr>
+        <tr><td class="tag">Tester</td><td>Quelle est la plus petite action réversible ?</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Trois perspectives extérieures :</strong> mentors, données, temps.</p>
+
+    <blockquote>Ne cherchez pas immédiatement une solution.<br>Commencez par identifier le type de système dans lequel vous êtes.</blockquote>
+  </div>
+</footer>
+
+<div class="colophon">Cours composé à partir de cinq versions sources — pensée systémique, diagnostic DART, quatre types de systèmes.</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- DARK MODE (session only, no storage APIs) ---------- */
+  var root = document.documentElement;
+  var toggleBtn = document.getElementById('theme-toggle');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(prefersDark){ root.setAttribute('data-theme','dark'); }
+
+  toggleBtn.addEventListener('click', function(){
+    var current = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  });
+
+  /* ---------- READING PROGRESS BAR ---------- */
+  var progressBar = document.getElementById('progress-bar');
+  function updateProgress(){
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress);
+  updateProgress();
+
+  /* ---------- DART INTERACTIVE DIAGRAM ---------- */
+  var dartInfo = {
+    d: { title: 'Déconstruire', text: 'De quelles parties le problème est-il fait ? Sont-elles stables ou en perpétuel mouvement ?' },
+    a: { title: 'Analyser', text: 'La relation cause → effet est-elle évidente, découvrable par l\u2019analyse, émergente avec le temps, ou totalement rompue ?' },
+    r: { title: 'Reconnaître', text: 'Ai-je déjà vu ce schéma — ou un schéma similaire — dans un autre système ?' },
+    t: { title: 'Tester', text: 'Quelle est la plus petite expérience réversible avant de m\u2019engager pleinement ? (sauf en système chaotique, où il n\u2019y a pas le temps de tester)' }
+  };
+  var dartDetail = document.getElementById('dart-detail');
+  var dartSteps = document.querySelectorAll('.dart-step');
+  dartSteps.forEach(function(step){
+    step.addEventListener('click', function(){
+      dartSteps.forEach(function(s){ s.classList.remove('active'); });
+      step.classList.add('active');
+      var key = step.getAttribute('data-step');
+      var info = dartInfo[key];
+      dartDetail.innerHTML = '<strong>' + info.title + '.</strong> ' + info.text;
+    });
+  });
+
+  /* ---------- MATRIX QUADRANT ↔ TABLE ROW ---------- */
+  var quadrants = document.querySelectorAll('g[data-quadrant]');
+  var rows = document.querySelectorAll('#tr-clair, #tr-complique, #tr-complexe, #tr-chaotique');
+  quadrants.forEach(function(q){
+    q.addEventListener('click', function(){
+      var targetId = q.getAttribute('data-quadrant');
+      var alreadyActive = document.getElementById(targetId).classList.contains('row-active');
+      rows.forEach(function(r){ r.classList.remove('row-active'); });
+      quadrants.forEach(function(o){ o.classList.remove('dimmed'); });
+      if(!alreadyActive){
+        document.getElementById(targetId).classList.add('row-active');
+        document.getElementById(targetId).scrollIntoView({ behavior:'smooth', block:'center' });
+        quadrants.forEach(function(o){ if(o !== q){ o.classList.add('dimmed'); } });
+      }
+    });
+  });
+
+  /* ---------- QUIZ ---------- */
+  var questions = [
+    {
+      q: "Un patient arrive aux urgences avec une douleur thoracique : le symptôme est clair, mais vingt causes sont possibles. De quel type de système s'agit-il ?",
+      options: ["Clair", "Compliqué", "Complexe", "Chaotique"],
+      correct: 1,
+      explanation: "Compliqué : la relation cause → effet existe bel et bien, mais elle est cachée et nécessite l'expertise d'un spécialiste pour être découverte."
+    },
+    {
+      q: "Pourquoi les habitants de Delhi se sont-ils mis à élever des cobras au lieu de les éliminer ?",
+      options: [
+        "Le climat favorisait leur reproduction",
+        "La prime récompensait le nombre de cobras livrés, pas la baisse réelle de leur population",
+        "Les cobras étaient devenus des animaux de compagnie",
+        "Le gouvernement avait interdit de les tuer"
+      ],
+      correct: 1,
+      explanation: "L'effet cobra : quand une récompense cible le mauvais indicateur, les gens optimisent pour cette récompense — au détriment de l'objectif réel."
+    },
+    {
+      q: "Fusionner deux cultures d'entreprise après un rachat relève de quel type de système ?",
+      options: ["Clair", "Compliqué", "Complexe", "Chaotique"],
+      correct: 2,
+      explanation: "Complexe : la relation cause → effet n'est visible qu'a posteriori. La bonne approche est d'expérimenter petit et de rester adaptable."
+    },
+    {
+      q: "Face à la crise du Tylenol empoisonné en 1982, quelle a été la bonne stratégie ?",
+      options: [
+        "Analyser en profondeur avant d'agir",
+        "Consulter un comité d'experts pendant plusieurs semaines",
+        "Stabiliser immédiatement en retirant les produits, comprendre ensuite",
+        "Attendre d'avoir toutes les données avant toute communication"
+      ],
+      correct: 2,
+      explanation: "En système chaotique, le lien cause-effet est rompu et l'information incomplète : il faut stabiliser d'abord, analyser plus tard."
+    },
+    {
+      q: "Dans le framework DART, que vérifie l'étape « Analyser » ?",
+      options: [
+        "Si le problème a déjà été vu ailleurs",
+        "Si la relation cause → effet est évidente, découvrable, émergente ou rompue",
+        "Le coût total du projet",
+        "La taille de l'équipe nécessaire"
+      ],
+      correct: 1,
+      explanation: "« Analyser » détermine la nature du lien cause-effet — c'est cette réponse qui indique le type de système et donc la méthode à suivre."
+    },
+    {
+      q: "Que symbolise la métaphore du quai de gare ?",
+      options: [
+        "Il vaut mieux voyager en train qu'en avion pour réfléchir",
+        "De l'intérieur d'un système, on peine à percevoir sa propre trajectoire",
+        "Les gares sont de bons exemples de systèmes clairs",
+        "Le temps s'écoule plus vite quand on est pressé"
+      ],
+      correct: 1,
+      explanation: "Comme dans un train à quai, on ne distingue pas toujours qui bouge de l'intérieur — mentors, données et temps donnent la perspective du quai."
+    }
+  ];
+
+  var quizApp = document.getElementById('quiz-app');
+  var current = 0;
+  var score = 0;
+  var answered = false;
+
+  function renderQuiz(){
+    if(current >= questions.length){
+      renderResult();
+      return;
+    }
+    var item = questions[current];
+    answered = false;
+
+    var html = '';
+    html += '<div class="quiz-progress"><span>Question ' + (current+1) + ' / ' + questions.length + '</span><span>Score : ' + score + '</span></div>';
+    html += '<div class="quiz-bar-track"><div class="quiz-bar-fill" style="width:' + ((current)/questions.length*100) + '%"></div></div>';
+    html += '<p class="quiz-q">' + item.q + '</p>';
+    html += '<div class="quiz-options">';
+    item.options.forEach(function(opt, i){
+      html += '<button class="quiz-opt" data-index="' + i + '">' + opt + '</button>';
+    });
+    html += '</div>';
+    html += '<div class="quiz-feedback" id="quiz-feedback"></div>';
+    html += '<div class="quiz-nav"><button class="quiz-btn" id="quiz-next" disabled>Suivant</button></div>';
+
+    quizApp.innerHTML = html;
+
+    var optButtons = quizApp.querySelectorAll('.quiz-opt');
+    var nextBtn = document.getElementById('quiz-next');
+    var feedback = document.getElementById('quiz-feedback');
+
+    optButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(answered) return;
+        answered = true;
+        var chosen = parseInt(btn.getAttribute('data-index'), 10);
+        var isCorrect = chosen === item.correct;
+        if(isCorrect) score++;
+
+        optButtons.forEach(function(b, i){
+          b.disabled = true;
+          if(i === item.correct){ b.classList.add('correct'); }
+          else if(i === chosen){ b.classList.add('incorrect'); }
+        });
+
+        feedback.innerHTML = (isCorrect ? '<strong>Exact.</strong> ' : '<strong>Pas tout à fait.</strong> ') + item.explanation;
+        feedback.classList.add('show');
+        nextBtn.disabled = false;
+      });
+    });
+
+    nextBtn.addEventListener('click', function(){
+      current++;
+      renderQuiz();
+    });
+  }
+
+  function renderResult(){
+    var pct = Math.round((score / questions.length) * 100);
+    var comment;
+    if(pct === 100){ comment = "Le système n'a plus de secret pour toi."; }
+    else if(pct >= 66){ comment = "Solide — encore quelques révisions et c'est acquis."; }
+    else { comment = "Retourne jeter un œil aux modules concernés, ça va vite se recoller."; }
+
+    var html = '<div class="quiz-result">';
+    html += '<p class="quiz-progress" style="justify-content:center;">Résultat</p>';
+    html += '<div class="score">' + score + ' / ' + questions.length + '</div>';
+    html += '<p>' + comment + '</p>';
+    html += '<button class="quiz-btn" id="quiz-restart">Recommencer</button>';
+    html += '</div>';
+    quizApp.innerHTML = html;
+
+    document.getElementById('quiz-restart').addEventListener('click', function(){
+      current = 0;
+      score = 0;
+      renderQuiz();
+    });
+  }
+
+  renderQuiz();
+})();
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

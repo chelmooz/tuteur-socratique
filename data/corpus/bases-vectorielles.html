@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bases de données vectorielles — cours en 9 modules</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #14b8a6;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #5eead4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Bases de données <span class="accent">vectorielles</span></h1>
+      <p class="lede">Stocker, indexer et retrouver des embeddings pour une recherche par similarité rapide, à grande échelle. Neuf briques, une par une.</p>
+    </div>
+    <button class="toggle" id="darkToggle" aria-pressed="false">
+      <span id="toggleLabel">mode clair</span>
+      <span class="knob"></span>
+    </button>
+  </header>
+
+  <div class="stack" id="stack">
+
+    <!-- 1 Embeddings -->
+    <section class="module" data-n="1">
+      <div class="module-head">
+        <span class="num-badge">1</span>
+        <span class="module-title">Embeddings
+          <span class="sub">transformer une donnée en sens mesurable</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Un embedding <strong>convertit un texte, une image ou toute donnée</strong> en un vecteur dense de nombres. Deux contenus proches en signification obtiennent des vecteurs numériquement proches — c'est ce qui rend la comparaison automatique possible.</p>
+            <span class="tag-line">donnée → modèle → vecteur dense</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 160" fill="none">
+              <rect x="10" y="52" width="54" height="56" rx="4" class="f-panel s-ink" stroke-width="1.6"/>
+              <path d="M22 66h30M22 76h30M22 86h20" class="s-soft" stroke-width="1.4" stroke-linecap="round"/>
+              <text x="37" y="123" text-anchor="middle" class="mono-text f-soft" font-size="9">texte</text>
+              <path d="M70 80h30" class="s-accent" stroke-width="1.8"/>
+              <rect x="104" y="46" width="68" height="68" rx="8" class="f-panel s-accent" stroke-width="1.8"/>
+              <circle cx="122" cy="70" r="4" class="f-ink"/>
+              <circle cx="138" cy="60" r="4" class="f-ink"/>
+              <circle cx="152" cy="76" r="4" class="f-ink"/>
+              <circle cx="128" cy="92" r="4" class="f-ink"/>
+              <path d="M122 70l16-10M138 60l14 16M122 70l6 22M152 76l-24 16" class="s-soft" stroke-width="1.2"/>
+              <text x="138" y="128" text-anchor="middle" class="mono-text f-soft" font-size="9">modèle</text>
+              <path d="M176 80h26" class="s-accent" stroke-width="1.8"/>
+              <rect x="206" y="40" width="66" height="80" rx="4" class="f-panel-soft s-ink" stroke-width="1.4"/>
+              <text x="216" y="58" class="mono-text f-ink" font-size="9">[0.12,</text>
+              <text x="216" y="72" class="mono-text f-ink" font-size="9">-0.44,</text>
+              <text x="216" y="86" class="mono-text f-ink" font-size="9">0.87,</text>
+              <text x="216" y="100" class="mono-text f-ink" font-size="9">...]</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 Similarity Search -->
+    <section class="module" data-n="2">
+      <div class="module-head">
+        <span class="num-badge">2</span>
+        <span class="module-title">Recherche par similarité
+          <span class="sub">trouver les vecteurs les plus proches d'une requête</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Une fois les vecteurs stockés, on compare le <strong>vecteur de la requête</strong> à tous les autres à l'aide d'une métrique de similarité (cosinus, distance euclidienne...). Les points les plus proches dans cet espace sont les plus pertinents sémantiquement.</p>
+            <span class="tag-line">trouver les vecteurs les plus proches</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 190" fill="none">
+              <path d="M30 20v150M20 150h170" class="s-ink" stroke-width="1.4" stroke-linecap="round"/>
+              <circle cx="60" cy="60" r="3.5" class="f-ink"/>
+              <circle cx="90" cy="45" r="3.5" class="f-ink"/>
+              <circle cx="70" cy="120" r="3.5" class="f-ink"/>
+              <circle cx="130" cy="130" r="3.5" class="f-ink"/>
+              <circle cx="120" cy="70" r="4.5" class="f-accent"/>
+              <text x="128" y="60" class="mono-text f-soft" font-size="8">requête</text>
+              <circle cx="150" cy="90" r="3.5" class="f-teal, f-accent"/>
+              <circle cx="165" cy="75" r="3.5" class="f-accent"/>
+              <circle cx="160" cy="105" r="3.5" class="f-accent"/>
+              <circle cx="145" cy="60" r="3.5" class="f-accent"/>
+              <circle cx="155" cy="85" r="34" class="s-accent" stroke-width="1.4" stroke-dasharray="4 3" fill="none"/>
+              <path d="M120 70l25 15" class="s-accent" stroke-width="1.3"/>
+              <text x="200" y="90" class="mono-text f-soft" font-size="8">voisins</text>
+              <text x="200" y="102" class="mono-text f-soft" font-size="8">proches</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 Metadata -->
+    <section class="module" data-n="3">
+      <div class="module-head">
+        <span class="num-badge">3</span>
+        <span class="module-title">Métadonnées
+          <span class="sub">enrichir chaque vecteur d'un contexte lisible</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Chaque vecteur est stocké aux côtés de <strong>métadonnées</strong> — source, date, catégorie, texte original. Ces informations permettent de filtrer les résultats et de redonner du contexte humain à un simple tableau de nombres.</p>
+            <span class="tag-line">vecteurs + métadonnées riches</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 170" fill="none">
+              <rect x="10" y="40" width="46" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="10" y="70" width="46" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="10" y="100" width="46" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="17" y="53" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <text x="17" y="83" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <text x="17" y="113" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <path d="M56 50h16M56 80h16M56 110h16" class="s-accent" stroke-width="1.4"/>
+              <rect x="76" y="30" width="190" height="110" rx="5" class="f-panel s-ink" stroke-width="1.4"/>
+              <path d="M76 60h190M126 30v110M180 30v110M224 30v110" class="s-soft" stroke-width="1"/>
+              <text x="84" y="47" class="mono-text f-ink" font-size="7.5">id</text>
+              <text x="132" y="47" class="mono-text f-ink" font-size="7.5">text</text>
+              <text x="186" y="47" class="mono-text f-ink" font-size="7.5">source</text>
+              <text x="230" y="47" class="mono-text f-ink" font-size="7.5">date</text>
+              <text x="84" y="76" class="mono-text f-soft" font-size="7">1</text>
+              <text x="132" y="76" class="mono-text f-soft" font-size="7">Intro VDB</text>
+              <text x="186" y="76" class="mono-text f-soft" font-size="7">docs</text>
+              <text x="230" y="76" class="mono-text f-soft" font-size="7">02-01</text>
+              <text x="84" y="94" class="mono-text f-soft" font-size="7">2</text>
+              <text x="132" y="94" class="mono-text f-soft" font-size="7">HNSW</text>
+              <text x="186" y="94" class="mono-text f-soft" font-size="7">blog</text>
+              <text x="230" y="94" class="mono-text f-soft" font-size="7">03-15</text>
+              <text x="84" y="112" class="mono-text f-soft" font-size="7">3</text>
+              <text x="132" y="112" class="mono-text f-soft" font-size="7">Filtrage</text>
+              <text x="186" y="112" class="mono-text f-soft" font-size="7">docs</text>
+              <text x="230" y="112" class="mono-text f-soft" font-size="7">04-10</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 Indexing -->
+    <section class="module" data-n="4">
+      <div class="module-head">
+        <span class="num-badge">4</span>
+        <span class="module-title">Indexation
+          <span class="sub">chercher vite sans tout comparer</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Comparer une requête à des millions de vecteurs un par un est trop lent. Un <strong>index</strong> (HNSW, IVF, PQ...) organise l'espace vectoriel à l'avance pour retrouver des voisins approximatifs presque instantanément.</p>
+            <span class="tag-line">vecteurs + rich metadata → index</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 170" fill="none">
+              <rect x="10" y="30" width="52" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="10" y="70" width="52" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <rect x="10" y="110" width="52" height="20" rx="3" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="16" y="43" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <text x="16" y="83" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <text x="16" y="123" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <path d="M62 40h30M62 80l30-30M62 120l30-70" class="s-accent" stroke-width="1.3"/>
+              <rect x="96" y="26" width="86" height="118" rx="6" class="f-panel s-accent" stroke-width="1.6"/>
+              <text x="139" y="46" text-anchor="middle" class="mono-text f-ink" font-size="8">structure</text>
+              <text x="139" y="58" text-anchor="middle" class="mono-text f-ink" font-size="8">d'index</text>
+              <text x="139" y="76" text-anchor="middle" class="mono-text f-accent" font-size="8">HNSW /</text>
+              <text x="139" y="88" text-anchor="middle" class="mono-text f-accent" font-size="8">IVF / PQ</text>
+              <circle cx="120" cy="118" r="4" class="f-ink"/>
+              <circle cx="145" cy="128" r="4" class="f-ink"/>
+              <circle cx="160" cy="112" r="4" class="f-ink"/>
+              <path d="M120 118l25 10M145 128l15-16" class="s-soft" stroke-width="1.2"/>
+              <path d="M182 90h30" class="s-accent" stroke-width="1.6"/>
+              <text x="245" y="94" text-anchor="middle" class="mono-text f-soft" font-size="8">recherche</text>
+              <text x="245" y="106" text-anchor="middle" class="mono-text f-soft" font-size="8">rapide</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 Retrieval -->
+    <section class="module" data-n="5">
+      <div class="module-head">
+        <span class="num-badge">5</span>
+        <span class="module-title">Récupération
+          <span class="sub">obtenir les K meilleurs résultats</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">La récupération renvoie les <strong>K vecteurs les plus proches</strong> de la requête, accompagnés de leurs métadonnées. C'est cette liste ordonnée par score de similarité qui alimente ensuite l'application.</p>
+            <span class="tag-line">requête → recherche → top K résultats</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 160" fill="none">
+              <rect x="10" y="60" width="56" height="34" rx="4" class="f-panel-soft s-ink" stroke-width="1.3"/>
+              <text x="38" y="80" text-anchor="middle" class="mono-text f-soft" font-size="7.5">requête</text>
+              <path d="M66 77h20" class="s-accent" stroke-width="1.6"/>
+              <ellipse cx="120" cy="60" rx="24" ry="8" class="s-ink" stroke-width="1.3"/>
+              <path d="M96 60v34c0 4.4 10.7 8 24 8s24-3.6 24-8V60" class="s-ink" stroke-width="1.3" fill="none"/>
+              <text x="120" y="98" text-anchor="middle" class="mono-text f-soft" font-size="7">base</text>
+              <path d="M168 77h20" class="s-accent" stroke-width="1.6"/>
+              <rect x="196" y="30" width="76" height="96" rx="4" class="f-panel s-ink" stroke-width="1.3"/>
+              <text x="234" y="46" text-anchor="middle" class="mono-text f-ink" font-size="7.5">top K</text>
+              <path d="M196 54h76" class="s-soft" stroke-width="1"/>
+              <text x="204" y="68" class="mono-text f-soft" font-size="6.5">id 7 · 0.92</text>
+              <text x="204" y="82" class="mono-text f-soft" font-size="6.5">id 12 · 0.89</text>
+              <text x="204" y="96" class="mono-text f-soft" font-size="6.5">id 3 · 0.86</text>
+              <text x="204" y="112" class="mono-text f-soft" font-size="6.5">...</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 Filtering -->
+    <section class="module" data-n="6">
+      <div class="module-head">
+        <span class="num-badge">6</span>
+        <span class="module-title">Filtrage
+          <span class="sub">croiser similarité et conditions exactes</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">On peut combiner la recherche vectorielle avec des <strong>filtres exacts sur les métadonnées</strong> (source, date, catégorie…) pour ne garder que les résultats à la fois pertinents et conformes aux critères métier.</p>
+            <span class="tag-line">requête + filtres → résultats filtrés</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 170" fill="none">
+              <rect x="8" y="20" width="60" height="26" rx="4" class="f-panel-soft s-ink" stroke-width="1.2"/>
+              <text x="38" y="37" text-anchor="middle" class="mono-text f-soft" font-size="7">requête</text>
+              <rect x="8" y="60" width="60" height="60" rx="4" class="f-panel-soft s-accent" stroke-width="1.3"/>
+              <text x="38" y="76" text-anchor="middle" class="mono-text f-accent" font-size="7">filtres</text>
+              <text x="16" y="92" class="mono-text f-soft" font-size="6">source=docs</text>
+              <text x="16" y="104" class="mono-text f-soft" font-size="6">date&gt;=01-01</text>
+              <path d="M68 33h30M68 90l30-40" class="s-accent" stroke-width="1.3"/>
+              <ellipse cx="128" cy="70" rx="22" ry="7" class="s-ink" stroke-width="1.2"/>
+              <path d="M106 70v34c0 3.9 9.9 7 22 7s22-3.1 22-7V70" class="s-ink" stroke-width="1.2" fill="none"/>
+              <path d="M150 82h20" class="s-accent" stroke-width="1.5"/>
+              <rect x="176" y="34" width="90" height="100" rx="4" class="f-panel s-ink" stroke-width="1.3"/>
+              <text x="221" y="50" text-anchor="middle" class="mono-text f-ink" font-size="7">filtrés</text>
+              <text x="184" y="68" class="mono-text f-soft" font-size="6.5">id 7 · 0.92</text>
+              <text x="184" y="82" class="mono-text f-soft" font-size="6.5">id 3 · 0.88</text>
+              <text x="184" y="96" class="mono-text f-soft" font-size="6.5">id 19 · 0.83</text>
+              <text x="184" y="110" class="mono-text f-soft" font-size="6.5">...</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 Storage -->
+    <section class="module" data-n="7">
+      <div class="module-head">
+        <span class="num-badge">7</span>
+        <span class="module-title">Stockage
+          <span class="sub">tout regrouper au même endroit</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Une base de données vectorielle rassemble en un seul système <strong>les vecteurs, les métadonnées et les index</strong> — évitant de synchroniser plusieurs outils séparés pour une même donnée.</p>
+            <span class="tag-line">tout en un seul endroit</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 170" fill="none">
+              <ellipse cx="140" cy="34" rx="86" ry="16" class="s-ink" stroke-width="1.4"/>
+              <path d="M54 34v88c0 8.8 38.5 16 86 16s86-7.2 86-16V34" class="s-ink" stroke-width="1.4" fill="none"/>
+              <rect x="68" y="70" width="56" height="26" rx="3" class="f-panel-soft s-ink" stroke-width="1.1"/>
+              <text x="96" y="87" text-anchor="middle" class="mono-text f-soft" font-size="7">[..~..]</text>
+              <rect x="134" y="70" width="56" height="26" rx="3" class="f-panel s-accent" stroke-width="1.3"/>
+              <text x="162" y="87" text-anchor="middle" class="mono-text f-accent" font-size="7">meta</text>
+              <circle cx="216" cy="76" r="4" class="f-ink"/>
+              <circle cx="230" cy="88" r="4" class="f-ink"/>
+              <circle cx="204" cy="92" r="4" class="f-ink"/>
+              <path d="M216 76l14 12M216 76l-12 16" class="s-soft" stroke-width="1.1"/>
+              <text x="96" y="112" text-anchor="middle" class="mono-text f-soft" font-size="7">vecteurs</text>
+              <text x="162" y="112" text-anchor="middle" class="mono-text f-accent" font-size="7">métadonnées</text>
+              <text x="216" y="112" text-anchor="middle" class="mono-text f-soft" font-size="7">index</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 Use in RAG -->
+    <section class="module" data-n="8">
+      <div class="module-head">
+        <span class="num-badge">8</span>
+        <span class="module-title">Usage en RAG
+          <span class="sub">donner à un LLM le contexte qui lui manque</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">Dans un système de <strong>RAG</strong> (retrieval-augmented generation), les documents sont découpés (chunking), transformés en embeddings, puis stockés. À chaque question, les passages les plus pertinents sont retrouvés et fournis au LLM avant qu'il ne réponde.</p>
+            <span class="tag-line">récupérer le contexte pour le LLM</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 190" fill="none">
+              <rect x="6" y="20" width="34" height="42" rx="3" class="f-panel-soft s-ink" stroke-width="1.1"/>
+              <path d="M12 32h22M12 40h22M12 48h14" class="s-soft" stroke-width="1"/>
+              <text x="23" y="76" text-anchor="middle" class="mono-text f-soft" font-size="6.5">documents</text>
+              <path d="M40 40h20" class="s-accent" stroke-width="1.3"/>
+              <rect x="64" y="22" width="38" height="38" rx="3" class="f-panel s-ink" stroke-width="1.2"/>
+              <path d="M74 32h8v8h-8zM86 32h8v8h-8zM74 44h8v8h-8zM86 44h8v8h-8z" class="s-accent" stroke-width="1"/>
+              <text x="83" y="76" text-anchor="middle" class="mono-text f-soft" font-size="6.5">chunking</text>
+              <path d="M102 40h20" class="s-accent" stroke-width="1.3"/>
+              <rect x="126" y="20" width="42" height="42" rx="6" class="f-panel s-accent" stroke-width="1.2"/>
+              <circle cx="140" cy="35" r="3" class="f-ink"/>
+              <circle cx="154" cy="30" r="3" class="f-ink"/>
+              <circle cx="150" cy="48" r="3" class="f-ink"/>
+              <path d="M140 35l14-5M140 35l10 13" class="s-soft" stroke-width="1"/>
+              <text x="147" y="76" text-anchor="middle" class="mono-text f-soft" font-size="6.5">embeddings</text>
+              <path d="M168 40h18" class="s-accent" stroke-width="1.3"/>
+              <ellipse cx="212" cy="32" rx="20" ry="7" class="s-ink" stroke-width="1.1"/>
+              <path d="M192 32v22c0 3.9 9 7 20 7s20-3.1 20-7V32" class="s-ink" stroke-width="1.1" fill="none"/>
+              <text x="212" y="76" text-anchor="middle" class="mono-text f-soft" font-size="6.5">base vectorielle</text>
+
+              <path d="M212 68v18" class="s-accent" stroke-width="1.3"/>
+              <rect x="150" y="94" width="66" height="42" rx="4" class="f-panel-soft s-ink" stroke-width="1.1"/>
+              <text x="183" y="112" text-anchor="middle" class="mono-text f-ink" font-size="6.5">top K</text>
+              <text x="183" y="124" text-anchor="middle" class="mono-text f-ink" font-size="6.5">docs pertinents</text>
+              <path d="M150 115h-40" class="s-accent" stroke-width="1.3"/>
+              <path d="M110 115v0" class="s-accent"/>
+              <rect x="34" y="94" width="76" height="42" rx="4" class="f-panel s-accent" stroke-width="1.4"/>
+              <circle cx="52" cy="115" r="9" class="s-accent" stroke-width="1.4" fill="none"/>
+              <path d="M48 112c0-3 8-3 8 0M48 118h8" class="s-soft" stroke-width="1"/>
+              <text x="82" y="112" text-anchor="middle" class="mono-text f-accent" font-size="6.5">réponse</text>
+              <text x="82" y="124" text-anchor="middle" class="mono-text f-accent" font-size="6.5">du LLM</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 Popular Vector DBs -->
+    <section class="module" data-n="9">
+      <div class="module-head">
+        <span class="num-badge">9</span>
+        <span class="module-title">Bases vectorielles populaires
+          <span class="sub">choisir l'outil adapté à son échelle</span>
+        </span>
+        <svg class="chev" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="module-body">
+        <div class="module-body-inner">
+          <div>
+            <p class="explain">De nombreuses options open-source ou managées existent, des plus simples pour prototyper (Chroma) aux plus robustes pour la production à grande échelle (Qdrant, Milvus). Le bon choix dépend du <strong>volume, de la latence attendue et de l'infrastructure existante</strong>.</p>
+            <span class="tag-line">choisir selon ses besoins</span>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 280 150" fill="none">
+              <rect x="6" y="10" width="120" height="34" rx="7" class="f-panel s-ink" stroke-width="1.3"/>
+              <text x="66" y="32" text-anchor="middle" class="mono-text f-ink" font-size="10">Pinecone</text>
+              <rect x="6" y="58" width="120" height="34" rx="7" class="f-panel s-ink" stroke-width="1.3"/>
+              <text x="66" y="80" text-anchor="middle" class="mono-text f-ink" font-size="10">Milvus</text>
+              <rect x="6" y="106" width="120" height="34" rx="7" class="f-panel s-accent" stroke-width="1.5"/>
+              <text x="66" y="128" text-anchor="middle" class="mono-text f-accent" font-size="10">Chroma</text>
+              <rect x="150" y="10" width="120" height="34" rx="7" class="f-panel s-accent" stroke-width="1.5"/>
+              <text x="210" y="32" text-anchor="middle" class="mono-text f-accent" font-size="10">Weaviate</text>
+              <rect x="150" y="58" width="120" height="34" rx="7" class="f-panel s-accent" stroke-width="1.5"/>
+              <text x="210" y="80" text-anchor="middle" class="mono-text f-accent" font-size="10">Qdrant</text>
+              <rect x="150" y="106" width="120" height="34" rx="7" class="f-panel s-ink" stroke-width="1.3"/>
+              <text x="210" y="128" text-anchor="middle" class="mono-text f-ink" font-size="10">pgvector</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="takeaways">
+    <h2>Points clés à retenir</h2>
+    <ul>
+      <li><b>Sens</b>Les vecteurs capturent le sens sémantique des données.</li>
+      <li><b>Pertinence</b>La recherche par similarité trouve les résultats les plus proches.</li>
+      <li><b>Vitesse</b>Les index permettent une recherche rapide à grande échelle.</li>
+      <li><b>Précision</b>Métadonnées et filtres améliorent la qualité des résultats.</li>
+      <li><b>Usage</b>Essentiel pour le RAG, la recherche sémantique et les recommandations.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>9 modules · bases de données vectorielles</span>
+    <span id="clock"></span>
+  </footer>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('darkToggle');
+  const label = document.getElementById('toggleLabel');
+  function setMode(dark){
+    root.classList.toggle('dark', dark);
+    toggle.setAttribute('aria-pressed', String(dark));
+    label.textContent = dark ? 'mode sombre' : 'mode clair';
+  }
+  setMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+  toggle.addEventListener('click', () => setMode(!root.classList.contains('dark')));
+
+  document.querySelectorAll('.module').forEach(mod => {
+    const head = mod.querySelector('.module-head');
+    const body = mod.querySelector('.module-body');
+    head.setAttribute('role','button');
+    head.setAttribute('tabindex','0');
+    function toggleOpen(){
+      const isOpen = mod.classList.contains('open');
+      if(isOpen){
+        body.style.maxHeight = '0px';
+        mod.classList.remove('open');
+      } else {
+        mod.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+    head.addEventListener('click', toggleOpen);
+    head.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleOpen(); } });
+  });
+
+  const first = document.querySelector('.module');
+  first.classList.add('open');
+  first.querySelector('.module-body').style.maxHeight = first.querySelector('.module-body').scrollHeight + 'px';
+
+  const clock = document.getElementById('clock');
+  clock.textContent = new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric'});
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

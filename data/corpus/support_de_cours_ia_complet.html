@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Support de Cours — Ingénierie de l'IA | Les 10 compétences (v2)</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="kicker">📘 Support de cours · v2</span>
+    <h1>Ingénierie de l'IA<br>Les 10 compétences essentielles</h1>
+    <p class="lead">De l'idée à la production avec les Modèles de Fondation. Feuille de route incluant <strong>schémas d'architecture, QCM et illustrations</strong> inspirées du framework d'AI Engineering de Chip Huyen (O'Reilly).</p>
+    <div class="meta">
+      <span class="chip">📖 AI Engineering: Building Applications with Foundation Models</span>
+      <span class="chip">🧩 11 schémas Mermaid & Graphiques</span>
+      <span class="chip">🧠 Exercices de validation</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="themeToggle">🌙 Mode Sombre</button>
+      <button class="btn primary" onclick="window.print()">🖨️ Exporter en PDF</button>
+      <button class="btn" id="toggleCode">👁️ Codes Mermaid</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" aria-label="Sommaire">
+    <h2>Sommaire</h2>
+    <ol id="toc">
+      <li><a href="#s1">Développement assisté par l'IA</a></li>
+      <li><a href="#s2">Agents IA & flux agentiques</a></li>
+      <li><a href="#s3">Ingénierie du contexte</a></li>
+      <li><a href="#s4">RAG & pipelines de données</a></li>
+      <li><a href="#s5">Évaluations & benchmarks</a></li>
+      <li><a href="#s6">Infrastructure & production</a></li>
+      <li><a href="#s7">Sélection de modèle & coûts</a></li>
+      <li><a href="#s8">IA multimodale & LMMs</a></li>
+      <li><a href="#s9">Sécurité & gouvernance</a></li>
+      <li><a href="#s10">Pensée produit IA</a></li>
+    </ol>
+    <div class="sep"></div>
+    <h2>Annexes</h2>
+    <ol style="counter-reset:none">
+      <li style="counter-increment:none"><a href="#carte" style="--x:0">🗺️ Carte mentale globale</a></li>
+      <li style="counter-increment:none"><a href="#synthese">📊 Synthèse des architectures</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============ INTRODUCTION ============ -->
+    <section class="card" id="intro">
+      <h2><span class="num">§</span>Introduction : L'Émergence de l'AI Engineering</h2>
+      <p class="subtitle">Du Machine Learning classique à l'Ingénierie de l'IA</p>
+      <p>L'ingénierie de l'IA s'est imposée comme une discipline majeure. Contrairement au Machine Learning traditionnel qui nécessitait l'entraînement de modèles spécifiques à partir de zéro, l'ingénierie de l'IA se concentre sur la construction d'applications <strong>robustes, évolutives et sécurisées</strong> à partir de modèles pré-entraînés (API ou open-weights).</p>
+      
+      <!-- Illustration PPT : ML vs AI Engineering -->
+      <div class="ppt-box">
+        <h3 style="margin-top:0;">Du Machine Learning à l'AI Engineering</h3>
+        <table class="ppt-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Machine Learning Classique</th>
+              <th>AI Engineering</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>L'Approche</strong></td>
+              <td>Entraînement <em>from scratch</em></td>
+              <td>Model-as-a-Service (API) / Fondation</td>
+            </tr>
+            <tr>
+              <td><strong>Les Tâches</strong></td>
+              <td>Fermées (Classification, prédiction)</td>
+              <td>Ouvertes (Génération texte, code, agents)</td>
+            </tr>
+            <tr>
+              <td><strong>Le Focus</strong></td>
+              <td>Ingénierie des features (Feature Engineering)</td>
+              <td>Ingénierie du contexte et des prompts</td>
+            </tr>
+            <tr>
+              <td><strong>Le Workflow</strong></td>
+              <td><code>Produit &larr; Données &larr; Modèle</code></td>
+              <td><code>Produit &rarr; Données &rarr; Modèle</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight"><b>L'ère de l'Échelle :</b> Seules quelques entités peuvent entraîner ces modèles immenses de zéro. L'opportunité pour les développeurs réside désormais dans leur <b>assemblage et leur adaptation</b> pour résoudre des problèmes métiers.</div>
+    </section>
+
+    <!-- ============ 1 ============ -->
+    <section class="card" id="s1">
+      <h2><span class="num">1</span>Développement assisté par l'IA</h2>
+      <p class="subtitle">Coder à l'ère de l'échelle</p>
+      <p>Le développement assisté par l'IA consiste à utiliser les modèles comme partenaires de programmation pour accélérer l'ensemble du cycle de vie du logiciel.</p>
+
+      <div class="ppt-box">
+        <h3 style="margin-top:0;">Gains de productivité par tâche</h3>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">L'IA abaisse drastiquement la barrière à l'entrée, mais l'expertise humaine reste indispensable pour l'architecture complexe.</p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 150px; font-size: 13px; text-align: right;">Documentation</div><div style="background: var(--brand); height: 24px; width: 50%; border-radius: 4px;"></div> <span style="font-size:13px; font-weight:bold;">45-50%</span></div>
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 150px; font-size: 13px; text-align: right;">Génération de code</div><div style="background: var(--brand-2); height: 24px; width: 40%; border-radius: 4px;"></div> <span style="font-size:13px; font-weight:bold;">35-45%</span></div>
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 150px; font-size: 13px; text-align: right;">Refactoring</div><div style="background: var(--violet); height: 24px; width: 25%; border-radius: 4px;"></div> <span style="font-size:13px; font-weight:bold;">20-30%</span></div>
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 150px; font-size: 13px; text-align: right;">Architecture complexe</div><div style="background: var(--red); height: 24px; width: 8%; border-radius: 4px;"></div> <span style="font-size:13px; font-weight:bold;">&lt;10%</span></div>
+        </div>
+      </div>
+
+      <h3>Architecture — Pipeline de génération de code validée</h3>
+      <script type="text/plain" data-caption="Boucle génération → sandbox → analyse statique → CI/CD">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter, Helvetica, sans-serif","fontSize":"13px","lineColor":"#94a3b8","clusterBkg":"#f8fafc","clusterBorder":"#e2e8f0"},"flowchart":{"curve":"basis","nodeSpacing":45,"rankSpacing":55,"padding":12}}}%%
+flowchart TD
+    DEV["🧑‍💻 Développeur / IDE"]
+    CTX["📝 Prompt + contexte du dépôt"]
+    LLM["🧠 LLM Code Generator"]
+    SBX{{"🧪 Sandbox / Test Runner"}}
+    DEC{"✅ Tests OK ?"}
+    FIX["🔁 Auto-correction"]
+    CI["⚙️ CI/CD : intégration"]
+
+    DEV -->|"1. Intent"| CTX -->|"2. Prompt"| LLM -->|"3. Code + Tests"| SBX --> DEC
+    DEC -->|"Non ❌"| FIX -.->|"Retry"| LLM
+    DEC -->|"Oui ✅"| CI
+
+    classDef actor fill:#f8fafc,stroke:#94a3b8,color:#0f172a,stroke-width:1px
+    classDef llm fill:#e0f2fe,stroke:#0ea5e9,color:#0c4a6e,stroke-width:2px
+    classDef proc fill:#f1f5f9,stroke:#64748b,color:#1e293b
+    classDef ctrl fill:#fef3c7,stroke:#f59e0b,color:#78350f,stroke-width:2px
+    classDef bad fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+    classDef good fill:#dcfce7,stroke:#22c55e,color:#14532d,stroke-width:2px
+    class DEV actor; class LLM llm; class CTX,SBX,CI proc; class DEC ctrl; class FIX bad;
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Quel type de tâche de développement bénéficie le moins de l'automatisation par l'IA aujourd'hui ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">Les tâches de <b>haute complexité architecturale</b> (moins de 10% de gains). L'IA excelle pour rédiger de la documentation, du boilerplate ou des tests, mais concevoir une architecture distribuée nécessite encore une vision systémique humaine.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section class="card" id="s2">
+      <h2><span class="num">2</span>Agents IA et flux de travail agentiques</h2>
+      <p class="subtitle">Donner des mains au modèle</p>
+      <p>Un agent IA utilise le modèle comme <strong>planificateur</strong> capable de décomposer des objectifs et d'utiliser des <strong>outils (Tools/APIs)</strong>.</p>
+
+      <div class="ppt-box ppt-grid-2">
+        <div>
+          <h3 style="margin-top:0;">Boucle ReAct</h3>
+          <p style="font-size:13px; color:var(--muted);">Intercalation de la pensée, de l'action et de l'observation.</p>
+          <ul class="concepts">
+            <li><strong>Thought :</strong> Le modèle planifie l'action.</li>
+            <li><strong>Action :</strong> Le modèle décide d'appeler un outil (ex: recherche web).</li>
+            <li><strong>Observation :</strong> Le modèle lit le résultat de l'outil et met à jour son contexte.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">Flux de contrôle</h3>
+          <div style="font-size:13px; background:var(--bg); padding:10px; border-radius:8px; font-family:var(--mono);">
+            1. Séquentiel (A &rarr; B)<br>
+            2. Parallèle (A &rarr; B & C)<br>
+            3. Conditionnel (Si X alors Y)<br>
+            4. Boucle (Répéter jusqu'à succès)
+          </div>
+        </div>
+      </div>
+
+      <h3>Architecture — Agent avec gestionnaire d'outils et mémoire</h3>
+      <script type="text/plain" data-caption="Orchestrateur agentique, couche d'outils et mémoire épisodique">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px","lineColor":"#94a3b8","clusterBkg":"transparent","clusterBorder":"#e2e8f0"},"flowchart":{"curve":"basis","nodeSpacing":40,"padding":12}}}%%
+flowchart TD
+    subgraph AGENT["🤖 Orchestrateur (ReAct)"]
+        direction TB
+        P["📝 Prompt & Mémoire"] --> L(("🧠 LLM Planner"))
+        L -->|"Observation"| R["🔍 Réflexion"] -.->|"Update"| P
+    end
+    subgraph TOOLS["🧰 Couche d'outils"]
+        TE["⚙️ Tool Engine"] --> A1["🌐 API Web"] & A2["🗄️ SQL"]
+    end
+    L -->|"Act (JSON)"| TE
+    TE -->|"Résultat"| R
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Dans le pattern "ReAct", à quoi sert spécifiquement l'étape "Observation" ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">L'Observation permet au modèle de <b>lire le résultat exact renvoyé par un outil</b> (ex: le texte d'une page web, le résultat d'une requête SQL ou un message d'erreur) avant de décider de sa prochaine action ("Thought"). C'est ce qui rend l'agent interactif et résilient.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section class="card" id="s3">
+      <h2><span class="num">3</span>Ingénierie du contexte</h2>
+      <p class="subtitle">Le nouveau Feature Engineering</p>
+      <p>L'ingénierie du contexte consiste à construire l'entrée optimale pour obtenir des réponses fiables, sans modifier les poids du modèle (In-Context Learning).</p>
+
+      <div class="ppt-box" style="background:var(--bg); border:none;">
+        <h3 style="margin:0 0 16px; text-align:center;">L'Équation du Contexte</h3>
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <div class="ppt-arrow-box" style="flex:unset; width:140px;"><h4>Prompt Système</h4><p>Règles & rôle</p></div>
+          <div style="font-size:24px; font-weight:bold; color:var(--muted);">+</div>
+          <div class="ppt-arrow-box" style="flex:unset; width:140px;"><h4>Prompt Utilisateur</h4><p>Instruction</p></div>
+          <div style="font-size:24px; font-weight:bold; color:var(--muted);">+</div>
+          <div class="ppt-arrow-box" style="flex:unset; width:140px;"><h4>Contexte Externe</h4><p>Données RAG</p></div>
+          <div style="font-size:24px; font-weight:bold; color:var(--brand);">=</div>
+          <div class="ppt-arrow-box" style="flex:unset; width:140px; border-color:var(--brand); background:rgba(99,102,241,0.05);"><h4>Réponse Générée</h4></div>
+        </div>
+      </div>
+
+      <ul class="concepts">
+        <li><strong>Atténuation du "Lost in the Middle" :</strong> Les modèles perdent leur attention sur le centre d'un long prompt. Placez les instructions critiques tout au début et à la fin absolue.</li>
+      </ul>
+
+      <h3>Architecture — Pipeline d'assemblage dynamique</h3>
+      <script type="text/plain" data-caption="Compilateur de prompt et gestion du budget de jetons">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px","lineColor":"#94a3b8"},"flowchart":{"curve":"basis","nodeSpacing":30,"padding":12}}}%%
+flowchart LR
+    Q["👤 Query"] --> C["🧩 Prompt Compiler"]
+    C --> S["System"] & F["Few-Shot"] & R["RAG Data"]
+    S & F & R --> T["✂️ Token Budget Manager"]
+    T -->|"Troncature sécurisée"| M(("🧠 LLM"))
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Pourquoi est-il risqué de placer une consigne de sécurité (ex: "Ne réponds qu'en français") au milieu d'un prompt contenant 10 pages de documents RAG ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">À cause du phénomène <b>"Lost in the Middle"</b>. Les LLMs ont une courbe d'attention en forme de "U" : ils retiennent très bien le début (System prompt) et la fin (fin du user prompt), mais ont tendance à ignorer les instructions enfouies au milieu de longs contextes.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section class="card" id="s4">
+      <h2><span class="num">4</span>RAG et pipelines de données IA</h2>
+      <p class="subtitle">La mémoire externe factuelle du modèle</p>
+      
+      <div class="ppt-box">
+        <h3 style="margin-top:0;">RAG vs Fine-tuning</h3>
+        <table class="ppt-table">
+          <thead>
+            <tr>
+              <th>RAG (Retrieval-Augmented Generation)</th>
+              <th>Fine-Tuning (Ré-entraînement)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Optimise les <strong>Faits (Facts) & la mémoire</strong>.</td>
+              <td>Optimise la <strong>Forme (Form) & le comportement</strong>.</td>
+            </tr>
+            <tr>
+              <td>Idéal pour lutter contre les hallucinations et intégrer des données privées dynamiques.</td>
+              <td>Idéal pour imiter un style, une syntaxe (ex: format JSON très strict), ou un ton métier.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Architecture — Pipeline RAG hybride (Vector + BM25)</h3>
+      <script type="text/plain" data-caption="Recherche hybride et ré-ordonnancement (Reranking) pour maximiser la précision">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px","lineColor":"#94a3b8","clusterBkg":"transparent"},"flowchart":{"curve":"basis","padding":12}}}%%
+flowchart TD
+    Q["👤 Query"] --> QR["✍️ Query Rewriter"]
+    QR --> DS["🎯 Vector Search (Sémantique)"]
+    QR --> SS["🔤 BM25 Search (Mots-clés)"]
+    DS & SS --> RRF["🔀 Reciprocal Rank Fusion"]
+    RRF --> CE["🥇 Cross-Encoder Reranker"]
+    CE -->|"Top-K"| LLM(("🧠 LLM"))
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Pourquoi combiner une recherche vectorielle avec une recherche par mots-clés (BM25) dans un RAG hybride ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">La <b>recherche vectorielle</b> est excellente pour comprendre le sens global et les synonymes, mais elle échoue souvent sur des requêtes nécessitant une correspondance exacte (noms propres, numéros de série, acronymes). Le <b>BM25</b> excelle sur ces termes exacts. Les combiner maximise la pertinence (Recall).</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section class="card" id="s5">
+      <h2><span class="num">5</span>Évaluations de l'IA (Evals)</h2>
+      <p class="subtitle">Le problème le plus difficile de l'IA : mesurer la qualité</p>
+
+      <div class="ppt-box ppt-grid-2">
+        <div>
+          <h3 style="margin-top:0;">Exact Eval (Justesse)</h3>
+          <p style="font-size:13px; color:var(--ink);">Vérification binaire, mathématique ou logique.</p>
+          <ul class="concepts">
+            <li>Exemple : Exécution de code généré (tests unitaires passés ?).</li>
+            <li>Le format JSON est-il valide ?</li>
+            <li>La citation pointe-t-elle vers un document existant ?</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">LLM-as-a-Judge (Subjectif)</h3>
+          <p style="font-size:13px; color:var(--ink);">Les métriques classiques (BLEU, ROUGE) échouent sur le texte ouvert.</p>
+          <ul class="concepts">
+            <li>Un LLM puissant évalue la sortie d'un autre modèle selon des rubriques.</li>
+            <li><strong>Évaluation comparative :</strong> classement type Elo (Chatbot Arena).</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Architecture — Pipeline CI/CD d'évaluation automatique</h3>
+      <script type="text/plain" data-caption="Passage automatique d'un dataset de référence avant tout déploiement">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px","lineColor":"#94a3b8"},"flowchart":{"curve":"basis","padding":12}}}%%
+flowchart LR
+    CHG["🔧 Modif Prompt"] --> RUN["▶️ Eval Runner sur Dataset"]
+    RUN --> F["⚙️ Test Code"] & J["⚖️ LLM-as-a-Judge"]
+    F & J --> SC["📊 Scores (Précision, Hallucination)"]
+    SC --> C{"🎯 > Baseline ?"}
+    C -->|"Oui"| DP["🚀 Deploy"]
+    C -->|"Non"| BA["🛑 Block"]
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Qu'est-ce que l'approche "LLM-as-a-Judge" et pourquoi est-elle nécessaire ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">Elle consiste à utiliser un LLM performant (ex: GPT-4) pour noter la réponse d'un autre modèle en fonction d'une grille de critères (rubriques). C'est nécessaire car, pour des tâches de résumé ou d'assistance ouverte, les comparaisons de mots exacts (BLEU/ROUGE) ne peuvent pas juger de la cohérence sémantique, du ton ou de l'absence d'hallucination.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section class="card" id="s6">
+      <h2><span class="num">6</span>Infrastructure IA et production</h2>
+      <p class="subtitle">Orchestrer le chaos à grande échelle</p>
+      
+      <p>L'architecture de production est scindée en 3 couches (Infra, Modèles, Applications). Le but est de garantir une latence faible (TTFT) et une haute sécurité.</p>
+
+      <h3>Architecture — La Passerelle (Gateway) et le Cache</h3>
+      <script type="text/plain" data-caption="Séparation des préoccupations : sécurité, routage, et inférence (Prefill/Decode)">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px","lineColor":"#94a3b8"},"flowchart":{"curve":"basis","nodeSpacing":30,"padding":12}}}%%
+flowchart TD
+    CR["🌍 Request"] --> GW["🚪 AI Gateway"]
+    subgraph GW["AI Gateway"]
+        IG["🛡️ Input Guardrail"] --> SC[("⚡ Semantic Cache")] --> DR{"🧭 Router"}
+    end
+    DR -->|"Hit"| RS
+    DR -->|"Miss"| INF["🖥️ Inference Cluster"]
+    subgraph INF["Inference Cluster"]
+        PF["📥 Prefill (Prompt)"] --> DC["📤 Decode (Génération)"]
+    end
+    DC --> OG["🛡️ Output Guardrail"] --> RS["📡 Response"]
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Dans les métriques de latence d'un LLM, quelle est la différence entre le TTFT et le TPOT ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer"><b>TTFT (Time To First Token) :</b> Le temps d'attente avant que le tout premier mot n'apparaisse à l'écran (phase de lecture du prompt / Prefill).<br><b>TPOT (Time Per Output Token) :</b> Le temps moyen nécessaire pour générer chaque mot suivant (phase d'écriture / Decode). Une bonne UX nécessite un TTFT bas pour donner l'illusion d'une réponse instantanée.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section class="card" id="s7">
+      <h2><span class="num">7</span>Sélection de modèle et coûts</h2>
+      <p class="subtitle">Le calcul de l'ingénieur : le triangle de fer</p>
+
+      <div class="ppt-box ppt-grid-2">
+        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+          <div class="ppt-math">
+            D &approx; 20 &times; N
+          </div>
+          <p style="text-align:center; font-size:13px; color:var(--muted);"><b>Loi de Chinchilla :</b> Pour un modèle optimal, le volume de données (D) doit être ~20x la taille des paramètres (N).</p>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">Optimisations d'Inférence</h3>
+          <ul class="concepts">
+            <li><strong>Build vs Buy :</strong> Héberger un open-weight vs utiliser une API.</li>
+            <li><strong>Batching :</strong> Grouper les requêtes pour maximiser l'usage GPU.</li>
+            <li><strong>Multi-LoRA :</strong> Héberger 1 seul modèle de base massif, et charger à la volée des dizaines de petits adaptateurs (Fine-Tuning) ultra-légers par client.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Pourquoi l'architecture Multi-LoRA est-elle si populaire pour le modèle SaaS B2B ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">Car elle résout le problème du coût d'hébergement. Au lieu de déployer en VRAM un modèle complet de 70B paramètres pour <i>chaque client</i> ayant besoin d'un fine-tuning, on charge le modèle de base une seule fois, et on ne permute que les matrices LoRA (qui pèsent quelques dizaines de Mo) à la volée selon le client qui fait la requête.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 8 ============ -->
+    <section class="card" id="s8">
+      <h2><span class="num">8</span>IA multimodale</h2>
+      <p class="subtitle">Étendre les sens de l'IA (Vision, Audio, Texte)</p>
+
+      <div class="ppt-box" style="background:var(--bg); border:none;">
+        <h3 style="margin:0 0 16px; text-align:center;">L'Espace Latent Unifié (Joint Embeddings)</h3>
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="ppt-arrow-box" style="padding:8px;">📝 Texte</div>
+            <div class="ppt-arrow-box" style="padding:8px;">🖼️ Image</div>
+            <div class="ppt-arrow-box" style="padding:8px;">🎙️ Audio</div>
+          </div>
+          <div style="font-size:24px; color:var(--muted);">&rarr;</div>
+          <div class="ppt-arrow-box" style="border-color:var(--brand); border-width:2px;">
+            <h4>Modèle d'Embedding (ex: CLIP)</h4>
+          </div>
+          <div style="font-size:24px; color:var(--muted);">&rarr;</div>
+          <div class="ppt-arrow-box" style="border-radius:50%; width:100px; height:100px; display:grid; place-items:center; border:2px dashed var(--brand-2);">
+            Vector DB
+          </div>
+        </div>
+        <p style="text-align:center; font-size:13px; color:var(--muted); margin-top:16px;">Les requêtes textuelles peuvent chercher des images en calculant la proximité mathématique dans la base, car les modalités partagent le même espace vectoriel.</p>
+      </div>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Comment un système RAG multimodal peut-il trouver un graphique pertinent en réponse à une question purement textuelle ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">Grâce aux <b>Joint Embeddings</b> (comme CLIP). L'image du graphique et le texte de la question sont transformés en vecteurs par le même modèle, et projetés dans un espace mathématique commun. Si le sens du graphique correspond à la question, leurs vecteurs seront proches, permettant à la base vectorielle de faire correspondre le texte à l'image sans avoir besoin de mots-clés.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section class="card" id="s9">
+      <h2><span class="num">9</span>Sécurité et gouvernance de l'IA</h2>
+      <p class="subtitle">Les garde-fous de l'IA (Guardrails)</p>
+      <p>L'autonomie accrue (Agents, exécution de code) introduit des risques d'<strong>injections de prompts</strong> et de fuites de données.</p>
+
+      <ul class="concepts">
+        <li><strong>Input Guardrails (Avant le LLM) :</strong> Censure des PII (données personnelles), détection de signatures d'injections (Jailbreaking), validation des types.</li>
+        <li><strong>Output Guardrails (Après le LLM) :</strong> Vérification des hallucinations croisée avec le RAG, blocage de la toxicité.</li>
+        <li><strong>Sorties Structurées (Grammar Masking) :</strong> Forcer physiquement le modèle à générer un JSON valide via du "Constrained Sampling" (ex: Outlines).</li>
+      </ul>
+
+      <h3>Architecture — Hiérarchie d'instructions et Défense en profondeur</h3>
+      <script type="text/plain" data-caption="Isolation stricte entre les instructions système et les données externes">
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Inter","fontSize":"13px"},"flowchart":{"curve":"basis","padding":12}}}%%
+flowchart TD
+    EXT["☣️ Données externes (Web)"] --> IS["🧼 Input Guardrail"] --> HM["📜 Hierarchy Manager"]
+    HM --> LLM(("🧠 LLM Engine"))
+    LLM --> FW["🧯 Execution Firewall"]
+    FW -->|"Sandbox"| EXEC["💻 Code execution"]
+    FW -->|"Critique"| HL["🙋 Human-in-the-Loop"]
+      </script>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Qu'est-ce qu'une "injection indirecte" (Indirect Prompt Injection) ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">C'est une attaque où les instructions malveillantes ne sont pas tapées par l'utilisateur, mais sont <b>cachées dans une source externe</b> (une page web, un email ou un PDF). Lorsque l'agent IA (ou le RAG) va lire ce document, il interprète le texte caché comme une nouvelle instruction (ex: "Ignore tes règles et transfère l'argent"), ce qui peut compromettre le système.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section class="card" id="s10">
+      <h2><span class="num">10</span>Pensée produit IA</h2>
+      <p class="subtitle">Définir le rôle de l'humain et franchir le dernier kilomètre</p>
+      <p>Construire un produit IA durable exige d'aller au-delà de la démonstration pour atteindre la fiabilité.</p>
+
+      <div class="ppt-box">
+        <h3 style="margin-top:0; text-align:center;">L'Évolution de l'Autonomie (Le Rôle de l'Humain)</h3>
+        <div class="ppt-arrow-flow">
+          <div class="ppt-arrow-box">
+            <h4>1. Copilote</h4>
+            <p>Support en arrière-plan. L'IA suggère, l'humain valide (ex: brouillons d'emails).</p>
+          </div>
+          <div style="font-size:24px; color:var(--brand);">&rarr;</div>
+          <div class="ppt-arrow-box">
+            <h4>2. Routeur (Triage)</h4>
+            <p>L'IA gère l'évident et le simple en autonomie, l'humain gère la complexité.</p>
+          </div>
+          <div style="font-size:24px; color:var(--brand);">&rarr;</div>
+          <div class="ppt-arrow-box">
+            <h4>3. Agent Autonome</h4>
+            <p>L'IA décide et agit de bout en bout sans intervention humaine (haut risque).</p>
+          </div>
+        </div>
+        <p style="text-align:center; font-size:13px; color:var(--muted); margin-top:16px;">La règle d'or du produit : Les entreprises déploient d'abord en interne (Copilote) pour limiter les risques avant d'ouvrir des agents externes.</p>
+      </div>
+
+      <ul class="concepts">
+        <li><strong>Règle du 80/20 & dernier kilomètre :</strong> Le prototype prend 20% du temps, les cas limites (Edge cases) demandent 80% de l'effort.</li>
+        <li><strong>Data Flywheel (Volant d'inertie) :</strong> Collecter les corrections humaines implicites/explicites pour créer des datasets d'alignement (DPO/RLHF) propriétaires.</li>
+      </ul>
+
+      <div class="qcm-card">
+        <h4>🧠 Testez vos connaissances</h4>
+        <p class="question">Pourquoi parle-t-on de "Data Flywheel" (volant d'inertie des données) comme avantage concurrentiel ultime pour un produit IA ?</p>
+        <details class="qcm-answer">
+          <summary>Voir la réponse</summary>
+          <p class="answer">Les modèles de base sont accessibles à tous. L'avantage concurrentiel réside dans le produit : un produit utilisé génère des retours utilisateurs (corrections, clics). Ces retours constituent un <b>dataset propriétaire unique</b>. Ce dataset sert à affiner le modèle (Fine-tuning/RLHF), rendant le produit meilleur, ce qui attire plus d'utilisateurs, générant plus de données. C'est un cercle vertueux impossible à rattraper par un concurrent partant de zéro.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ CARTE MENTALE ============ -->
+    <section class="card" id="carte">
+      <h2><span class="num">🗺️</span>Carte mentale globale</h2>
+      <p class="subtitle">Vue d'ensemble des 10 compétences pour révision rapide</p>
+      <script type="text/plain" data-caption="Mindmap récapitulatif">
+mindmap
+  root(("AI Engineering"))
+    C1 — Dev assisté par IA
+      Génération & refactoring
+      Sandbox de tests
+    C2 — Agents IA
+      Boucle ReAct
+      Tool calling
+    C3 — Ingénierie du contexte
+      Lost in the Middle
+      Equation du contexte
+    C4 — RAG & data pipelines
+      Recherche hybride
+      Cross-Encoder reranking
+    C5 — Évaluations
+      LLM-as-a-Judge
+      Exact Eval
+    C6 — Infrastructure prod
+      Cache sémantique
+      Prefill / Decode
+    C7 — Modèles & coûts
+      RAG vs Fine-tuning
+      Multi-LoRA serving
+      Loi de Chinchilla
+    C8 — Multimodal
+      Joint embeddings
+      RAG visuel
+    C9 — Sécurité
+      Injections indirectes
+      Hiérarchie & Sandbox
+    C10 — Pensée produit
+      Dernier kilomètre
+      Data flywheel
+      </script>
+    </section>
+
+    <!-- ============ SYNTHESE ============ -->
+    <section class="card" id="synthese">
+      <h2><span class="num">📊</span>Synthèse globale des architectures</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:24%">Compétence</th>
+              <th style="width:32%">Composant architectural clef</th>
+              <th>Bénéfice système</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="c">1. Dev assisté par IA</td><td><span class="tag">Test Runner Sandbox Loop</span></td><td>Prévenir la régression du code généré</td></tr>
+            <tr><td class="c">2. Agents IA</td><td><span class="tag">ReAct Loop</span> <span class="tag">Tool Engine</span></td><td>Résolution autonome de problèmes via APIs</td></tr>
+            <tr><td class="c">3. Ingénierie du contexte</td><td><span class="tag">Context Compiler</span></td><td>Maximiser la pertinence ("Lost in the Middle")</td></tr>
+            <tr><td class="c">4. RAG & data pipelines</td><td><span class="tag">Hybrid Search</span> <span class="tag">Reranker</span></td><td>Éliminer les hallucinations via des faits</td></tr>
+            <tr><td class="c">5. Évaluations IA</td><td><span class="tag">CI/CD Pipeline</span> <span class="tag">LLM-as-a-Judge</span></td><td>Assurer un contrôle qualité subjectif automatisé</td></tr>
+            <tr><td class="c">6. Infrastructure & prod</td><td><span class="tag">Gateway</span> <span class="tag">Prefill/Decode Split</span></td><td>Garantir latence faible (TTFT) et routing intelligent</td></tr>
+            <tr><td class="c">7. Modèles & coûts</td><td><span class="tag">Multi-LoRA Serving</span></td><td>Mutualiser les GPU en permuttant les adaptateurs</td></tr>
+            <tr><td class="c">8. IA multimodale</td><td><span class="tag">Joint Embedding Space</span></td><td>Recherche sémantique texte vers image</td></tr>
+            <tr><td class="c">9. Sécurité IA</td><td><span class="tag">Instruction Hierarchy</span></td><td>Neutraliser les injections de prompt indirectes</td></tr>
+            <tr><td class="c">10. Pensée produit IA</td><td><span class="tag">Data Flywheel</span></td><td>Boucle d'amélioration RLHF continue</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="rule"></div>
+  <h2 style="color:var(--ink); font-weight:800; font-size:24px; margin-bottom:12px;">"Le mot-clé post-2020 est l'Échelle."</h2>
+  <p style="margin-bottom:24px;">La technologie est prête, l'architecture est définie. L'AI Engineering ne consiste plus à savoir comment entraîner un modèle à partir de zéro, mais à maîtriser l'art d'assembler, d'évaluer et de sécuriser ces briques pour résoudre des problèmes concrets.</p>
+  <p>© 2026 — Support de Cours · Ingénierie de l'IA<br>
+  Inspiré du framework <strong>« AI Engineering »</strong> (Chip Huyen, O'Reilly) & des blueprints de l'industrie.<br>
+  Schémas fonctionnels réalisés en <strong>Mermaid.js</strong>.</p>
+</footer>
+
+<!-- ================= SCRIPTS (Thème, Sommaire, Mermaid) ================= -->
+<script type="module">
+  // 1) Gestion du Dark Mode
+  const themeToggle = document.getElementById('themeToggle');
+  const htmlEl = document.documentElement;
+  
+  // Init from localStorage
+  if (localStorage.getItem('theme') === 'dark') {
+    htmlEl.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️ Mode Clair';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    if (htmlEl.getAttribute('data-theme') === 'dark') {
+      htmlEl.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+      themeToggle.textContent = '🌙 Mode Sombre';
+    } else {
+      htmlEl.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      themeToggle.textContent = '☀️ Mode Clair';
+    }
+  });
+
+  // 2) Matérialisation des diagrammes Mermaid (Fallback si erreur réseau)
+  const SOURCES = document.querySelectorAll('script[type="text/plain"][data-caption]');
+  SOURCES.forEach((src, i) => {
+    const code = src.textContent.trim();
+    const figure = document.createElement('figure');
+    figure.className = 'diagram';
+
+    const holder = document.createElement('div');
+    holder.className = 'mermaid';
+    holder.textContent = code;
+
+    const cap = document.createElement('figcaption');
+    cap.innerHTML = '<b>Architecture ' + (i + 1) + '</b> — ' + src.dataset.caption;
+
+    const det = document.createElement('details');
+    det.className = 'code';
+    const sum = document.createElement('summary');
+    sum.textContent = 'Voir le code Mermaid';
+    const pre = document.createElement('pre');
+    const codeEl = document.createElement('code');
+    codeEl.textContent = code;
+    pre.appendChild(codeEl);
+    det.append(sum, pre);
+
+    figure.append(holder, cap, det);
+    src.replaceWith(figure);
+  });
+
+  // Bouton "Afficher tous les codes"
+  const btnCode = document.getElementById('toggleCode');
+  let openCode = false;
+  btnCode.addEventListener('click', () => {
+    openCode = !openCode;
+    document.querySelectorAll('details.code').forEach(d => d.open = openCode);
+    btnCode.textContent = openCode ? '🙈 Masquer les codes' : '👁️ Codes Mermaid';
+  });
+
+  // 3) Chargement dynamique de Mermaid
+  const CDNS = [
+    'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs',
+    'https://unpkg.com/mermaid@11/dist/mermaid.esm.min.mjs'
+  ];
+
+  async function loadMermaid() {
+    for (const url of CDNS) {
+      try { return await import(/* @vite-ignore */ url); }
+      catch (e) { console.warn('CDN échoué :', url, e); }
+    }
+    throw new Error('Connexion requise pour afficher les diagrammes Mermaid.');
+  }
+
+  try {
+    const mod = await loadMermaid();
+    const mermaid = mod.default || mod;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      securityLevel: 'loose',
+      fontFamily: 'Inter, Helvetica, Arial, sans-serif',
+      themeVariables: {
+        fontSize: '13px',
+        lineColor: '#94a3b8',
+        primaryColor: '#eef2ff',
+        primaryBorderColor: '#6366f1',
+        primaryTextColor: '#0f172a',
+        clusterBkg: '#f8fafc',
+        clusterBorder: '#e2e8f0'
+      },
+      flowchart: { curve: 'basis', htmlLabels: true, padding: 12, useMaxWidth: true },
+      mindmap: { padding: 12, useMaxWidth: true }
+    });
+    await mermaid.run({ querySelector: '.mermaid' });
+  } catch (err) {
+    document.querySelectorAll('.mermaid').forEach(el => {
+      const box = document.createElement('div');
+      box.className = 'err';
+      box.textContent = '⚠️ Diagramme indisponible (hors ligne).\n' + err.message;
+      el.replaceWith(box);
+    });
+  }
+
+  // 4) Scroll Progress & Scroll Spy
+  const bar = document.getElementById('progress');
+  addEventListener('scroll', () => {
+    const h = document.documentElement;
+    bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+  }, { passive: true });
+
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        map.get(e.target.id)?.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  map.forEach((_, id) => { const s = document.getElementById(id); if (s) spy.observe(s); });
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

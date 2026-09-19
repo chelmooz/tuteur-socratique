@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entraîner un LLM à utiliser des outils — Schéma interactif</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">SCHÉMA INTERACTIF</div>
+    <h1>Entraîner un LLM à <span class="accent">utiliser des outils</span></h1>
+    <p class="subhead">Comment un modèle apprend à appeler des API. Cliquez sur n'importe quelle étape pour lire son explication — les couleurs indiquent le rôle de chaque bloc dans l'entraînement.</p>
+
+    <div class="legend-strip">
+      <div class="li"><span class="sw" style="background:var(--role-user)"></span>Contexte utilisateur / conversation</div>
+      <div class="li"><span class="sw" style="background:var(--role-schema)"></span>Schéma d'outil disponible (aussi du contexte)</div>
+      <div class="li"><span class="sw" style="background:var(--role-assistant)"></span>Cible de l'assistant (perte appliquée)</div>
+      <div class="li"><span class="sw" style="background:var(--role-result)"></span>Résultat d'outil exécuté (nouveau contexte)</div>
+    </div>
+  </header>
+
+  <!-- ============ SECTION 1 ============ -->
+  <section class="section" id="sec1">
+    <div class="section-head" style="--sec-color:var(--role-assistant)">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">Une trajectoire réussie devient un exemple d'entraînement</div>
+        <div class="section-desc">Chaque échange complet — requête, appels d'outils, résultats, réponse finale — devient une séquence sur laquelle le modèle apprend, token par token.</div>
+      </div>
+    </div>
+
+    <div class="flow-scroll"><div class="flow-row" id="flow1"></div></div>
+    <div class="detail-panel" id="detail1"></div>
+  </section>
+
+  <!-- ============ SECTION 2 ============ -->
+  <section class="section" id="sec2">
+    <div class="section-head" style="--sec-color:var(--role-schema)">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">D'où viennent les trajectoires valides ?</div>
+        <div class="section-desc">Trois façons de constituer les exemples qui nourriront l'entraînement, chacune avec ses compromis.</div>
+      </div>
+    </div>
+
+    <div class="sources-grid" id="sourcesGrid"></div>
+
+    <div class="converge">
+      <div class="converge-lines">
+        <svg viewBox="0 0 720 46" preserveAspectRatio="none">
+          <path d="M120 0 L 360 40" stroke="#26304A" stroke-width="2" fill="none"/>
+          <path d="M360 0 L 360 40" stroke="#26304A" stroke-width="2" fill="none"/>
+          <path d="M600 0 L 360 40" stroke="#26304A" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+      <div class="converge-mobile-arrow" aria-hidden="true">
+        <svg viewBox="0 0 18 24"><path d="M9 0v18M2 14l7 8 7-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="converge-row">
+        <div class="converge-card">
+          <span class="ic">
+            <svg width="20" height="20" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </span>
+          <span>Jeu de données SFT pour l'usage d'outils<small>requêtes + appels + résultats</small></span>
+        </div>
+        <div class="infer-flow-arrow"><svg viewBox="0 0 24 14"><path d="M0 7h20M14 1l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="converge-card trained">
+          <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="currentColor"/><circle cx="15" cy="10" r="1.4" fill="currentColor"/><path d="M8 15c1.2 1 2.5 1.5 4 1.5s2.8-.5 4-1.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></span>
+          <span>Poids entraînés pour l'appel d'outils</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3 ============ -->
+  <section class="section" id="sec3">
+    <div class="section-head" style="--sec-color:var(--role-runtime)">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">À l'inférence : la proposition est séparée de l'action</div>
+        <div class="section-desc">Le modèle entraîné ne fait que proposer un appel d'outil. Un runtime distinct valide, vérifie les permissions puis exécute réellement l'action — cliquez sur les puces rouges pour voir où les choses peuvent mal tourner.</div>
+      </div>
+    </div>
+
+    <div class="infer-grid" id="inferGrid"></div>
+    <div class="detail-panel" id="detail3"></div>
+  </section>
+
+  <p class="foot-note">proposition du modèle → validation runtime → exécution — le résultat de l'outil redevient du contexte</p>
+</div>
+
+<script>
+const ARROW = `<div class="flow-arrow"><svg viewBox="0 0 24 14"><path d="M0 7h20M14 1l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+const ARROW_INFER = `<div class="infer-flow-arrow"><svg viewBox="0 0 24 14"><path d="M0 7h20M14 1l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+
+/* ===================== SECTION 1 ===================== */
+const FLOW1 = [
+  {role:'user', label:"Requête utilisateur", code:'"Réserver 30 min avec Maya, vendredi après-midi."',
+   detail:"Le point de départ de la trajectoire : une demande formulée en langage naturel, qui deviendra le premier tour de la conversation dans l'exemple d'entraînement."},
+  {role:'schema', dashed:true, label:"Schémas d'outils disponibles", code:'search_calendar(date, start, end)\ncreate_event(title, attendees, start, end)',
+   detail:"La liste des outils que le modèle peut appeler fait elle aussi partie du contexte fourni au modèle — sans elle, il ne saurait ni quels outils existent, ni quels arguments ils attendent."},
+  {role:'assistant', label:"Assistant (appel d'outil)", code:'search_calendar("Friday", "12:00", "17:00")',
+   detail:"Le modèle choisit un outil et génère ses arguments token par token. C'est sur cette génération que porte la perte supervisée : le modèle apprend à reproduire exactement cet appel."},
+  {role:'result', label:"Résultat de l'outil", code:'Disponible : 15:00',
+   detail:"L'outil est réellement exécuté et son résultat est réinjecté dans la conversation comme nouveau contexte — le modèle ne l'a pas généré, il le lit."},
+  {role:'assistant', label:"Assistant (appel d'outil)", code:'create_event("Meeting with Maya", "Maya", "15:00", "15:30")',
+   detail:"Fort du résultat précédent, le modèle génère un second appel. Chaque appel d'outil de la trajectoire est un point où la perte next-token s'applique."},
+  {role:'result', label:"Résultat de l'outil", code:'Event ID : evt_42',
+   detail:"Le second résultat confirme que l'action a réussi et fournit un identifiant que la réponse finale pourra citer."},
+  {role:'assistant', label:"Assistant (réponse finale)", code:'"Réunion créée. À vendredi !"',
+   detail:"La réponse finale est elle aussi un texte généré par le modèle, donc soumise à la même perte supervisée — le modèle apprend à conclure correctement l'échange."}
+];
+
+const roleColors1 = {
+  user:['var(--role-user)','var(--role-user-soft)'],
+  schema:['var(--role-schema)','var(--role-schema-soft)'],
+  assistant:['var(--role-assistant)','var(--role-assistant-soft)'],
+  result:['var(--role-result)','var(--role-result-soft)']
+};
+const roleNames1 = {user:'Contexte', schema:'Schéma', assistant:'Assistant', result:'Résultat outil'};
+
+const flow1El = document.getElementById('flow1');
+FLOW1.forEach((n, i) => {
+  const [color, soft] = roleColors1[n.role];
+  const node = document.createElement('button');
+  node.className = 'flow-node' + (n.dashed ? ' dashed' : '');
+  node.style.setProperty('--node-color', color);
+  node.style.setProperty('--node-soft', soft);
+  node.dataset.idx = i;
+  node.innerHTML = `<span class="role">${roleNames1[n.role]}</span><span class="label">${n.label}</span><span class="code">${n.code.replace(/\n/g,'<br>')}</span>`;
+  flow1El.appendChild(node);
+  if (i < FLOW1.length - 1) flow1El.insertAdjacentHTML('beforeend', ARROW);
+});
+
+flow1El.addEventListener('click', (e) => {
+  const btn = e.target.closest('.flow-node');
+  if (!btn) return;
+  const idx = +btn.dataset.idx;
+  const n = FLOW1[idx];
+  const panel = document.getElementById('detail1');
+  const already = btn.classList.contains('selected');
+  flow1El.querySelectorAll('.flow-node').forEach(b => b.classList.remove('selected'));
+  if (already) { panel.classList.remove('show'); panel.innerHTML=''; return; }
+  btn.classList.add('selected');
+  panel.style.setProperty('--panel-color', roleColors1[n.role][0]);
+
+  // Position the pointer under the clicked node, relative to the scroll container
+  const btnRect = btn.getBoundingClientRect();
+  const scrollRect = flow1El.parentElement.getBoundingClientRect();
+  const pointerX = Math.max(16, Math.min(
+    btnRect.left - scrollRect.left + btnRect.width / 2 - 6,
+    scrollRect.width - 28
+  ));
+  panel.style.setProperty('--pointer-x', pointerX + 'px');
+
+  panel.innerHTML = `<b>${n.label}.</b> ${n.detail}`;
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+/* ===================== SECTION 2 ===================== */
+const SOURCES = [
+  {
+    letter:'A', title:"Démonstration humaine", color:'#4EA8F2', soft:'#122E44',
+    steps:[
+      {t:'Requête utilisateur', cls:''},
+      {t:'search_calendar(..)', cls:''},
+      {t:'Disponible : 15:00', cls:'ok'},
+      {t:'create_event(..)', cls:''},
+      {t:'Event ID : evt_42', cls:'ok'}
+    ],
+    pros:['+ direct'], cons:['- effort humain important'],
+    detail:"Un annotateur humain déroule lui-même la trajectoire complète. C'est la méthode la plus fiable pour obtenir des appels d'outils corrects, mais elle ne passe pas à l'échelle : chaque exemple coûte du temps humain."
+  },
+  {
+    letter:'B', title:"Synthétique piloté par la requête", color:'#F2A93B', soft:'#3A2A14',
+    steps:[
+      {t:'Requête naturelle', cls:''},
+      {t:"L'agent explore les outils", cls:''},
+      {t:'Appel invalide (erreur)', cls:'err'},
+      {t:'Chemin réussi', cls:'ok'},
+      {t:'Conserver le chemin réussi', cls:''}
+    ],
+    pros:['+ flexible'], cons:['- exploration gaspillée'],
+    detail:"On part d'une requête naturelle et on laisse un agent explorer librement les outils disponibles jusqu'à trouver un chemin qui fonctionne. Seuls les chemins réussis sont conservés comme exemples ; les tentatives ratées sont jetées, ce qui gaspille du calcul."
+  },
+  {
+    letter:'C', title:"Synthétique piloté par l'exécution", color:'#38D39F', soft:'#123328',
+    steps:[
+      {t:'Exécuter une chaîne d\'outils valide', cls:''},
+      {t:'Exécution réussie', cls:'ok'},
+      {t:'Générer une requête naturelle correspondante', cls:''},
+      {t:'Utiliser requête + appels + résultats', cls:''}
+    ],
+    pros:['+ appels ancrés dans le réel'], cons:['- risque sur la requête synthétique'],
+    detail:"On part cette fois de l'exécution : on choisit une chaîne d'appels d'outils qu'on sait valide, puis on génère après coup une requête utilisateur plausible qui aurait justifié cette chaîne. Les appels sont garantis corrects, mais la requête, elle, est artificielle et peut sonner faux."
+  }
+];
+
+const grid = document.getElementById('sourcesGrid');
+SOURCES.forEach(src => {
+  const card = document.createElement('div');
+  card.className = 'source-card';
+  card.style.setProperty('--src-color', src.color);
+  card.style.setProperty('--src-soft', src.soft);
+
+  const stepsHtml = src.steps.map((s,i) => `
+    ${i>0 ? '<div class="mini-connector"></div>' : ''}
+    <button class="mini-step ${s.cls}" style="--mini-color:${src.color}">${s.t}</button>
+  `).join('');
+
+  card.innerHTML = `
+    <div class="src-title"><span class="src-badge">${src.letter}</span>${src.title}</div>
+    <div class="mini-flow">${stepsHtml}</div>
+    <div class="pros-cons">
+      ${src.pros.map(p=>`<span class="plus">${p}</span>`).join('')}
+      ${src.cons.map(c=>`<span class="minus">${c}</span>`).join('')}
+    </div>
+    <div class="source-detail" style="color:var(--text-dim)">${src.detail}</div>
+  `;
+  grid.appendChild(card);
+
+  card.addEventListener('click', () => {
+    const d = card.querySelector('.source-detail');
+    d.classList.toggle('show');
+  });
+});
+
+/* ===================== SECTION 3 ===================== */
+const FAILS = {
+  'wrong-tool': {
+    label:"Mauvais outil / valeurs",
+    detail:"Le modèle propose le mauvais outil, ou remplit ses arguments avec des valeurs erronées. C'est une erreur du modèle lui-même, avant même que le runtime n'intervienne."
+  },
+  'poor-schema': {
+    label:"Schéma imprécis",
+    detail:"Quand la description d'un outil est ambiguë ou incomplète, le modèle a plus de mal à choisir le bon outil ou à bien renseigner ses arguments — le problème vient alors du schéma fourni, pas du modèle."
+  },
+  'validate': {
+    label:"Arguments invalides",
+    detail:"Le runtime rejette l'appel parce que les arguments proposés ne respectent pas le format ou les contraintes attendues — c'est précisément le rôle de cette étape que d'intercepter ce type de proposition avant toute exécution réelle."
+  },
+  'permission': {
+    label:"Refusé par la politique",
+    detail:"Même avec des arguments valides, l'action peut être bloquée si elle enfreint une règle de permission — par exemple, créer un événement dans un calendrier auquel le modèle n'a pas accès."
+  },
+  'execute': {
+    label:"Échec d'exécution",
+    detail:"L'appel est validé et autorisé, mais son exécution échoue côté API — service indisponible, temporisation dépassée, erreur réseau. Ce résultat d'échec doit lui aussi être renvoyé comme contexte, pour que le modèle puisse réagir plutôt que d'halluciner un succès."
+  },
+  'misread': {
+    label:"Résultat mal interprété",
+    detail:"Même quand l'outil s'exécute correctement, le modèle peut mal lire ou mal résumer son résultat dans la réponse finale adressée à l'utilisateur."
+  }
+};
+
+function failBadge(id){
+  return `<button class="node-fail-badge" data-fail="${id}" aria-label="Mode d'échec : ${FAILS[id].label}" title="${FAILS[id].label}">!</button>`;
+}
+
+const inferGrid = document.getElementById('inferGrid');
+inferGrid.innerHTML = `
+  <div class="infer-node" style="--node-color:var(--role-user); --node-soft:var(--role-user-soft)">
+    <div class="role">Contexte</div>
+    <div class="txt">Nouvelle requête</div>
+    <div class="code">"Réserver 30 min avec Maya, vendredi après-midi."</div>
+  </div>
+  <div class="infer-node" style="--node-color:var(--role-schema); --node-soft:var(--role-schema-soft); margin-top:10px;">
+    ${failBadge('poor-schema')}
+    <div class="role">Schéma</div>
+    <div class="txt">Schémas actuels</div>
+    <div class="code">search_calendar(...)<br>create_event(...)</div>
+  </div>
+
+  ${ARROW_INFER}
+
+  <div class="infer-node" style="--node-color:var(--role-user); --node-soft:var(--role-user-soft)">
+    <div class="role">Modèle</div>
+    <div class="txt">LLM entraîné (appel d'outils)</div>
+    <span class="frozen">❄ poids gelés</span>
+  </div>
+
+  <div class="runtime-box">
+    <div class="rt-title">RUNTIME (SÉPARÉ DU MODÈLE)</div>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div class="infer-node" style="--node-color:var(--role-assistant); --node-soft:var(--role-assistant-soft); flex:none; width:190px;">
+        ${failBadge('wrong-tool')}
+        <div class="role">Proposition</div>
+        <div class="txt">Appel d'outil proposé</div>
+        <div class="code">create_event("Maya", …)</div>
+      </div>
+      ${ARROW_INFER}
+      <div class="runtime-steps" style="flex:1; min-width:260px;">
+        <div class="rt-step-wrap">
+          <button class="rt-step" data-fail="validate">Valider les arguments</button>
+          ${failBadge('validate')}
+        </div>
+        <div class="rt-step-wrap">
+          <button class="rt-step" data-fail="permission">Vérifier la permission</button>
+          ${failBadge('permission')}
+        </div>
+        <div class="rt-step-wrap">
+          <button class="rt-step" data-fail="execute">Exécuter l'outil</button>
+          ${failBadge('execute')}
+        </div>
+      </div>
+      ${ARROW_INFER}
+      <div class="infer-node" style="--node-color:var(--role-runtime); --node-soft:var(--role-runtime-soft); flex:none; width:150px; border-style:dashed;">
+        <div class="role">API externe</div>
+        <div class="txt">Agenda</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="infer-col-span infer-col-span-desktop3" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+    <div class="infer-node" style="--node-color:var(--role-result); --node-soft:var(--role-result-soft); flex:none; width:190px;">
+      <div class="role">Résultat</div>
+      <div class="txt">Résultat de l'outil</div>
+      <div class="code">Event ID : evt_42</div>
+    </div>
+  </div>
+
+  <div class="loop-note infer-col-span"><div class="l"></div>le résultat de l'outil redevient le contexte pour le prochain tour<div class="l"></div></div>
+
+  <div class="infer-node infer-col-span-half" style="--node-color:var(--role-user); --node-soft:var(--role-user-soft);">
+    ${failBadge('misread')}
+    <div class="role">Sortie</div>
+    <div class="txt">Réponse finale à l'utilisateur</div>
+    <div class="code">"Réunion créée. À vendredi !"</div>
+  </div>
+`;
+
+const detail3 = document.getElementById('detail3');
+
+inferGrid.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-fail]');
+  if (!target) return;
+  const id = target.dataset.fail;
+  if (!id || !FAILS[id]) return;
+  const f = FAILS[id];
+
+  const already = target.classList.contains('selected');
+  inferGrid.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+
+  if (already) {
+    detail3.classList.remove('show');
+    detail3.innerHTML = '';
+    return;
+  }
+
+  target.classList.add('selected');
+  detail3.style.setProperty('--panel-color', 'var(--role-error)');
+  detail3.innerHTML = `<b>⚠ ${f.label}.</b> ${f.detail}`;
+  detail3.classList.add('show');
+  detail3.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

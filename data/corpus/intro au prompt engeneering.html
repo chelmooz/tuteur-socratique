@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎯 Cours Magistral & Interactif — Prompt Engineering</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="container">
+
+  <!-- HERO SECTION -->
+  <header class="hero">
+    <span class="badge">📘 Support de Cours Interactif & Professionnel</span>
+    <h1>Introduction au Prompt Engineering</h1>
+    <p>Maîtrisez la programmation en langage naturel pour exploiter tout le potentiel des Modèles de Langage (LLM).</p>
+    
+    <div class="visual-banner">
+      <div class="v-node">
+        <div class="v-icon">👤</div>
+        <span>Utilisateur</span>
+      </div>
+      <div class="v-arrow">➔</div>
+      <div class="v-node">
+        <div class="v-icon">✍️</div>
+        <span>Prompt & Contexte</span>
+      </div>
+      <div class="v-arrow">➔</div>
+      <div class="v-node">
+        <div class="v-icon">🤖</div>
+        <span>LLM (Tokens)</span>
+      </div>
+      <div class="v-arrow">➔</div>
+      <div class="v-node">
+        <div class="v-icon">🎯</div>
+        <span>Résultat Précis</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 1 -->
+  <section>
+    <h2>1. Fondations et Fonctionnement des LLM</h2>
+    
+    <h3>Comment fonctionne un LLM ?</h3>
+    <p>À la base, un Grand Modèle de Langage (LLM) est un <strong>modèle de prédiction de texte</strong>. Il reçoit une entrée (découpée en tokens) et prédit la suite logique des tokens les plus probables en se basant sur ses données d'entraînement.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <strong>🧠 Absence de mémoire native</strong>
+        <p style="font-size: 14px; color: var(--muted); margin-top: 6px;">Par défaut, un LLM ne se souvient de rien. C'est l'interface (ChatGPT, Claude...) qui réinjecte l'historique et le contexte en arrière-plan à chaque requête.</p>
+      </div>
+      <div class="card">
+        <strong>📦 Le Contexte</strong>
+        <p style="font-size: 14px; color: var(--muted); margin-top: 6px;">Tout ce que le modèle "voit" en plus de votre message direct (historique, fichiers joints, consignes système) forme sa fenêtre de perception.</p>
+      </div>
+    </div>
+
+    <h3>Commander vs. Diriger (Steering vs. Commanding)</h3>
+    <div class="compare-box compare-bad">
+      <strong>❌ Commander (À éviter) :</strong>
+      <pre>"Résume ce texte."</pre>
+      <p style="margin-top: 6px; font-size: 13px; color: var(--muted);">Le modèle choisit lui-même la longueur, le ton et le format, générant des résultats génériques et imprévisibles.</p>
+    </div>
+    <div class="compare-box compare-good">
+      <strong>✅ Diriger (À privilégier) :</strong>
+      <pre>"Tu es assistant de direction. Résume ce compte-rendu en 4 puces, en te focalisant uniquement sur les décisions et les actions à mener. Pas de superflu."</pre>
+      <p style="margin-top: 6px; font-size: 13px; color: var(--muted);">Contrôle total de la longueur, du rôle, du focus et de la structure de sortie.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section>
+    <h2>2. Techniques Clés de Prompting</h2>
+    <p>Pour structurer efficacement vos requêtes et éliminer l'ambiguïté, appliquez ces méthodes :</p>
+    
+    <div class="card">
+      <ul>
+        <li><strong>Cadrage complet :</strong> Intégrez systématiquement le <em>rôle</em> (ex: rédacteur B2B senior), l'<em>audience</em> (ex: gestionnaires), le <em>ton</em> (ex: confiant) et le <em>format de sortie</em>.</li>
+        <li><strong>Few-Shot Prompting :</strong> Fournissez quelques exemples d'entrées/sorties avant votre requête réelle pour guider la structure et le style souhaités.</li>
+        <li><strong>Chain of Thought :</strong> Demandez explicitement au modèle de raisonner étape par étape avant d'émettre sa conclusion.</li>
+        <li><strong>Sorties Structurées :</strong> Exigez un format strict (JSON, Markdown, XML) pour intégrer directement la réponse dans un flux de données.</li>
+        <li><strong>Contraintes Négatives :</strong> Explicitez ce qu'il ne faut pas faire (ex: <em>pas d'argot, pas de salutations génériques, max 150 mots</em>).</li>
+        <li><strong>Style Entretien :</strong> Donnez l'objectif global et demandez au modèle de vous questionner <em>une par une</em> pour collecter les informations manquantes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SECTION 3 -->
+  <section>
+    <h2>3. Stratégies Avancées</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Prompts Système vs Utilisateur</h3>
+        <p style="font-size: 14px;">Le <strong>prompt système</strong> définit l'identité permanente et les barrières de sécurité, tandis que le <strong>prompt utilisateur</strong> exprime la requête ponctuelle.</p>
+      </div>
+      <div class="card">
+        <h3>Prompt Chaining (Chaînage)</h3>
+        <p style="font-size: 14px;">Découpez les tâches complexes en briques séquentielles (ex: Plan ➔ Rédaction section par section ➔ Relecture) pour fiabiliser le rendu global.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Paramétrage de la Température (API)</h3>
+      <div class="grid-2" style="margin-top: 10px;">
+        <div>
+          <strong style="color: var(--accent-secondary);">❄️ Température basse (0.0 - 0.2)</strong>
+          <p style="font-size: 13px; color: var(--muted); margin-top: 4px;">Déterministe et factuelle. Idéale pour le code, l'extraction de données et la structuration JSON.</p>
+        </div>
+        <div>
+          <strong style="color: var(--danger);">🔥 Température haute (0.7 - 1.0)</strong>
+          <p style="font-size: 13px; color: var(--muted); margin-top: 4px;">Créative et variée. Idéale pour la poésie, le brainstorming et la génération de concepts originaux.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4 -->
+  <section>
+    <h2>4. Pièges Courants & Productivité</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Éviter le piège du flou :</strong> Un prompt imprécis donne une réponse générique. Spécifiez toujours vos attentes.</li>
+        <li><strong>Ne pas saturer le modèle :</strong> Préférez le chaînage aux requêtes "monolithes" qui mélangent trop de consignes.</li>
+        <li>💡 <strong>Astuce de productivité :</strong> Pour concevoir des prompts riches et nuancés sans effort de frappe, utilisez la <strong>dictée vocale</strong> en langage naturel. Votre pensée s'exprime ainsi avec toutes ses subtilités.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- NOUVEAU MODULE : CAS PRATIQUE / EXERCICE INTERACTIF -->
+  <section>
+    <h2>5. Cas Pratique & Exercice Guidé</h2>
+    <div class="workshop-box">
+      <h3>🛠️ Atelier de Conception de Prompt</h3>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 20px;">
+        Mettez en pratique la méthode de cadrage avancée. Remplissez les critères ci-dessous pour générer un prompt professionnel prêt à l'emploi.
+      </p>
+
+      <div class="input-group">
+        <label>1. Quel rôle l'IA doit-elle incarner ?</label>
+        <select id="atelier-role">
+          <option value="un expert en cybersécurité pédagogue">Expert en cybersécurité pédagogue</option>
+          <option value="un growth marketer growth-Hacker créatif">Growth Marketer créatif</option>
+          <option value="un chef de projet agile expérimenté">Chef de projet Agile</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>2. Quel est l'objectif ou livrable attendu ?</label>
+        <input type="text" id="atelier-objectif" placeholder="Ex: Expliquer le phishing à des collaborateurs non-techniques" value="Rédiger une note de cadrage synthétique pour un nouveau projet">
+      </div>
+
+      <div class="input-group">
+        <label>3. Contraintes & Format de sortie :</label>
+        <textarea id="atelier-contraintes" rows="2">Format : 3 sections clés en Markdown, ton professionnel mais accessible, interdiction d'utiliser du jargon abscons.</textarea>
+      </div>
+
+      <button class="btn" onclick="genererAtelierPrompt()">✨ Générer le Prompt Optimisé</button>
+
+      <div class="solution-panel" id="atelier-resultat">
+        <strong>📋 Votre Prompt Structuré (Prêt à copier-coller) :</strong>
+        <pre id="atelier-texte-genere"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>📘 Cours de Prompt Engineering — Conçu pour l'apprentissage actif et la mise en production.</p>
+    <p style="margin-top: 6px;">Astuce d'impression : Faites <strong>Ctrl + P</strong> pour enregistrer ce cours proprement en PDF.</p>
+  </footer>
+
+</div>
+
+<script>
+  function genererAtelierPrompt() {
+    const role = document.getElementById('atelier-role').value;
+    const objectif = document.getElementById('atelier-objectif').value;
+    const contraintes = document.getElementById('atelier-contraintes').value;
+
+    const promptFinal = `Tu agis en tant que ${role}.\n\n` +
+                        `🎯 OBJECTIF PRINCIPAL :\n${objectif}\n\n` +
+                        `📐 RÈGLES & FORMAT DE SORTIE :\n${contraintes}\n\n` +
+                        `Assure-toi de respecter scrupuleusement ces consignes sans texte superflu introductif.`;
+
+    const panel = document.getElementById('solution-panel') || document.getElementById('atelier-resultat');
+    const texteContainer = document.getElementById('atelier-texte-genere');
+
+    texteContainer.textContent = promptFinal;
+    panel.classList.add('active');
+  }
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

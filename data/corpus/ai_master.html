@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Power User Masterclass — Cours interactif animé</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+  <header>
+    <div class="header-inner">
+      <div class="logo">AI_MASTERS<span>.</span></div>
+      <div class="header-right">
+        <div class="badge">CURRICULUM 2026</div>
+        <div class="chip green">Score : <span id="globalScore">0/0</span></div>
+        <div class="chip">Modules vus : <span id="visitedCount">0/6</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-inner">
+      <span>Progression du cours</span>
+      <div class="progress"><div id="progressBar"></div></div>
+      <span id="progressText">0%</span>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">
+          <span class="blink">●</span> Cours interactif animé
+        </div>
+        <h1>Stop prompting like a search engine. <span>Become a power user.</span></h1>
+        <p>
+          Passe des requêtes superficielles aux workflows d’expert : contexte riche, recherche web,
+          deep research, raisonnement long, rubriques objectives, écriture itérative, multimodalité
+          et création d’applications.
+        </p>
+        <div class="cta-group">
+          <button class="btn primary" onclick="showLesson('lesson-1')">Commencer le module 1</button>
+          <a class="btn secondary" href="#modules">Voir les modules</a>
+          <button class="btn ghost" onclick="resetCourse()">Réinitialiser</button>
+        </div>
+        <div class="mini-map" id="miniMap">
+          <button data-target="lesson-1">1. Knowledge</button>
+          <button data-target="lesson-2">2. Thought Partner</button>
+          <button data-target="lesson-3">3. Context</button>
+          <button data-target="lesson-4">4. Sycophancy</button>
+          <button data-target="lesson-5">5. Writing</button>
+          <button data-target="lesson-6">6. Multimodal</button>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="terminal-header">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+        </div>
+        <div class="terminal-body">
+          <div class="tline"><span class="accent">// Paradigm Shift</span></div>
+          <div class="tline"><strong>Novice:</strong> “Write a self-review.”</div>
+          <div class="tline"><span class="warn">[Result: generic AI slop]</span></div>
+          <div class="tline"><strong>Power user:</strong> uploads trackers, voice notes, metrics + neutral rubric</div>
+          <div class="tline"><span class="ok">[Result: high-precision execution]</span></div>
+          <div class="tline"><span class="accent">> Loading animated schemas...</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules">
+      <div class="section-head">
+        <div>
+          <h2>Core Mastery Modules</h2>
+          <p>Clique sur un module pour ouvrir la leçon animée, lire les principes clés, tester un quiz et récupérer des prompts utiles.</p>
+        </div>
+        <div class="chip">6 modules • 18 questions • 6 schémas animés</div>
+      </div>
+
+      <div class="modules-grid">
+        <article class="module-card">
+          <span class="module-number">MODULE 01</span>
+          <h3>Knowledge & Web Search</h3>
+          <p>Comprendre la connaissance pré-entraînée, la date de coupure, le web search et le deep research.</p>
+          <button class="btn primary small openLesson" data-target="lesson-1">Ouvrir la leçon</button>
+        </article>
+
+        <article class="module-card">
+          <span class="module-number">MODULE 02</span>
+          <h3>Thought Partner & Iteration</h3>
+          <p>Utiliser l’IA comme partenaire de brainstorming via options, feedback et itération.</p>
+          <button class="btn primary small openLesson" data-target="lesson-2">Ouvrir la leçon</button>
+        </article>
+
+        <article class="module-card">
+          <span class="module-number">MODULE 03</span>
+          <h3>Context & Reasoning</h3>
+          <p>Gérer le contexte, les fichiers, les apps agentiques et le raisonnement long.</p>
+          <button class="btn primary small openLesson" data-target="lesson-3">Ouvrir la leçon</button>
+        </article>
+
+        <article class="module-card">
+          <span class="module-number">MODULE 04</span>
+          <h3>Combating Sycophancy</h3>
+          <p>Obtenir un feedback honnête grâce à des questions neutres et des rubriques objectives.</p>
+          <button class="btn primary small openLesson" data-target="lesson-4">Ouvrir la leçon</button>
+        </article>
+
+        <article class="module-card">
+          <span class="module-number">MODULE 05</span>
+          <h3>Writing & Editing</h3>
+          <p>Éviter l’AI slop avec l’outline progressive, les bullets et l’édition paragraphe par paragraphe.</p>
+          <button class="btn primary small openLesson" data-target="lesson-5">Ouvrir la leçon</button>
+        </article>
+
+        <article class="module-card">
+          <span class="module-number">MODULE 06</span>
+          <h3>Multimodal & Code Execution</h3>
+          <p>Images, audio, vidéo, code, analyse de données et création d’applications simples.</p>
+          <button class="btn primary small openLesson" data-target="lesson-6">Ouvrir la leçon</button>
+        </article>
+      </div>
+
+      <!-- LESSON 1 -->
+      <section id="lesson-1" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 01 — Knowledge & Web Search</h3>
+            <p class="subtitle">
+              Les modèles apprennent de motifs statistiques à partir d’énormes volumes de textes publics.
+              Leur connaissance est puissante, mais figée dans le temps et biaisée par la fréquence des informations en ligne.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 300" role="img" aria-label="Schéma animé : connaissance pré-entraînée, coupure temporelle et web search">
+            <defs>
+              <marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#94A3B8" />
+              </marker>
+            </defs>
+
+            <line x1="70" y1="120" x2="830" y2="120" stroke="#334155" stroke-width="4" />
+            <rect x="70" y="92" width="390" height="56" rx="14" fill="rgba(16,185,129,0.10)" stroke="#10B981" />
+            <text x="95" y="125" class="label green">Pré-entraînement</text>
+
+            <line x1="460" y1="55" x2="460" y2="185" stroke="#EF4444" stroke-width="3" stroke-dasharray="7 7" />
+            <text x="470" y="72" class="label red">Knowledge cutoff</text>
+
+            <rect x="460" y="92" width="370" height="56" rx="14" fill="rgba(239,68,68,0.10)" stroke="#EF4444" />
+            <text x="485" y="125" class="label red">Monde actuel → web search</text>
+
+            <g class="travel">
+              <circle cx="120" cy="225" r="12" fill="#6366F1" />
+              <text x="140" y="230" class="muted">requête récente / locale / niche</text>
+            </g>
+
+            <path class="dash" d="M120 205 L120 155" marker-end="url(#arrow1)" />
+            <path class="dash green" d="M250 155 L250 205" marker-end="url(#arrow1)" />
+            <text x="270" y="210" class="muted">réponse augmentée</text>
+
+            <g class="pulse">
+              <circle cx="760" cy="225" r="18" fill="rgba(34,211,238,0.16)" stroke="#22D3EE" stroke-width="2" />
+              <text x="760" y="230" text-anchor="middle" class="label cyan">DR</text>
+            </g>
+            <text x="650" y="265" class="muted small">Deep Research : dizaines de sources, synthèse longue</text>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card info">
+            <h4>Ce que l’IA sait bien</h4>
+            <ul>
+              <li>Sujets très fréquents en ligne : cuisine, films, conseils courants.</li>
+              <li>Sujets niche mais documentés : Voyager 1, quasars, événements spécifiques.</li>
+              <li>Textes mal orthographiés, parce que l’entraînement contient beaucoup de fautes.</li>
+            </ul>
+          </div>
+          <div class="card warn">
+            <h4>Ce qu’elle ne sait pas ou mal</h4>
+            <ul>
+              <li>Vos données privées ou propriétaires.</li>
+              <li>Les événements postérieurs à sa date de coupure.</li>
+              <li>Les sujets rares où internet diffuse des erreurs ou idées reçues.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card good">
+          <h4>Prompt utile pour orienter vers des sources fiables</h4>
+          <div class="prompt" id="p1">Utilise des sources fiables : organisations officielles, études peer-reviewed, agences de santé ou autorités publiques.
+Indique les dates, les limites des preuves et distingue faits, opinions et incertitudes.</div>
+          <div class="toolbar">
+            <button class="btn secondary small" onclick="copyText('p1')">Copier</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 1</h4>
+
+          <div class="q" data-answer="b">
+            <p>1. D’où vient principalement la connaissance pré-entraînée d’un modèle ?</p>
+            <label><input type="radio" name="q1-1" value="a"> De votre ordinateur personnel.</label>
+            <label><input type="radio" name="q1-1" value="b"> De grandes quantités de textes et données publiques vues pendant l’entraînement.</label>
+            <label><input type="radio" name="q1-1" value="c"> D’une base de vérité unique et parfaite.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Pourquoi un sujet récent peut-il déclencher une recherche web ?</p>
+            <label><input type="radio" name="q1-2" value="a"> Parce que l’IA déteste les dates.</label>
+            <label><input type="radio" name="q1-2" value="b"> Parce que toutes les questions nécessitent internet.</label>
+            <label><input type="radio" name="q1-2" value="c"> Parce que l’information pourrait être postérieure à sa connaissance pré-entraînée.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>3. Quel est le risque principal du web search automatique ?</p>
+            <label><input type="radio" name="q1-3" value="a"> Privilégier des sources populaires mais peu fiables ou obsolètes.</label>
+            <label><input type="radio" name="q1-3" value="b"> Ne jamais pouvoir lire de pages web.</label>
+            <label><input type="radio" name="q1-3" value="c"> Être toujours plus lent que Google.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- LESSON 2 -->
+      <section id="lesson-2" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 02 — Thought Partner & Iteration</h3>
+            <p class="subtitle">
+              L’IA est entraînée sur des motifs fréquents. Sans contexte ni itération, elle revient souvent vers les idées les plus communes.
+              Le power user l’utilise comme un partenaire de réflexion : options, feedback, raffinement.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 300" role="img" aria-label="Schéma animé : boucle de brainstorming itératif">
+            <defs>
+              <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#94A3B8" />
+              </marker>
+            </defs>
+
+            <rect x="80" y="90" width="180" height="70" rx="16" class="node" />
+            <text x="170" y="120" text-anchor="middle" class="label">Contexte</text>
+            <text x="170" y="142" text-anchor="middle" class="muted">âge, contraintes, goûts</text>
+
+            <rect x="360" y="50" width="180" height="70" rx="16" class="node green" />
+            <text x="450" y="80" text-anchor="middle" class="label green">Options</text>
+            <text x="450" y="102" text-anchor="middle" class="muted">3 à 5 pistes</text>
+
+            <rect x="640" y="90" width="180" height="70" rx="16" class="node yellow" />
+            <text x="730" y="120" text-anchor="middle" class="label yellow">Feedback</text>
+            <text x="730" y="142" text-anchor="middle" class="muted">j’aime / je rejette</text>
+
+            <rect x="360" y="180" width="180" height="70" rx="16" class="node cyan" />
+            <text x="450" y="210" text-anchor="middle" class="label cyan">Itération</text>
+            <text x="450" y="232" text-anchor="middle" class="muted">nouvelles options</text>
+
+            <path class="dash" d="M260 115 L350 95" marker-end="url(#arrow2)" />
+            <path class="dash green" d="M540 95 L630 115" marker-end="url(#arrow2)" />
+            <path class="dash yellow" d="M730 165 L550 205" marker-end="url(#arrow2)" />
+            <path class="dash cyan" d="M360 205 L260 145" marker-end="url(#arrow2)" />
+
+            <g class="pulse">
+              <circle cx="450" cy="145" r="22" fill="rgba(99,102,241,0.16)" stroke="#6366F1" stroke-width="2" />
+              <text x="450" y="150" text-anchor="middle" class="label">IA</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card bad">
+            <h4>Prompt faible</h4>
+            <div class="prompt">Aide-moi à créer un plan d’entraînement.</div>
+            <p>Résultat probable : squats, pompes, routine générique.</p>
+          </div>
+          <div class="card good">
+            <h4>Prompt puissant</h4>
+            <div class="prompt" id="p2">J’ai 38 ans, niveau débutant, 10 minutes par jour, des haltères de 5 kg, un mini-trampoline, un chat,
+et je déteste les routines rigides. Propose 5 options créatives pour rester motivé, dont une absurde mais faisable.</div>
+            <div class="toolbar">
+              <button class="btn secondary small" onclick="copyText('p2')">Copier</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h4>Méthode en 5 étapes</h4>
+          <ol>
+            <li>Donner un maximum de contexte pertinent.</li>
+            <li>Demander 3 à 5 options contrastées.</li>
+            <li>Donner un feedback concret.</li>
+            <li>Demander de nouvelles options affinées.</li>
+            <li>Développer seulement la piste retenue.</li>
+          </ol>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 2</h4>
+
+          <div class="q" data-answer="b">
+            <p>1. Pourquoi l’IA donne-t-elle souvent des idées banales en brainstorming ?</p>
+            <label><input type="radio" name="q2-1" value="a"> Parce qu’elle n’est pas créative du tout.</label>
+            <label><input type="radio" name="q2-1" value="b"> Parce qu’elle reproduit fréquemment les motifs les plus communs de ses données.</label>
+            <label><input type="radio" name="q2-1" value="c"> Parce qu’elle refuse les idées originales.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Quel est le meilleur moyen de découvrir quel contexte donner à l’IA ?</p>
+            <label><input type="radio" name="q2-2" value="a"> Lui demander plusieurs options, puis donner un feedback sur ces options.</label>
+            <label><input type="radio" name="q2-2" value="b"> Écrire un prompt d’un seul mot.</label>
+            <label><input type="radio" name="q2-2" value="c"> Accepter la première proposition.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>3. Une fois qu’une option vous plaît, que faire ?</p>
+            <label><input type="radio" name="q2-3" value="a"> Demander immédiatement 200 autres idées.</label>
+            <label><input type="radio" name="q2-3" value="b"> Supprimer le contexte.</label>
+            <label><input type="radio" name="q2-3" value="c"> Demander à l’IA de développer cette option en détail.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- LESSON 3 -->
+      <section id="lesson-3" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 03 — Context & Reasoning</h3>
+            <p class="subtitle">
+              Le contexte est la ressource la plus sous-estimée. Il comprend le system prompt, les outils, les fichiers,
+              votre prompt et l’historique. Un bon raisonnement exige des informations réelles, pas seulement une injonction à “réfléchir”.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 320" role="img" aria-label="Schéma animé : pile de contexte alimentant un modèle de raisonnement">
+            <defs>
+              <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#94A3B8" />
+              </marker>
+            </defs>
+
+            <rect x="70" y="45" width="300" height="42" rx="12" class="node" />
+            <text x="90" y="72" class="label">System prompt</text>
+
+            <rect x="70" y="95" width="300" height="42" rx="12" class="node green" />
+            <text x="90" y="122" class="label green">Outils : web, fichiers, code</text>
+
+            <rect x="70" y="145" width="300" height="42" rx="12" class="node yellow" />
+            <text x="90" y="172" class="label yellow">Documents uploadés</text>
+
+            <rect x="70" y="195" width="300" height="42" rx="12" class="node cyan" />
+            <text x="90" y="222" class="label cyan">Prompt utilisateur</text>
+
+            <rect x="70" y="245" width="300" height="42" rx="12" class="node red" />
+            <text x="90" y="272" class="label red">Historique de chat</text>
+
+            <path class="dash" d="M380 66 L520 145" marker-end="url(#arrow3)" />
+            <path class="dash green" d="M380 116 L520 155" marker-end="url(#arrow3)" />
+            <path class="dash yellow" d="M380 166 L520 165" marker-end="url(#arrow3)" />
+            <path class="dash cyan" d="M380 216 L520 175" marker-end="url(#arrow3)" />
+            <path class="dash red" d="M380 266 L520 185" marker-end="url(#arrow3)" />
+
+            <g class="pulse">
+              <circle cx="600" cy="165" r="58" fill="rgba(99,102,241,0.12)" stroke="#6366F1" stroke-width="3" />
+              <text x="600" y="160" text-anchor="middle" class="label">Modèle</text>
+              <text x="600" y="182" text-anchor="middle" class="muted">reasoning</text>
+            </g>
+
+            <path class="dash" d="M660 165 L760 165" marker-end="url(#arrow3)" />
+            <rect x="760" y="130" width="120" height="70" rx="16" class="node green" />
+            <text x="820" y="160" text-anchor="middle" class="label green">Réponse</text>
+            <text x="820" y="182" text-anchor="middle" class="muted">custom</text>
+
+            <text x="450" y="305" text-anchor="middle" class="muted">Si le sujet change complètement, ouvrir un nouveau chat évite un contexte parasite.</text>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card good">
+            <h4>Bonne pratique</h4>
+            <p>Donnez à l’IA ce qu’un conseiller humain compétent aurait besoin de savoir : documents, contraintes, objectifs, exemples.</p>
+          </div>
+          <div class="card bad">
+            <h4>Mauvaise pratique</h4>
+            <p>Changer brutalement de sujet dans la même conversation sans nettoyer le contexte.</p>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h4>Apps agentiques de bureau</h4>
+          <p>
+            Elles peuvent explorer des fichiers avec permission, proposer un plan, puis exécuter des actions : lire, déplacer, renommer, écrire.
+            Toujours demander d’abord un plan, limiter l’accès au dossier pertinent, vérifier les permissions.
+          </p>
+          <div class="prompt" id="p3">Objectif : organiser ce dossier.
+Commence par lire les fichiers et proposer un plan de réorganisation.
+N’exécute aucune action tant que je n’ai pas validé le plan.
+Lis uniquement les fichiers nécessaires et signale toute suppression potentielle.</div>
+          <div class="toolbar">
+            <button class="btn secondary small" onclick="copyText('p3')">Copier</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 3</h4>
+
+          <div class="q" data-answer="a">
+            <p>1. Le contexte d’un modèle inclut…</p>
+            <label><input type="radio" name="q3-1" value="a"> Le system prompt, les outils, les fichiers, le prompt et l’historique.</label>
+            <label><input type="radio" name="q3-1" value="b"> Uniquement la dernière phrase tapée.</label>
+            <label><input type="radio" name="q3-1" value="c"> Seulement les images uploadées.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Que faire si vous changez complètement de sujet ?</p>
+            <label><input type="radio" name="q3-2" value="a"> Continuer dans le même chat pour garder la mémoire.</label>
+            <label><input type="radio" name="q3-2" value="b"> Supprimer tous vos fichiers.</label>
+            <label><input type="radio" name="q3-2" value="c"> Ouvrir une nouvelle conversation pour éviter un contexte parasite.</label>
+          </div>
+
+          <div class="q" data-answer="b">
+            <p>3. Avec une app agentique qui peut modifier vos fichiers, quelle précaution ?</p>
+            <label><input type="radio" name="q3-3" value="a"> Lui donner accès à tout le disque immédiatement.</label>
+            <label><input type="radio" name="q3-3" value="b"> Demander un plan, vérifier les permissions, limiter au dossier nécessaire.</label>
+            <label><input type="radio" name="q3-3" value="c"> Désactiver toutes les sauvegardes.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- LESSON 4 -->
+      <section id="lesson-4" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 04 — Combating Sycophancy</h3>
+            <p class="subtitle">
+              Les IA sont souvent entraînées à plaire. Si votre question contient un indice de ce que vous voulez entendre,
+              elles risquent de le confirmer. La solution : neutralité, critères explicites, rubriques objectives.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 300" role="img" aria-label="Schéma animé : balance entre prompt biaisé et prompt neutre">
+            <line x1="450" y1="60" x2="450" y2="220" stroke="#334155" stroke-width="6" />
+            <g class="beam">
+              <line x1="180" y1="105" x2="720" y2="105" stroke="#94A3B8" stroke-width="6" />
+              <line x1="180" y1="105" x2="180" y2="150" stroke="#94A3B8" stroke-width="4" />
+              <line x1="720" y1="105" x2="720" y2="150" stroke="#94A3B8" stroke-width="4" />
+              <circle cx="180" cy="175" r="42" fill="rgba(239,68,68,0.12)" stroke="#EF4444" stroke-width="3" />
+              <circle cx="720" cy="175" r="42" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="3" />
+            </g>
+
+            <text x="180" y="172" text-anchor="middle" class="label red">Biaisé</text>
+            <text x="180" y="192" text-anchor="middle" class="muted small">“Super idée, non ?”</text>
+
+            <text x="720" y="172" text-anchor="middle" class="label green">Neutre</text>
+            <text x="720" y="192" text-anchor="middle" class="muted small">Rubrique + critères</text>
+
+            <text x="450" y="260" text-anchor="middle" class="muted">La neutralité et les critères objectifs réduisent la tendance à vous rassurer.</text>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card bad">
+            <h4>Formulation biaisée</h4>
+            <div class="prompt">Je pense que le télétravail est meilleur. Tu confirmes ?</div>
+          </div>
+          <div class="card good">
+            <h4>Formulation neutre</h4>
+            <div class="prompt" id="p4">Compare productivité, collaboration, bien-être et coûts entre télétravail et travail en présentiel.
+Donne avantages, inconvénients et conditions de validité.</div>
+            <div class="toolbar">
+              <button class="btn secondary small" onclick="copyText('p4')">Copier</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h4>Exemple de rubrique objective</h4>
+          <div class="prompt" id="p5">Évalue ce projet selon les critères suivants, chacun étant soit vrai soit faux, sans interprétation libre :
+
+1. Problème réel identifié : 20 points
+   - Le problème est décrit précisément : 10
+   - Une population cible est identifiable : 10
+
+2. Marché existant : 20 points
+   - Des solutions actuelles existent : 10
+   - La demande est documentée ou testable : 10
+
+3. Avantage concurrentiel : 20 points
+   - Différenciation claire : 10
+   - Défense plausible contre imitation : 10
+
+4. Faisabilité : 20 points
+   - Compétences nécessaires accessibles : 10
+   - Coût initial réaliste : 10
+
+5. Risques majeurs : 20 points
+   - Risques identifiés : 10
+   - Mitigations proposées : 10
+
+Commence par cocher chaque critère, puis additionne les points. Ne donne pas de score global avant d’avoir évalué chaque critère.</div>
+          <div class="toolbar">
+            <button class="btn secondary small" onclick="copyText('p5')">Copier la rubrique</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 4</h4>
+
+          <div class="q" data-answer="b">
+            <p>1. Qu’est-ce que la flagornerie (sycophancy) ?</p>
+            <label><input type="radio" name="q4-1" value="a"> L’IA refuse de répondre.</label>
+            <label><input type="radio" name="q4-1" value="b"> L’IA tend à confirmer ce que l’utilisateur veut entendre.</label>
+            <label><input type="radio" name="q4-1" value="c"> L’IA corrige systématiquement l’utilisateur.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Quelle formulation est la plus neutre ?</p>
+            <label><input type="radio" name="q4-2" value="a"> Dans quelle mesure les taxes carbone affectent-elles les petites entreprises ?</label>
+            <label><input type="radio" name="q4-2" value="b"> Les taxes carbone sont mauvaises, n’est-ce pas ?</label>
+            <label><input type="radio" name="q4-2" value="c"> Dis-moi que mon idée est géniale.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>3. Pourquoi une rubrique aide-t-elle ?</p>
+            <label><input type="radio" name="q4-3" value="a"> Elle rend l’IA plus polie.</label>
+            <label><input type="radio" name="q4-3" value="b"> Elle permet d’écrire plus vite.</label>
+            <label><input type="radio" name="q4-3" value="c"> Elle force l’évaluation selon des critères explicites et vérifiables.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- LESSON 5 -->
+      <section id="lesson-5" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 05 — Writing & Editing</h3>
+            <p class="subtitle">
+              L’“AI slop” désigne un texte qui semble correct phrase par phrase mais manque de substance.
+              La solution : écrire avec l’IA, pas se faire écrire par elle sans contrôle.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 240" role="img" aria-label="Schéma animé : pipeline d’écriture itérative">
+            <defs>
+              <marker id="arrow5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#94A3B8" />
+              </marker>
+            </defs>
+
+            <g class="stage s1">
+              <rect x="40" y="80" width="130" height="70" rx="16" class="node" />
+              <text x="105" y="110" text-anchor="middle" class="label">Notes</text>
+              <text x="105" y="132" text-anchor="middle" class="muted small">contexte</text>
+            </g>
+
+            <g class="stage s2">
+              <rect x="210" y="80" width="120" height="70" rx="16" class="node green" />
+              <text x="270" y="115" text-anchor="middle" class="label green">Plan</text>
+            </g>
+
+            <g class="stage s3">
+              <rect x="370" y="80" width="120" height="70" rx="16" class="node yellow" />
+              <text x="430" y="115" text-anchor="middle" class="label yellow">Bullets</text>
+            </g>
+
+            <g class="stage s4">
+              <rect x="530" y="80" width="120" height="70" rx="16" class="node cyan" />
+              <text x="590" y="115" text-anchor="middle" class="label cyan">Draft</text>
+            </g>
+
+            <g class="stage s5">
+              <rect x="690" y="80" width="130" height="70" rx="16" class="node red" />
+              <text x="755" y="115" text-anchor="middle" class="label red">Final</text>
+            </g>
+
+            <path class="dash" d="M170 115 L205 115" marker-end="url(#arrow5)" />
+            <path class="dash green" d="M330 115 L365 115" marker-end="url(#arrow5)" />
+            <path class="dash yellow" d="M490 115 L525 115" marker-end="url(#arrow5)" />
+            <path class="dash cyan" d="M650 115 L685 115" marker-end="url(#arrow5)" />
+
+            <path class="dash" d="M270 150 C270 205, 430 205, 430 150" fill="none" marker-end="url(#arrow5)" />
+            <path class="dash green" d="M430 150 C430 205, 590 205, 590 150" fill="none" marker-end="url(#arrow5)" />
+
+            <text x="450" y="225" text-anchor="middle" class="muted">Modifier un plan a plus d’effet que modifier un mot dans un texte déjà généré.</text>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card bad">
+            <h4>Signes d’AI slop</h4>
+            <ul>
+              <li>Phrases vagues mais solennelles.</li>
+              <li>Surutilisation de tirets longs, listes de trois, « nuancé », « plonger dans ».</li>
+              <li>Structures « ce n’est pas X, c’est Y » sans contenu précis.</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h4>Meilleure méthode</h4>
+            <ul>
+              <li>Fournir notes, exemples, données.</li>
+              <li>Demander plusieurs plans.</li>
+              <li>Itérer sur la structure avant la prose.</li>
+              <li>Éditer paragraphe par paragraphe.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card info">
+          <h4>Template d’écriture itérative</h4>
+          <div class="prompt" id="p6">Je veux écrire un article sur : [sujet].
+
+Voici mes notes, exemples et angle personnel :
+[coller contexte]
+
+Étape 1 : propose 3 plans différents, avec un angle distinct pour chacun.
+Attends mon choix avant d’aller plus loin.
+
+Étape 2 : quand j’aurai choisi un plan, transforme-le en bullet points détaillés.
+Signale les affirmations qui manquent de preuve.
+
+Étape 3 : rédige seulement après validation des bullets.
+Évite les formules vagues, les listes de trois artificielles et le ton trop lisse.
+Utilise un style concret, précis, avec des exemples.</div>
+          <div class="toolbar">
+            <button class="btn secondary small" onclick="copyText('p6')">Copier le template</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 5</h4>
+
+          <div class="q" data-answer="b">
+            <p>1. Qu’est-ce que l’AI slop ?</p>
+            <label><input type="radio" name="q5-1" value="a"> Un texte toujours faux.</label>
+            <label><input type="radio" name="q5-1" value="b"> Un texte qui semble correct mais manque de substance et de pensée réelle.</label>
+            <label><input type="radio" name="q5-1" value="c"> Un texte écrit uniquement en majuscules.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>2. Pourquoi itérer sur un plan est-il plus efficace que modifier un texte final ?</p>
+            <label><input type="radio" name="q5-2" value="a"> Parce qu’un petit changement de structure peut améliorer tout un paragraphe ou section.</label>
+            <label><input type="radio" name="q5-2" value="b"> Parce que les plans sont toujours plus courts.</label>
+            <label><input type="radio" name="q5-2" value="c"> Parce que l’IA ne sait pas rédiger.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>3. Comment obtenir une critique utile de votre texte ?</p>
+            <label><input type="radio" name="q5-3" value="a"> Demander « c’est bien ? ».</label>
+            <label><input type="radio" name="q5-3" value="b"> Dire que vous êtes très fier du texte.</label>
+            <label><input type="radio" name="q5-3" value="c"> Fournir une rubrique claire et demander une évaluation critère par critère.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- LESSON 6 -->
+      <section id="lesson-6" class="lesson">
+        <div class="lesson-top">
+          <div>
+            <h3>Module 06 — Multimodal & Code Execution</h3>
+            <p class="subtitle">
+              L’IA peut recevoir et produire des images, de l’audio, de la vidéo et du code.
+              Chaque modalité a ses forces, ses coûts et ses pièges.
+            </p>
+          </div>
+          <button class="btn secondary small" onclick="hideLesson()">Fermer</button>
+        </div>
+
+        <div class="schema-wrap">
+          <svg class="schema" viewBox="0 0 900 300" role="img" aria-label="Schéma animé : coût relatif des modalités et exécution de code">
+            <text x="70" y="70" class="label">Texte</text>
+            <rect x="160" y="52" width="120" height="26" rx="8" fill="#10B981" class="bar" style="animation-delay:0.1s" />
+
+            <text x="70" y="120" class="label">Audio</text>
+            <rect x="160" y="102" width="220" height="26" rx="8" fill="#22D3EE" class="bar" style="animation-delay:0.3s" />
+
+            <text x="70" y="170" class="label">Image</text>
+            <rect x="160" y="152" width="360" height="26" rx="8" fill="#F59E0B" class="bar" style="animation-delay:0.5s" />
+
+            <text x="70" y="220" class="label">Vidéo</text>
+            <rect x="160" y="202" width="560" height="26" rx="8" fill="#EF4444" class="bar" style="animation-delay:0.7s" />
+
+            <g class="spin" transform="translate(760 90)">
+              <circle r="34" fill="rgba(99,102,241,0.12)" stroke="#6366F1" stroke-width="3" />
+              <circle r="12" fill="#6366F1" />
+              <rect x="-4" y="-46" width="8" height="16" rx="3" fill="#6366F1" />
+              <rect x="-4" y="30" width="8" height="16" rx="3" fill="#6366F1" />
+              <rect x="30" y="-4" width="16" height="8" rx="3" fill="#6366F1" />
+              <rect x="-46" y="-4" width="16" height="8" rx="3" fill="#6366F1" />
+            </g>
+            <text x="760" y="155" text-anchor="middle" class="label accent">Code</text>
+            <text x="760" y="178" text-anchor="middle" class="muted small">exécution / data</text>
+
+            <text x="450" y="275" text-anchor="middle" class="muted">Le texte est rapide et bon marché ; la vidéo est souvent lente et coûteuse. Adaptez vos itérations en conséquence.</text>
+          </svg>
+        </div>
+
+        <div class="grid2">
+          <div class="card info">
+            <h4>Images en entrée</h4>
+            <ul>
+              <li>Whiteboard, reçu, lettre manuscrite, objet, screenshot.</li>
+              <li>Utile quand une image vaut mille mots.</li>
+              <li>L’IA peut manquer des détails fins.</li>
+            </ul>
+          </div>
+          <div class="card good">
+            <h4>Images en sortie</h4>
+            <ul>
+              <li>Brainstorming visuel : gâteau, costume, infographic.</li>
+              <li>Restauration de photos.</li>
+              <li>Les modèles modernes gèrent mieux le texte et la cohérence.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card warn">
+          <h4>Analyse de données avec code exécuté</h4>
+          <p>
+            Quand vous fournissez un CSV ou un tableur, l’IA peut écrire du code pour calculer, agréger, tracer des graphiques
+            et identifier des tendances. C’est souvent plus fiable qu’un simple texte, mais il faut quand même vérifier les chiffres.
+          </p>
+          <div class="prompt" id="p7">Voici un fichier de données : [décrire colonnes].
+
+Objectif : identifier les tendances les plus intéressantes et produire un graphique clair.
+
+Instructions :
+1. Inspecte les données et signale les valeurs manquantes ou aberrantes.
+2. Calcule les métriques pertinentes avec du code.
+3. Propose d’abord 3 angles d’analyse.
+4. Après ma validation, génère le graphique et explique les insights en langage simple.
+5. Indique les limites de l’analyse.</div>
+          <div class="toolbar">
+            <button class="btn secondary small" onclick="copyText('p7')">Copier le template data</button>
+          </div>
+        </div>
+
+        <div class="quiz">
+          <h4>Quiz express — Module 6</h4>
+
+          <div class="q" data-answer="b">
+            <p>1. Pourquoi uploader une image peut-il être plus efficace qu’un long texte ?</p>
+            <label><input type="radio" name="q6-1" value="a"> Parce que les images sont toujours parfaites.</label>
+            <label><input type="radio" name="q6-1" value="b"> Parce qu’elle transmet rapidement un contexte visuel difficile à décrire.</label>
+            <label><input type="radio" name="q6-1" value="c"> Parce que l’IA ne comprend pas le français.</label>
+          </div>
+
+          <div class="q" data-answer="c">
+            <p>2. Quelle est une limite actuelle de la vision par IA ?</p>
+            <label><input type="radio" name="q6-2" value="a"> Elle ne peut lire aucun texte.</label>
+            <label><input type="radio" name="q6-2" value="b"> Elle voit toujours mieux qu’un humain sur tous les détails.</label>
+            <label><input type="radio" name="q6-2" value="c"> Elle peut manquer des détails fins ou confondre des objets visuellement proches.</label>
+          </div>
+
+          <div class="q" data-answer="a">
+            <p>3. Pourquoi itérer beaucoup sur une vidéo est-il plus délicat que sur du texte ?</p>
+            <label><input type="radio" name="q6-3" value="a"> Parce que la génération vidéo est souvent plus lente et plus coûteuse.</label>
+            <label><input type="radio" name="q6-3" value="b"> Parce que les vidéos ne contiennent jamais de texte.</label>
+            <label><input type="radio" name="q6-3" value="c"> Parce que l’IA refuse de générer des vidéos.</label>
+          </div>
+
+          <button class="btn primary small checkQuiz">Vérifier mes réponses</button>
+          <div class="feedback"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="studio">
+      <div class="section-head" style="margin-top:0">
+        <div>
+          <h2>Prompt Studio</h2>
+          <p>Construis un prompt plus expert en quelques secondes : tâche, contexte, format et niveau de réflexion.</p>
+        </div>
+      </div>
+
+      <div class="studio-grid">
+        <div class="field">
+          <label for="task">Type de tâche</label>
+          <select id="task">
+            <option value="plan">Plan personnel / habitude</option>
+            <option value="business">Idée de business</option>
+            <option value="writing">Angle d’article</option>
+            <option value="gift">Cadeau / événement</option>
+            <option value="career">Orientation de carrière</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ctx">Contexte spécifique</label>
+          <textarea id="ctx" placeholder="Ex : âge, contraintes, budget, objets disponibles, ce que je déteste, objectif réel..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="fmt">Format souhaité</label>
+          <select id="fmt">
+            <option value="options">3 à 5 options contrastées</option>
+            <option value="plan">Plan étape par étape</option>
+            <option value="tableau">Tableau comparatif</option>
+            <option value="scripts">Scripts / exemples concrets</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="think">Niveau de réflexion</label>
+          <select id="think">
+            <option value="normal">Réponse rapide</option>
+            <option value="hard">Réfléchis sérieusement</option>
+            <option value="ultra">Ultra-réflexion, explore plusieurs hypothèses</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn primary" onclick="makePrompt()">Générer mon prompt</button>
+        <button class="btn secondary" onclick="copyText('promptOut')">Copier le prompt</button>
+      </div>
+
+      <pre class="prompt" id="promptOut">Votre prompt optimisé apparaîtra ici…</pre>
+
+      <div class="status-line">
+        <span>Astuce : plus le contexte est concret, plus l’IA sort des réponses génériques.</span>
+        <span>Score global : <strong id="finalScoreInline">0/0</strong></span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 AI Masterclass Curriculum. Version interactive animée — basée sur le transcript fourni.</p>
+  </footer>
+
+  <script>
+    const lessons = Array.from(document.querySelectorAll('.lesson'));
+    const openButtons = Array.from(document.querySelectorAll('.openLesson'));
+    const miniButtons = Array.from(document.querySelectorAll('#miniMap button'));
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const globalScore = document.getElementById('globalScore');
+    const finalScoreInline = document.getElementById('finalScoreInline');
+    const visitedCount = document.getElementById('visitedCount');
+
+    const visited = new Set();
+
+    function updateProgress() {
+      const pct = Math.round((visited.size / lessons.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressText.textContent = pct + '%';
+      visitedCount.textContent = visited.size + '/' + lessons.length;
+    }
+
+    function updateScore() {
+      const qs = document.querySelectorAll('.q');
+      const correct = document.querySelectorAll('.q.correct').length;
+      const total = qs.length;
+      const text = correct + '/' + total;
+      globalScore.textContent = text;
+      finalScoreInline.textContent = text;
+    }
+
+    function setActiveMini(target) {
+      miniButtons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+      openButtons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+    }
+
+    function showLesson(id) {
+      lessons.forEach(l => l.classList.toggle('active', l.id === id));
+      setActiveMini(id);
+      visited.add(id);
+      updateProgress();
+      const el = document.getElementById(id);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+    }
+
+    function hideLesson() {
+      lessons.forEach(l => l.classList.remove('active'));
+      setActiveMini(null);
+    }
+
+    openButtons.forEach(btn => {
+      btn.addEventListener('click', () => showLesson(btn.dataset.target));
+    });
+
+    miniButtons.forEach(btn => {
+      btn.addEventListener('click', () => showLesson(btn.dataset.target));
+    });
+
+    document.querySelectorAll('.checkQuiz').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const quiz = btn.closest('.quiz');
+        const qs = quiz.querySelectorAll('.q');
+        let correct = 0;
+
+        qs.forEach(q => {
+          const selected = q.querySelector('input:checked');
+          q.classList.remove('correct', 'incorrect');
+          if (selected && selected.value === q.dataset.answer) {
+            q.classList.add('correct');
+            correct++;
+          } else {
+            q.classList.add('incorrect');
+          }
+        });
+
+        const feedback = quiz.querySelector('.feedback');
+        if (feedback) {
+          feedback.textContent = correct === qs.length
+            ? 'Parfait : ' + correct + '/' + qs.length
+            : 'Résultat : ' + correct + '/' + qs.length + '. Les questions incorrectes sont entourées en rouge.';
+        }
+
+        updateScore();
+      });
+    });
+
+    function copyText(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+        const oldBorder = el.style.borderColor;
+        el.style.borderColor = '#10B981';
+        setTimeout(() => {
+          el.style.borderColor = oldBorder || '';
+        }, 700);
+      }).catch(() => {
+        alert('Copie impossible dans ce contexte. Sélectionnez le texte manuellement.');
+      });
+    }
+
+    function makePrompt() {
+      const task = document.getElementById('task').value;
+      const ctx = document.getElementById('ctx').value.trim() || '[Ajoutez ici votre situation, contraintes, objectifs, exemples, données]';
+      const fmt = document.getElementById('fmt').value;
+      const think = document.getElementById('think').value;
+
+      const taskMap = {
+        plan: 'Propose un plan réaliste et personnalisable.',
+        business: 'Analyse cette idée de manière critique et constructive.',
+        writing: 'Aide-moi à trouver un angle original et une structure claire.',
+        gift: 'Propose des idées concrètes, originales et adaptées.',
+        career: 'Explore des pistes de carrière réalistes avec compromis explicites.'
+      };
+
+      const fmtMap = {
+        options: 'Donne 3 à 5 options contrastées, avec avantages, inconvénients et risque principal.',
+        plan: 'Donne un plan étape par étape, avec priorités et checkpoints.',
+        tableau: 'Présente le résultat sous forme de tableau comparatif.',
+        scripts: 'Fournis des exemples concrets, scripts ou formulations prêtes à utiliser.'
+      };
+
+      const thinkMap = {
+        normal: 'Réponds de façon claire et directe.',
+        hard: 'Réfléchis sérieusement avant de répondre, en pesant les compromis.',
+        ultra: 'Explore plusieurs hypothèses, identifie les points faibles, puis propose la recommandation la plus robuste.'
+      };
+
+      const prompt =
+`Tâche : ${taskMap[task]}
+
+Contexte :
+${ctx}
+
+Format attendu :
+${fmtMap[fmt]}
+
+Niveau de réflexion :
+${thinkMap[think]}
+
+Processus :
+1. Commence par reformuler mon objectif pour vérifier la compréhension.
+2. Pose maximum 3 questions si une information cruciale manque.
+3. Propose d’abord des options ou un plan, pas la version finale.
+4. Attends mon feedback avant d’affiner.`;
+
+      document.getElementById('promptOut').textContent = prompt;
+    }
+
+    function resetCourse() {
+      lessons.forEach(l => l.classList.remove('active'));
+      setActiveMini(null);
+      visited.clear();
+      document.querySelectorAll('.q').forEach(q => q.classList.remove('correct', 'incorrect'));
+      document.querySelectorAll('.feedback').forEach(f => f.textContent = '');
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      updateScore();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    updateProgress();
+    updateScore();
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

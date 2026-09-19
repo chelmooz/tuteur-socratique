@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture RAG de Qualité Production</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+<div id="diagram-wrap">
+  <svg id="rag" viewBox="0 0 1600 1060" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Schéma de l'architecture RAG de qualité production, de la requête utilisateur à la réponse fondée">
+  <style>
+      .bg{ fill:#0B0F19; }
+      text{ font-family:system-ui,-apple-system,"Segoe UI",sans-serif; fill:#E8EAF2; }
+      .title-main{ font-size:30px; font-weight:800; }
+      .title-accent{ font-size:30px; font-weight:800; fill:#4da3ff; }
+      .subtitle{ font-size:14px; fill:#8A90A6; }
+      .col-outer{ fill:#0f1420; stroke-width:1.4; opacity:0.9; }
+      .col-title{ font-size:15px; font-weight:700; }
+      .col-sub{ font-size:11px; fill:#8A90A6; }
+      .badge-circle{ fill:#0B0F19; stroke-width:1.6; }
+      .badge-num{ font-size:12px; font-weight:800; text-anchor:middle; }
+      .panel-bg{ fill:#111826; stroke-width:1.3; transition:filter .15s ease, stroke .15s ease; cursor:pointer; }
+      .panel-title{ font-size:13px; font-weight:700; }
+      .panel-sub{ font-size:10.5px; fill:#8A90A6; }
+      .item-text{ font-size:11.6px; fill:#C7CBDA; }
+      .item-dot{ }
+      .panel:hover .panel-bg{ filter:drop-shadow(0 0 6px var(--pc)) drop-shadow(0 0 2px var(--pc)); stroke:var(--pc); }
+      .panel:focus{ outline:none; }
+      .panel:focus-visible .panel-bg{ filter:drop-shadow(0 0 8px var(--pc)); stroke:var(--pc); stroke-width:2.4; }
+      .flow-arrow{ fill:none; stroke-width:2; }
+      .flow-arrow.dashed{ stroke-dasharray:5 4; }
+      .flow-label{ font-size:10.5px; fill:#8A90A6; font-style:italic; }
+      .metric-pill{ fill:#111826; stroke-width:1.2; }
+      .metric-title{ font-size:12.4px; font-weight:700; }
+      .metric-sub{ font-size:9.6px; fill:#8A90A6; }
+      .quote{ font-size:15px; font-weight:600; text-anchor:middle; fill:#C7CBDA; }
+      .quote tspan.accent{ fill:#4da3ff; }
+      .tip-bg{ fill:#0f1420; stroke:#2a3040; stroke-width:1.2; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+      .tip-bg.show{ opacity:1; }
+      .tip-title{ font-size:12.5px; font-weight:800; }
+      .tip-body{ font-size:11px; fill:#C7CBDA; }
+      .bubble-user{ fill:#141b2b; stroke:#2a3040; stroke-width:1.2; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1060"></rect>
+
+  <!-- Titre -->
+  <text x="800" y="38" text-anchor="middle" class="title-main">Architecture RAG de <tspan class="title-accent">Qualité Production</tspan></text>
+  <text x="800" y="60" text-anchor="middle" class="subtitle">De la Requête Utilisateur à la Réponse Fondée, Fiable et Pertinente</text>
+
+  <!-- Barre de métriques (générée en JS) -->
+  <g id="metrics"></g>
+
+  <!-- Colonnes principales (générées en JS) -->
+  <g id="col1"></g>
+  <g id="col2"></g>
+  <g id="col3"></g>
+  <g id="col4"></g>
+
+  <!-- Flèches de flux -->
+  <g id="arrows"></g>
+
+  <!-- Rangée basse -->
+  <g id="bottom"></g>
+
+  <!-- Citation finale -->
+  <text x="800" y="1042" class="quote">"Vos Données + LLMs = Valeur Réelle" <tspan class="accent" dx="4">(Quand c'est fait correctement)</tspan></text>
+
+  <!-- Panneau info-bulle (mis à jour au clic) -->
+  <g id="tooltip" transform="translate(1130,72)">
+    <rect id="tip-rect" class="tip-bg" x="0" y="0" width="450" height="58" rx="10"></rect>
+    <text id="tip-title" class="tip-title" x="16" y="20" fill="#4da3ff"></text>
+    <text id="tip-body" class="tip-body" x="16" y="38"></text>
+  </g>
+
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4da3ff"></path></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"></path></marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"></path></marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fb923c"></path></marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6178"></path></marker>
+  </defs>
+  </svg>
+</div>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById('rag');
+function el(tag, attrs={}){
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+
+/* ---------- mesure de texte réelle (canvas), pour un rendu qui s'adapte ---------- */
+const measureCanvas = document.createElement('canvas');
+const measureCtx = measureCanvas.getContext('2d');
+function measure(str, size, weight=400){
+  measureCtx.font = `${weight} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  return measureCtx.measureText(str).width;
+}
+function fitFontSize(str, maxWidth, baseSize, weight, minSize=9.5){
+  const w = measure(str, baseSize, weight);
+  if (w <= maxWidth) return baseSize;
+  return Math.max(minSize, +(baseSize*maxWidth/w).toFixed(2));
+}
+function wrapToWidth(str, maxWidth, size, weight=400){
+  const words = str.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w=>{
+    const test = cur ? cur+' '+w : w;
+    if (measure(test, size, weight) <= maxWidth || !cur) cur = test;
+    else { lines.push(cur); cur = w; }
+  });
+  if (cur) lines.push(cur);
+  return lines;
+}
+function wrapItems(items, maxWidth, size){
+  return items.map(it => wrapToWidth(it, maxWidth, size));
+}
+
+/* ---------- helpers de bas niveau ---------- */
+function rect(parent, x,y,w,h,rx,cls,stroke){
+  const r = el('rect',{x,y,width:w,height:h,rx,class:cls});
+  if (stroke) r.setAttribute('stroke', stroke);
+  parent.appendChild(r);
+  return r;
+}
+function text(parent, x,y,str,cls,anchor,fill,size){
+  const t = el('text',{x,y,class:cls});
+  if (anchor) t.setAttribute('text-anchor', anchor);
+  if (fill) t.setAttribute('fill', fill);
+  if (size) t.setAttribute('style', `font-size:${size}px`);
+  t.textContent = str;
+  parent.appendChild(t);
+  return t;
+}
+function circleBadge(parent, cx,cy,num,color){
+  const g = el('g');
+  const c = el('circle',{cx,cy,r:11,class:'badge-circle'});
+  c.setAttribute('stroke', color);
+  g.appendChild(c);
+  const t = el('text',{x:cx,y:cy+4,class:'badge-num'});
+  t.setAttribute('fill', color);
+  t.textContent = num;
+  g.appendChild(t);
+  parent.appendChild(g);
+}
+function bulletList(parent, x, y, w, items, color, size=11.6, lineH=17){
+  const wrapped = wrapItems(items, w, size);
+  let ly = y;
+  wrapped.forEach(lines=>{
+    lines.forEach((line,i)=>{
+      if (i===0){
+        const dot = el('circle',{cx:x, cy:ly-4, r:2.6, class:'item-dot'});
+        dot.setAttribute('fill', color);
+        parent.appendChild(dot);
+      }
+      text(parent, x+11, ly, line, 'item-text', null, null, size);
+      ly += lineH;
+    });
+  });
+  return ly;
+}
+function itemsHeight(items, w, size=11.6, lineH=17){
+  return wrapItems(items, w, size).reduce((sum,l)=>sum+l.length, 0) * lineH;
+}
+
+/* ---------- panneau générique cliquable ---------- */
+function panel(parent, {x,y,w,title,color,items,tooltip,paragraph}){
+  const innerW = w-28;
+  const headerH = 26;
+  const padTop = 12, padBottom = 16;
+  const bodyH = paragraph
+    ? paragraph.reduce((sum,l)=> sum + wrapToWidth(l, innerW, 11.6).length, 0) * 17
+    : itemsHeight(items, innerW);
+  const h = headerH + padTop + bodyH + padBottom;
+  const g = el('g', {class:'panel', tabindex:'0', role:'button', style:`--pc:${color}`});
+  rect(g, x, y, w, h, 10, 'panel-bg', color+'55');
+  const titleSize = fitFontSize(title, innerW, 13, 700, 10);
+  text(g, x+14, y+20, title, 'panel-title', null, color, titleSize);
+  if (paragraph){
+    let py = y+headerH+padTop+10;
+    paragraph.forEach(l=>{
+      wrapToWidth(l, innerW, 11.6).forEach(line=>{ text(g, x+14, py, line, 'item-text'); py += 17; });
+    });
+  } else {
+    bulletList(g, x+14, y+headerH+padTop+8, innerW, items, color);
+  }
+  const fire = ()=> showTooltip(title, tooltip);
+  g.addEventListener('click', fire);
+  g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fire(); }});
+  parent.appendChild(g);
+  return { x, y, w, h, bottom:y+h, right:x+w, cx:x+w/2, cy:y+h/2 };
+}
+
+/* ---------- en-tête de colonne + conteneur ---------- */
+function columnOuter(parent, {x,y,w,h,num,title,sub,color}){
+  rect(parent, x, y, w, h, 14, 'col-outer', color+'66');
+  circleBadge(parent, x+22, y+24, num, color);
+  const titleSize = fitFontSize(title, w-56, 15, 700, 11.5);
+  text(parent, x+40, y+22, title, 'col-title', null, color, titleSize);
+  if (sub) text(parent, x+40, y+38, sub, 'col-sub');
+  return { contentY: y+58 };
+}
+
+/* ---------- info-bulle ---------- */
+function wrap(str, maxChars){
+  const words = str.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w=>{
+    if ((cur+' '+w).trim().length > maxChars){ lines.push(cur.trim()); cur = w; }
+    else cur += ' '+w;
+  });
+  if (cur.trim()) lines.push(cur.trim());
+  return lines;
+}
+function showTooltip(title, desc){
+  const rectEl = document.getElementById('tip-rect');
+  const titleEl = document.getElementById('tip-title');
+  const bodyEl = document.getElementById('tip-body');
+  titleEl.textContent = title;
+  while (bodyEl.firstChild) bodyEl.removeChild(bodyEl.firstChild);
+  const lines = wrap(desc || 'Détails à venir.', 62);
+  lines.forEach((line,i)=>{
+    const tspan = el('tspan',{x:16, dy: i===0? 0 : 15});
+    tspan.textContent = line;
+    bodyEl.appendChild(tspan);
+  });
+  rectEl.setAttribute('height', 30 + lines.length*15);
+  rectEl.classList.add('show');
+}
+
+/* ============================================================
+   MISE EN PAGE
+   ============================================================ */
+
+/* ---- barre de métriques ---- */
+const metricsData = [
+  {icon:'✓', color:'#34d399', title:'Réponses Précises', sub:'(à partir de vos données)'},
+  {icon:'◆', color:'#a78bfa', title:'Hallucinations Réduites', sub:'(avec ancrage documentaire)'},
+  {icon:'⚡', color:'#4da3ff', title:'Évolutif & Prêt pour la Prod.', sub:'(cache, monitoring, repli)'},
+  {icon:'$', color:'#facc15', title:'Rentable', sub:'(recherche hybride + reranking)'},
+  {icon:'♥', color:'#f472b6', title:'Meilleure Expérience Utilisateur', sub:'(réponses rapides et fiables)'}
+];
+{
+  const g = document.getElementById('metrics');
+  const gap = 12, mx = 20, mw = (1560 - gap*4)/5, my = 78, mh = 40;
+  metricsData.forEach((m,i)=>{
+    const x = mx + i*(mw+gap);
+    rect(g, x, my, mw, mh, 10, 'metric-pill', m.color+'55');
+    const c = el('circle',{cx:x+20, cy:my+20, r:10, fill:m.color+'22', stroke:m.color});
+    g.appendChild(c);
+    text(g, x+20, my+24, m.icon, 'metric-title', 'middle', m.color);
+    text(g, x+38, my+17, m.title, 'metric-title');
+    text(g, x+38, my+30, m.sub, 'metric-sub');
+  });
+}
+
+/* ---- colonne 1 : pipeline d'ingestion ---- */
+{
+  const g = document.getElementById('col1');
+  const X=20, W=330, Y=150, H=550, C='#4da3ff';
+  const head = columnOuter(g, {x:X,y:Y,w:W,h:H,num:1,title:"Pipeline d'Ingestion de Données",sub:'(Hors ligne / Périodique)',color:C});
+  let cy = head.contentY;
+  const p1 = panel(g, {x:X+14,y:cy,w:W-28,title:'Sources de Données',color:C,
+    items:['Documents (PDF, DOC, TXT)','Pages Web (URLs)','Bases de Données (structurées)','Stockage Cloud (S3, Drive, etc.)','APIs (Confluence, Notion, etc.)','Autres…'],
+    tooltip:"Toutes les origines de contenu à ingérer : fichiers, pages web, bases de données métier, stockage cloud et APIs tierces."});
+  cy = p1.bottom + 14;
+  const p2 = panel(g, {x:X+14,y:cy,w:W-28,title:'Prétraitement',color:C,
+    items:['Extraction de texte','Nettoyage & segmentation','Enrichissement des métadonnées','Découpage en segments (chunks)'],
+    tooltip:"Nettoie et découpe les documents bruts en segments exploitables, en y ajoutant les métadonnées utiles (source, date, permissions…)."});
+  cy = p2.bottom + 14;
+  panel(g, {x:X+14,y:cy,w:W-28,title:'Embedding & Stockage',color:C,
+    items:['Génération des embeddings','(OpenAI / Gemini / Bge, etc.)','Stockage en base vectorielle','(Pinecone / Weaviate / Qdrant…)'],
+    tooltip:"Chaque segment est converti en vecteur numérique (embedding) puis indexé dans une base vectorielle pour une recherche sémantique rapide."});
+}
+
+/* ---- colonne 2 : traitement & recherche de la requête ---- */
+let ctxPertinentAnchor, connIndexeeAnchor, cacheHitAnchor, requeteAnchor;
+{
+  const g = document.getElementById('col2');
+  const X=370, W=640, Y=150, H=670, C='#a78bfa';
+  const head = columnOuter(g, {x:X,y:Y,w:W,h:H,num:2,title:'Traitement & Recherche de la Requête',sub:'(En ligne / Temps réel)',color:C});
+  let cy = head.contentY;
+
+  // Requête utilisateur + vérification cache (côte à côte)
+  const reqW = 190, cacheW = W-28-reqW-14;
+  const pReq = panel(g, {x:X+14,y:cy,w:reqW,title:'Requête Utilisateur',color:'#8A90A6',
+    paragraph:['« Quelle est notre','politique de… »'],
+    tooltip:"Le point d'entrée du système : la question brute posée par l'utilisateur, en langage naturel."});
+  requeteAnchor = pReq;
+  const pCache = panel(g, {x:X+14+reqW+14,y:cy,w:cacheW,title:'Vérification Cache (Redis)',color:C,
+    items:['Vérifier si une requête similaire existe','Utiliser le cache sémantique','Définir un TTL (ex. 1 à 24 h)'],
+    tooltip:"Avant toute recherche coûteuse, on vérifie si une réponse à une requête équivalente est déjà en cache — ce qui réduit la latence et les coûts."});
+  cacheHitAnchor = pCache;
+  // étiquette "Cache Hit" + retour en cache
+  const chY = pCache.y - 22;
+  rect(g, pCache.right-84, chY, 78, 18, 8, 'metric-pill', '#34d39955');
+  text(g, pCache.right-45, chY+13, 'Cache Hit', 'flow-label', 'middle', '#34d399');
+  const pRetour = panel(g, {x:pCache.right-150, y: pCache.bottom+10, w:150, title:'Retour Réponse en Cache', color:'#34d399',
+    paragraph:['Réponse immédiate,','sans nouvel appel LLM.'],
+    tooltip:"En cas de correspondance dans le cache, la réponse déjà générée est renvoyée directement à l'utilisateur, sans repasser par la recherche ni le LLM."});
+
+  cy = Math.max(pReq.bottom, pRetour.bottom) + 14;
+
+  const pAmelio = panel(g, {x:X+14,y:cy,w:W-28,title:'Amélioration de la Requête',color:C,
+    items:["Réécrire la requête (pour une meilleure recherche)","Détection d'intention (optionnel)","Ajouter des filtres (type de doc, date, droits d'accès…)","Générer plusieurs variantes de requête (optionnel)"],
+    tooltip:"La requête brute est reformulée, enrichie de filtres et parfois déclinée en plusieurs variantes afin de maximiser la qualité de la recherche qui suit."});
+  cy = pAmelio.bottom + 14;
+
+  // Recherche hybride (conteneur avec 2 sous-blocs)
+  const hybH = 26+12+2*20+16+18;
+  rect(g, X+14, cy, W-28, hybH, 10, 'col-outer', C+'55');
+  text(g, X+28, cy+20, 'Recherche Hybride', 'panel-title', null, C);
+  const subW = (W-28-24-16)/2;
+  const pVec = panel(g, {x:X+28,y:cy+30,w:subW,title:'Recherche Vectorielle (sémantique)',color:C,
+    paragraph:['Trouve les segments','sémantiquement proches (embeddings).'],
+    tooltip:"Compare le vecteur de la requête à ceux des segments indexés pour retrouver les passages les plus proches par le sens, même sans mot commun."});
+  const pKey = panel(g, {x:X+28+subW+16,y:cy+30,w:subW,title:'Recherche par Mot-clé (lexicale)',color:C,
+    paragraph:['BM25 / Elasticsearch — idéal','pour les correspondances exactes.'],
+    tooltip:"Recherche par correspondance exacte de termes (BM25 / Elasticsearch) : très efficace pour les noms propres, codes, références précises."});
+  cy = cy + hybH + 14;
+
+  const pRerank = panel(g, {x:X+14,y:cy,w:W-28,title:'Re-classement (Top K)',color:C,
+    paragraph:['Cross-Encoder / Cohere Rerank, etc. — sélectionne les','segments les plus pertinents et les plus diversifiés.'],
+    tooltip:"Un modèle de reranking réévalue finement les meilleurs résultats des deux recherches pour ne garder que les segments réellement utiles au LLM."});
+  cy = pRerank.bottom + 18;
+
+  text(g, X+W-28, cy, 'Contexte Pertinent →', 'flow-label', 'end', C);
+  ctxPertinentAnchor = {x:X+W-14, y:cy-5};
+  text(g, X+40, cy, '↑ Connaissance Indexée', 'flow-label', 'start', '#4da3ff');
+  connIndexeeAnchor = {x:X+60, y:cy};
+}
+
+/* ---- colonne 3 : génération & réponse du LLM ---- */
+let reponseFinaleAnchor;
+{
+  const g = document.getElementById('col3');
+  const X=1030, W=260, Y=150, H=516, C='#34d399';
+  const head = columnOuter(g, {x:X,y:Y,w:W,h:H,num:3,title:'Génération & Réponse du LLM',sub:'(En ligne)',color:C});
+  let cy = head.contentY;
+  const pLLM = panel(g, {x:X+14,y:cy,w:W-28,title:'LLM (avec garde-fous)',color:C,
+    items:['Génère une réponse fondée','Utilise le prompt système + contexte','Applique les garde-fous (sécurité, ton…)','Appel de fonction / outils (optionnel)'],
+    tooltip:"Le modèle génère la réponse en s'appuyant strictement sur le contexte récupéré, encadré par un prompt système et des garde-fous de sécurité et de ton."});
+  cy = pLLM.bottom + 14;
+  const pPost = panel(g, {x:X+14,y:cy,w:W-28,title:'Post-traitement (optionnel)',color:C,
+    items:['Vérification de fond (grounding)','Formatage de la réponse (Markdown, UI…)'],
+    tooltip:"Contrôles et mises en forme appliqués après génération : vérifier que la réponse s'appuie bien sur les sources, puis la formater pour l'interface."});
+  cy = pPost.bottom + 14;
+  const pFinal = panel(g, {x:X+14,y:cy,w:W-28,title:'Réponse Finale',color:C,
+    paragraph:['Réponse précise,','étayée par ses sources.'],
+    tooltip:"La réponse livrée à l'utilisateur, accompagnée des sources documentaires qui la justifient."});
+  reponseFinaleAnchor = pFinal;
+  cy = pFinal.bottom + 14;
+  const g2 = el('g');
+  const bh = 60;
+  rect(g2, X+14, cy, W-28, bh, 12, 'bubble-user');
+  text(g2, X+28, cy+22, 'Utilisateur', 'panel-title', null, '#8A90A6');
+  text(g2, X+28, cy+40, '« Voici la réponse avec', 'item-text');
+  text(g2, X+28, cy+56, 'les sources… »', 'item-text');
+  g.appendChild(g2);
+}
+
+/* ---- colonne 4 : surveillance & stratégie de repli ---- */
+{
+  const g = document.getElementById('col4');
+  const X=1310, W=270, Y=150, C1='#fb923c', C2='#f87171';
+  const p1 = panel(g, {x:X,y:Y,w:W,title:'④ Surveillance & Observabilité',color:C1,
+    items:['Latence (de bout en bout)','Qualité de la recherche (scores reranker)','Utilisation des jetons & coût','Taux de cache hit / miss',"Taux d'hallucination (vérif. de fond)","Erreurs & délais d'attente",'Retour utilisateur','Traces (OpenTelemetry)'],
+    tooltip:"Les métriques suivies en continu pour garder le système sous contrôle en production : performance, qualité, coût et fiabilité."});
+  const p2 = panel(g, {x:X,y:p1.bottom+20,w:W,title:'⑤ Stratégie de Repli',color:C2,
+    items:['Repli vers un autre fournisseur LLM','Utiliser un modèle plus petit / moins cher','Retourner la réponse en cache','Réponse simplifiée (contexte réduit)',"Message d'erreur gracieux à l'utilisateur"],
+    tooltip:"Les mécanismes de secours activés automatiquement en cas de panne, de lenteur ou d'erreur, pour que le service continue de répondre."});
+}
+
+/* ---- flèches de flux ---- */
+{
+  const g = document.getElementById('arrows');
+  function arrow(d, color, dashed){
+    const p = el('path', {d, class:'flow-arrow'+(dashed?' dashed':''), stroke:color, 'marker-end':`url(#arrow-${color==='#4da3ff'?'blue':color==='#a78bfa'?'purple':color==='#34d399'?'green':color==='#fb923c'?'orange':'gray'})`});
+    g.appendChild(p);
+  }
+  // requête -> vérification cache
+  arrow(`M${requeteAnchor.right},${requeteAnchor.cy} L${cacheHitAnchor.x-2},${requeteAnchor.cy}`, '#a78bfa', false);
+  // contexte pertinent -> LLM (col2 -> col3)
+  arrow(`M${ctxPertinentAnchor.x},${ctxPertinentAnchor.y} C 1000,${ctxPertinentAnchor.y} 1010,${reponseFinaleAnchor.cy-70} 1030,${reponseFinaleAnchor.y-95}`, '#34d399', false);
+  // connaissance indexée : col1 -> recherche hybride (courbe montante en pointillés)
+  arrow(`M185,700 C 185,760 ${connIndexeeAnchor.x},${connIndexeeAnchor.y+40} ${connIndexeeAnchor.x},${connIndexeeAnchor.y+6}`, '#4da3ff', true);
+  // cache hit -> réponse finale (grand arc au-dessus du diagramme)
+  arrow(`M950,${cacheHitAnchor.y-4} C 1000,60 1080,60 ${reponseFinaleAnchor.x+10},${reponseFinaleAnchor.y-2}`, '#34d399', true);
+}
+
+/* ---- rangée basse ---- */
+{
+  const g = document.getElementById('bottom');
+  const Y = 850;
+  panel(g, {x:20,y:Y,w:330,title:'Avantages Clés',color:'#34d399',
+    items:['Réponses précises','Réduction des hallucinations','Recherche hybride','Prêt pour la production'],
+    tooltip:"Les bénéfices concrets d'une architecture RAG bien conçue par rapport à un LLM utilisé seul."});
+
+  // Cas d'usage courants — deux colonnes
+  const cx=370, cw=640, C='#4da3ff';
+  rect(g, cx, Y, cw, 130, 10, 'col-outer', C+'55');
+  text(g, cx+14, Y+22, "Cas d'Usage Courants", 'panel-title', null, C);
+  const leftItems = ['Assistant de connaissance interne','Support client / chatbots','Documentation Q&A'];
+  const rightItems = ['Recherche & résumé','Recherche d\'entreprise','Assistant de conformité & politique'];
+  const colInnerW = cw/2 - 40;
+  bulletList(g, cx+20, Y+46, colInnerW, leftItems, C);
+  bulletList(g, cx+cw/2+10, Y+46, colInnerW, rightItems, C);
+
+  // Exemple de tech stack — 4 mini-colonnes
+  const tx=1030, tw=550, TC='#a78bfa';
+  rect(g, tx, Y, tw, 130, 10, 'col-outer', TC+'55');
+  text(g, tx+14, Y+22, 'Exemple de Tech Stack', 'panel-title', null, TC);
+  const stack = [
+    {t:'Embeddings', l:['OpenAI / Gemini /','Cohere, etc.']},
+    {t:'Base Vectorielle', l:['Pinecone / Weaviate /','Qdrant, etc.']},
+    {t:'Recherche', l:['BM25 + recherche','vectorielle, reranker']},
+    {t:'Cache & Frameworks', l:['Redis · LangChain,','LlamaIndex']}
+  ];
+  const colW = (tw-28)/4;
+  stack.forEach((s,i)=>{
+    const sx = tx+14+i*colW;
+    text(g, sx, Y+46, s.t, 'panel-sub', null, TC);
+    s.l.forEach((line,j)=> text(g, sx, Y+64+j*15, line, 'item-text'));
+  });
+}
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

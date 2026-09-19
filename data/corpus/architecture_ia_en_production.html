@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture de l'IA en production</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+    <div class="canvas-container">
+        <svg viewBox="0 0 1200 1060" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2593b"/>
+                </marker>
+                <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+                    <circle cx="5" cy="5" r="4.5" fill="#c2593b"/>
+                </marker>
+            </defs>
+
+            <!-- Top to Center -->
+            <line x1="600" y1="260" x2="600" y2="310" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+
+            <!-- Left to Center -->
+            <line x1="340" y1="360" x2="400" y2="360" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="340" y1="470" x2="400" y2="470" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="340" y1="580" x2="400" y2="580" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="340" y1="690" x2="400" y2="690" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+
+            <!-- Right to Center -->
+            <line x1="860" y1="360" x2="800" y2="360" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="860" y1="470" x2="800" y2="470" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="860" y1="580" x2="800" y2="580" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+            <line x1="860" y1="690" x2="800" y2="690" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+
+            <!-- Center to Output -->
+            <line x1="600" y1="740" x2="600" y2="780" stroke="#c2593b" stroke-width="2" marker-start="url(#dot)" marker-end="url(#arrow)" />
+
+            <!-- Output to Bottom Columns -->
+            <line x1="600" y1="820" x2="600" y2="840" stroke="#c2593b" stroke-width="2" />
+            <line x1="140" y1="840" x2="1060" y2="840" stroke="#c2593b" stroke-width="2" />
+            
+            <line x1="140" y1="840" x2="140" y2="860" stroke="#c2593b" stroke-width="2" />
+            <line x1="370" y1="840" x2="370" y2="860" stroke="#c2593b" stroke-width="2" />
+            <line x1="600" y1="840" x2="600" y2="860" stroke="#c2593b" stroke-width="2" />
+            <line x1="830" y1="840" x2="830" y2="860" stroke="#c2593b" stroke-width="2" />
+            <line x1="1060" y1="840" x2="1060" y2="860" stroke="#c2593b" stroke-width="2" />
+
+            <!-- En-tête -->
+            <foreignObject x="0" y="20" width="1200" height="150">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="header-container">
+                    <div class="header-small">Architecture de l'IA en production</div>
+                    <div class="header-large">Le Harnais d'Agent IA</div>
+                    <div class="header-medium">Votre Plan de Contrôle de Production</div>
+                </div>
+            </foreignObject>
+
+            <!-- Top Box -->
+            <foreignObject x="350" y="180" width="500" height="80">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="top-box">
+                    <div class="top-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="top-title">Requête Utilisateur / BUT</div>
+                        <div class="top-desc">Demander, instruire ou définir un but pour l'agent.</div>
+                    </div>
+                </div>
+            </foreignObject>
+
+            <!-- Center Box -->
+            <foreignObject x="400" y="310" width="400" height="430">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="center-box">
+                    <div class="center-title">Agent Hermes</div>
+                    <div class="center-subtitle">Modèle + Mémoire + Outils + Orchestration</div>
+                    
+                    <div class="center-divider"></div>
+                    
+                    <div class="center-models-text">Fonctionne avec tous les principaux modèles</div>
+                    <div class="models-container">
+                        <div class="model-item">
+                            <!-- OpenAI/ChatGPT abstract icon -->
+                            <svg class="model-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22.28 11.2a5.55 5.55 0 0 0-1.22-4.93A5.67 5.67 0 0 0 17 4.14a5.57 5.57 0 0 0-3.66-1.58A5.6 5.6 0 0 0 8.44 3.9a5.55 5.55 0 0 0-2.3 4.4A5.63 5.63 0 0 0 2.2 11.5a5.55 5.55 0 0 0 1.22 4.93A5.67 5.67 0 0 0 7 19.86a5.57 5.57 0 0 0 3.66 1.58 5.6 5.6 0 0 0 4.9-1.34 5.55 5.55 0 0 0 2.3-4.4 5.63 5.63 0 0 0 3.94-3.2A5.55 5.55 0 0 0 22.28 11.2zM12 21.05a4.34 4.34 0 0 1-3.32-1.56l4.63-2.67v-5.34l3.15 1.82a4.4 4.4 0 0 1-4.46 7.75zm-6.83-3A4.34 4.34 0 0 1 3.5 14.7l4.63 2.67v-5.34L5 10.2A4.4 4.4 0 0 1 5.17 18zm-2.7-8.2a4.34 4.34 0 0 1 1.67-3.23 4.39 4.39 0 0 1 5.15-.36L5 8.1v5.34l-3.15-1.8a4.34 4.34 0 0 1 .63-1.8zM12 2.95a4.34 4.34 0 0 1 3.32 1.56l-4.63 2.67v5.34L7.54 10.7a4.4 4.4 0 0 1 4.46-7.75zm6.83 3A4.34 4.34 0 0 1 20.5 9.3l-4.63-2.67v5.34L19 13.8a4.4 4.4 0 0 1-.17-7.85zm2.7 8.2a4.34 4.34 0 0 1-1.67 3.23 4.39 4.39 0 0 1-5.15.36L19 15.9v-5.34l3.15 1.8a4.34 4.34 0 0 1-.63 1.8z" />
+                            </svg>
+                            <div class="model-name">ChatGPT</div>
+                        </div>
+                        <div class="model-item">
+                            <!-- Anthropic/Claude abstract star -->
+                            <svg class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/>
+                            </svg>
+                            <div class="model-name">Claude</div>
+                        </div>
+                        <div class="model-item">
+                            <!-- Google/Gemini sparkle -->
+                            <svg class="model-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
+                            </svg>
+                            <div class="model-name">Gemini</div>
+                        </div>
+                    </div>
+                </div>
+            </foreignObject>
+
+            <!-- Left Column -->
+            <foreignObject x="40" y="310" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">1</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </div>
+                        <div class="box-title">Écosystème d'Outils</div>
+                    </div>
+                    <div class="box-desc">Plus de 40 outils intégrés pour la recherche web, le contrôle du navigateur, l'exécution de code, les API, les opérations sur les fichiers et les flux de travail des agents.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="40" y="420" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">2</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                        </div>
+                        <div class="box-title">Couche d'Exécution</div>
+                    </div>
+                    <div class="box-desc">Exécutez les agents localement, dans Docker, via SSH ou dans des environnements cloud serverless.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="40" y="530" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">3</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="6" rx="1"/><rect x="2" y="16" width="8" height="6" rx="1"/><rect x="14" y="16" width="8" height="6" rx="1"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="6" y2="12"/><line x1="12" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="6" y2="16"/><line x1="18" y1="12" x2="18" y2="16"/></svg>
+                        </div>
+                        <div class="box-title">Orchestration des Tâches</div>
+                    </div>
+                    <div class="box-desc">Coordonne les tâches à plusieurs étapes via les outils, la mémoire et les couches d'exécution pour atteindre des objectifs complexes.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="40" y="640" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">4</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+                        </div>
+                        <div class="box-title">Mémoire & Contexte</div>
+                    </div>
+                    <div class="box-desc">Mémorise les utilisateurs, les préférences, les actions précédentes et les comportements appris d'une session à l'autre.</div>
+                </div>
+            </foreignObject>
+
+            <!-- Right Column -->
+            <foreignObject x="860" y="310" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">5</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        </div>
+                        <div class="box-title">Boucle de Rétroaction</div>
+                    </div>
+                    <div class="box-desc">
+                        <span style="font-size: 11px; color: #888; display: block; margin-bottom: 2px;">(Boucle d'auto-amélioration)</span>
+                        Capture les résultats des actions terminées et met à jour la mémoire pour affiner le comportement futur.
+                    </div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="860" y="420" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">6</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="3"/></svg>
+                        </div>
+                        <div class="box-title">Automatisation Planifiée</div>
+                    </div>
+                    <div class="box-desc">La planification cron native permet des tâches récurrentes, des opérations sans surveillance et des déclencheurs basés sur des conditions.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="860" y="530" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">7</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+                        </div>
+                        <div class="box-title">Persistance de Session</div>
+                    </div>
+                    <div class="box-desc">Maintient le contexte et la progression de manière transparente à travers les jours, les tâches, les interactions et les changements de modèles.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="860" y="640" width="300" height="100">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="box">
+                    <div class="box-header">
+                        <div class="box-num">8</div>
+                        <div class="box-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M6 8l4 4-4 4"/><line x1="12" y1="16" x2="18" y2="16"/></svg>
+                        </div>
+                        <div class="box-title">Orchestrateur d'Agent</div>
+                    </div>
+                    <div class="box-desc">Unifie les outils, la mémoire, la planification et l'exécution en un système autonome cohérent et un cerveau d'agent central.</div>
+                </div>
+            </foreignObject>
+
+            <!-- Output Oval -->
+            <foreignObject x="490" y="780" width="220" height="40">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="output-oval">
+                    Sortie / Actions
+                </div>
+            </foreignObject>
+
+            <!-- Bottom 5 Columns -->
+            <foreignObject x="50" y="860" width="180" height="160">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="col-box">
+                    <div class="col-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                    </div>
+                    <div class="col-title">Actions du Navigateur</div>
+                    <div class="col-desc">Rechercher, naviguer, réserver, remplir, acheter.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="280" y="860" width="180" height="160">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="col-box">
+                    <div class="col-icon" style="font-weight: 800; font-size: 24px; line-height: 32px;">
+                        &lt;/&gt;
+                    </div>
+                    <div class="col-title">Exécution de Code</div>
+                    <div class="col-desc">Écrire, exécuter, tester et déboguer du code.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="510" y="860" width="180" height="160">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="col-box">
+                    <div class="col-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8v8M16 8v8M4 12h16M12 4v16"/></svg>
+                    </div>
+                    <div class="col-title">Intégrations API</div>
+                    <div class="col-desc">Connecter et orchestrer des services externes.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="740" y="860" width="180" height="160">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="col-box">
+                    <div class="col-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    </div>
+                    <div class="col-title">Opérations sur les Fichiers</div>
+                    <div class="col-desc">Lire, écrire, analyser et gérer des fichiers.</div>
+                </div>
+            </foreignObject>
+
+            <foreignObject x="970" y="860" width="180" height="160">
+                <div xmlns="http://www.w3.org/1999/xhtml" class="col-box">
+                    <div class="col-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="col-title">Tâches de Longue Durée</div>
+                    <div class="col-desc">Fonctionner sans surveillance pendant des heures ou des jours.</div>
+                </div>
+            </foreignObject>
+        </svg>
+    </div>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

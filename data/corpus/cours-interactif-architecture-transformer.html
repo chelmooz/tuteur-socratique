@@ -1,0 +1,65 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — Architecture Transformer</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #a78bfa;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="current">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Fondations LLM • guide débutant</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs" aria-label="Modules"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Vue d’ensemble"><span class="pill">Introduction</span><h1>Comprendre l’Architecture Transformer</h1><p class="muted">Le moteur des IA modernes, expliqué du texte d’entrée jusqu’au prochain token généré.</p><p>Les Transformers remplacent la lecture strictement séquentielle par une attention qui compare les éléments de la séquence. L’encodeur comprend une entrée ; le décodeur produit une sortie token par token.</p><div class="diagram" role="img" aria-label="Trajet général dans un Transformer"><svg viewBox="0 0 900 190"><g fill="#4b2a61" stroke="#f7a8d8" stroke-width="2"><rect x="20" y="70" width="120" height="50" rx="10"/><rect x="180" y="70" width="140" height="50" rx="10"/><rect x="360" y="70" width="140" height="50" rx="10"/><rect x="540" y="70" width="140" height="50" rx="10"/><rect x="720" y="70" width="150" height="50" rx="10"/></g><g fill="#fbf4ff" text-anchor="middle" font-size="14"><text x="80" y="100">Tokens</text><text x="250" y="100">Embeddings</text><text x="430" y="100">Encodeur</text><text x="610" y="100">Décodeur</text><text x="795" y="100">Softmax</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M140 95h40M320 95h40M500 95h40M680 95h40"/></g></svg></div><div class="quiz"><h3>Quiz express</h3><p>Quelle est l’idée centrale du Transformer ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Comparer les éléments de la séquence grâce à l’attention</button><button class="choice" data-correct="false" onclick="answer(this,false)">Lire uniquement le dernier mot sans contexte</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Entrées"><span class="pill">Étape 1</span><h2>Tokens, embeddings et position</h2><p>Le texte est découpé en tokens puis transformé en vecteurs. L’embedding place des mots proches par le sens dans des régions voisines de l’espace vectoriel.</p><div class="grid"><div><h3>Tokenisation</h3><p>Un mot peut être représenté par un mot entier ou plusieurs sous-mots.</p></div><div><h3>Embedding</h3><p>Chaque token devient un vecteur numérique exploitable par le réseau.</p></div><div><h3>Encodage positionnel</h3><p>Il ajoute l’ordre, nécessaire pour distinguer « le chat mange » de « la souris mange ».</p></div></div><pre id="input">Texte → tokens → vecteurs
+[Le, chat, mange] → [e₁, e₂, e₃]
+representation = embedding(token) + position(token)</pre><button class="btn primary copy" onclick="copyText('input')">Copier le schéma</button><div class="quiz"><h3>Quiz</h3><p>Pourquoi ajouter un encodage positionnel ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour conserver l’ordre et le rôle de chaque token</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour supprimer les embeddings</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Encodeur"><span class="pill">Étape 2</span><h2>Le bloc encodeur — comprendre le contexte</h2><p>L’encodeur affine la représentation de l’entrée à travers plusieurs blocs répétés.</p><div class="grid"><div><h3>Multi-Head Attention</h3><p>Chaque token compare sa signification aux autres ; différentes têtes captent grammaire, accords ou relations.</p></div><div><h3>Feed-Forward</h3><p>Réseau appliqué à chaque position pour transformer les caractéristiques extraites.</p></div><div><h3>Add & Norm</h3><p>Connexions résiduelles et normalisation pour stabiliser l’apprentissage.</p></div><div><h3>N ×</h3><p>Le bloc est empilé plusieurs fois pour des représentations plus abstraites.</p></div></div><div class="diagram"><svg viewBox="0 0 850 170"><g fill="#4b2a61" stroke="#f7a8d8" stroke-width="2"><rect x="30" y="60" width="160" height="50" rx="10"/><rect x="230" y="60" width="180" height="50" rx="10"/><rect x="450" y="60" width="130" height="50" rx="10"/><rect x="620" y="60" width="190" height="50" rx="10"/></g><g fill="#fbf4ff" text-anchor="middle" font-size="14"><text x="110" y="90">Embeddings</text><text x="320" y="90">Attention multi-tête</text><text x="515" y="90">Feed-forward</text><text x="715" y="90">Add &amp; Norm × N</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M190 85h40M410 85h40M580 85h40"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Que fait l’attention multi-tête ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Elle permet à chaque token de comparer les autres selon plusieurs aspects</button><button class="choice" data-correct="false" onclick="answer(this,false)">Elle choisit toujours le mot le plus court</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Décodeur"><span class="pill">Étape 3</span><h2>Le bloc décodeur — générer sans regarder le futur</h2><p>Le décodeur utilise les tokens déjà produits et les représentations de l’encodeur pour générer le token suivant.</p><div class="grid"><div><h3>Attention masquée</h3><p>Le masque empêche de consulter les tokens futurs pendant la prédiction.</p></div><div><h3>Cross-attention</h3><p>Le décodeur interroge la sortie de l’encodeur pour relier ce qu’il écrit à la source.</p></div><div><h3>Génération auto-régressive</h3><p>Le token produit est réinjecté pour prédire le suivant.</p></div></div><pre id="decoder">Déjà généré : Le chat
+Masque : ne pas voir le futur
+Cross-attention : consulter la source
+Prédit : mange
+Puis : Le chat mange ...</pre><button class="btn primary copy" onclick="copyText('decoder')">Copier le flux</button><div class="quiz"><h3>Quiz</h3><p>Pourquoi masquer l’attention du décodeur ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour empêcher l’accès aux mots futurs pendant la prédiction</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour empêcher toute utilisation du contexte source</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Sortie"><span class="pill">Étape 4</span><h2>Couche linéaire, softmax et prochain token</h2><p>Le dernier vecteur est projeté sur le vocabulaire. La couche linéaire produit des scores ; le softmax les transforme en probabilités. Le modèle choisit ou échantillonne un token selon la température.</p><pre id="output">h_final → Linear(vocabulaire) → logits
+logits → Softmax → probabilités
+["mange": 0.62, "dort": 0.21, "court": 0.08, ...]
+choisir/échantillonner → réinjecter le token</pre><button class="btn primary copy" onclick="copyText('output')">Copier la sortie</button><div class="quiz"><h3>Quiz</h3><p>Quel est le rôle du softmax ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Transformer les scores en distribution de probabilités</button><button class="choice" data-correct="false" onclick="answer(this,false)">Transformer les probabilités en tokens d’entrée</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Synthèse"><span class="pill">Atelier</span><h2>Suivre un token de bout en bout</h2><p>Utilisez la checklist pour expliquer le trajet d’une phrase dans un Transformer.</p><label class="check"><input type="checkbox" onchange="saveChecks()"> Découper la phrase en tokens.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Ajouter embedding et encodage positionnel.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Faire passer la séquence dans les blocs encodeur.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Appliquer attention masquée et cross-attention au décodeur.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Projeter avec Linear puis calculer le softmax.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Réinjecter le token et recommencer jusqu’à la fin.</label><button class="btn primary" onclick="finish()">Valider mon trajet de token</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

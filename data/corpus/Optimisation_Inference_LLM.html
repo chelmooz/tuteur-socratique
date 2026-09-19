@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optimisation de l'inférence LLM — Fiche technique</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav>
+
+<div class="wrap">
+
+  <header>
+    <div class="kicker mono">FICHE TECHNIQUE — AI ENGINEERING</div>
+    <h1>Optimiser l'inférence des LLM</h1>
+    <p class="dek">Huit techniques pour réduire la latence de génération token par token, organisées selon le goulot d'étranglement qu'elles ciblent : calcul (compute) ou bande passante mémoire.</p>
+
+    <div class="ruler" id="ruler"></div>
+  </header>
+
+  <!-- ============ HERO: TWO PHASES ============ -->
+  <section aria-label="Les deux phases de l'inférence">
+    <div class="phases">
+      <div class="phase p-fill">
+        <span class="phase-tag compute"><span class="dot"></span>COMPUTE-BOUND</span>
+        <h3>Préremplissage <span style="color:var(--ink-faint); font-weight:400; font-style:italic;">— Prefill</span></h3>
+        <div class="stat">TTFT</div>
+        <div class="stat-label">Time To First Token</div>
+        <p>Les jetons du prompt sont traités en parallèle, en une seule passe. La vitesse dépend de la puissance de calcul brute du processeur.</p>
+      </div>
+      <div class="phase p-decode">
+        <span class="phase-tag memory"><span class="dot"></span>MEMORY-BOUND</span>
+        <h3>Décodage <span style="color:var(--ink-faint); font-weight:400; font-style:italic;">— Decode</span></h3>
+        <div class="stat">TPOT</div>
+        <div class="stat-label">Time Per Output Token</div>
+        <p>Les jetons sont générés un par un. À chaque étape, la totalité des poids du modèle doit transiter depuis la mémoire — c'est ce transfert qui limite la vitesse.</p>
+      </div>
+    </div>
+    <div class="phase-flow">PROMPT → [ PREFILL : un seul passage ] → jeton 1 → jeton 2 → jeton 3 → … [ DECODE : séquentiel ]</div>
+
+    <p class="lede">Comme un LLM autorégressif génère son texte <strong>un jeton après l'autre</strong>, chaque étape ajoute sa propre latence, qui s'accumule sur toute la réponse. Optimiser l'inférence revient donc à traiter ces deux phases séparément : soulager le calcul pendant le prefill, et soulager la bande passante mémoire pendant le decode.</p>
+  </section>
+
+  <!-- ============ 8 TECHNIQUES ============ -->
+  <section aria-label="Les huit techniques d'optimisation">
+    <h2 class="section-title">Huit leviers d'optimisation</h2>
+
+    <div class="legend">
+      <span><i class="c-memory"></i>Cible la bande passante mémoire</span>
+      <span><i class="c-compute"></i>Cible le calcul</span>
+      <span><i class="c-both"></i>Agit sur les deux / au niveau du service</span>
+    </div>
+
+    <!-- 1 Quantization -->
+    <article class="tech t-memory">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 01</span>
+        <h3>Quantification</h3>
+        <span class="en">Quantization</span>
+      </div>
+      <div class="tag-row"><span class="tag memory">MÉMOIRE</span></div>
+      <p>Convertit les poids et activations d'un format de haute précision vers un format plus compact — de <code>FP32</code>/<code>FP16</code> (2 octets/paramètre) vers <code>INT8</code> (1 octet) ou <code>INT4</code>/<code>NF4</code> (0,5 octet).</p>
+      <p>En réduisant le volume de données à transférer de la mémoire GPU (HBM) vers les cœurs de calcul à chaque jeton, elle soulage directement le goulot d'étranglement du decode.</p>
+      <div class="impact">
+        <div class="figure">14 Go → 3,5 Go</div>
+        <div class="note">Empreinte mémoire d'un modèle à 7 milliards de paramètres, de FP16 à INT4.</div>
+      </div>
+    </article>
+
+    <!-- 2 Speculative decoding -->
+    <article class="tech t-compute">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 02</span>
+        <h3>Décodage spéculatif</h3>
+        <span class="en">Speculative Decoding</span>
+      </div>
+      <div class="tag-row"><span class="tag compute">CALCUL</span></div>
+      <p>Un petit <strong>modèle brouillon</strong> (draft model) propose rapidement une suite de K jetons candidats. Le grand modèle cible les valide tous <strong>en une seule passe parallèle</strong>, puis accepte la plus longue sous-séquence correcte et génère un jeton de plus.</p>
+      <p>Cette vérification est compute-bound, pas memory-bound : elle exploite la capacité de calcul du GPU qui reste sous-utilisée pendant le decode classique.</p>
+      <div class="impact">
+        <div class="figure">K jetons / passe</div>
+        <div class="note">Plusieurs jetons validés par itération, sans perte de qualité sur la réponse finale.</div>
+      </div>
+    </article>
+
+    <!-- 3 KV cache -->
+    <article class="tech t-memory">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 03</span>
+        <h3>Cache KV</h3>
+        <span class="en">Key-Value Cache</span>
+      </div>
+      <div class="tag-row"><span class="tag memory">MÉMOIRE</span></div>
+      <p>À chaque nouveau jeton, l'attention a besoin des vecteurs Clé et Valeur de tous les jetons précédents. Plutôt que de les recalculer, le cache KV les garde en mémoire GPU et n'ajoute que le nouveau jeton à chaque étape.</p>
+      <p>Le compromis : la taille du cache croît linéairement avec la longueur de séquence et la taille du batch, ce qui en fait vite un goulot d'étranglement mémoire à son tour.</p>
+      <div class="impact">
+        <div class="figure mono">2·B·S·L·H·M</div>
+        <div class="note">Octets requis par le cache — B: batch, S: séquence, L: couches, H: têtes, M: taille du modèle.</div>
+      </div>
+    </article>
+
+    <!-- 4 PagedAttention -->
+    <article class="tech t-memory">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 04</span>
+        <h3>PagedAttention</h3>
+        <span class="en">vLLM</span>
+      </div>
+      <div class="tag-row"><span class="tag memory">MÉMOIRE</span></div>
+      <p>S'inspire de la mémoire virtuelle des systèmes d'exploitation : au lieu de réserver un bloc contigu pour la taille maximale théorique du cache KV, elle le découpe en <strong>pages</strong> allouées à la demande et partageables entre requêtes.</p>
+      <p>Elle élimine la fragmentation mémoire massive du stockage contigu classique, ce qui permet des lots (batchs) bien plus grands sur le même GPU.</p>
+      <div class="impact">
+        <div class="figure">60–80 %</div>
+        <div class="note">Mémoire GPU gaspillée par l'allocation contiguë classique du cache KV.</div>
+      </div>
+    </article>
+
+    <!-- 5 FlashAttention -->
+    <article class="tech t-compute">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 05</span>
+        <h3>FlashAttention</h3>
+        <span class="en">Fused CUDA kernel</span>
+      </div>
+      <div class="tag-row"><span class="tag compute">CALCUL</span></div>
+      <p>L'attention standard écrit et relit sans cesse des matrices intermédiaires dans la mémoire HBM du GPU. FlashAttention <strong>fusionne</strong> ces opérations en un seul noyau et découpe les calculs en blocs traités directement dans la SRAM, bien plus rapide.</p>
+      <p>Le gain vient de l'architecture matérielle elle-même, pas d'une approximation : la précision du résultat reste identique.</p>
+      <div class="impact">
+        <div class="figure">×2 – ×4</div>
+        <div class="note">Accélération du calcul d'attention, sans perte de précision.</div>
+      </div>
+    </article>
+
+    <!-- 6 Continuous batching -->
+    <article class="tech t-both">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 06</span>
+        <h3>Batching continu</h3>
+        <span class="en">Continuous / In-Flight Batching</span>
+      </div>
+      <div class="tag-row"><span class="tag both">SERVICE</span></div>
+      <p>Dans un batch classique, une requête courte doit attendre qu'une requête longue termine avant que le GPU ne se libère. Le batching continu (introduit par Orca) renvoie chaque requête <strong>dès qu'elle atteint son jeton de fin</strong>, et insère immédiatement une nouvelle requête à sa place.</p>
+      <p>Résultat : le GPU reste occupé en continu, sans que les requêtes courtes ne subissent l'attente des requêtes longues.</p>
+      <div class="impact">
+        <div class="figure">~100 %</div>
+        <div class="note">Taux d'occupation GPU visé, sans temps d'attente imposé aux requêtes courtes.</div>
+      </div>
+    </article>
+
+    <!-- 7 Pruning -->
+    <article class="tech t-memory">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 07</span>
+        <h3>Élagage de modèle</h3>
+        <span class="en">Model Pruning</span>
+      </div>
+      <div class="tag-row"><span class="tag memory">MÉMOIRE</span></div>
+      <p><strong>Non structuré</strong> — met à zéro les poids les moins significatifs ; le modèle garde sa forme mais devient creux (sparse), et nécessite du matériel dédié pour convertir cette parcimonie en gain réel.</p>
+      <p><strong>Structuré</strong> — supprime des têtes d'attention, canaux ou couches entières, réduisant directement les dimensions des matrices.</p>
+      <div class="impact">
+        <div class="figure">−90 %</div>
+        <div class="note">Réduction du nombre de paramètres possible dans certains cas d'élagage non structuré.</div>
+      </div>
+    </article>
+
+    <!-- 8 Right-sized model -->
+    <article class="tech t-memory">
+      <div class="tech-head">
+        <span class="tech-id mono">OPT · 08</span>
+        <h3>Modèle plus petit et adéquat</h3>
+        <span class="en">Right-Sized Model & Distillation</span>
+      </div>
+      <div class="tag-row"><span class="tag memory">MÉMOIRE</span></div>
+      <p>Choisir un modèle de taille réduite mais <strong>entraîné de façon optimale</strong> (lois d'échelle Chinchilla) ou distillé à partir d'un plus grand (DistilBERT, Alpaca) — souvent suffisant pour égaler un modèle bien plus lourd sur une tâche ciblée.</p>
+      <p>Moins de paramètres à charger à chaque jeton signifie, dès le départ, moins de pression sur la bande passante mémoire.</p>
+      <div class="impact">
+        <div class="figure">↓ paramètres</div>
+        <div class="note">Le débit d'inférence est inversement proportionnel au nombre de paramètres chargés par jeton.</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ CONCLUSION: 4 FACTORS ============ -->
+  <section aria-label="Les quatre facteurs de la latence">
+    <h2 class="section-title">Ce qui façonne la latence globale</h2>
+    <p class="lede" style="margin-bottom:32px;">Aucune technique n'agit seule. La latence perçue résulte de l'interaction entre quatre couches, du silicium jusqu'à l'architecture du service.</p>
+
+    <div class="diagram-frame">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- connecting lines -->
+        <g stroke="#263241" stroke-width="1.5" fill="none">
+          <path d="M440,54 L440,90"/>
+          <path d="M440,90 L110,90 L110,120"/>
+          <path d="M440,90 L330,90 L330,120"/>
+          <path d="M440,90 L550,90 L550,120"/>
+          <path d="M440,90 L770,90 L770,120"/>
+        </g>
+        <!-- root -->
+        <rect x="300" y="14" width="280" height="40" fill="#121926" stroke="#3A4A5C"/>
+        <text x="440" y="39" text-anchor="middle" fill="#E7EDF4" font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="0.5">LATENCE GLOBALE D'INFÉRENCE</text>
+
+        <!-- 4 nodes -->
+        <rect x="20" y="120" width="180" height="150" fill="#121926" stroke="#ED7A6E"/>
+        <text x="110" y="146" text-anchor="middle" fill="#ED7A6E" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="0.5">MATÉRIEL</text>
+        <text x="110" y="172" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">FLOP/s</text>
+        <text x="110" y="192" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Bande passante</text>
+        <text x="110" y="212" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">HBM / SRAM</text>
+        <text x="110" y="232" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">GPU / TPU / LPU</text>
+
+        <rect x="240" y="120" width="180" height="150" fill="#121926" stroke="#2FD3C0"/>
+        <text x="330" y="146" text-anchor="middle" fill="#2FD3C0" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="0.5">TAILLE DU MODÈLE</text>
+        <text x="330" y="172" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Nb. paramètres</text>
+        <text x="330" y="192" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Dimension intrinsèque</text>
+        <text x="330" y="212" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Format numérique</text>
+        <text x="330" y="232" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">FP16 / INT4…</text>
+
+        <rect x="460" y="120" width="180" height="150" fill="#121926" stroke="#E3A21A"/>
+        <text x="550" y="146" text-anchor="middle" fill="#E3A21A" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="0.5">MOTEURS D'INFÉRENCE</text>
+        <text x="550" y="172" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Kernels (FlashAttn)</text>
+        <text x="550" y="192" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">vLLM · PagedAttn</text>
+        <text x="550" y="212" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Compilateurs</text>
+        <text x="550" y="232" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">torch.compile</text>
+
+        <rect x="680" y="120" width="180" height="150" fill="#121926" stroke="#9C8CF2"/>
+        <text x="770" y="146" text-anchor="middle" fill="#9C8CF2" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="0.5">STRATÉGIES DE SERVICE</text>
+        <text x="770" y="172" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Découplage</text>
+        <text x="770" y="192" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Prefill / Decode</text>
+        <text x="770" y="212" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Batching continu</text>
+        <text x="770" y="232" text-anchor="middle" fill="#8FA0B3" font-family="IBM Plex Sans, sans-serif" font-size="11.5">Prompt caching</text>
+      </svg>
+    </div>
+    <div class="factor-caption">
+      <div class="fc-hw"><h4>01 · MATÉRIEL</h4><p>Capacités brutes de calcul et vitesse du bus mémoire.</p></div>
+      <div class="fc-model"><h4>02 · MODÈLE</h4><p>Empreinte mémoire et opérations requises par jeton.</p></div>
+      <div class="fc-engine"><h4>03 · MOTEUR</h4><p>Frameworks et compilateurs qui exécutent l'attention sur la puce.</p></div>
+      <div class="fc-serve"><h4>04 · SERVICE</h4><p>Choix d'architecture système autour du modèle.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    D'après « AI Engineering: Building Applications with Foundation Models », Chip Huyen (O'Reilly, 2025) — Chapitre 9, Inference Optimization.
+  </footer>
+
+</div>
+
+<script>
+  // Build the measurement ruler ticks
+  const ruler = document.getElementById('ruler');
+  const count = 24;
+  for (let i = 0; i <= count; i++) {
+    const pct = (i / count) * 100;
+    const tick = document.createElement('div');
+    tick.className = 'tick';
+    tick.style.left = pct + '%';
+    tick.style.height = (i % 4 === 0) ? '14px' : '8px';
+    ruler.appendChild(tick);
+  }
+  const labels = ['PREFILL', 'DECODE', 'SERVING'];
+  labels.forEach((txt, i) => {
+    const l = document.createElement('div');
+    l.className = 'label';
+    l.textContent = txt;
+    l.style.left = (i * 33 + 1) + '%';
+    ruler.appendChild(l);
+  });
+</script>
+
+<script src="/course-kit.js"></script>
+</body>
+</html>

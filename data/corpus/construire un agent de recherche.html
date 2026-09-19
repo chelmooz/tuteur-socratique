@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atelier Premium : Agent de Recherche LangGraph | State, Nodes, Edges, Human-in-the-loop, Send API</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #22d3ee;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="dark">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="brand">🕸️ <span>LangGraph Research Agent</span> Atelier</div>
+        <div class="muted small">State • Nodes • Edges • Human-in-the-loop • Subgraph • Send API • Tavily • LangSmith</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="muted small">Progression : <span id="progressText">0%</span> • <span id="scoreDisplay">Score 0/0</span></div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="controls no-print">
+        <button class="icon-btn" onclick="toggleSources()" title="Afficher / masquer les références au transcript">⏱</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Thème sombre / clair">🌓</button>
+        <button class="icon-btn" onclick="toggleMobileNav()" title="Menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <nav id="nav" aria-label="Navigation de l atelier"></nav>
+    </aside>
+    <main id="content"></main>
+  </div>
+
+  <script>
+    const KEY = "langgraph-research-agent-workshop-v1";
+
+    const STATE = {
+      theme: "dark",
+      visited: new Set(),
+      quizScores: {},
+      diagnostic: null,
+      path: "masterclass",
+      flash: { index: 0, known: new Set() },
+      checklist: {},
+      exam: { started: false, finished: false, score: 0, total: 10, passed: false, remaining: 480, interval: null },
+      certName: "",
+      sourcesHidden: false
+    };
+
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          theme: STATE.theme,
+          visited: [...STATE.visited],
+          quizScores: STATE.quizScores,
+          diagnostic: STATE.diagnostic,
+          path: STATE.path,
+          flash: { index: STATE.flash.index, known: [...STATE.flash.known] },
+          checklist: STATE.checklist,
+          exam: { finished: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, passed: STATE.exam.passed },
+          certName: STATE.certName,
+          sourcesHidden: STATE.sourcesHidden
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        STATE.theme = data.theme || "dark";
+        STATE.visited = new Set(data.visited || []);
+        STATE.quizScores = data.quizScores || {};
+        STATE.diagnostic = data.diagnostic || null;
+        STATE.path = data.path || "masterclass";
+        STATE.flash.index = data.flash?.index || 0;
+        STATE.flash.known = new Set(data.flash?.known || []);
+        STATE.checklist = data.checklist || {};
+        STATE.certName = data.certName || "";
+        STATE.sourcesHidden = !!data.sourcesHidden;
+        if (data.exam) {
+          STATE.exam.finished = !!data.exam.finished;
+          STATE.exam.score = data.exam.score || 0;
+          STATE.exam.total = data.exam.total || 10;
+          STATE.exam.passed = !!data.exam.passed;
+        }
+      } catch (e) {}
+    }
+
+    function quizHTML(items, moduleId, title = "Quiz express", boxId = "") {
+      const idAttr = boxId ? ' id="' + boxId + '"' : "";
+      return `
+        <div class="quiz" data-module="${moduleId}"${idAttr}>
+          <h3>${title}</h3>
+          ${items.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="${moduleId}-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e || ""}</div>
+            </div>
+          `).join("")}
+          <button class="btn" onclick="checkQuiz(this)">Vérifier mes réponses</button>
+          <div class="result" aria-live="polite"></div>
+        </div>
+      `;
+    }
+
+    function codeHTML(label, id, code) {
+      return `
+        <div class="card">
+          <h3>${label}</h3>
+          <pre class="code" id="${id}">${code}</pre>
+          <button class="btn secondary small" onclick="copyText('${id}', this)">Copier</button>
+        </div>
+      `;
+    }
+
+    function switchTab(btn, panelId) {
+      const root = btn.closest(".tabs");
+      $$(".tab-btn", root).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".tab-panel", root).forEach(p => p.classList.toggle("active", p.id === panelId));
+    }
+
+    function checkQuiz(btn) {
+      const box = btn.closest(".quiz");
+      const moduleId = box.dataset.module;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      const total = qs.length;
+      const result = box.querySelector(".result");
+      if (result) result.textContent = "Résultat : " + correct + "/" + total;
+      STATE.quizScores[moduleId] = { correct, total };
+      saveState();
+      updateScore();
+    }
+
+    function copyText(id, btn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.innerText.trim();
+      const done = () => {
+        if (!btn) return;
+        const old = btn.textContent;
+        btn.textContent = "✅ Copié";
+        setTimeout(() => { btn.textContent = old; }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, done) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+
+    function visibleModules() {
+      return MODULES.filter(m => STATE.path === "masterclass" || m.express !== false);
+    }
+
+    function renderNav() {
+      const mods = visibleModules();
+      $("#nav").innerHTML = mods.map(m => `
+        <button data-target="${m.id}" class="${STATE.visited.has(m.id) ? "completed" : ""}">
+          ${m.title}
+        </button>
+      `).join("");
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    function renderSections() {
+      $("#content").innerHTML = MODULES.map(m => `
+        <section id="${m.id}" class="section">
+          ${m.content}
+        </section>
+      `).join("");
+    }
+
+    function showSection(id) {
+      const mod = MODULES.find(m => m.id === id);
+      if (!mod) return;
+
+      if (STATE.path === "express" && mod.express === false) {
+        STATE.path = "masterclass";
+        saveState();
+        renderNav();
+      }
+
+      $$(".section").forEach(s => s.classList.toggle("active", s.id === id));
+      $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+
+      STATE.visited.add(id);
+      saveState();
+      updateProgress();
+      initModule(id);
+      $("#sidebar").classList.remove("mobile-open");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function initModule(id) {
+      if (id === "diagnostic") restoreDiagnostic();
+      if (id === "simulator") simReset();
+      if (id === "flashcards") renderFlashcard();
+      if (id === "final") restoreExam();
+      if (id === "action") restoreAction();
+    }
+
+    function updateProgress() {
+      const mods = visibleModules();
+      const done = mods.filter(m => STATE.visited.has(m.id)).length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      $("#progressBar").style.width = pct + "%";
+      $("#progressText").textContent = pct + "%";
+    }
+
+    function updateScore() {
+      let correct = 0;
+      let total = 0;
+      Object.values(STATE.quizScores).forEach(s => {
+        correct += s.correct || 0;
+        total += s.total || 0;
+      });
+      if (STATE.exam.finished) {
+        correct += STATE.exam.score;
+        total += STATE.exam.total;
+      }
+      $("#scoreDisplay").textContent = "Score " + correct + "/" + total;
+    }
+
+    function toggleTheme() {
+      STATE.theme = STATE.theme === "dark" ? "light" : "dark";
+      document.body.setAttribute("data-theme", STATE.theme);
+      saveState();
+    }
+
+    function toggleSources() {
+      STATE.sourcesHidden = !STATE.sourcesHidden;
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      saveState();
+    }
+
+    function toggleMobileNav() {
+      $("#sidebar").classList.toggle("mobile-open");
+    }
+
+    function nextFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx >= 0 && idx < mods.length - 1) showSection(mods[idx + 1].id);
+    }
+
+    function prevFrom(id) {
+      const mods = visibleModules();
+      const idx = mods.findIndex(m => m.id === id);
+      if (idx > 0) showSection(mods[idx - 1].id);
+    }
+
+    const DIAG_TEXT = {
+      debutant: "Commencez par les piliers State / Nodes / Edges, puis suivez l atelier pas à pas. Ne cherchez pas à tout paralléliser au début.",
+      praticien: "Focus sur le subgraph interview, le human-in-the-loop et la Send API. Vous pouvez coder un graphe complet et le monitorer avec LangSmith.",
+      expert: "Analysez les trade-offs : coût, latence, parallelisme, qualité du rapport, contrôle humain. Ajoutez eval, tracing et garde-fous de boucle."
+    };
+
+    function validateDiagnostic() {
+      const level = document.querySelector("input[name='diag-level']:checked");
+      const goal = document.querySelector("input[name='diag-goal']:checked");
+      const time = document.querySelector("input[name='diag-time']:checked");
+      if (!level || !goal || !time) {
+        alert("Répondez aux trois questions du diagnostic.");
+        return;
+      }
+
+      STATE.diagnostic = { level: level.value, goal: goal.value, time: time.value };
+      STATE.path = time.value === "express" ? "express" : "masterclass";
+      saveState();
+      renderNav();
+
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Votre parcours recommandé</h3>
+          <p><span class="pill">Niveau : ${level.value}</span><span class="pill">Objectif : ${goal.value}</span><span class="pill">Mode : ${time.value}</span></p>
+          <p>${DIAG_TEXT[level.value] || DIAG_TEXT.praticien}</p>
+          <p class="muted">Le mode express masque les modules avancés. Vous pouvez basculer en masterclass à tout moment depuis le diagnostic.</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    function restoreDiagnostic() {
+      if (!STATE.diagnostic) return;
+      const rec = $("#diag-rec");
+      const next = $("#diag-next");
+      if (rec) {
+        rec.style.display = "block";
+        rec.innerHTML = `
+          <h3>Parcours enregistré</h3>
+          <p><span class="pill">Niveau : ${STATE.diagnostic.level}</span><span class="pill">Objectif : ${STATE.diagnostic.goal}</span><span class="pill">Mode : ${STATE.path}</span></p>
+          <p>${DIAG_TEXT[STATE.diagnostic.level] || ""}</p>
+        `;
+      }
+      if (next) next.style.display = "inline-flex";
+    }
+
+    let sim = {
+      stage: "idle",
+      topic: "LangGraph",
+      maxAnalysts: 1,
+      analysts: [],
+      feedback: "",
+      sections: [],
+      turns: 0
+    };
+
+    function simReset() {
+      sim = {
+        stage: "idle",
+        topic: "LangGraph",
+        maxAnalysts: 1,
+        analysts: [],
+        feedback: "",
+        sections: [],
+        turns: 0
+      };
+      const log = $("#sim-log");
+      const state = $("#sim-state");
+      const stage = $("#sim-stage");
+      const fb = $("#sim-feedback");
+      if (log) log.textContent = "Atelier prêt. Commencez par create_analysts.";
+      if (state) state.textContent = JSON.stringify(sim, null, 2);
+      if (stage) stage.textContent = "idle";
+      if (fb) fb.value = "Je veux deux analystes, dont un nommé Mike.";
+    }
+
+    function simLog(msg) {
+      const log = $("#sim-log");
+      if (!log) return;
+      log.textContent += "\n" + msg;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function simUpdate() {
+      const state = $("#sim-state");
+      const stage = $("#sim-stage");
+      if (state) state.textContent = JSON.stringify(sim, null, 2);
+      if (stage) stage.textContent = sim.stage;
+      saveState();
+    }
+
+    function simStep(action) {
+      if (action === "create") {
+        if (sim.stage === "idle" || sim.stage === "feedback_received") {
+          if (sim.stage === "feedback_received") {
+            sim.maxAnalysts = 2;
+            sim.analysts = [
+              { name: "Dr. Emily Carter", role: "Theoretical Physics", affiliation: "Institute of Theoretical Physics" },
+              { name: "Mike", role: "Systems Engineer", affiliation: "Applied AI Lab" }
+            ];
+            sim.stage = "recreated";
+            simLog("create_analysts relancé avec le feedback humain. 2 analystes créés.");
+          } else {
+            sim.analysts = [
+              { name: "Dr. Emily Carter", role: "Theoretical Physics", affiliation: "Institute of Theoretical Physics" }
+            ];
+            sim.stage = "created";
+            simLog("create_analysts exécuté. 1 analyste créé à partir du topic LangGraph.");
+          }
+        } else {
+          simLog("Impossible : create_analysts n est pas attendu à ce stade.");
+        }
+      }
+
+      if (action === "feedback") {
+        if (sim.stage === "created" || sim.stage === "recreated") {
+          const fb = $("#sim-feedback");
+          sim.feedback = fb ? fb.value : "";
+          sim.stage = "feedback_received";
+          simLog("human_feedback interrompt le graphe et renvoie le feedback vers create_analysts.");
+        } else {
+          simLog("Impossible : il faut d abord créer des analystes.");
+        }
+      }
+
+      if (action === "approve") {
+        if (sim.stage === "created" || sim.stage === "recreated") {
+          sim.feedback = "";
+          sim.stage = "approved";
+          simLog("Feedback validé. Le graphe peut passer à initiate_all_interviews.");
+        } else {
+          simLog("Impossible : rien à approuver.");
+        }
+      }
+
+      if (action === "fanout") {
+        if (sim.stage === "approved") {
+          sim.stage = "interviewing";
+          sim.turns = 0;
+          sim.sections = [];
+          simLog("Send API fan-out : une interview parallèle est lancée pour chaque analyste.");
+        } else {
+          simLog("Impossible : approuvez d abord les analystes.");
+        }
+      }
+
+      if (action === "interview") {
+        if (sim.stage === "interviewing") {
+          sim.turns++;
+          simLog("Tour " + sim.turns + " : generate_question, search_web, answer_question.");
+          if (sim.turns >= 2) {
+            sim.sections = sim.analysts.map(a => a.name + " : section rédigée après interview.");
+            sim.stage = "sections_ready";
+            simLog("route_messages atteint max_turns. save_interview puis write_section exécutés.");
+          }
+        } else {
+          simLog("Impossible : lancez d abord le fan-out des interviews.");
+        }
+      }
+
+      if (action === "finalize") {
+        if (sim.stage === "sections_ready") {
+          sim.stage = "finalized";
+          simLog("write_report, write_introduction, write_conclusion, finalize_report exécutés. Rapport disponible dans LangSmith.");
+        } else {
+          simLog("Impossible : les sections ne sont pas prêtes.");
+        }
+      }
+
+      simUpdate();
+    }
+
+    function chooseScenario(key) {
+      const out = $("#scenario-out");
+      if (!out) return;
+      const texts = {
+        simple: "Cas : question factuelle simple.\nArchitecture recommandée : un LLM + web search, pas de LangGraph complexe.\nPourquoi : un graphe ajoute de la latence, des coûts et de la surface de bug sans bénéfice réel.",
+        multi_angle: "Cas : sujet needing plusieurs angles (science, business, réglementation, expérience utilisateur).\nArchitecture recommandée : create_analysts, human_feedback, Send API parallel interviews, write_report.\nPourquoi : les analystes personas structurent la diversité des questions et des sources.",
+        regulated: "Cas : domaine sensible, conformité, validation humaine obligatoire.\nArchitecture recommandée : interrupt human-in-the-loop avant interviews, traçabilité LangSmith, sources attribuées, garde-fous de boucle.\nPourquoi : l humain doit pouvoir rejeter ou corriger les analystes avant la production du rapport.",
+        cost: "Cas : budget serré, beaucoup de requêtes.\nArchitecture recommandée : max_turns faible, modèles auxiliaires moins chers pour consolidation, caching des recherches, limitation du fan-out.\nPourquoi : paralleliser sans plafond consomme rapidement des tokens et des appels d outils."
+      };
+      out.style.display = "block";
+      out.textContent = texts[key] || "";
+    }
+
+    function generateWorkshopPrompt() {
+      const topic = $("#pg-topic")?.value || "LangGraph";
+      const personas = $("#pg-personas")?.value || "2";
+      const depth = $("#pg-depth")?.value || "intermédiaire";
+      const tone = $("#pg-tone")?.value || "pédagogique";
+      const sources = $("#pg-sources")?.value || "web + documents internes";
+      const format = $("#pg-format")?.value || "rapport markdown";
+
+      const prompt = `Tu es un architecte d agent de recherche LangGraph.
+
+Objectif : produire un rapport ${format} sur le sujet suivant : ${topic}.
+
+Configuration :
+- Nombre d analystes : ${personas}
+- Profondeur : ${depth}
+- Ton : ${tone}
+- Sources autorisées : ${sources}
+
+Instructions :
+1. Crée des analystes personas distincts, chacun avec nom, rôle, affiliation, description, préoccupations et motivations.
+2. Avant de lancer les interviews, soumets les analystes à validation humaine via interrupt.
+3. Si l humain demande une modification, régénère les analystes sans perdre l historique du state.
+4. Lance une interview parallèle par analyste avec Send API.
+5. Dans chaque subgraph interview : pose une question, effectue une recherche web, réponds, itère jusqu à max_turns.
+6. Sauvegarde chaque interview, rédige une section, puis agrège les sections.
+7. Rédige introduction, corps du rapport, conclusion et rapport final.
+8. Trace tout dans LangSmith : state, nodes, edges, appels d outils, latence, erreurs.
+
+Contraintes :
+- Ne supprime pas les informations obsolètes : marque-les comme remplacées si nécessaire.
+- Utilise des reducers pour context et sections.
+- Limite le nombre de tours pour contrôler les coûts.
+- Cite les sources quand elles existent.`;
+
+      const out = $("#pg-out");
+      if (out) {
+        out.textContent = prompt;
+        out.style.display = "block";
+      }
+      const copy = $("#pg-copy");
+      if (copy) copy.style.display = "inline-flex";
+    }
+
+    const FLASHCARDS = [
+      { front: "State", back: "Le contrat de données que le graphe suit du début à la fin. Il définit ce qui est disponible à chaque node.", tip: "0:24:10" },
+      { front: "Node", back: "Une unité de travail : créer des analystes, interroger, chercher, répondre, rédiger une section.", tip: "0:23:29" },
+      { front: "Edge", back: "La règle de transition entre nodes. Peut être conditionnelle selon le state.", tip: "0:23:29" },
+      { front: "Human-in-the-loop", back: "Interrupt qui suspend le graphe pour demander une validation ou un feedback humain.", tip: "0:56:39" },
+      { front: "Send API", back: "Permet de fan-out plusieurs sous-graphes en parallèle, un par analyste.", tip: "2:33:37" },
+      { front: "Subgraph", back: "Un graphe imbriqué dans un autre. Ici, le subgraph interview est appelé par conduct_interview.", tip: "1:22:01" },
+      { front: "Reducer", back: "Fusionne les mises à jour d une clé du state. Exemple : ajouter au context ou aux sections au lieu de remplacer.", tip: "1:24:26" },
+      { front: "Tavily", back: "Outil de recherche web utilisé pour alimenter les réponses de l expert pendant l interview.", tip: "1:42:19" },
+      { front: "LangSmith", back: "Plateforme de tracing pour observer les runs, latences, erreurs et le rapport final.", tip: "0:08:38" },
+      { front: "Structured output", back: "Forcer le LLM à respecter un schéma Pydantic, ici Perspectives avec une liste d Analyst.", tip: "0:30:43" }
+    ];
+
+    function renderFlashcard() {
+      const card = $("#flashcard");
+      if (!card) return;
+      const i = STATE.flash.index;
+      const c = FLASHCARDS[i];
+      card.classList.remove("flipped");
+      card.innerHTML = `
+        <div class="flash-inner" onclick="flipFlash()">
+          <div class="flash-face flash-front">
+            <h3>${c.front}</h3>
+            <p class="muted">Cliquez pour retourner la carte.</p>
+            <div><span class="pill">Carte ${i + 1}/${FLASHCARDS.length}</span><span class="pill">${c.tip}</span></div>
+          </div>
+          <div class="flash-face flash-back">
+            <p><strong>${c.back}</strong></p>
+            <p class="muted">${STATE.flash.known.has(i) ? "Déjà marquée connue." : "Marquez-la connue si vous la maîtrisez."}</p>
+          </div>
+        </div>
+      `;
+      const knownBtn = $("#flash-known");
+      if (knownBtn) knownBtn.textContent = STATE.flash.known.has(i) ? "✅ Connue" : "Marquer connue";
+    }
+
+    function flipFlash() { $("#flashcard")?.classList.toggle("flipped"); }
+    function nextFlash() { STATE.flash.index = (STATE.flash.index + 1) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function prevFlash() { STATE.flash.index = (STATE.flash.index - 1 + FLASHCARDS.length) % FLASHCARDS.length; saveState(); renderFlashcard(); }
+    function markFlash() {
+      const i = STATE.flash.index;
+      if (STATE.flash.known.has(i)) STATE.flash.known.delete(i); else STATE.flash.known.add(i);
+      saveState();
+      renderFlashcard();
+    }
+
+    const FINAL_QUESTIONS = [
+      { q: "Quelle est la première idée à clarifier avant de coder un agent LangGraph ?", o: ["Le modèle le plus puissant", "Le state, puis les nodes, puis les edges", "Le frontend"], a: 1, e: "Le transcript insiste : state, edges, nodes sont les trois éléments centraux." },
+      { q: "Pourquoi créer des analystes personas dans ce projet ?", o: ["Pour décorer le rapport", "Pour diversifier les angles de recherche et les questions d interview", "Pour remplacer Tavily"], a: 1, e: "Les analystes ont spécialité, affiliation, rôle, motivations et mènent des interviews." },
+      { q: "À quoi sert human_feedback avec interrupt ?", o: ["À supprimer le state", "À suspendre le graphe pour validation humaine avant de continuer", "À accélérer les LLM"], a: 1, e: "L humain peut rejeter, modifier le nombre d analystes ou approuver." },
+      { q: "Que fait la Send API dans initiate_all_interviews ?", o: ["Elle envoie un email", "Elle fan-out une interview parallèle par analyste", "Elle compile le rapport"], a: 1, e: "Elle renvoie une liste de Send vers conduct_interview pour exécuter les interviews en parallèle." },
+      { q: "Pourquoi un reducer sur context et sections est-il utile ?", o: ["Pour remplacer toutes les valeurs", "Pour ajouter les nouvelles valeurs sans écraser les précédentes", "Pour désactiver LangSmith"], a: 1, e: "Plusieurs interviews produisent plusieurs contextes et sections à agréger." },
+      { q: "Quel risque principal dans le subgraph interview sans route_messages ?", o: ["Aucun", "Boucle infinie entre question et réponse", "Perte du topic"], a: 1, e: "Il faut compter les réponses expert et sortir après max_turns." },
+      { q: "Pourquoi valider analyst s il est un dictionary ?", o: ["Pour utiliser persona, property de l objet Analyst", "Pour supprimer le state", "Pour changer de modèle"], a: 0, e: "Un dictionary n a pas la property persona ; il faut reconstruire l objet Pydantic." },
+      { q: "Quel outil est utilisé pour la recherche web dans le transcript ?", o: ["Supabase", "Tavily", "Zep"], a: 1, e: "TavilySearchResults est invoqué avec la requête générée par le LLM." },
+      { q: "À quoi sert LangSmith dans cet atelier ?", o: ["À stocker les vecteurs", "À tracer les runs, nodes, latences et erreurs", "À créer le frontend"], a: 1, e: "Le monitoring permet de voir le graphe tourner et le rapport finalisé." },
+      { q: "Quelle est la bonne posture face aux erreurs de code pendant l apprentissage ?", o: ["Déléguer tout à l IA sans comprendre", "Faire ses propres erreurs, lire les traceback, corriger, puis utiliser l IA pour accélérer", "Éviter de coder"], a: 1, e: "Le transcript recommande de ne pas compter uniquement sur les outils IA pendant l apprentissage." }
+    ];
+
+    function finalQuizHTML() {
+      return `
+        <div class="quiz" data-module="final" id="final-quiz">
+          <h3>Examen final chronométré</h3>
+          ${FINAL_QUESTIONS.map((item, i) => `
+            <div class="q" data-answer="${item.a}">
+              <p class="q-text">${i + 1}. ${item.q}</p>
+              ${item.o.map((opt, j) => `
+                <label class="q-option">
+                  <input type="radio" name="final-q${i}" value="${j}">
+                  ${opt}
+                </label>
+              `).join("")}
+              <div class="explain">${item.e}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function startExam() {
+      if (STATE.exam.finished) return;
+      STATE.exam.started = true;
+      STATE.exam.remaining = 480;
+      updateExamTimer();
+      clearInterval(STATE.exam.interval);
+      STATE.exam.interval = setInterval(() => {
+        STATE.exam.remaining--;
+        updateExamTimer();
+        if (STATE.exam.remaining <= 0) submitExam();
+      }, 1000);
+      const btn = $("#exam-start");
+      if (btn) btn.style.display = "none";
+    }
+
+    function updateExamTimer() {
+      const el = $("#exam-timer");
+      if (!el) return;
+      const m = Math.floor(Math.max(0, STATE.exam.remaining) / 60);
+      const s = String(Math.max(0, STATE.exam.remaining) % 60).padStart(2, "0");
+      el.textContent = "⏱ " + m + ":" + s;
+    }
+
+    function submitExam() {
+      clearInterval(STATE.exam.interval);
+      const box = $("#final-quiz");
+      if (!box) return;
+      const qs = $$(".q", box);
+      let correct = 0;
+
+      qs.forEach(q => {
+        const selected = q.querySelector("input:checked");
+        const explain = q.querySelector(".explain");
+        const options = $$(".q-option", q);
+        q.classList.remove("correct", "incorrect");
+        options.forEach(o => o.classList.remove("correct", "incorrect"));
+        if (explain) explain.style.display = "block";
+
+        if (!selected) {
+          q.classList.add("incorrect");
+          return;
+        }
+
+        const answer = Number(q.dataset.answer);
+        const value = Number(selected.value);
+        const chosen = selected.closest(".q-option");
+
+        if (value === answer) {
+          q.classList.add("correct");
+          if (chosen) chosen.classList.add("correct");
+          correct++;
+        } else {
+          q.classList.add("incorrect");
+          if (chosen) chosen.classList.add("incorrect");
+          if (options[answer]) options[answer].classList.add("correct");
+        }
+      });
+
+      STATE.exam.finished = true;
+      STATE.exam.score = correct;
+      STATE.exam.total = qs.length;
+      STATE.exam.passed = correct >= 7;
+      saveState();
+      updateScore();
+
+      const res = $("#exam-result");
+      if (res) {
+        let advice = "";
+        if (STATE.exam.passed) {
+          advice = "Vous pouvez architecturer un agent de recherche LangGraph avec contrôle humain, subgraph parallèle et tracing.";
+        } else if (correct >= 5) {
+          advice = "Bases solides. Revoyez Send API, route_messages, reducers et validation Pydantic.";
+        } else {
+          advice = "Reprenez les piliers State / Nodes / Edges, puis l atelier pas à pas avant de coder.";
+        }
+        res.innerHTML = `
+          <strong>Résultat : ${correct}/${qs.length}</strong><br>
+          ${STATE.exam.passed ? "✅ Réussite" : "⚠️ À consolider"}<br>
+          <span class="muted">${advice}</span>
+        `;
+      }
+
+      const certBtn = $("#go-cert");
+      if (certBtn) certBtn.style.display = "inline-flex";
+    }
+
+    function restoreExam() {
+      updateExamTimer();
+      if (STATE.exam.finished) {
+        const btn = $("#exam-start");
+        if (btn) btn.style.display = "none";
+        const res = $("#exam-result");
+        if (res && !res.innerHTML) {
+          res.innerHTML = `Examen terminé : ${STATE.exam.score}/${STATE.exam.total}. ${STATE.exam.passed ? "Certificat disponible." : "Revoyez les modules puis réessayez."}`;
+        }
+        const certBtn = $("#go-cert");
+        if (certBtn) certBtn.style.display = "inline-flex";
+      }
+    }
+
+    function generateCert() {
+      if (!STATE.exam.finished) {
+        alert("Terminez d abord l examen final.");
+        return;
+      }
+      const name = ($("#cert-name")?.value || "Apprenant").trim();
+      STATE.certName = name;
+      saveState();
+      const block = $("#certificate");
+      if (!block) return;
+      block.classList.add("show");
+      $("#cert-name-out").textContent = name;
+      $("#cert-date").textContent = new Date().toLocaleDateString("fr-FR");
+      $("#cert-score").textContent = STATE.exam.score + "/" + STATE.exam.total;
+      $("#cert-level").textContent = STATE.exam.passed ? "Maîtrise validée" : "Fin de parcours";
+      block.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function restoreAction() {
+      const nameInput = $("#cert-name");
+      if (nameInput && STATE.certName) nameInput.value = STATE.certName;
+      Object.entries(STATE.checklist).forEach(([id, checked]) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = checked;
+      });
+      updateChecklistProgress();
+      if (STATE.exam.finished) generateCert();
+    }
+
+    function toggleCheck(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      STATE.checklist[id] = el.checked;
+      saveState();
+      updateChecklistProgress();
+    }
+
+    function updateChecklistProgress() {
+      const boxes = $$(".checklist input[type='checkbox']");
+      const done = boxes.filter(b => b.checked).length;
+      const el = $("#check-progress");
+      if (el) el.textContent = done + "/" + boxes.length;
+    }
+
+    function exportJSON() {
+      const data = {
+        atelier: "Agent de Recherche LangGraph",
+        date: new Date().toISOString(),
+        profil: STATE.diagnostic,
+        parcours: STATE.path,
+        progression: [...STATE.visited],
+        quiz: STATE.quizScores,
+        examen: { termine: STATE.exam.finished, score: STATE.exam.score, total: STATE.exam.total, reussi: STATE.exam.passed },
+        flashcards_connues: [...STATE.flash.known],
+        checklist: STATE.checklist,
+        recommandation: buildRecommendation()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "rapport-langgraph-research-agent.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function buildRecommendation() {
+      const d = STATE.diagnostic || {};
+      if (d.level === "debutant") return "Commencer par un graphe linéaire : create_analysts, human_feedback, une seule interview, rapport simple.";
+      if (d.level === "expert") return "Ajouter evals,成本控制, retry, caching, multi-outils, tests unitaires sur nodes et observabilité LangSmith avancée.";
+      return "Stack pragmatique : State clair, nodes modularisés, interrupt humain, subgraph interview, Send API si plusieurs analystes, tracing LangSmith.";
+    }
+
+    function resetCourse() {
+      if (!confirm("Réinitialiser toute la progression, les quiz et la checklist ?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    }
+
+    const MODULES = [
+      {
+        id: "home",
+        title: "🏠 Accueil",
+        express: true,
+        content: `
+          <h1>Atelier pratique : construire un agent de recherche LangGraph de bout en bout</h1>
+          <p class="lead">
+            Cet atelier transforme le transcript en parcours actif : vous allez comprendre l architecture, coder pas à pas,
+            simuler le graphe, générer des prompts, éviter les erreurs classiques et valider votre maîtrise par un examen final.
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 960 260" role="img" aria-label="Architecture globale de l agent de recherche LangGraph">
+              <defs>
+                <marker id="arrow-home" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="25" y="95" width="125" height="70" class="node" />
+              <text x="87" y="122" text-anchor="middle">Topic</text>
+              <text x="87" y="142" text-anchor="middle" class="sub">LangGraph</text>
+
+              <path class="dash" d="M150 130 L205 130" marker-end="url(#arrow-home)" />
+
+              <rect x="205" y="95" width="150" height="70" class="node purple pulse" />
+              <text x="280" y="122" text-anchor="middle">create_analysts</text>
+              <text x="280" y="142" text-anchor="middle" class="sub">personas</text>
+
+              <path class="dash purple" d="M355 130 L410 130" marker-end="url(#arrow-home)" />
+
+              <rect x="410" y="95" width="150" height="70" class="node yellow" />
+              <text x="485" y="122" text-anchor="middle">human_feedback</text>
+              <text x="485" y="142" text-anchor="middle" class="sub">interrupt</text>
+
+              <path class="dash yellow" d="M560 130 L615 130" marker-end="url(#arrow-home)" />
+
+              <rect x="615" y="80" width="160" height="100" class="node green pulse" />
+              <text x="695" y="112" text-anchor="middle">Send API</text>
+              <text x="695" y="134" text-anchor="middle" class="sub">interviews parallèles</text>
+              <text x="695" y="154" text-anchor="middle" class="sub">subgraph</text>
+
+              <path class="dash green" d="M775 130 L830 130" marker-end="url(#arrow-home)" />
+
+              <rect x="830" y="95" width="105" height="70" class="node" />
+              <text x="882" y="122" text-anchor="middle">Rapport</text>
+              <text x="882" y="142" text-anchor="middle" class="sub">final</text>
+            </svg>
+          </div>
+
+          <div class="grid">
+            <div class="card info">
+              <h3>Objectif pédagogique</h3>
+              <p>À la fin, vous serez capable de concevoir un agent de recherche multi-analystes avec LangGraph : state, nodes, edges, human-in-the-loop, subgraph parallèle et rapport final tracé.</p>
+            </div>
+            <div class="card warn">
+              <h3>Méthode</h3>
+              <p>Diagnostic, architecture, atelier code pas à pas, simulateur de graphe, générateur de prompts, flashcards, erreurs fréquentes, examen chronométré.</p>
+            </div>
+            <div class="card good">
+              <h3>Livrable</h3>
+              <p>Un plan d implémentation défendable, des snippets copiables, une checklist 7 jours et un certificat de maîtrise.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="showSection('diagnostic')">Commencer par le diagnostic</button>
+            <button class="btn secondary" onclick="showSection('problem')">Aller directement au cours</button>
+          </div>
+        `
+      },
+      {
+        id: "diagnostic",
+        title: "🎯 Diagnostic",
+        express: true,
+        content: `
+          <h1>Diagnostic initial</h1>
+          <p class="lead">Trois questions pour adapter l atelier : niveau, objectif et temps disponible.</p>
+
+          <div class="quiz">
+            <div class="q">
+              <p class="q-text">1. Quel est votre niveau avec LangGraph / agents IA ?</p>
+              <label class="q-option"><input type="radio" name="diag-level" value="debutant"> Débutant : je découvre state, nodes et edges.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="praticien"> Praticien : j ai déjà fait un graphe simple ou un RAG.</label>
+              <label class="q-option"><input type="radio" name="diag-level" value="expert"> Expert : je conçois des sous-graphes, parallelisme et observabilité.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">2. Quel est votre objectif principal ?</p>
+              <label class="q-option"><input type="radio" name="diag-goal" value="comprendre"> Comprendre l architecture avant de coder.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="coder"> Coder un agent de recherche complet.</label>
+              <label class="q-option"><input type="radio" name="diag-goal" value="portfolio"> Construire un projet portfolio type deep research.</label>
+            </div>
+
+            <div class="q">
+              <p class="q-text">3. Combien de temps voulez-vous investir ?</p>
+              <label class="q-option"><input type="radio" name="diag-time" value="express"> Express : 15-20 minutes, essentiel seulement.</label>
+              <label class="q-option"><input type="radio" name="diag-time" value="masterclass"> Masterclass : 45-60 minutes, atelier complet.</label>
+            </div>
+
+            <button class="btn" onclick="validateDiagnostic()">Valider mon diagnostic</button>
+            <div class="result" id="diag-rec" style="display:none"></div>
+            <div class="toolbar">
+              <button class="btn secondary" id="diag-next" style="display:none" onclick="nextFrom('diagnostic')">Continuer →</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "problem",
+        title: "1. Le problème",
+        express: true,
+        content: `
+          <h1>Pourquoi un simple chatbot ne suffit pas pour la recherche profonde</h1>
+          <p class="lead">
+            Le transcript montre un projet qui ne se contente pas de répondre à une question : il crée des analystes,
+            mène des interviews, utilise des outils, parallélise les recherches, itère, puis rédige un rapport final.
+            <span class="source">⏱ 0:06</span>
+          </p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Approche novice</h3>
+              <p>Une seule question, une seule réponse, pas de structure, pas de contrôle humain, pas de traçabilité. Résultat souvent générique.</p>
+            </div>
+            <div class="card good">
+              <h3>Approche power user</h3>
+              <p>Des analystes personas, des interviews ciblées, des recherches web, des sections agrégées, un rapport final et du monitoring.</p>
+            </div>
+          </div>
+
+          <div class="card purple">
+            <h3>Idée clé du transcript</h3>
+            <p>Un agent de recherche utile n est pas juste un LLM qui parle. C est un système orchestré : state partagé, nodes spécialisés, edges conditionnels, outils, boucles contrôlées et validation humaine.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quel élément distingue surtout ce projet d un chatbot simple ?", o: ["Un prompt plus long", "Des analystes, interviews parallèles, outils et rapport structuré", "Une interface graphique seulement"], a: 1, e: "La valeur vient de l orchestration multi-étapes et de la production d un artefact final." },
+            { q: "Pourquoi le monitoring est-il mentionné dès le début ?", o: ["Pour décorer le projet", "Pour observer les runs, erreurs, latences et le rapport final", "Pour remplacer le code"], a: 1, e: "LangSmith permet de voir ce qui se passe réellement dans le graphe." }
+          ], "problem")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('problem')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('problem')">Architecture globale →</button>
+          </div>
+        `
+      },
+      {
+        id: "architecture",
+        title: "2. Architecture",
+        express: true,
+        content: `
+          <h1>La roadmap du projet</h1>
+          <p class="lead">Le transcript suit une feuille de route claire. Voici la version atelier, découpée en briques compréhensibles.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Étape</th><th>Node / composant</th><th>Rôle</th><th>Notion LangGraph</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>create_analysts</td><td>Générer des analystes personas à partir du topic</td><td>structured output, state</td></tr>
+                <tr><td>2</td><td>human_feedback</td><td>Demander validation ou modification humaine</td><td>interrupt, conditional edge</td></tr>
+                <tr><td>3</td><td>initiate_all_interviews</td><td>Lancer une interview par analyste</td><td>Send API, fan-out</td></tr>
+                <tr><td>4</td><td>conduct_interview</td><td>Sous-graphe question, recherche, réponse, itération</td><td>subgraph, reducer, loop</td></tr>
+                <tr><td>5</td><td>write_section</td><td>Transformer chaque interview en section exploitable</td><td>prompt, state update</td></tr>
+                <tr><td>6</td><td>write_report / intro / conclusion</td><td>Agréger les sections en rapport</td><td>fan-in, final nodes</td></tr>
+                <tr><td>7</td><td>finalize_report</td><td>Produire le livrable final</td><td>tracing, output</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card info">
+            <h3>Point d attention</h3>
+            <p>Ne construisez pas tout le graphe d un coup. Le transcript procède par incréments : d abord create_analysts, puis human_feedback, puis subgraph, puis parallélisation, puis rapport final.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle étape permet de revenir à create_analysts si l humain n est pas satisfait ?", o: ["Send API", "human_feedback + conditional edge", "finalize_report"], a: 1, e: "Le feedback humain déclenche un retour conditionnel vers la création d analystes." },
+            { q: "Pourquoi découper le projet en étapes ?", o: ["Pour faire plus long", "Pour tester chaque brique avant de connecter le graphe complet", "Pour éviter LangSmith"], a: 1, e: "Un graphe complexe se débogue mieux incrementalement." }
+          ], "architecture")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('architecture')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('architecture')">Les 3 piliers LangGraph →</button>
+          </div>
+        `
+      },
+      {
+        id: "pillars",
+        title: "3. State / Nodes / Edges",
+        express: true,
+        content: `
+          <h1>Les trois piliers à toujours garder en tête</h1>
+          <p class="lead">
+            Le transcript répète une règle simple : quand on pense LangGraph, on pense state, edges, nodes.
+            <span class="source">⏱ 1:58:33</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 760 300" role="img" aria-label="Triangle State Nodes Edges">
+              <defs>
+                <marker id="arrow-pillar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+              <circle cx="380" cy="150" r="95" class="node purple pulse" />
+              <text x="380" y="145" text-anchor="middle">LangGraph</text>
+              <text x="380" y="168" text-anchor="middle" class="sub">orchestration</text>
+
+              <rect x="80" y="40" width="150" height="65" class="node" />
+              <text x="155" y="68" text-anchor="middle">State</text>
+              <text x="155" y="88" text-anchor="middle" class="sub">données partagées</text>
+              <path class="dash" d="M230 85 L300 120" marker-end="url(#arrow-pillar)" />
+
+              <rect x="530" y="40" width="150" height="65" class="node green" />
+              <text x="605" y="68" text-anchor="middle">Nodes</text>
+              <text x="605" y="88" text-anchor="middle" class="sub">unités de travail</text>
+              <path class="dash green" d="M530 85 L460 120" marker-end="url(#arrow-pillar)" />
+
+              <rect x="305" y="210" width="150" height="65" class="node yellow" />
+              <text x="380" y="238" text-anchor="middle">Edges</text>
+              <text x="380" y="258" text-anchor="middle" class="sub">transitions</text>
+              <path class="dash yellow" d="M380 210 L380 175" marker-end="url(#arrow-pillar)" />
+            </svg>
+          </div>
+
+          <div class="tabs">
+            <div class="tab-list">
+              <button class="tab-btn active" onclick="switchTab(this, 'tab-state')">State</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-nodes')">Nodes</button>
+              <button class="tab-btn" onclick="switchTab(this, 'tab-edges')">Edges</button>
+            </div>
+
+            <div id="tab-state" class="tab-panel active">
+              <div class="card info">
+                <h3>State = contrat de données</h3>
+                <p>C est ce que le graphe doit suivre tout du long. Dans le projet : topic, max_analysts, human_analyst_feedback, analysts, sections, interview, context, messages, rapport final.</p>
+              </div>
+              <div class="card warn">
+                <h3>Sous-states</h3>
+                <p>Le subgraph interview n a pas besoin de tout le state global. Il utilise un InterviewState plus petit, puis LangGraph fait le lien avec le state principal.</p>
+              </div>
+            </div>
+
+            <div id="tab-nodes" class="tab-panel">
+              <div class="card good">
+                <h3>Node = action</h3>
+                <p>Chaque node fait une chose : créer des analystes, attendre un feedback, générer une question, chercher sur le web, répondre, sauvegarder une interview, écrire une section.</p>
+              </div>
+              <div class="card purple">
+                <h3>Bonne pratique</h3>
+                <p>Un node doit être testable isolément. Le transcript construit d abord le subgraph interview avant de le brancher au grand graphe.</p>
+              </div>
+            </div>
+
+            <div id="tab-edges" class="tab-panel">
+              <div class="card yellow">
+                <h3>Edge = routage</h3>
+                <p>Les edges disent où aller ensuite. Conditional edge exemple : si human_analyst_feedback existe, retourner à create_analysts ; sinon lancer les interviews.</p>
+              </div>
+              <div class="card bad">
+                <h3>Piège</h3>
+                <p>Sans condition de sortie dans la boucle interview, le graphe peut tourner indéfiniment entre question et réponse.</p>
+              </div>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Que représente le state dans LangGraph ?", o: ["Une base de vectors", "Les données partagées que le graphe suit", "Un outil web"], a: 1, e: "Le state est le fil conducteur du graphe." },
+            { q: "Pourquoi un conditional edge est-il essentiel après human_feedback ?", o: ["Pour décorer le graphe", "Pour décider si on régénère les analystes ou si on continue", "Pour supprimer les messages"], a: 1, e: "Le feedback humain change la route du graphe." }
+          ], "pillars")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('pillars')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('pillars')">Atelier setup →</button>
+          </div>
+        `
+      },
+      {
+        id: "setup",
+        title: "4. Atelier setup",
+        express: true,
+        content: `
+          <h1>Atelier 1 : initialiser le projet sans se piéger</h1>
+          <p class="lead">Le transcript commence par VS Code, UV, virtual environment, variables d environnement, LangSmith, OpenAI et Tavily. <span class="source">⏱ 6:43</span></p>
+
+          ${codeHTML("Commandes de base", "code-setup-cmd", `uv init langgraph-research-agent
+cd langgraph-research-agent
+uv venv --python 3.11
+source .venv/bin/activate
+touch .env .gitignore
+uv add langgraph langchain-openai langchain-community tavily-python python-dotenv pydantic`)}
+
+          ${codeHTML(".env", "code-setup-env", `OPENAI_API_KEY=VotreCleOpenAI
+TAVILY_API_KEY=VotreCleTavily
+LANGSMITH_API_KEY=VotreCleLangSmith
+LANGSMITH_PROJECT=langgraph-research-agent
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com`)}
+
+          ${codeHTML(".gitignore minimal", "code-setup-git", `.venv/
+.env/
+__pycache__/
+.DS_Store`)}
+
+          ${codeHTML("langgraph.json", "code-setup-json", `{
+  "dependencies": ["."],
+  "graphs": {
+    "research_agent": "./src/create_analysts.py:graph"
+  },
+  "env": ".env"
+}`)}
+
+          <div class="card bad">
+            <h3>Erreur fréquente</h3>
+            <p>Coller de vraies clés dans le code ou dans la vidéo. Le transcript montre les clés puis les supprime : ne faites jamais cela dans un dépôt réel.</p>
+          </div>
+
+          <div class="card info">
+            <h3>Checklist setup</h3>
+            <ul>
+              <li>Python entre 3.11 et 3.13.</li>
+              <li>Virtual environment activé.</li>
+              <li>.env ignoré par Git.</li>
+              <li>Comptes OpenAI / Tavily / LangSmith créés.</li>
+              <li>langgraph.json pointe vers le bon fichier et le bon nom de graphe.</li>
+            </ul>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi utiliser un fichier .env ?", o: ["Pour accélérer le LLM", "Pour stocker les secrets hors du code", "Pour créer le state"], a: 1, e: "Les API keys ne doivent pas être commitées." },
+            { q: "Que fait langgraph.json ?", o: ["Il configure le déploiement et indique où trouver les graphs", "Il remplace Tavily", "Il supprime les erreurs"], a: 0, e: "C est le fichier de configuration du runtime LangGraph." }
+          ], "setup")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('setup')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('setup')">Objets et state →</button>
+          </div>
+        `
+      },
+      {
+        id: "objects",
+        title: "5. Objets / State",
+        express: true,
+        content: `
+          <h1>Atelier 2 : définir les objets et le state</h1>
+          <p class="lead">Avant les nodes, il faut dire quelles données circulent. Le transcript crée Analyst, Perspectives, puis les states.</p>
+
+          ${codeHTML("objects.py", "code-objects", `from pydantic import BaseModel, Field
+from typing import List
+
+class Analyst(BaseModel):
+    affiliation: str = Field(description="Primary affiliation")
+    name: str = Field(description="Name of the analyst")
+    role: str = Field(description="Role of the analyst in the context of the topic")
+    description: str = Field(description="Description of the analyst, focus, concerns and motives")
+
+    @property
+    def persona(self) -> str:
+        return (
+            "Name: " + self.name + "\\n"
+            "Role: " + self.role + "\\n"
+            "Affiliation: " + self.affiliation + "\\n"
+            "Description: " + self.description
+        )
+
+class Perspectives(BaseModel):
+    analysts: List[Analyst] = Field(
+        description="Comprehensive list of analysts with roles, affiliations and descriptions"
+    )`)}
+
+          ${codeHTML("state.py", "code-state", `from typing import Optional, List
+from typing_extensions import TypedDict, Annotated
+from langgraph.graph import MessageState
+import operator
+from objects import Analyst
+
+class GenerateAnalystState(TypedDict):
+    topic: str
+    max_analysts: int
+    human_analyst_feedback: Optional[str]
+    analysts: Optional[List[Analyst]]
+
+class InterviewState(MessageState):
+    max_turns: int
+    context: Annotated[List[str], operator.add]
+    analyst: Analyst
+    interview: str
+    sections: Annotated[List[str], operator.add]
+
+class ResearchGraphState(GenerateAnalystState):
+    sections: Annotated[List[str], operator.add]
+    introduction: str
+    conclusion: str
+    final_report: str`)}
+
+          <div class="card warn">
+            <h3>Détail important du transcript</h3>
+            <p>Quand un analyste arrive sous forme de dictionary, il faut le revalider en objet Analyst pour pouvoir utiliser la property persona. <span class="source">⏱ 1:28:10</span></p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi Analyst hérite de BaseModel ?", o: ["Pour forcer une structure Pydantic et valider les données", "Pour connecter Tavily", "Pour créer l interface"], a: 0, e: "Pydantic garantit un schéma exploitable par le structured output." },
+            { q: "À quoi sert Annotated avec operator.add ?", o: ["À remplacer le state", "À ajouter aux listes context ou sections au lieu de les écraser", "À désactiver les edges"], a: 1, e: "C est un reducer : il fusionne les mises à jour successives." }
+          ], "objects")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('objects')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('objects')">Node create_analysts →</button>
+          </div>
+        `
+      },
+      {
+        id: "create",
+        title: "6. create_analysts",
+        express: true,
+        content: `
+          <h1>Atelier 3 : le node create_analysts</h1>
+          <p class="lead">Ce node transforme un topic en liste d analystes personas. Il utilise un LLM avec structured output pour forcer le format Perspectives.</p>
+
+          ${codeHTML("model.py", "code-model", `from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0
+)`)}
+
+          ${codeHTML("prompts.py", "code-prompt-analyst", `ANALYST_INSTRUCTIONS = """
+You are tasked with creating a set of AI analyst personas.
+Follow these instructions carefully.
+
+1. Review the research topic: {topic}
+2. Examine any editorial feedback provided: {human_analyst_feedback}
+3. Determine interesting themes based on the topic.
+4. Pick the top {max_analysts} themes.
+5. Assign one analyst to each theme.
+"""`)}
+
+          ${codeHTML("nodes.py", "code-create-node", `from langchain_core.messages import SystemMessage, HumanMessage
+from model import llm
+from objects import Perspectives
+from prompts import ANALYST_INSTRUCTIONS
+
+def create_analysts(state):
+    topic = state["topic"]
+    max_analysts = state["max_analysts"]
+    feedback = state.get("human_analyst_feedback") or ""
+
+    structured_llm = llm.with_structured_output(Perspectives)
+
+    system_message = SystemMessage(
+        content=ANALYST_INSTRUCTIONS.format(
+            topic=topic,
+            human_analyst_feedback=feedback,
+            max_analysts=max_analysts
+        )
+    )
+
+    result = structured_llm.invoke([
+        system_message,
+        HumanMessage(content="Please generate the set of analysts.")
+    ])
+
+    return {"analysts": result.analysts}`)}
+
+          <div class="card good">
+            <h3>Pédagogie du transcript</h3>
+            <p>Le formateur insiste : on ne laisse pas le LLM produire du texte libre. On force une structure, donc le state reste fiable.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que fait with_structured_output(Perspectives) ?", o: ["Il supprime les erreurs", "Il force le LLM à retourner un objet conforme au schéma", "Il crée un edge"], a: 1, e: "C est la clé pour obtenir une liste d analystes exploitable." },
+            { q: "Pourquoi temperature=0 dans un projet d apprentissage structuré ?", o: ["Pour plus de créativité", "Pour des sorties plus déterministes et testables", "Pour éviter Tavily"], a: 1, e: "Moins de aléa facilite le debugging du graphe." }
+          ], "create")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('create')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('create')">Human feedback →</button>
+          </div>
+        `
+      },
+      {
+        id: "human",
+        title: "7. Human feedback",
+        express: true,
+        content: `
+          <h1>Atelier 4 : interrupt et validation humaine</h1>
+          <p class="lead">Le graphe doit pouvoir s arrêter pour demander : ces analystes vous conviennent-ils ? L humain peut approuver ou demander une régénération. <span class="source">⏱ 56:19</span></p>
+
+          ${codeHTML("human_feedback node", "code-human-node", `from langgraph.types import interrupt
+
+def human_feedback(state):
+    analysts = state.get("analysts", [])
+
+    payload = {
+        "question": "Are these analysts okay for you?",
+        "analysts": [
+            analyst.model_dump() if hasattr(analyst, "model_dump") else analyst
+            for analyst in analysts
+        ],
+        "instructions": "Return feedback to regenerate analysts, or return empty/perfect/continue to approve."
+    }
+
+    feedback = interrupt(payload)
+
+    if feedback is None:
+        return {"human_analyst_feedback": None}
+
+    if isinstance(feedback, str):
+        clean = feedback.strip()
+        if not clean or clean.lower() in {"perfect", "continue", "ok", "yes"}:
+            return {"human_analyst_feedback": None}
+        return {"human_analyst_feedback": clean}
+
+    return {"human_analyst_feedback": None}`)}
+
+          ${codeHTML("conditional edge", "code-human-edge", `def should_continue(state):
+    feedback = state.get("human_analyst_feedback")
+    if feedback:
+        return "create_analysts"
+    return "initiate_all_interviews"`)}
+
+          <div class="card warn">
+            <h3>Ce que fait interrupt</h3>
+            <p>Il suspend l exécution, expose un payload à l interface, attend une reprise, puis injecte la réponse humaine dans le node. C est la base du human-in-the-loop.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que renvoie human_feedback si l utilisateur écrit perfect ?", o: ["Le mot perfect comme feedback", "None, pour indiquer qu il n y a pas de modification à faire", "Une erreur"], a: 1, e: "Les validations neutres sont normalisées en None." },
+            { q: "Pourquoi should_continue renvoie create_analysts si feedback existe ?", o: ["Pour relancer la génération avec la contrainte humaine", "Pour supprimer le state", "Pour appeler Tavily"], a: 0, e: "Le feedback humain sert à régénérer de meilleurs analystes." }
+          ], "human")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('human')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('human')">Subgraph interview →</button>
+          </div>
+        `
+      },
+      {
+        id: "subgraph",
+        title: "8. Subgraph interview",
+        express: true,
+        content: `
+          <h1>Atelier 5 : le subgraph interview</h1>
+          <p class="lead">
+            Le transcript construit ce sous-graphe séparément : ask question, search web, answer question, route messages,
+            save interview, write section. <span class="source">⏱ 1:21:37</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 280" role="img" aria-label="Boucle du subgraph interview">
+              <defs>
+                <marker id="arrow-sub" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="40" y="105" width="140" height="65" class="node" />
+              <text x="110" y="132" text-anchor="middle">generate_question</text>
+              <text x="110" y="152" text-anchor="middle" class="sub">analyste</text>
+
+              <path class="dash" d="M180 137 L235 137" marker-end="url(#arrow-sub)" />
+
+              <rect x="235" y="105" width="130" height="65" class="node purple" />
+              <text x="300" y="132" text-anchor="middle">search_web</text>
+              <text x="300" y="152" text-anchor="middle" class="sub">Tavily</text>
+
+              <path class="dash purple" d="M365 137 L420 137" marker-end="url(#arrow-sub)" />
+
+              <rect x="420" y="105" width="140" height="65" class="node green" />
+              <text x="490" y="132" text-anchor="middle">answer_question</text>
+              <text x="490" y="152" text-anchor="middle" class="sub">expert</text>
+
+              <path class="dash green" d="M560 137 L615 137" marker-end="url(#arrow-sub)" />
+
+              <rect x="615" y="90" width="130" height="95" class="node yellow pulse" />
+              <text x="680" y="122" text-anchor="middle">route_messages</text>
+              <text x="680" y="144" text-anchor="middle" class="sub">max_turns</text>
+              <text x="680" y="164" text-anchor="middle" class="sub">loop ou sortie</text>
+
+              <path class="dash yellow" d="M680 185 L680 225 L110 225 L110 170" marker-end="url(#arrow-sub)" />
+              <text x="390" y="218" text-anchor="middle" class="sub">retour question si max_turns non atteint</text>
+
+              <path class="dash" d="M745 137 L800 137" marker-end="url(#arrow-sub)" />
+              <rect x="800" y="105" width="85" height="65" class="node" />
+              <text x="842" y="132" text-anchor="middle">save</text>
+              <text x="842" y="152" text-anchor="middle" class="sub">interview</text>
+            </svg>
+          </div>
+
+          ${codeHTML("generate_question", "code-question", `from langchain_core.messages import SystemMessage, HumanMessage
+from prompts import QUESTION_INSTRUCTIONS
+
+def generate_question(state):
+    analyst = state["analyst"]
+    messages = state["messages"]
+
+    if isinstance(analyst, dict):
+        from objects import Analyst
+        analyst = Analyst.model_validate(analyst)
+
+    system_message = SystemMessage(
+        content=QUESTION_INSTRUCTIONS.format(goals=analyst.persona)
+    )
+
+    question = llm.invoke([
+        system_message,
+        HumanMessage(content="Generate the next interview question.")
+    ] + messages)
+
+    return {"messages": [question]}`)}
+
+          ${codeHTML("search_web", "code-search", `from langchain_community.tools.tavily_search import TavilySearchResults
+from objects import SearchQuery
+from prompts import SEARCH_INSTRUCTIONS
+from langchain_core.messages import SystemMessage
+
+tavily = TavilySearchResults(max_results=3)
+
+def search_web(state):
+    messages = state["messages"]
+
+    structured_llm = llm.with_structured_output(SearchQuery)
+    search_query = structured_llm.invoke([
+        SystemMessage(content=SEARCH_INSTRUCTIONS)
+    ] + messages)
+
+    data = tavily.invoke({"query": search_query.search_query})
+    docs = data.get("results", [])
+
+    formatted = []
+    for doc in docs:
+        formatted.append("Source: " + doc.get("url", "") + "\\nContent: " + doc.get("content", ""))
+
+    return {"context": formatted}`)}
+
+          ${codeHTML("route_messages", "code-route", `from langchain_core.messages import AIMessage
+
+def route_messages(state):
+    messages = state["messages"]
+    max_turns = state.get("max_turns", 2)
+
+    expert_responses = sum(
+        1 for m in messages
+        if isinstance(m, AIMessage) and getattr(m, "name", None) == "expert"
+    )
+
+    if expert_responses >= max_turns:
+        return "save_interview"
+
+    return "generate_question"`)}
+
+          <div class="card bad">
+            <h3>Piège majeur</h3>
+            <p>Si vous ne nommez pas la réponse AI avec name="expert", route_messages ne peut pas compter correctement les tours. Le transcript montre cette subtilité.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi construire le subgraph interview séparément ?", o: ["Pour le tester isolément avant de l intégrer au grand graphe", "Pour éviter le state", "Pour supprimer Tavily"], a: 0, e: "Un sous-graphe complexe doit être validé indépendamment." },
+            { q: "Que fait route_messages si expert_responses est inférieur à max_turns ?", o: ["Il finalise le rapport", "Il retourne à generate_question", "Il supprime le context"], a: 1, e: "C est la boucle de conversation contrôlée." }
+          ], "subgraph")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('subgraph')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('subgraph')">Send API parallèle →</button>
+          </div>
+        `
+      },
+      {
+        id: "send",
+        title: "9. Send API",
+        express: true,
+        content: `
+          <h1>Atelier 6 : paralléliser les interviews avec Send</h1>
+          <p class="lead">
+            Une fois les analystes validés, le graphe ne doit pas les traiter un par un. Il envoie chaque analyste
+            dans une instance parallèle de conduct_interview. <span class="source">⏱ 2:31:02</span>
+          </p>
+
+          <div class="schema-wrap">
+            <svg class="schema" viewBox="0 0 900 260" role="img" aria-label="Fan-out Send API vers plusieurs interviews parallèles">
+              <defs>
+                <marker id="arrow-send" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+              </defs>
+
+              <rect x="40" y="95" width="160" height="70" class="node yellow" />
+              <text x="120" y="122" text-anchor="middle">initiate_all_interviews</text>
+              <text x="120" y="142" text-anchor="middle" class="sub">liste d analystes</text>
+
+              <path class="dash yellow" d="M200 105 L290 55" marker-end="url(#arrow-send)" />
+              <path class="dash yellow" d="M200 130 L290 130" marker-end="url(#arrow-send)" />
+              <path class="dash yellow" d="M200 155 L290 205" marker-end="url(#arrow-send)" />
+
+              <rect x="290" y="25" width="170" height="60" class="node green pulse" />
+              <text x="375" y="50" text-anchor="middle">conduct_interview</text>
+              <text x="375" y="70" text-anchor="middle" class="sub">analyste 1</text>
+
+              <rect x="290" y="100" width="170" height="60" class="node green pulse" />
+              <text x="375" y="125" text-anchor="middle">conduct_interview</text>
+              <text x="375" y="145" text-anchor="middle" class="sub">analyste 2</text>
+
+              <rect x="290" y="175" width="170" height="60" class="node green pulse" />
+              <text x="375" y="200" text-anchor="middle">conduct_interview</text>
+              <text x="375" y="220" text-anchor="middle" class="sub">analyste N</text>
+
+              <path class="dash green" d="M460 55 L560 120" marker-end="url(#arrow-send)" />
+              <path class="dash green" d="M460 130 L560 130" marker-end="url(#arrow-send)" />
+              <path class="dash green" d="M460 205 L560 140" marker-end="url(#arrow-send)" />
+
+              <rect x="560" y="95" width="140" height="70" class="node" />
+              <text x="630" y="122" text-anchor="middle">sections</text>
+              <text x="630" y="142" text-anchor="middle" class="sub">fan-in</text>
+
+              <path class="dash" d="M700 130 L770 130" marker-end="url(#arrow-send)" />
+              <rect x="770" y="95" width="95" height="70" class="node purple" />
+              <text x="817" y="122" text-anchor="middle">rapport</text>
+              <text x="817" y="142" text-anchor="middle" class="sub">final</text>
+            </svg>
+          </div>
+
+          ${codeHTML("initiate_all_interviews", "code-send", `from langgraph.types import Send
+from langchain_core.messages import HumanMessage
+
+def initiate_all_interviews(state):
+    feedback = state.get("human_analyst_feedback")
+    if feedback:
+        return "create_analysts"
+
+    topic = state["topic"]
+    analysts = state.get("analysts", [])
+
+    return [
+        Send(
+            "conduct_interview",
+            {
+                "analyst": analyst,
+                "topic": topic,
+                "messages": [
+                    HumanMessage(content="Write an article on " + topic + ".")
+                ]
+            }
+        )
+        for analyst in analysts
+    ]`)}
+
+          <div class="card info">
+            <h3>Explication simple</h3>
+            <p>Send ne renvoie pas une seule route. Il renvoie une liste d envois vers le même node subgraph, chacun avec un payload différent. C est le fan-out.</p>
+          </div>
+
+          <div class="card warn">
+            <h3>Attention coût</h3>
+            <p>Paralleliser multiplie les appels LLM et outils. Toujours fixer max_analysts, max_turns et plafond de résultats de recherche.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Que renvoie initiate_all_interviews pour paralléliser ?", o: ["Une chaîne de caractères", "Une liste de Send vers conduct_interview", "Un rapport final"], a: 1, e: "Chaque Send porte le payload d un analyste." },
+            { q: "Pourquoi les sections utilisent-elles un reducer ?", o: ["Pour remplacer la dernière section", "Pour agréger les sections produites par chaque interview parallèle", "Pour désactiver LangSmith"], a: 1, e: "Plusieurs branches écrivent dans la même clé sections." }
+          ], "send")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('send')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('send')">Rapport final →</button>
+          </div>
+        `
+      },
+      {
+        id: "report",
+        title: "10. Rapport final",
+        express: true,
+        content: `
+          <h1>Atelier 7 : agréger, rédiger, tracer</h1>
+          <p class="lead">Après les interviews, le graphe collecte les sections, rédige introduction, corps, conclusion, puis finalise le rapport. LangSmith permet de visualiser le run complet.</p>
+
+          ${codeHTML("write_report", "code-report", `from langchain_core.messages import SystemMessage, HumanMessage
+from prompts import REPORT_WRITE_INSTRUCTIONS
+
+def write_report(state):
+    sections = state.get("sections", [])
+    topic = state["topic"]
+
+    formatted_sections = "\\n\\n".join(sections)
+
+    system_message = SystemMessage(
+        content=REPORT_WRITE_INSTRUCTIONS.format(
+            topic=topic,
+            sections=formatted_sections
+        )
+    )
+
+    report = llm.invoke([
+        system_message,
+        HumanMessage(content="Write the report body based on these sections.")
+    ])
+
+    return {"final_report": report.content}`)}
+
+          ${codeHTML("finalize_report", "code-finalize", `def finalize_report(state):
+    introduction = state.get("introduction", "")
+    report = state.get("final_report", "")
+    conclusion = state.get("conclusion", "")
+
+    full_report = introduction + "\\n\\n" + report + "\\n\\n" + conclusion
+
+    return {"final_report": full_report}`)}
+
+          <div class="card purple">
+            <h3>Monitoring</h3>
+            <p>Le transcript montre qu avec LangSmith on voit les nodes, les appels, les erreurs, les durées et le rapport final. C est indispensable pour un projet portfolio crédible.</p>
+          </div>
+
+          ${quizHTML([
+            { q: "Pourquoi séparer write_report, introduction et conclusion ?", o: ["Pour rendre le code plus long", "Pour produire un rapport structuré et modulaire", "Pour éviter le state"], a: 1, e: "Chaque partie peut être promptée et évaluée séparément." },
+            { q: "Que fait finalize_report ?", o: ["Il supprime les sections", "Il assemble introduction, corps et conclusion", "Il lance Tavily"], a: 1, e: "C est le node de synthèse finale." }
+          ], "report")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('report')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('report')">Simulateur →</button>
+          </div>
+        `
+      },
+      {
+        id: "simulator",
+        title: "11. Simulateur",
+        express: true,
+        content: `
+          <h1>Simulateur d atelier : faites tourner le graphe mentalement</h1>
+          <p class="lead">Utilisez ce simulateur pour comprendre les transitions de state sans exécuter de code. Cliquez les étapes dans l ordre.</p>
+
+          <div class="simulator">
+            <div class="step-row no-print">
+              <button class="btn" onclick="simStep('create')">1. create_analysts</button>
+              <button class="btn secondary" onclick="simStep('feedback')">2. human_feedback</button>
+              <button class="btn secondary" onclick="simStep('approve')">3. approuver</button>
+              <button class="btn secondary" onclick="simStep('fanout')">4. Send fan-out</button>
+              <button class="btn secondary" onclick="simStep('interview')">5. interview tour</button>
+              <button class="btn secondary" onclick="simStep('finalize')">6. finalize report</button>
+              <button class="btn secondary" onclick="simReset()">Réinitialiser</button>
+            </div>
+
+            <label for="sim-feedback">Feedback humain simulé</label>
+            <input id="sim-feedback" value="Je veux deux analystes, dont un nommé Mike." />
+
+            <p class="small muted">Étape courante : <span class="highlight" id="sim-stage">idle</span></p>
+            <div id="sim-log" class="sim-log"></div>
+            <div id="sim-state" class="sim-state"></div>
+          </div>
+
+          <div class="grid">
+            <div class="card good">
+              <h3>Ce que vous observez</h3>
+              <p>Le state évolue : analysts, feedback, turns, sections. Chaque button simule un node ou un edge conditionnel.</p>
+            </div>
+            <div class="card warn">
+              <h3>Réflexe pro</h3>
+              <p>Avant de coder, simulez toujours le chemin heureux et le chemin de rejet humain. Cela révèle les edges manquants.</p>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('simulator')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('simulator')">Scénarios →</button>
+          </div>
+        `
+      },
+      {
+        id: "scenarios",
+        title: "12. Scénarios",
+        express: false,
+        content: `
+          <h1>Scénarios branching : choisir la bonne architecture</h1>
+          <p class="lead">Tous les projets ne méritent pas un agent complexe. Sélectionnez un scénario pour voir la recommandation.</p>
+
+          <div class="simulator">
+            <div class="step-row no-print">
+              <button class="btn secondary" onclick="chooseScenario('simple')">Question simple</button>
+              <button class="btn secondary" onclick="chooseScenario('multi_angle')">Recherche multi-angle</button>
+              <button class="btn secondary" onclick="chooseScenario('regulated')">Domaine sensible</button>
+              <button class="btn secondary" onclick="chooseScenario('cost')">Budget serré</button>
+            </div>
+            <pre id="scenario-out" class="prompt" style="display:none"></pre>
+          </div>
+
+          <div class="card info">
+            <h3>Leçon du transcript</h3>
+            <p>La complexité doit être justifiée par un besoin : diversité des angles, contrôle humain, parallelisme, qualité du livrable, traçabilité.</p>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('scenarios')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('scenarios')">Générateur de prompts →</button>
+          </div>
+        `
+      },
+      {
+        id: "generator",
+        title: "13. Prompts",
+        express: false,
+        content: `
+          <h1>Générateur de prompt système pour votre agent</h1>
+          <p class="lead">Remplissez les champs, générez un prompt réutilisable pour create_analysts, interviews et rapport final.</p>
+
+          <div class="generator">
+            <div class="grid">
+              <div>
+                <label for="pg-topic">Sujet de recherche</label>
+                <input id="pg-topic" value="LangGraph" />
+              </div>
+              <div>
+                <label for="pg-personas">Nombre d analystes</label>
+                <input id="pg-personas" value="2" />
+              </div>
+              <div>
+                <label for="pg-depth">Profondeur</label>
+                <select id="pg-depth">
+                  <option>superficielle</option>
+                  <option selected>intermédiaire</option>
+                  <option>deep research</option>
+                </select>
+              </div>
+              <div>
+                <label for="pg-tone">Ton du rapport</label>
+                <select id="pg-tone">
+                  <option selected>pédagogique</option>
+                  <option>technique</option>
+                  <option>exécutif</option>
+                  <option>critique</option>
+                </select>
+              </div>
+              <div>
+                <label for="pg-sources">Sources autorisées</label>
+                <input id="pg-sources" value="web + documents internes" />
+              </div>
+              <div>
+                <label for="pg-format">Format de sortie</label>
+                <input id="pg-format" value="rapport markdown" />
+              </div>
+            </div>
+
+            <button class="btn" onclick="generateWorkshopPrompt()">Générer le prompt</button>
+            <pre id="pg-out" class="prompt" style="display:none"></pre>
+            <button class="btn secondary small" id="pg-copy" style="display:none" onclick="copyText('pg-out', this)">Copier le prompt</button>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('generator')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('generator')">Flashcards →</button>
+          </div>
+        `
+      },
+      {
+        id: "flashcards",
+        title: "14. Flashcards",
+        express: false,
+        content: `
+          <h1>Flashcards de mémorisation active</h1>
+          <p class="lead">Retournez la carte, marquez-la connue, avancez. Ces cartes résument le vocabulaire essentiel du transcript.</p>
+
+          <div class="flashcards">
+            <div id="flashcard" class="flashcard"></div>
+            <div class="toolbar no-print">
+              <button class="btn secondary" onclick="prevFlash()">← Précédente</button>
+              <button class="btn" onclick="flipFlash()">Retourner</button>
+              <button class="btn secondary" onclick="nextFlash()">Suivante →</button>
+              <button class="btn secondary" id="flash-known" onclick="markFlash()">Marquer connue</button>
+            </div>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('flashcards')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('flashcards')">Erreurs fréquentes →</button>
+          </div>
+        `
+      },
+      {
+        id: "errors",
+        title: "15. Erreurs",
+        express: true,
+        content: `
+          <h1>Erreurs fréquentes à éviter absolument</h1>
+          <p class="lead">Le transcript montre aussi des difficultés réelles : imports relatifs, state mal typé, boucles non contrôlées, clés exposées, dépendance excessive à l IA pendant l apprentissage.</p>
+
+          <div class="grid">
+            <div class="card bad">
+              <h3>Imports relatifs cassés</h3>
+              <p>Le formateur rencontre plusieurs erreurs de module. Solutions : structure source/, fichiers __init__.py si nécessaire, imports absolus ou configuration correcte.</p>
+            </div>
+            <div class="card bad">
+              <h3>State trop strict</h3>
+              <p>human_analyst_feedback et analysts doivent être Optional. Sinon le graphe échoue au premier passage.</p>
+            </div>
+            <div class="card bad">
+              <h3>Dictionary au lieu d Analyst</h3>
+              <p>Si vous recevez un dict, la property persona n existe pas. Il faut model_validate pour reconstruire l objet.</p>
+            </div>
+            <div class="card bad">
+              <h3>Boucle infinie d interview</h3>
+              <p>Sans max_turns et route_messages, generate_question et answer_question peuvent tourner indéfiniment.</p>
+            </div>
+            <div class="card bad">
+              <h3>Parallélisation sans plafond</h3>
+              <p>Send API multiplie les coûts. Fixez max_analysts, max_results, max_turns et surveillez LangSmith.</p>
+            </div>
+            <div class="card bad">
+              <h3>Trop déléguer à l IA</h3>
+              <p>Le transcript conseille : pendant l apprentissage, faites vos propres erreurs, comprenez, puis utilisez l IA pour accélérer.</p>
+            </div>
+          </div>
+
+          ${quizHTML([
+            { q: "Quelle erreur provoque souvent no module named states ou relative import ?", o: ["Mauvaise structure de paquets / imports", "Tavily indisponible", "Température trop basse"], a: 0, e: "C est un problème de configuration projet, visible dans le transcript." },
+            { q: "Pourquoi rendre human_analyst_feedback Optional ?", o: ["Parce qu il peut ne pas exister au premier passage", "Pour supprimer le state", "Pour forcer l humain à répondre"], a: 0, e: "Le grappe doit pouvoir démarrer sans feedback initial." },
+            { q: "Quel garde-fou empêche la boucle interview de durer trop longtemps ?", o: ["LangSmith", "max_turns dans route_messages", "Pydantic"], a: 1, e: "La condition de sortie compte les réponses expert." }
+          ], "errors")}
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('errors')">← Précédent</button>
+            <button class="btn" onclick="nextFrom('errors')">Examen final →</button>
+          </div>
+        `
+      },
+      {
+        id: "final",
+        title: "✅ Examen final",
+        express: true,
+        content: `
+          <h1>Examen final chronométré</h1>
+          <p class="lead">10 questions. 8 minutes. Seuil de réussite : 7/10. Objectif : vérifier que vous pouvez concevoir, coder et déboguer l agent de recherche.</p>
+
+          <div class="toolbar no-print">
+            <button class="btn" id="exam-start" onclick="startExam()">Démarrer le minuteur</button>
+            <div id="exam-timer" class="pill">⏱ 8:00</div>
+          </div>
+
+          ${finalQuizHTML()}
+
+          <div class="toolbar no-print">
+            <button class="btn" onclick="submitExam()">Soumettre l examen</button>
+            <button class="btn secondary" id="go-cert" style="display:none" onclick="showSection('action')">Voir certificat →</button>
+          </div>
+          <div class="result" id="exam-result" aria-live="polite"></div>
+        `
+      },
+      {
+        id: "action",
+        title: "🏆 Certificat",
+        express: true,
+        content: `
+          <h1>Certificat et plan d action 7 jours</h1>
+          <p class="lead">Générez votre certificat, exportez votre rapport de progression et passez à l implémentation réelle.</p>
+
+          <div class="card info no-print">
+            <h3>Votre nom pour le certificat</h3>
+            <input id="cert-name" placeholder="Prénom / pseudo" />
+            <div class="toolbar">
+              <button class="btn" onclick="generateCert()">Générer le certificat</button>
+              <button class="btn secondary" onclick="exportJSON()">Exporter JSON</button>
+              <button class="btn secondary" onclick="window.print()">Imprimer / PDF</button>
+              <button class="btn secondary" onclick="resetCourse()">Réinitialiser</button>
+            </div>
+          </div>
+
+          <div id="certificate" class="certificate">
+            <span class="badge">🕸️</span>
+            <h2>Certificat de maîtrise</h2>
+            <p>Décerné à</p>
+            <h3 id="cert-name-out">Apprenant</h3>
+            <p>pour avoir complété l atelier</p>
+            <p class="highlight">Agent de Recherche LangGraph : State, Nodes, Edges, Human-in-the-loop, Send API</p>
+            <p class="muted">Date : <span id="cert-date"></span> • Score : <span id="cert-score"></span> • Niveau : <span id="cert-level"></span></p>
+          </div>
+
+          <h2>Plan d action 7 jours</h2>
+          <div class="card checklist">
+            <label><input type="checkbox" id="c1" onchange="toggleCheck('c1')"> Jour 1 : créer le projet UV, .env, langgraph.json et vérifier les imports.</label>
+            <label><input type="checkbox" id="c2" onchange="toggleCheck('c2')"> Jour 2 : coder Analyst, Perspectives, GenerateAnalystState et le node create_analysts.</label>
+            <label><input type="checkbox" id="c3" onchange="toggleCheck('c3')"> Jour 3 : ajouter human_feedback avec interrupt et conditional edge.</label>
+            <label><input type="checkbox" id="c4" onchange="toggleCheck('c4')"> Jour 4 : construire le subgraph interview avec max_turns.</label>
+            <label><input type="checkbox" id="c5" onchange="toggleCheck('c5')"> Jour 5 : intégrer Tavily, structured search query et formatage des docs.</label>
+            <label><input type="checkbox" id="c6" onchange="toggleCheck('c6')"> Jour 6 : brancher Send API pour paralléliser plusieurs analystes.</label>
+            <label><input type="checkbox" id="c7" onchange="toggleCheck('c7')"> Jour 7 : rédiger report/intro/conclusion, finaliser et inspecter dans LangSmith.</label>
+          </div>
+          <p class="muted small">Checklist : <span id="check-progress">0/7</span></p>
+
+          <h2>Ressources ancrées au transcript</h2>
+          <div class="resources">
+            <ul>
+              <li><strong>Projet</strong> : agent de recherche LangGraph avec analystes, interviews, web search, parallelisation et rapport final.</li>
+              <li><strong>Outils</strong> : VS Code, UV, OpenAI, Tavily, LangSmith, Pydantic, LangChain, LangGraph.</li>
+              <li><strong>Concepts clés</strong> : state, nodes, edges, interrupt, Send API, subgraph, reducers, structured output.</li>
+              <li><strong>Conseil du formateur</strong> : ne pas déléguer entièrement l apprentissage à l IA ; comprendre ses erreurs d abord.</li>
+            </ul>
+          </div>
+
+          <div class="toolbar no-print">
+            <button class="btn secondary" onclick="prevFrom('action')">← Revenir à l examen</button>
+            <button class="btn" onclick="showSection('home')">Retour à l accueil</button>
+          </div>
+        `
+      }
+    ];
+
+    function init() {
+      loadState();
+      document.body.setAttribute("data-theme", STATE.theme);
+      document.body.classList.toggle("hide-sources", STATE.sourcesHidden);
+      renderNav();
+      renderSections();
+      const first = visibleModules()[0]?.id || "home";
+      showSection(first);
+      updateScore();
+      updateChecklistProgress();
+
+      $$("#nav button").forEach(btn => {
+        btn.addEventListener("click", () => showSection(btn.dataset.target));
+      });
+    }
+
+    window.showSection = showSection;
+    window.nextFrom = nextFrom;
+    window.prevFrom = prevFrom;
+    window.toggleTheme = toggleTheme;
+    window.toggleSources = toggleSources;
+    window.toggleMobileNav = toggleMobileNav;
+    window.validateDiagnostic = validateDiagnostic;
+    window.switchTab = switchTab;
+    window.checkQuiz = checkQuiz;
+    window.copyText = copyText;
+    window.simStep = simStep;
+    window.simReset = simReset;
+    window.chooseScenario = chooseScenario;
+    window.generateWorkshopPrompt = generateWorkshopPrompt;
+    window.renderFlashcard = renderFlashcard;
+    window.flipFlash = flipFlash;
+    window.nextFlash = nextFlash;
+    window.prevFlash = prevFlash;
+    window.markFlash = markFlash;
+    window.startExam = startExam;
+    window.submitExam = submitExam;
+    window.generateCert = generateCert;
+    window.toggleCheck = toggleCheck;
+    window.exportJSON = exportJSON;
+    window.resetCourse = resetCourse;
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+<script src="/course-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cours interactif — Le CRAG</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #ec4899;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #f9a8d4;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head><body>
+<nav class="parcours-bar" aria-label="Navigation du parcours"><span class="sep">Fondations LLM</span> <a href="cours-interactif-architecture-transformer.html" class="">Architecture Transformer</a> <a href="cours-interactif-zero-ai-stack.html" class="">Zero Ai Stack</a> <a href="cours-interactif-9-techniques-ia-moderne.html" class="">9 Techniques Ia Moderne</a> <span class="sep">→</span> <span class="sep">RAG Avancé</span> <a href="cours-interactif-5-familles-rag.html" class="">5 Familles Rag</a> <a href="cours-interactif-rag-data-streaming.html" class="">Rag Data Streaming</a> <a href="cours-interactif-rag-multimodal-deux-architectures.html" class="">Rag Multimodal Deux Architectures</a> <a href="cours-interactif-architecture-rag-agentique.html" class="">Architecture Rag Agentique</a> <a href="cours-interactif-trois-ages-rag.html" class="">Trois Ages Rag</a> <a href="cours-interactif-deep-research-langgraph.html" class="">Deep Research Langgraph</a> <span class="sep">→</span> <span class="sep">Agents & MCP</span> <a href="cours-interactif-graphe-ia-agentique.html" class="">Graphe Ia Agentique</a> <a href="cours-interactif-devenir-ai-engineer.html" class="">Devenir Ai Engineer</a> <a href="cours-interactif-connaissance-persistante.html" class="">Connaissance Persistante</a> <a href="cours-interactif-architecture-ia-zero-cost.html" class="">Architecture Ia Zero Cost</a> <a href="cours-interactif-stack-agent-ia.html" class="">Stack Agent Ia</a> <a href="cours-interactif-guide-concepts-systemes-ia.html" class="">Guide Concepts Systemes Ia</a> <a href="cours-interactif-maitriser-ingenierie-ia.html" class="">Maitriser Ingenierie Ia</a> <span class="sep">→</span> <span class="sep">Spécialisation Drive</span> <a href="cours-interactif-parcours-tuteur-6-semaines.html" class="">Parcours Tuteur 6 Semaines</a></nav><header><div class="wrap"><div class="top"><div><div class="eyebrow">Guide grand débutant • Corrective RAG</div><div class="score" id="score">Progression : 0%</div></div><button class="btn" onclick="resetCourse()">Réinitialiser</button></div><div class="progress"><div class="bar" id="bar"></div></div><nav class="tabs" id="tabs"></nav></div></header><main class="wrap">
+<section class="card module active" data-title="Problème"><span class="pill">Étape 1</span><h1>Le CRAG : corriger le retrieval avant de répondre</h1><p class="muted">Un guide visuel pour comprendre comment un système RAG détecte les mauvaises sources et choisit une stratégie de correction.</p><p>Dans un RAG classique, la chaîne Question → Recherche → Génération reste linéaire. Si les documents récupérés sont hors sujet ou incomplets, le modèle répond malgré tout et peut halluciner.</p><div class="diagram"><svg viewBox="0 0 900 190"><g fill="#21414c" stroke="#70e6f4" stroke-width="2"><rect x="35" y="65" width="160" height="50" rx="10"/><rect x="250" y="65" width="160" height="50" rx="10"/><rect x="465" y="65" width="160" height="50" rx="10"/><rect x="680" y="65" width="180" height="50" rx="10"/></g><g fill="#effcff" text-anchor="middle" font-size="15"><text x="115" y="95">Question</text><text x="330" y="95">Recherche</text><text x="545" y="95">Documents</text><text x="770" y="95">Réponse</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M195 90h55M410 90h55M625 90h55"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Quel est le piège du RAG classique ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Il génère même lorsque les sources sont mauvaises</button><button class="choice" data-correct="false" onclick="answer(this,false)">Il vérifie toujours parfaitement les sources</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Évaluer"><span class="pill">Étape 2</span><h2>L’évaluateur de retrieval</h2><p>Le CRAG place un juge entre la récupération et la génération. Il estime la qualité des documents et choisit une branche.</p><div class="grid"><div><h3 style="color:var(--green)">Correct</h3><p>Sources pertinentes : raffiner les morceaux utiles puis générer.</p></div><div><h3 style="color:var(--yellow)">Ambigu</h3><p>Sources partielles : combiner les passages internes et une recherche externe.</p></div><div><h3 style="color:var(--red)">Incorrect</h3><p>Sources hors sujet : rejeter, reformuler la question et chercher à l’extérieur.</p></div></div><div class="diagram"><svg viewBox="0 0 900 210"><g fill="#21414c" stroke="#70e6f4" stroke-width="2"><rect x="30" y="80" width="160" height="50" rx="10"/><rect x="270" y="80" width="180" height="50" rx="10"/><rect x="540" y="20" width="160" height="45" rx="10"/><rect x="540" y="82" width="160" height="45" rx="10"/><rect x="540" y="144" width="160" height="45" rx="10"/></g><g fill="#effcff" text-anchor="middle" font-size="14"><text x="110" y="110">Recherche</text><text x="360" y="110">Retrieval Evaluator</text><text x="620" y="48">Correct</text><text x="620" y="110">Ambigu</text><text x="620" y="172">Incorrect</text></g><g class="flow" stroke="#ffd166" stroke-width="3"><path d="M190 105h80M450 105h70M520 105L540 42M520 105h20M520 105l20 62" fill="none"/></g></svg></div><div class="quiz"><h3>Quiz</h3><p>Que faire si le retrieval est incorrect ?</p><button class="choice" data-correct="false" onclick="answer(this,false)">Générer quand même avec les documents</button><button class="choice" data-correct="true" onclick="answer(this,true)">Rejeter, reformuler et effectuer une recherche externe</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Raffiner"><span class="pill">Étape 3</span><h2>Raffiner les connaissances</h2><p>Même les bonnes sources contiennent du bruit. Le CRAG découpe les documents en petits morceaux, filtre les passages faibles et ne transmet que l’essentiel au modèle.</p><pre id="refine">documents récupérés
+→ découpage en strips / chunks
+→ filtrage du bruit
+→ conservation des passages pertinents
+→ génération ancrée dans k_in</pre><button class="btn primary copy" onclick="copyText('refine')">Copier le pipeline</button><div class="quiz"><h3>Quiz</h3><p>Pourquoi raffiner les documents corrects ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Pour réduire le bruit et transmettre les preuves utiles</button><button class="choice" data-correct="false" onclick="answer(this,false)">Pour supprimer les sources</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Stack"><span class="pill">Étape 4</span><h2>La pile technique</h2><div class="grid"><div><h3>Python</h3><p>Langage principal de l’implémentation.</p></div><div><h3>LangChain & LangGraph</h3><p>Orchestration des nœuds et embranchements.</p></div><div><h3>Ollama</h3><p>Exécution de modèles localement.</p></div><div><h3>Embeddings</h3><p>Vectorisation et recherche sémantique.</p></div><div><h3>Base vectorielle</h3><p>Stockage et récupération des documents.</p></div></div><div class="quiz"><h3>Quiz</h3><p>Quel composant orchestre les trois branches Correct/Ambigu/Incorrect ?</p><button class="choice" data-correct="true" onclick="answer(this,true)">Un graphe de workflow comme LangGraph</button><button class="choice" data-correct="false" onclick="answer(this,false)">Le stockage d’objets seul</button><div class="feedback"></div></div></section>
+<section class="card module" data-title="Synthèse"><span class="pill">Atelier</span><h2>Concevoir un pipeline CRAG fiable</h2><label class="check"><input type="checkbox" onchange="saveChecks()"> Récupérer des documents candidats.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Évaluer leur pertinence et leur ancrage.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Raffiner les passages corrects.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Combiner interne et externe si la qualité est ambiguë.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Reformuler et rechercher à l’extérieur si la qualité est mauvaise.</label><label class="check"><input type="checkbox" onchange="saveChecks()"> Générer seulement avec des preuves identifiées.</label><button class="btn primary" onclick="finish()">Valider le pipeline CRAG</button><p id="result" class="score"></p></section><footer><button class="btn" onclick="prev()">← Précédent</button><button class="btn primary" onclick="next()">Suivant →</button></footer></main><script src="/course-kit.js"></script>
+</body></html>

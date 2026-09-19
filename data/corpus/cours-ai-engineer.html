@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Devenir Ingénieur IA — Cours interactif</title>
+<link rel="stylesheet" href="/course-kit.css">
+<style>
+:root {
+  --bg: #07111f;
+  --bg-elevated: #0d1b2c;
+  --panel: #101f33;
+  --panel-hover: #152a41;
+  --line: #27415f;
+  --line-soft: rgba(148,163,184,0.10);
+  --txt: #eef6ff;
+  --txt-dim: #94a3b8;
+  --muted: #64748b;
+  --accent: #b79cff;
+  --accent-soft: rgba(99,102,241,0.12);
+  --accent-glow: rgba(99,102,241,0.28);
+  --accent-2: #6ee7f5;
+  --accent-2-soft: rgba(34,211,228,0.12);
+  --ok: #22c55e;
+  --ok-soft: rgba(34,197,94,0.12);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245,158,11,0.12);
+  --bad: #ef4444;
+  --bad-soft: rgba(239,68,68,0.12);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-base: 16px;
+  --leading: 1.6;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.4);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="3" stroke="var(--accent)" stroke-width="1.6"/><circle cx="8" cy="8" r="1.6" fill="var(--accent)"/><circle cx="16" cy="8" r="1.6" fill="var(--amber)"/><circle cx="8" cy="16" r="1.6" fill="var(--amber)"/><circle cx="16" cy="16" r="1.6" fill="var(--accent)"/><path d="M8 8L16 16M16 8L8 16" stroke="var(--line)" stroke-width="1"/></svg>
+    AI ENGINEER — cours
+  </div>
+  <nav>
+    <a href="#intro">Rôle</a>
+    <a href="#tiers">Compétences</a>
+    <a href="#usecases">Cas d'usage</a>
+    <a href="#projects">Projets</a>
+    <a href="#quiz">Quiz</a>
+  </nav>
+  <div class="theme-toggle" id="themeToggle" role="button" aria-label="Basculer le mode sombre">
+    <div class="knob">
+      <svg id="knobIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5a1 1 0 011 1V7a1 1 0 11-2 0V5.5a1 1 0 011-1zm0 12a1 1 0 011 1V19a1 1 0 11-2 0v-1.5a1 1 0 011-1zM4.5 12a1 1 0 011-1H7a1 1 0 110 2H5.5a1 1 0 01-1-1zm12 0a1 1 0 011-1H19a1 1 0 110 2h-1.5a1 1 0 01-1-1zM6.34 6.34a1 1 0 011.42 0l.7.71a1 1 0 11-1.42 1.41l-.7-.7a1 1 0 010-1.42zm9.2 9.2a1 1 0 011.42 0l.7.71a1 1 0 11-1.42 1.41l-.7-.7a1 1 0 010-1.42zm0-9.2a1 1 0 010 1.42l-.7.7a1 1 0 11-1.42-1.41l.7-.71a1 1 0 011.42 0zm-9.2 9.2a1 1 0 010 1.42l-.7.7a1 1 0 11-1.42-1.41l.7-.71a1 1 0 011.42 0zM12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div>
+    <div class="kicker">cours · 3 niveaux de compétences</div>
+    <h1>Devenir <em>Ingénieur IA</em>, pas seulement utilisateur de modèles</h1>
+    <p class="lede">Le code n'est plus la partie difficile — les outils l'écrivent pour vous. Ce qui compte désormais, c'est le jugement : quoi construire, comment l'architecturer, et comment le mettre en production.</p>
+    <div class="hero-meta">
+      <span><b>3</b>niveaux (tiers)</span>
+      <span><b>3</b>cas d'usage clés</span>
+      <span><b>15</b>questions de quiz</span>
+    </div>
+  </div>
+  <div class="figure" style="margin:0;">
+    <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="360" height="260" fill="none"/>
+      <!-- car outline -->
+      <path d="M40 170 Q40 140 70 135 L110 100 Q130 85 165 85 L235 85 Q260 85 280 105 L305 135 Q330 138 330 165 L330 185 L40 185 Z" fill="none" stroke="var(--line)" stroke-width="2"/>
+      <line x1="20" y1="185" x2="340" y2="185" stroke="var(--line)" stroke-width="2"/>
+      <circle cx="95" cy="188" r="18" fill="var(--bg-panel)" stroke="var(--ink-soft)" stroke-width="2.5"/>
+      <circle cx="95" cy="188" r="6" fill="var(--ink-soft)"/>
+      <circle cx="270" cy="188" r="18" fill="var(--bg-panel)" stroke="var(--ink-soft)" stroke-width="2.5"/>
+      <circle cx="270" cy="188" r="6" fill="var(--ink-soft)"/>
+      <!-- engine (gear) inside -->
+      <g transform="translate(182,140)">
+        <circle r="28" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <circle r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <g stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+          <line x1="0" y1="-28" x2="0" y2="-36"/>
+          <line x1="0" y1="28" x2="0" y2="36"/>
+          <line x1="-28" y1="0" x2="-36" y2="0"/>
+          <line x1="28" y1="0" x2="36" y2="0"/>
+          <line x1="-20" y1="-20" x2="-26" y2="-26"/>
+          <line x1="20" y1="20" x2="26" y2="26"/>
+          <line x1="-20" y1="20" x2="-26" y2="26"/>
+          <line x1="20" y1="-20" x2="26" y2="-26"/>
+        </g>
+      </g>
+      <text x="182" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">modèle</text>
+      <text x="182" y="225" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">le système = la voiture</text>
+    </svg>
+    <div class="figure-caption">Le ML Researcher construit le moteur — l'AI Engineer construit la voiture autour</div>
+  </div>
+</section>
+
+<!-- ===================== 1. INTRO / ROLE ===================== -->
+<section class="section" id="intro">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <h2>Qu'est-ce qu'un AI Engineer ?</h2>
+  </div>
+  <p class="section-sub">Le parcours classique vers la tech (diplôme → stages → coding challenges) s'est effondré. Les outils d'IA génèrent le code facilement : la vraie compétence rare, c'est le jugement — savoir quoi construire, comment le structurer, et pourquoi.</p>
+
+  <div class="lead-block">
+    <p>On confond souvent deux métiers très différents. Le <b>ML Researcher</b> entraîne des modèles fondationnels depuis zéro, conçoit de nouvelles architectures et publie des articles — un travail qui demande des mathématiques de haut niveau et des diplômes avancés. L'<b>AI Engineer</b>, lui, part de modèles déjà existants (open source ou propriétaires) et les connecte à des données, des outils, de la mémoire et des garde-fous pour livrer une solution réellement utilisable.</p>
+  </div>
+
+  <div class="compare">
+    <div class="researcher">
+      <h4>Le moteur</h4>
+      <div class="role">ML Researcher</div>
+      <ul>
+        <li>Entraîne des modèles fondationnels à partir de zéro</li>
+        <li>Conçoit de nouvelles architectures</li>
+        <li>Publie des articles de recherche</li>
+        <li>Nécessite des mathématiques avancées</li>
+      </ul>
+    </div>
+    <div class="engineer">
+      <h4>La voiture</h4>
+      <div class="role">AI Engineer</div>
+      <ul>
+        <li>Utilise des modèles existants (open source ou propriétaires)</li>
+        <li>Connecte le modèle aux données et aux outils</li>
+        <li>Ajoute mémoire et garde-fous</li>
+        <li>Construit une solution utilisable et déployable</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout"><b>À retenir —</b> Un modèle puissant ne suffit pas à créer un produit. L'AI Engineer transforme un modèle en solution : c'est l'assemblage autour du moteur qui fait la voiture.</div>
+</section>
+
+<!-- ===================== 2. TIERS ===================== -->
+<section class="section" id="tiers">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <h2>La pile de compétences — 3 niveaux</h2>
+  </div>
+  <p class="section-sub">L'ordre compte. Beaucoup de débutants sautent directement aux agents ou au déploiement sans maîtriser les bases, et doivent ensuite revenir en arrière. Cliquez sur un niveau pour l'explorer.</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
+      <rect x="60" y="130" width="580" height="46" rx="4" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="1.5"/>
+      <rect x="100" y="72" width="500" height="46" rx="4" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="1.5"/>
+      <rect x="140" y="14" width="420" height="46" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="70" y="158" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-soft)">TIER 1 — Python · Git · CLI · Linux · APIs</text>
+      <text x="110" y="100" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-soft)">TIER 2 — Embeddings · RAG · Agents</text>
+      <text x="150" y="42" font-family="IBM Plex Mono" font-size="12" fill="var(--accent)">TIER 3 — Conteneurs · Observabilité · Monitoring</text>
+    </svg>
+    <div class="figure-caption">Les fondations portent tout le reste — on construit toujours de bas en haut</div>
+  </div>
+
+  <div class="tier-stack" id="tierStack">
+    <div class="tier-card active" data-tier="1">
+      <div class="tier-top">
+        <div class="tier-name">Tier 1 — Les fondations</div>
+        <div class="tier-badge">non spécifique à l'IA · indispensable</div>
+      </div>
+      <div class="tier-list">
+        <span class="tier-pill">Python</span><span class="tier-pill">Git</span><span class="tier-pill">CLI</span><span class="tier-pill">Linux</span><span class="tier-pill">APIs</span>
+      </div>
+      <div class="tier-detail">
+        <div class="tier-detail-inner">
+          <dl>
+            <dt>Python</dt><dd>Pas besoin d'être expert — juste assez fluide pour lire le code que votre agent IA écrit. PyTorch et TensorFlow tournent dessus.</dd>
+            <dt>Git</dt><dd>Versionner, collaborer, partager du code et revenir en arrière en cas d'erreur.</dd>
+            <dt>CLI &amp; Linux</dt><dd>La plupart des outils d'IA et environnements de déploiement tournent sous Linux et se pilotent en ligne de commande.</dd>
+            <dt>APIs</dt><dd>Le cœur du métier : appeler des modèles, gérer les réponses et les limites de requêtes. Un produit IA est fondamentalement une suite d'appels API bien structurés.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-card" data-tier="2">
+      <div class="tier-top">
+        <div class="tier-name">Tier 2 — Compétences IA</div>
+        <div class="tier-badge">le cœur du métier</div>
+      </div>
+      <div class="tier-list">
+        <span class="tier-pill">Embeddings</span><span class="tier-pill">Recherche vectorielle</span><span class="tier-pill">RAG</span><span class="tier-pill">Agents</span><span class="tier-pill">Tool use</span>
+      </div>
+      <div class="tier-detail">
+        <div class="tier-detail-inner">
+          <dl>
+            <dt>Embeddings &amp; recherche vectorielle</dt><dd>Convertir du texte en vecteurs numériques pour chercher par sens plutôt que par mot-clé exact.</dd>
+            <dt>RAG</dt><dd>Un pipeline qui va récupérer l'information exacte dans des documents d'entreprise avant que le modèle ne réponde — pour éviter les hallucinations.</dd>
+            <dt>Agents &amp; tool use</dt><dd>Contrairement à un workflow figé (A → B → C), un agent décide dynamiquement de la suite, appelle des outils et observe les résultats en boucle.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-card" data-tier="3">
+      <div class="tier-top">
+        <div class="tier-name">Tier 3 — Déploiement &amp; opérations</div>
+        <div class="tier-badge">sortir du laptop</div>
+      </div>
+      <div class="tier-list">
+        <span class="tier-pill">Conteneurisation</span><span class="tier-pill">Kubernetes</span><span class="tier-pill">Observabilité</span><span class="tier-pill">Monitoring</span>
+      </div>
+      <div class="tier-detail">
+        <div class="tier-detail-inner">
+          <dl>
+            <dt>Conteneurisation</dt><dd>Empaqueter l'agent (et parfois le modèle) pour le déployer de façon fiable sur n'importe quel environnement.</dd>
+            <dt>Observabilité</dt><dd>Tracer pourquoi l'agent a pris telle décision — quelles bases requêtées, quels outils appelés. Essentiel pour la confiance.</dd>
+            <dt>Monitoring</dt><dd>Surveiller l'usage pour ne pas exploser les coûts de tokens et garder le système sécurisé.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:19px; margin:36px 0 6px;">Le pipeline RAG en détail</h3>
+  <p style="color:var(--ink-soft); font-size:15px; margin-bottom:6px;">Le cas d'usage le plus demandé aujourd'hui : ancrer les réponses du modèle dans des documents réels.</p>
+  <div class="pipeline">
+    <div class="pipe-step"><div class="pipe-num">01</div><div class="pipe-label">Documents</div></div>
+    <div class="pipe-step"><div class="pipe-num">02</div><div class="pipe-label">Chunking</div></div>
+    <div class="pipe-step"><div class="pipe-num">03</div><div class="pipe-label">Embeddings</div></div>
+    <div class="pipe-step"><div class="pipe-num">04</div><div class="pipe-label">Base vectorielle</div></div>
+    <div class="pipe-step"><div class="pipe-num">05</div><div class="pipe-label">Retrieval</div></div>
+    <div class="pipe-step"><div class="pipe-num">06</div><div class="pipe-label">Génération LLM</div></div>
+  </div>
+
+  <h3 style="font-size:19px; margin:36px 0 6px;">Workflow vs. Agent</h3>
+  <div class="wa-grid">
+    <div class="wa-card">
+      <h4>Workflow — chemin prédéfini</h4>
+      <svg viewBox="0 0 260 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="45" r="16" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="2"/>
+        <text x="30" y="49" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">A</text>
+        <line x1="46" y1="45" x2="94" y2="45" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="110" cy="45" r="16" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="2"/>
+        <text x="110" y="49" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">B</text>
+        <line x1="126" y1="45" x2="174" y2="45" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="190" cy="45" r="16" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="2"/>
+        <text x="190" y="49" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-soft)">C</text>
+        <polygon points="174,40 174,50 184,45" fill="var(--line)"/>
+        <polygon points="94,40 94,50 104,45" fill="var(--line)"/>
+      </svg>
+      <p style="font-size:14px; color:var(--ink-soft); margin-top:8px;">Suit toujours la même séquence, sans décision dynamique.</p>
+    </div>
+    <div class="wa-card">
+      <h4>Agent — boucle décisionnelle</h4>
+      <svg viewBox="0 0 260 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="50" r="18" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="60" y="54" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">LLM</text>
+        <circle cx="180" cy="50" r="18" fill="var(--bg-raised)" stroke="var(--line)" stroke-width="2"/>
+        <text x="180" y="54" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-soft)">outil</text>
+        <path d="M78 44 Q130 20 162 44" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <polygon points="156,40 162,44 155,48" fill="var(--accent)"/>
+        <path d="M162 56 Q130 80 78 56" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <polygon points="84,60 78,56 85,52" fill="var(--accent)"/>
+        <text x="120" y="18" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">appelle</text>
+        <text x="120" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ink-soft)">observe</text>
+      </svg>
+      <p style="font-size:14px; color:var(--ink-soft); margin-top:8px;">Décide, agit, observe le résultat, et boucle jusqu'à la tâche accomplie.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. CAS D'USAGE ===================== -->
+<section class="section" id="usecases">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <h2>Trois cas d'usage dominants</h2>
+  </div>
+  <p class="section-sub">Aujourd'hui, l'ingénierie IA en production se concentre principalement sur ces trois familles de systèmes.</p>
+  <div class="cards3">
+    <div class="card">
+      <span class="num">01</span>
+      <h4>RAG / connaissances</h4>
+      <p>Services RH, chatbots hospitaliers ou internes propulsés par des données d'entreprise fiables.</p>
+    </div>
+    <div class="card">
+      <span class="num">02</span>
+      <h4>Agents outillés</h4>
+      <p>Un agent capable d'interroger une base de données et de visualiser des résultats comme le ferait un expert métier.</p>
+    </div>
+    <div class="card">
+      <span class="num">03</span>
+      <h4>Productivité logicielle</h4>
+      <p>Accélérer le déploiement de code : livrer en heures ce qui prenait auparavant des semaines.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4. PROJETS ===================== -->
+<section class="section" id="projects">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <h2>Trois projets pour démontrer vos compétences</h2>
+  </div>
+  <p class="section-sub">Un projet par tier, pour couvrir l'ensemble de la pile devant un employeur.</p>
+  <div class="cards3">
+    <div class="card">
+      <span class="num">Projet 1</span>
+      <h4>Assistant de connaissances (RAG)</h4>
+      <p>Répondre à des questions sur des documents internes, avec réponses sourcées.</p>
+      <div class="skills"><span>chunking</span><span>embeddings</span><span>recherche vectorielle</span></div>
+    </div>
+    <div class="card">
+      <span class="num">Projet 2</span>
+      <h4>Agent + base de données</h4>
+      <p>Un agent qui interroge une BDD, produit un graphique et rédige une synthèse.</p>
+      <div class="skills"><span>tool use</span><span>boucles</span><span>robustesse</span></div>
+    </div>
+    <div class="card">
+      <span class="num">Projet 3</span>
+      <h4>App déployée &amp; monitorée</h4>
+      <p>Conteneuriser un projet IA, ajouter logs, observabilité et suivi des coûts.</p>
+      <div class="skills"><span>Docker</span><span>observabilité</span><span>monitoring</span></div>
+    </div>
+  </div>
+  <div class="callout"><b>Conseil —</b> Documentez vos décisions d'architecture : c'est le jugement, plus que le code brut, qui fait la différence devant un employeur.</div>
+</section>
+
+<!-- ===================== 5. QUIZ ===================== -->
+<section class="section" id="quiz">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <h2>Quiz — validez vos acquis</h2>
+  </div>
+  <p class="section-sub">15 questions à choix multiples couvrant les trois niveaux du cours.</p>
+
+  <div class="quiz-shell">
+    <div class="quiz-head">
+      <div class="quiz-progress" id="quizProgress">Question 1 / 15</div>
+      <div class="quiz-score" id="quizScore">Score : 0</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="quiz-body" id="quizBody">
+      <div class="q-prompt" id="qPrompt"></div>
+      <div class="q-options" id="qOptions"></div>
+      <div class="q-explain" id="qExplain"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn" id="nextBtn">Question suivante</button>
+    </div>
+    <div class="quiz-result" id="quizResult">
+      <div class="score-big" id="finalScore">0 / 15</div>
+      <p id="resultMsg">Continuez à pratiquer pour consolider vos acquis.</p>
+      <button class="btn show" id="restartBtn">Recommencer le quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6. RESUME ===================== -->
+<section class="section" id="summary">
+  <div class="section-head">
+    <span class="section-num">06</span>
+    <h2>Ce qu'il faut retenir</h2>
+  </div>
+  <p><b>Un AI Engineer n'est pas un ML Researcher.</b> Il construit des systèmes utiles autour de modèles existants, en respectant les fondamentaux avant de passer aux couches supérieures.</p>
+  <div class="summary-grid">
+    <div class="tier-mini">
+      <span class="mono-tag">TIER 1</span>
+      <h4>Fondations</h4>
+      <ul><li>Python</li><li>Git</li><li>CLI / Linux</li><li>APIs</li></ul>
+    </div>
+    <div class="tier-mini">
+      <span class="mono-tag">TIER 2</span>
+      <h4>Compétences IA</h4>
+      <ul><li>Embeddings</li><li>Recherche vectorielle</li><li>RAG</li><li>Agents</li></ul>
+    </div>
+    <div class="tier-mini">
+      <span class="mono-tag">TIER 3</span>
+      <h4>Déploiement</h4>
+      <ul><li>Conteneurisation</li><li>Observabilité</li><li>Monitoring</li></ul>
+    </div>
+  </div>
+</section>
+
+<footer>cours généré à partir de trois sources fusionnées · usage pédagogique</footer>
+
+<script>
+  // ---------- Theme toggle (in-memory, no storage) ----------
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    const html = document.body;
+    const current = html.getAttribute('data-theme');
+    html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  });
+
+  // ---------- Tier stack interactivity ----------
+  document.querySelectorAll('.tier-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const isActive = card.classList.contains('active');
+      document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('active'));
+      if (!isActive) card.classList.add('active');
+    });
+  });
+
+  // ---------- Quiz data (merged from all sources) ----------
+  const questions = [
+    {
+      q: "Quelle affirmation décrit le mieux un AI Engineer ?",
+      opts: ["Il entraîne des modèles fondamentaux à partir de zéro", "Il publie principalement des articles de recherche", "Il construit des systèmes utiles à partir de modèles existants", "Il travaille uniquement sur des mathématiques avancées"],
+      correct: 2,
+      explain: "L'AI Engineer assemble des modèles déjà existants dans des systèmes utiles — il ne les entraîne pas depuis zéro."
+    },
+    {
+      q: "Quelle est la différence majeure avec un machine learning researcher ?",
+      opts: ["Le researcher utilise seulement des APIs", "Le researcher entraîne des modèles et publie des travaux de recherche", "Le researcher ne connaît pas Python", "Le researcher ne travaille jamais avec des données"],
+      correct: 1,
+      explain: "Le ML Researcher conçoit et entraîne de nouvelles architectures, un travail académique et mathématique poussé."
+    },
+    {
+      q: "Avec la montée des outils d'IA qui génèrent du code, quelle compétence devient particulièrement importante ?",
+      opts: ["La capacité à réciter du code par cœur", "Le jugement technique et la prise de décision", "La vitesse de frappe au clavier", "L'apprentissage exclusif du HTML"],
+      correct: 1,
+      explain: "Le code s'écrit de plus en plus facilement — savoir quoi construire et comment l'architecturer devient la vraie compétence rare."
+    },
+    {
+      q: "Parmi les éléments suivants, lesquels appartiennent aux fondamentaux du Tier 1 ?",
+      opts: ["Python, Git, CLI, Linux, APIs", "Kubernetes, Docker, Monitoring, Sécurité", "Embeddings, RAG, Agents, Tool use", "Recherche académique, publication, conférences"],
+      correct: 0,
+      explain: "Ce sont des compétences non spécifiques à l'IA, mais indispensables avant de construire quoi que ce soit."
+    },
+    {
+      q: "Pourquoi Python est-il important pour un AI Engineer ?",
+      opts: ["Parce qu'il faut être un expert absolu avant de commencer", "Parce que beaucoup d'outils IA et de bibliothèques l'utilisent", "Parce qu'il remplace totalement les APIs", "Parce qu'il est obligatoire pour entraîner tous les modèles"],
+      correct: 1,
+      explain: "PyTorch, TensorFlow et la majorité des SDK liés aux LLMs reposent sur Python."
+    },
+    {
+      q: "À quoi sert principalement une API dans une application IA ?",
+      opts: ["À remplacer le système d'exploitation", "À connecter différents logiciels entre eux", "À supprimer le besoin de Git", "À entraîner automatiquement des modèles"],
+      correct: 1,
+      explain: "Une application IA est fondamentalement une suite d'appels API bien structurés entre l'app, le modèle et les services."
+    },
+    {
+      q: "Un embedding permet principalement de :",
+      opts: ["représenter du texte sous forme numérique pour raisonner sur le sens", "remplacer complètement une base de données SQL", "entraîner un LLM depuis zéro", "éviter d'utiliser Linux"],
+      correct: 0,
+      explain: "Les embeddings transforment du texte en vecteurs, permettant une recherche par similarité de sens plutôt que par mot-clé."
+    },
+    {
+      q: "Quel est l'objectif principal du RAG ?",
+      opts: ["Rendre le modèle plus créatif sans sources", "Fournir au modèle des informations pertinentes pour réduire les hallucinations", "Remplacer totalement les LLMs", "Supprimer la nécessité des APIs"],
+      correct: 1,
+      explain: "Le RAG va chercher l'information exacte dans des documents réels avant que le modèle ne génère sa réponse."
+    },
+    {
+      q: "Dans un pipeline RAG classique, quelle est la bonne suite logique ?",
+      opts: ["Documents → génération finale → chunking → embeddings", "Documents → chunking → embeddings → stockage vectoriel → retrieval → génération", "Retrieval → stockage → entraînement du modèle → réponse", "Embeddings → suppression des documents → réponse"],
+      correct: 1,
+      explain: "Les documents sont d'abord découpés, vectorisés, stockés, puis récupérés par similarité avant la génération finale."
+    },
+    {
+      q: "Quelle est la différence principale entre un workflow et un agent ?",
+      opts: ["Un workflow est dynamique alors que l'agent est fixe", "Un workflow suit un chemin prédéfini, alors qu'un agent peut décider dynamiquement des étapes suivantes", "Un agent ne peut jamais utiliser d'outils", "Un workflow est toujours plus intelligent qu'un agent"],
+      correct: 1,
+      explain: "L'agent observe les résultats et boucle pour ajuster ses actions ; le workflow suit toujours A → B → C."
+    },
+    {
+      q: "Pourquoi l'observabilité est-elle importante dans un système IA ?",
+      opts: ["Parce qu'elle permet de comprendre les décisions et actions du système", "Parce qu'elle remplace le code", "Parce qu'elle empêche définitivement toutes les erreurs", "Parce qu'elle supprime le besoin de monitoring"],
+      correct: 0,
+      explain: "Elle permet de tracer pourquoi un agent a pris telle décision — essentiel pour la confiance et le débogage."
+    },
+    {
+      q: "Parmi ces compétences, laquelle appartient surtout au Tier 3 ?",
+      opts: ["Comprendre les embeddings", "Utiliser Python", "Conteneuriser une application", "Apprendre Git"],
+      correct: 2,
+      explain: "La conteneurisation fait partie du déploiement et de la mise en production, le troisième niveau de la pile."
+    },
+    {
+      q: "Lequel de ces cas d'usage est cité comme fréquent en production ?",
+      opts: ["Un système RAG de questions-réponses sur documents internes", "Un agent qui interroge une base de données", "Une application déployée pour améliorer la productivité", "Toutes ces réponses"],
+      correct: 3,
+      explain: "Les trois cas d'usage — RAG, agents outillés, et productivité logicielle — sont tous cités comme dominants aujourd'hui."
+    },
+    {
+      q: "Quelle est la meilleure stratégie pour démontrer ses compétences en AI engineering ?",
+      opts: ["Mémoriser des définitions sans jamais pratiquer", "Construire des projets concrets qui utilisent les compétences clés", "Attendre de maîtriser parfaitement la théorie avant de commencer", "Éviter de travailler sur des systèmes réels"],
+      correct: 1,
+      explain: "Des projets concrets (RAG, agent, déploiement) démontrent le jugement technique bien mieux que la théorie seule."
+    },
+    {
+      q: "Que surveille principalement le monitoring dans un système IA en production ?",
+      opts: ["Les couleurs de l'interface utilisateur", "Les coûts de tokens, la sécurité et les erreurs", "Le nombre de commits Git", "La taille des fichiers PDF sources"],
+      correct: 1,
+      explain: "Le monitoring contrôle l'usage pour éviter d'exploser les coûts de tokens et garder le système sécurisé."
+    }
+  ];
+
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  const qPrompt = document.getElementById('qPrompt');
+  const qOptions = document.getElementById('qOptions');
+  const qExplain = document.getElementById('qExplain');
+  const nextBtn = document.getElementById('nextBtn');
+  const quizProgress = document.getElementById('quizProgress');
+  const quizScore = document.getElementById('quizScore');
+  const progressFill = document.getElementById('progressFill');
+  const quizBody = document.getElementById('quizBody');
+  const quizResult = document.getElementById('quizResult');
+  const restartBtn = document.getElementById('restartBtn');
+  const finalScore = document.getElementById('finalScore');
+  const resultMsg = document.getElementById('resultMsg');
+
+  function renderQuestion(){
+    answered = false;
+    const item = questions[current];
+    qPrompt.textContent = item.q;
+    qOptions.innerHTML = '';
+    qExplain.classList.remove('show');
+    qExplain.textContent = '';
+    nextBtn.classList.remove('show');
+
+    const letters = ['A','B','C','D'];
+    item.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = '<span class="opt-letter">' + letters[i] + '</span><span>' + opt + '</span>';
+      btn.addEventListener('click', () => selectAnswer(i, btn));
+      qOptions.appendChild(btn);
+    });
+
+    quizProgress.textContent = 'Question ' + (current+1) + ' / ' + questions.length;
+    quizScore.textContent = 'Score : ' + score;
+    progressFill.style.width = ((current)/questions.length*100) + '%';
+  }
+
+  function selectAnswer(i, btn){
+    if (answered) return;
+    answered = true;
+    const item = questions[current];
+    const allOpts = qOptions.querySelectorAll('.opt');
+    allOpts.forEach(o => o.disabled = true);
+
+    if (i === item.correct){
+      btn.classList.add('correct');
+      score++;
+    } else {
+      btn.classList.add('wrong');
+      allOpts[item.correct].classList.add('correct');
+    }
+    qExplain.textContent = item.explain;
+    qExplain.classList.add('show');
+    quizScore.textContent = 'Score : ' + score;
+    nextBtn.classList.add('show');
+    nextBtn.textContent = (current === questions.length - 1) ? 'Voir le résultat' : 'Question suivante';
+  }
+
+  nextBtn.addEventListener('click', () => {
+    current++;
+    if (current >= questions.length){
+      showResult();
+    } else {
+      renderQuestion();
+    }
+  });
+
+  function showResult(){
+    quizBody.style.display = 'none';
+    document.querySelector('.quiz-nav').style.display = 'none';
+    progressFill.style.width = '100%';
+    quizResult.classList.add('show');
+    finalScore.textContent = score + ' / ' + questions.length;
+    let msg = 'Continuez à pratiquer pour consolider vos acquis.';
+    const pct = score/questions.length;
+    if (pct >= 0.85) msg = 'Excellente maîtrise des trois niveaux de compétences — prêt·e pour les projets pratiques.';
+    else if (pct >= 0.6) msg = 'Bonne compréhension générale — relisez les points manqués avant de passer aux projets.';
+    resultMsg.textContent = msg;
+    quizProgress.textContent = 'Terminé';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    current = 0; score = 0;
+    quizBody.style.display = '';
+    document.querySelector('.quiz-nav').style.display = '';
+    quizResult.classList.remove('show');
+    renderQuestion();
+  });
+
+  renderQuestion();
+</script>
+<script src="/course-kit.js"></script>
+</body>
+</html>
