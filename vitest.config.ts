@@ -7,4 +7,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./tests/setup.ts"],
   },
+  resolve: {
+    alias: {
+      "@": "/home/chelmooz/Downloads/tuteur scholastique update/tuteur-scolastique",
+    },
+  },
 });
