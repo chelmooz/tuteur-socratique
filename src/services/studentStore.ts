@@ -7,7 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 const getDirname = (): string => {
   try {
     return path.dirname(fileURLToPath(import.meta.url));
-  } catch {
+  } catch (error) {
+    console.error('getDirname() failed, falling back to process.cwd():', error);
     return path.join(process.cwd(), 'src', 'services');
   }
 };
